@@ -15,6 +15,7 @@ import {
 	getSqlInsight,
 	listErrors,
 	updateFeatureFlag,
+	getLLMTotalCostsForProject,
 } from "./posthogApi";
 
 import { FilterGroupsSchema, UpdateFeatureFlagInputSchema } from "./schema/flags";
@@ -432,6 +433,17 @@ export class MyMCP extends McpAgent<Env> {
 				}
 			},
 		);
+
+		this.server.tool("get-llm-total-costs-for-project", {}, async () => {
+			const projectId = await this.getProjectId();
+
+			const totalCosts = await getLLMTotalCostsForProject({
+				projectId: projectId,
+				apiToken: this.env.POSTHOG_API_TOKEN,
+			});
+
+			return { content: [{ type: "text", text: JSON.stringify(totalCosts) }] };
+		});
 	}
 }
 

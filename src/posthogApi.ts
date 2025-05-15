@@ -348,3 +348,17 @@ export async function getSqlInsight({
 
 	return response.body;
 }
+
+export async function getLLMTotalCostsForProject({
+	projectId,
+	apiToken,
+}: { projectId: string; apiToken: string }) {
+	const response = await fetch(`https://us.posthog.com/api/projects/${projectId}/llm_total_costs/`, {
+		headers: {
+			Authorization: `Bearer ${apiToken}`,
+			"Content-Type": "application/json",
+		},
+	});
+
+	return response.json();
+}

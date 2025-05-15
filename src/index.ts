@@ -469,7 +469,8 @@ export class MyMCP extends McpAgent<Env> {
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const url = new URL(request.url);
-		const token = url.searchParams.get("token");
+		// const token = url.searchParams.get("token");
+		const token = request.headers.get("Authorization")?.split(" ")[1];
 
 		if (!token) {
 			return new Response("Unauthorized", { status: 401 });

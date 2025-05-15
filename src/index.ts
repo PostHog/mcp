@@ -28,15 +28,13 @@ import { ErrorDetailsSchema, ListErrorsSchema } from "./schema/errors";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
-- Before using any of the tools, clarify which project the user wants to query - use the 'projects-get' tool.
-- Then return the full list of project names and IDs and ask the user to select one. 
-- Keep this project ID in scope unless the user asks to change.
 - If some resource from another tool is not found, ask the user if they want to try finding it in another project.
 - If you cannot answer the user's PostHog related request or question using other available tools in this MCP, use the 'docs-search' tool to provide information from the documentation to guide user how they can do it themselves - when doing so provide condensed instructions with links to sources.
 `;
 
 type State = {
 	projectId: string | undefined;
+	orgId: string | undefined;
 };
 // Define our MCP agent with tools
 export class MyMCP extends McpAgent<Env> {
@@ -48,15 +46,35 @@ export class MyMCP extends McpAgent<Env> {
 
 	initialState: State = {
 		projectId: undefined,
+		orgId: undefined,
 	};
 
 	cache = new MemoryCache<State>(this.env.USER_HASH);
+
+	async getOrgID() {
+		const orgId = await this.cache.get("orgId");
+
+		if (!orgId) {
+			const orgs = await getOrganizations(this.env.POSTHOG_API_TOKEN);
+
+			// If there is only one org, set it as the active org
+			if (orgs.length === 1) {
+				await this.cache.set("orgId", orgs[0].id);
+				return orgs[0].id;
+			}
+
+			return "@current";
+		}
+
+		return orgId;
+	}
 
 	async getProjectId() {
 		const projectId = await this.cache.get("projectId");
 
 		if (!projectId) {
-			const projects = await getProjects(undefined, this.env.POSTHOG_API_TOKEN);
+			const orgId = await this.getOrgID();
+			const projects = await getProjects(orgId, this.env.POSTHOG_API_TOKEN);
 
 			// If there is only one project, set it as the active project
 			if (projects.length === 1) {
@@ -64,9 +82,7 @@ export class MyMCP extends McpAgent<Env> {
 				return projects[0].id;
 			}
 
-			throw new Error(
-				"Instructions to agent: You must set an active project using the `project-set-active` tool before using any other tools. If you are unsure which project to use, use the `projects-get` tool to see all available projects.",
-			);
+			return "@current";
 		}
 
 		return projectId;
@@ -85,8 +101,6 @@ export class MyMCP extends McpAgent<Env> {
 				flagName: z.string().optional(),
 			},
 			async ({ flagId, flagName }) => {
-				const projectId = await this.getProjectId();
-
 				const posthogToken = this.env.POSTHOG_API_TOKEN;
 
 				if (!flagId && !flagName) {
@@ -103,6 +117,7 @@ export class MyMCP extends McpAgent<Env> {
 				try {
 					let flagDefinition: any;
 
+					const projectId = await this.getProjectId();
 					if (flagId) {
 						flagDefinition = await getFeatureFlagDefinition(
 							projectId,
@@ -149,6 +164,21 @@ export class MyMCP extends McpAgent<Env> {
 						],
 					};
 				}
+			},
+		);
+
+		this.server.tool(
+			"feature-flag-get-all",
+			`
+				- Use this tool to get all feature flags in the project.
+			`,
+			{},
+			async () => {
+				const projectId = await this.getProjectId();
+
+				const allFlags = await getFeatureFlags(projectId, this.env.POSTHOG_API_TOKEN);
+
+				return { content: [{ type: "text", text: JSON.stringify(allFlags) }] };
 			},
 		);
 
@@ -211,28 +241,36 @@ export class MyMCP extends McpAgent<Env> {
 		);
 
 		this.server.tool(
-			"organization-details-get",
+			"organization-set-active",
 			{
-				orgId: z.string().optional(),
+				orgId: z.string(),
 			},
 			async ({ orgId }) => {
-				try {
-					const organizationDetails = await getOrganizationDetails(
-						orgId,
-						this.env.POSTHOG_API_TOKEN,
-					);
-					console.log("organization details", organizationDetails);
-					return {
-						content: [{ type: "text", text: JSON.stringify(organizationDetails) }],
-					};
-				} catch (error) {
-					console.error("Error fetching organization details:", error);
-					return {
-						content: [{ type: "text", text: "Error fetching organization details" }],
-					};
-				}
+				await this.cache.set("orgId", orgId);
+
+				return { content: [{ type: "text", text: `Switched to organization ${orgId}` }] };
 			},
 		);
+
+		this.server.tool("organization-details-get", {}, async () => {
+			try {
+				const orgId = await this.getOrgID();
+
+				const organizationDetails = await getOrganizationDetails(
+					orgId,
+					this.env.POSTHOG_API_TOKEN,
+				);
+				console.log("organization details", organizationDetails);
+				return {
+					content: [{ type: "text", text: JSON.stringify(organizationDetails) }],
+				};
+			} catch (error) {
+				console.error("Error fetching organization details:", error);
+				return {
+					content: [{ type: "text", text: "Error fetching organization details" }],
+				};
+			}
+		});
 
 		this.server.tool(
 			"projects-get",
@@ -243,7 +281,8 @@ export class MyMCP extends McpAgent<Env> {
 			{},
 			async () => {
 				try {
-					const projects = await getProjects(undefined, this.env.POSTHOG_API_TOKEN);
+					const orgId = await this.getOrgID();
+					const projects = await getProjects(orgId, this.env.POSTHOG_API_TOKEN);
 					console.log("projects", projects);
 					return { content: [{ type: "text", text: JSON.stringify(projects) }] };
 				} catch (error) {
@@ -265,6 +304,11 @@ export class MyMCP extends McpAgent<Env> {
 
 		this.server.tool(
 			"create-feature-flag",
+			`Creates a new feature flag in the project. Once you have created a feature flag, you should:
+			 - Ask the user if they want to add it to their codebase
+			 - Use the "search-docs" tool to find documentation on how to add feature flags to the codebase (search for the right language / framework)
+			 - Clarify where it should be added and then add it.
+			`,
 			{
 				name: z.string(),
 				key: z.string(),
@@ -287,11 +331,12 @@ export class MyMCP extends McpAgent<Env> {
 		this.server.tool(
 			"list-errors",
 			{
-				projectId: z.string(),
 				data: ListErrorsSchema,
 			},
-			async ({ projectId, data }) => {
+			async ({ data }) => {
 				try {
+					const projectId = await this.getProjectId();
+
 					const errors = await listErrors({
 						projectId: projectId,
 						data: data,
@@ -310,11 +355,12 @@ export class MyMCP extends McpAgent<Env> {
 		this.server.tool(
 			"error-details",
 			{
-				projectId: z.string(),
 				data: ErrorDetailsSchema,
 			},
-			async ({ projectId, data }) => {
+			async ({ data }) => {
 				try {
+					const projectId = await this.getProjectId();
+
 					const errors = await errorDetails({
 						projectId: projectId,
 						data: data,
@@ -332,6 +378,10 @@ export class MyMCP extends McpAgent<Env> {
 
 		this.server.tool(
 			"update-feature-flag",
+			`Update a new feature flag in the project.
+			- To enable a feature flag, you should make sure it is active and the rollout percentage is set to 100 for the group you want to target.
+			- To disable a feature flag, you should make sure it is inactive, you can keep the rollout percentage as it is.
+			`,
 			{
 				flagKey: z.string(),
 				data: UpdateFeatureFlagInputSchema,
@@ -387,7 +437,6 @@ export class MyMCP extends McpAgent<Env> {
 				- When giving the results back to the user, first show the SQL query that was used, then briefly explain the query, then provide results in reasily readable format.
 			`,
 			{
-				projectId: z.string().describe("The ID of the project."),
 				query: z
 					.string()
 					.max(1000)
@@ -395,7 +444,7 @@ export class MyMCP extends McpAgent<Env> {
 						"Your natural language query describing the SQL insight (max 1000 characters).",
 					),
 			},
-			async ({ projectId, query }) => {
+			async ({ query }) => {
 				const apiToken = this.env.POSTHOG_API_TOKEN;
 				if (!apiToken) {
 					return {
@@ -406,6 +455,8 @@ export class MyMCP extends McpAgent<Env> {
 				}
 
 				try {
+					const projectId = await this.getProjectId();
+
 					const sseStream = await getSqlInsight({ projectId, apiToken, query });
 					const extractedData = await extractDataFromSSEStream(sseStream);
 					console.log("extractedData", extractedData);
@@ -460,9 +511,20 @@ export class MyMCP extends McpAgent<Env> {
 					apiToken: this.env.POSTHOG_API_TOKEN,
 					days: days,
 				});
-				return { content: [{ type: "text", text: JSON.stringify(totalCosts["results"])}] }; //TODO: Fix the type issue here
+				return { content: [{ type: "text", text: JSON.stringify(totalCosts["results"]) }] }; //TODO: Fix the type issue here
 			},
 		);
+
+		// 	this.server.prompt("add-feature-flag-to-codebase", "Use this prompt to add a feature flag to the codebase", async ({
+		// 	}) => {
+		// 		return `Follow these steps to add a feature flag to the codebase:
+		// 		1. Ask the user what flag they want to add if it is not already obvious.
+		// 		2. Search for that flag, if it does not exist, create it.
+		// 		3. Search the docs for the right language / framework on how to add a feature flag - make sure you get the docs you need.
+		// 		4. Gather any context you need on how flags are used in the codebase.
+		// 		5. Add the feature flag to the codebase.
+		// 		`
+		// 	})
 	}
 }
 

@@ -33,7 +33,6 @@ const operatorSchema = z.enum([
 export const PersonPropertyFilterSchema = z
 	.object({
 		key: z.string(),
-		type: z.literal("person").transform(() => "person"),
 		value: z.union([
 			z.string(),
 			z.number(),
@@ -65,6 +64,12 @@ export const PersonPropertyFilterSchema = z
 				code: z.ZodIssueCode.custom,
 				message: `operator "${operator}" requires an array value`,
 			});
+	})
+	.transform((data) => {
+		return {
+			...data,
+			type: "person",
+		};
 	});
 
 export type PersonPropertyFilter = z.infer<typeof PersonPropertyFilterSchema>;
@@ -104,6 +109,7 @@ export const FeatureFlagSchema = z.object({
 	name: z.string(),
 	description: z.string().optional(),
 	filters: FiltersSchema.optional(),
+	active: z.boolean(),
 });
 
 export type FeatureFlag = z.infer<typeof FeatureFlagSchema>;

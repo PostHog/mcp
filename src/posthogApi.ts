@@ -352,13 +352,48 @@ export async function getSqlInsight({
 export async function getLLMTotalCostsForProject({
 	projectId,
 	apiToken,
-}: { projectId: string; apiToken: string }) {
-	const response = await fetch(`https://us.posthog.com/api/projects/${projectId}/llm_total_costs/`, {
+	days,
+}: { projectId: string; apiToken: string; days?: number }) {
+	const body = {
+		query: {
+			kind: "TrendsQuery",
+			dateRange: {
+				date_from: `-${days ?? 6}d`,
+				date_to: null,
+			},
+			
+			filterTestAccounts: true,
+			series: [
+				{
+					event: "$ai_generation",
+					name: "$ai_generation",
+					math: "sum",
+					math_property: "$ai_total_cost_usd",
+					kind: "EventsNode",
+				},
+			],
+			breakdownFilter: 
+				{
+					breakdown_type: "event",
+					breakdown: "$ai_model",
+				},
+		},
+	};
+	const response = await fetch(`https://us.posthog.com/api/environments/${projectId}/query/`, {
+		method: "POST",
 		headers: {
 			Authorization: `Bearer ${apiToken}`,
 			"Content-Type": "application/json",
 		},
+		body: JSON.stringify(body),
 	});
 
-	return response.json();
+	if (!response.ok) {
+		const errorText = await response.text();
+		console.log("errorText", errorText);
+		throw new Error(`Failed to fetch llm total costs for project: ${response.statusText}`);
+	}
+	const responseData = await response.json();
+	console.log("responseData", responseData);
+	return responseData
 }

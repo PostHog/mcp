@@ -434,16 +434,35 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool("get-llm-total-costs-for-project", {}, async () => {
-			const projectId = await this.getProjectId();
-
-			const totalCosts = await getLLMTotalCostsForProject({
-				projectId: projectId,
-				apiToken: this.env.POSTHOG_API_TOKEN,
-			});
-
-			return { content: [{ type: "text", text: JSON.stringify(totalCosts) }] };
-		});
+		this.server.tool(
+			"get-llm-total-costs-for-project",
+			`
+				- Fetches the total LLM daily costs for each model for a project over a given number of days.
+				- If no number of days is provided, it defaults to 7.
+				- The results are sorted by model name.
+				- The total cost is rounded to 4 decimal places.
+				- The query is executed against the project's data warehouse.
+				- Show the results as a Markdown formatted table with the following information for each model:
+					- Model name
+					- Total cost in USD
+					- Each day's date
+					- Each day's cost in USD
+				- Write in bold the model name with the highest total cost.
+				- Properly render the markdown table in the response.
+			`,
+			{
+				projectId: z.string(),
+				days: z.number().optional(),
+			},
+			async ({ projectId, days }) => {
+				const totalCosts = await getLLMTotalCostsForProject({
+					projectId: projectId,
+					apiToken: this.env.POSTHOG_API_TOKEN,
+					days: days,
+				});
+				return { content: [{ type: "text", text: JSON.stringify(totalCosts["results"])}] }; //TODO: Fix the type issue here
+			},
+		);
 	}
 }
 

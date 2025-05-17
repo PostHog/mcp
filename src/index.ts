@@ -37,7 +37,7 @@ type State = {
 	orgId: string | undefined;
 };
 // Define our MCP agent with tools
-export class MyMCP extends McpAgent<Env> {
+export class PostHogMCP extends McpAgent<Env> {
 	server = new McpServer({
 		name: "PostHog MCP",
 		version: "1.0.0",
@@ -531,26 +531,23 @@ export class MyMCP extends McpAgent<Env> {
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const url = new URL(request.url);
-		// const token = url.searchParams.get("token");
 		const token = request.headers.get("Authorization")?.split(" ")[1];
 
 		if (!token) {
-			return new Response("Unauthorized", { status: 401 });
+			return new Response("No token provided, please provide a valid API token.", { status: 401 });
 		}
 
-		const userHash = hash(token);
+		// const userHash = hash(token);
 
-		env.POSTHOG_API_TOKEN = token;
-		env.USER_HASH = userHash;
+		// env.POSTHOG_API_TOKEN = token;
+		// env.USER_HASH = userHash;
 
 		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
-			// @ts-ignore
-			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
+			return PostHogMCP.serveSSE("/sse").fetch(request, env, ctx);
 		}
 
 		if (url.pathname === "/mcp") {
-			// @ts-ignore
-			return MyMCP.serve("/mcp").fetch(request, env, ctx);
+			return PostHogMCP.serve("/mcp").fetch(request, env, ctx);
 		}
 
 		return new Response("Not found", { status: 404 });

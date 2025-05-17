@@ -37,7 +37,7 @@ type State = {
 	orgId: string | undefined;
 };
 // Define our MCP agent with tools
-export class PostHogMCP extends McpAgent<Env> {
+export class MyMCP extends McpAgent<Env> {
 	server = new McpServer({
 		name: "PostHog MCP",
 		version: "1.0.0",
@@ -543,11 +543,11 @@ export default {
 		// env.USER_HASH = userHash;
 
 		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
-			return PostHogMCP.serveSSE("/sse").fetch(request, env, ctx);
+			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
 		}
 
 		if (url.pathname === "/mcp") {
-			return PostHogMCP.serve("/mcp").fetch(request, env, ctx);
+			return MyMCP.serve("/mcp").fetch(request, env, ctx);
 		}
 
 		return new Response("Not found", { status: 404 });

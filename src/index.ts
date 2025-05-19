@@ -299,10 +299,15 @@ export class MyMCP extends McpAgent<Env> {
 			`,
 			{},
 			async () => {
-				const orgId = await this.getOrgID();
-				const projects = await getProjects(orgId, this.requestProperties.apiToken);
-				console.log("projects", projects);
-				return { content: [{ type: "text", text: JSON.stringify(projects) }] };
+				try {
+					const orgId = await this.getOrgID();
+					const projects = await getProjects(orgId, this.requestProperties.apiToken);
+					console.log("projects", projects);
+					return { content: [{ type: "text", text: JSON.stringify(projects) }] };
+				} catch (error) {
+					console.error("Error fetching projects:", error);
+					return { content: [{ type: "text", text: `Error fetching projects: ${error}` }] };
+				}
 			},
 		);
 

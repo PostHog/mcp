@@ -18,6 +18,7 @@ import {
 	type PostHogFeatureFlag,
 	type UpdateFeatureFlagInput,
 } from "./schema/flags";
+import { ErrorCode } from "./lib/errors";
 
 export async function getFeatureFlagDefinition(
 	projectId: string,
@@ -60,6 +61,11 @@ export async function getOrganizations(apiToken: string): Promise<Organization[]
 		},
 	});
 	if (!response.ok) {
+
+		if (response.status === 401) {
+			throw new Error(ErrorCode.INVALID_API_KEY);
+		}
+
 		throw new Error(`Failed to fetch organizations: ${response.statusText}`);
 	}
 	return response.json();
@@ -89,6 +95,11 @@ export async function getProjects(orgId: string, apiToken: string): Promise<Proj
 		},
 	});
 	if (!response.ok) {
+
+		if (response.status === 401) {
+			throw new Error(ErrorCode.INVALID_API_KEY);
+		}
+
 		throw new Error(`Failed to fetch projects: ${response.statusText}`);
 	}
 	return response.json();
@@ -355,7 +366,7 @@ export async function getLLMTotalCostsForProject({
 				date_from: `-${days ?? 6}d`,
 				date_to: null,
 			},
-			
+
 			filterTestAccounts: true,
 			series: [
 				{
@@ -366,11 +377,11 @@ export async function getLLMTotalCostsForProject({
 					kind: "EventsNode",
 				},
 			],
-			breakdownFilter: 
-				{
-					breakdown_type: "event",
-					breakdown: "$ai_model",
-				},
+			breakdownFilter:
+			{
+				breakdown_type: "event",
+				breakdown: "$ai_model",
+			},
 		},
 	};
 	const response = await fetch(`https://us.posthog.com/api/environments/${projectId}/query/`, {

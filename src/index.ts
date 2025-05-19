@@ -32,6 +32,11 @@ const INSTRUCTIONS = `
 - If you cannot answer the user's PostHog related request or question using other available tools in this MCP, use the 'docs-search' tool to provide information from the documentation to guide user how they can do it themselves - when doing so provide condensed instructions with links to sources.
 `;
 
+type RequestProperties = {
+	userHash: string;
+	apiToken: string;
+};
+
 type State = {
 	projectId: string | undefined;
 	orgId: string | undefined;
@@ -49,13 +54,25 @@ export class MyMCP extends McpAgent<Env> {
 		orgId: undefined,
 	};
 
-	cache = new MemoryCache<State>(this.env.USER_HASH);
+	_cache: MemoryCache<State> | undefined;
+
+	get requestProperties() {
+		return this.props as RequestProperties;
+	}
+
+	get cache() {
+		if (!this._cache) {
+			this._cache = new MemoryCache<State>(this.requestProperties.userHash);
+		}
+		return this._cache;
+	}
 
 	async getOrgID() {
 		const orgId = await this.cache.get("orgId");
 
+
 		if (!orgId) {
-			const orgs = await getOrganizations(this.env.POSTHOG_API_TOKEN);
+			const orgs = await getOrganizations(this.requestProperties.apiToken);
 
 			// If there is only one org, set it as the active org
 			if (orgs.length === 1) {
@@ -70,11 +87,12 @@ export class MyMCP extends McpAgent<Env> {
 	}
 
 	async getProjectId() {
+
 		const projectId = await this.cache.get("projectId");
 
 		if (!projectId) {
 			const orgId = await this.getOrgID();
-			const projects = await getProjects(orgId, this.env.POSTHOG_API_TOKEN);
+			const projects = await getProjects(orgId, this.requestProperties.apiToken);
 
 			// If there is only one project, set it as the active project
 			if (projects.length === 1) {
@@ -89,6 +107,7 @@ export class MyMCP extends McpAgent<Env> {
 	}
 
 	async init() {
+
 		this.server.tool(
 			"feature-flag-get-definition",
 			`
@@ -101,7 +120,7 @@ export class MyMCP extends McpAgent<Env> {
 				flagName: z.string().optional(),
 			},
 			async ({ flagId, flagName }) => {
-				const posthogToken = this.env.POSTHOG_API_TOKEN;
+				const posthogToken = this.requestProperties.apiToken;
 
 				if (!flagId && !flagName) {
 					return {
@@ -176,7 +195,7 @@ export class MyMCP extends McpAgent<Env> {
 			async () => {
 				const projectId = await this.getProjectId();
 
-				const allFlags = await getFeatureFlags(projectId, this.env.POSTHOG_API_TOKEN);
+				const allFlags = await getFeatureFlags(projectId, this.requestProperties.apiToken);
 
 				return { content: [{ type: "text", text: JSON.stringify(allFlags) }] };
 			},
@@ -219,7 +238,7 @@ export class MyMCP extends McpAgent<Env> {
 		);
 		this.server.tool("organizations-get", {}, async () => {
 			try {
-				const organizations = await getOrganizations(this.env.POSTHOG_API_TOKEN);
+				const organizations = await getOrganizations(this.requestProperties.apiToken);
 				console.log("organizations", organizations);
 				return { content: [{ type: "text", text: JSON.stringify(organizations) }] };
 			} catch (error) {
@@ -258,7 +277,7 @@ export class MyMCP extends McpAgent<Env> {
 
 				const organizationDetails = await getOrganizationDetails(
 					orgId,
-					this.env.POSTHOG_API_TOKEN,
+					this.requestProperties.apiToken,
 				);
 				console.log("organization details", organizationDetails);
 				return {
@@ -280,15 +299,10 @@ export class MyMCP extends McpAgent<Env> {
 			`,
 			{},
 			async () => {
-				try {
-					const orgId = await this.getOrgID();
-					const projects = await getProjects(orgId, this.env.POSTHOG_API_TOKEN);
-					console.log("projects", projects);
-					return { content: [{ type: "text", text: JSON.stringify(projects) }] };
-				} catch (error) {
-					console.error("Error fetching projects:", error);
-					return { content: [{ type: "text", text: "Error fetching projects" }] };
-				}
+				const orgId = await this.getOrgID();
+				const projects = await getProjects(orgId, this.requestProperties.apiToken);
+				console.log("projects", projects);
+				return { content: [{ type: "text", text: JSON.stringify(projects) }] };
 			},
 		);
 
@@ -297,7 +311,7 @@ export class MyMCP extends McpAgent<Env> {
 
 			const propertyDefinitions = await getPropertyDefinitions({
 				projectId: projectId,
-				apiToken: this.env.POSTHOG_API_TOKEN,
+				apiToken: this.requestProperties.apiToken,
 			});
 			return { content: [{ type: "text", text: JSON.stringify(propertyDefinitions) }] };
 		});
@@ -321,7 +335,7 @@ export class MyMCP extends McpAgent<Env> {
 
 				const featureFlag = await createFeatureFlag({
 					projectId: projectId,
-					apiToken: this.env.POSTHOG_API_TOKEN,
+					apiToken: this.requestProperties.apiToken,
 					data: { name, key, description, filters, active },
 				});
 				return { content: [{ type: "text", text: JSON.stringify(featureFlag) }] };
@@ -340,7 +354,7 @@ export class MyMCP extends McpAgent<Env> {
 					const errors = await listErrors({
 						projectId: projectId,
 						data: data,
-						apiToken: this.env.POSTHOG_API_TOKEN,
+						apiToken: this.requestProperties.apiToken,
 					});
 					const results = (errors as any).results;
 					console.log("errors results", results);
@@ -364,7 +378,7 @@ export class MyMCP extends McpAgent<Env> {
 					const errors = await errorDetails({
 						projectId: projectId,
 						data: data,
-						apiToken: this.env.POSTHOG_API_TOKEN,
+						apiToken: this.requestProperties.apiToken,
 					});
 					const results = (errors as any).results;
 					console.log("error details results", results);
@@ -391,7 +405,7 @@ export class MyMCP extends McpAgent<Env> {
 
 				const featureFlag = await updateFeatureFlag({
 					projectId: projectId,
-					apiToken: this.env.POSTHOG_API_TOKEN,
+					apiToken: this.requestProperties.apiToken,
 					key: flagKey,
 					data: data,
 				});
@@ -407,7 +421,7 @@ export class MyMCP extends McpAgent<Env> {
 			async ({ flagKey }) => {
 				const projectId = await this.getProjectId();
 
-				const allFlags = await getFeatureFlags(projectId, this.env.POSTHOG_API_TOKEN);
+				const allFlags = await getFeatureFlags(projectId, this.requestProperties.apiToken);
 
 				const flag = allFlags.find((f) => f.key === flagKey);
 
@@ -419,7 +433,7 @@ export class MyMCP extends McpAgent<Env> {
 
 				const featureFlag = await deleteFeatureFlag({
 					projectId: projectId,
-					apiToken: this.env.POSTHOG_API_TOKEN,
+					apiToken: this.requestProperties.apiToken,
 					flagId: flag.id,
 				});
 
@@ -445,7 +459,7 @@ export class MyMCP extends McpAgent<Env> {
 					),
 			},
 			async ({ query }) => {
-				const apiToken = this.env.POSTHOG_API_TOKEN;
+				const apiToken = this.requestProperties.apiToken;
 				if (!apiToken) {
 					return {
 						content: [
@@ -508,7 +522,7 @@ export class MyMCP extends McpAgent<Env> {
 			async ({ projectId, days }) => {
 				const totalCosts = await getLLMTotalCostsForProject({
 					projectId: projectId,
-					apiToken: this.env.POSTHOG_API_TOKEN,
+					apiToken: this.requestProperties.apiToken,
 					days: days,
 				});
 				return { content: [{ type: "text", text: JSON.stringify(totalCosts["results"]) }] }; //TODO: Fix the type issue here
@@ -537,10 +551,10 @@ export default {
 			return new Response("No token provided, please provide a valid API token.", { status: 401 });
 		}
 
-		// const userHash = hash(token);
-
-		// env.POSTHOG_API_TOKEN = token;
-		// env.USER_HASH = userHash;
+		ctx.props = {
+			apiToken: token,
+			userHash: hash(token),
+		};
 
 		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
 			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);

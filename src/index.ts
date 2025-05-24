@@ -1,29 +1,51 @@
-import { McpAgent } from "agents/mcp";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpAgent } from "agents/mcp";
 import { z } from "zod";
 
 import {
+	addInsightToDashboard,
+	createDashboard,
 	createFeatureFlag,
+	createInsight,
+	deleteDashboard,
 	deleteFeatureFlag,
+	deleteInsight,
 	errorDetails,
+	getDashboard,
+	getDashboards,
 	getFeatureFlagDefinition,
 	getFeatureFlags,
+	getInsight,
+	getInsights,
+	getLLMTotalCostsForProject,
 	getOrganizationDetails,
 	getOrganizations,
 	getProjects,
 	getPropertyDefinitions,
 	getSqlInsight,
 	listErrors,
+	updateDashboard,
 	updateFeatureFlag,
-	getLLMTotalCostsForProject,
+	updateInsight,
 } from "./posthogApi";
 
+import {
+	AddInsightToDashboardSchema,
+	CreateDashboardInputSchema,
+	ListDashboardsSchema,
+	UpdateDashboardInputSchema,
+} from "./schema/dashboards";
 import { FilterGroupsSchema, UpdateFeatureFlagInputSchema } from "./schema/flags";
+import {
+	CreateInsightInputSchema,
+	ListInsightsSchema,
+	UpdateInsightInputSchema,
+} from "./schema/insights";
 
 import { docsSearch } from "./inkeepApi";
-import { extractDataFromSSEStream } from "./lib/utils/streaming";
-import { hash } from "./lib/utils/helper-functions";
 import { MemoryCache } from "./lib/utils/cache/MemoryCache";
+import { hash } from "./lib/utils/helper-functions";
+import { extractDataFromSSEStream } from "./lib/utils/streaming";
 import { ErrorDetailsSchema, ListErrorsSchema } from "./schema/errors";
 
 const INSTRUCTIONS = `
@@ -70,7 +92,6 @@ export class MyMCP extends McpAgent<Env> {
 	async getOrgID() {
 		const orgId = await this.cache.get("orgId");
 
-
 		if (!orgId) {
 			const orgs = await getOrganizations(this.requestProperties.apiToken);
 
@@ -87,7 +108,6 @@ export class MyMCP extends McpAgent<Env> {
 	}
 
 	async getProjectId() {
-
 		const projectId = await this.cache.get("projectId");
 
 		if (!projectId) {
@@ -107,7 +127,6 @@ export class MyMCP extends McpAgent<Env> {
 	}
 
 	async init() {
-
 		this.server.tool(
 			"feature-flag-get-definition",
 			`
@@ -152,7 +171,9 @@ export class MyMCP extends McpAgent<Env> {
 						const allFlags = await getFeatureFlags(projectId, posthogToken);
 						const foundFlag = allFlags.find((f) => f.key === flagName);
 						if (foundFlag) {
-							return { content: [{ type: "text", text: JSON.stringify(foundFlag) }] };
+							return {
+								content: [{ type: "text", text: JSON.stringify(foundFlag) }],
+							};
 						}
 						return {
 							content: [
@@ -178,7 +199,9 @@ export class MyMCP extends McpAgent<Env> {
 						content: [
 							{
 								type: "text",
-								text: `Error: ${error.message || "Failed to process feature flag request"}`,
+								text: `Error: ${
+									error.message || "Failed to process feature flag request"
+								}`,
 							},
 						],
 					};
@@ -217,7 +240,10 @@ export class MyMCP extends McpAgent<Env> {
 					if (!inkeepApiKey) {
 						return {
 							content: [
-								{ type: "text", text: "Error: INKEEP_API_KEY is not configured." },
+								{
+									type: "text",
+									text: "Error: INKEEP_API_KEY is not configured.",
+								},
 							],
 						};
 					}
@@ -229,7 +255,9 @@ export class MyMCP extends McpAgent<Env> {
 						content: [
 							{
 								type: "text",
-								text: `Error: ${error.message || "Failed to process docs search request"}`,
+								text: `Error: ${
+									error.message || "Failed to process docs search request"
+								}`,
 							},
 						],
 					};
@@ -240,10 +268,14 @@ export class MyMCP extends McpAgent<Env> {
 			try {
 				const organizations = await getOrganizations(this.requestProperties.apiToken);
 				console.log("organizations", organizations);
-				return { content: [{ type: "text", text: JSON.stringify(organizations) }] };
+				return {
+					content: [{ type: "text", text: JSON.stringify(organizations) }],
+				};
 			} catch (error) {
 				console.error("Error fetching organizations:", error);
-				return { content: [{ type: "text", text: "Error fetching organizations" }] };
+				return {
+					content: [{ type: "text", text: "Error fetching organizations" }],
+				};
 			}
 		});
 
@@ -255,7 +287,9 @@ export class MyMCP extends McpAgent<Env> {
 			async ({ projectId }) => {
 				await this.cache.set("projectId", projectId);
 
-				return { content: [{ type: "text", text: `Switched to project ${projectId}` }] };
+				return {
+					content: [{ type: "text", text: `Switched to project ${projectId}` }],
+				};
 			},
 		);
 
@@ -267,7 +301,9 @@ export class MyMCP extends McpAgent<Env> {
 			async ({ orgId }) => {
 				await this.cache.set("orgId", orgId);
 
-				return { content: [{ type: "text", text: `Switched to organization ${orgId}` }] };
+				return {
+					content: [{ type: "text", text: `Switched to organization ${orgId}` }],
+				};
 			},
 		);
 
@@ -303,10 +339,14 @@ export class MyMCP extends McpAgent<Env> {
 					const orgId = await this.getOrgID();
 					const projects = await getProjects(orgId, this.requestProperties.apiToken);
 					console.log("projects", projects);
-					return { content: [{ type: "text", text: JSON.stringify(projects) }] };
+					return {
+						content: [{ type: "text", text: JSON.stringify(projects) }],
+					};
 				} catch (error) {
 					console.error("Error fetching projects:", error);
-					return { content: [{ type: "text", text: `Error fetching projects: ${error}` }] };
+					return {
+						content: [{ type: "text", text: `Error fetching projects: ${error}` }],
+					};
 				}
 			},
 		);
@@ -318,7 +358,9 @@ export class MyMCP extends McpAgent<Env> {
 				projectId: projectId,
 				apiToken: this.requestProperties.apiToken,
 			});
-			return { content: [{ type: "text", text: JSON.stringify(propertyDefinitions) }] };
+			return {
+				content: [{ type: "text", text: JSON.stringify(propertyDefinitions) }],
+			};
 		});
 
 		this.server.tool(
@@ -343,7 +385,16 @@ export class MyMCP extends McpAgent<Env> {
 					apiToken: this.requestProperties.apiToken,
 					data: { name, key, description, filters, active },
 				});
-				return { content: [{ type: "text", text: JSON.stringify(featureFlag) }] };
+
+				// Add URL field for easy navigation
+				const featureFlagWithUrl = {
+					...(featureFlag as any),
+					url: `https://app.posthog.com/project/${projectId}/feature_flags/${(featureFlag as any).id}`,
+				};
+
+				return {
+					content: [{ type: "text", text: JSON.stringify(featureFlagWithUrl) }],
+				};
 			},
 		);
 
@@ -361,9 +412,8 @@ export class MyMCP extends McpAgent<Env> {
 						data: data,
 						apiToken: this.requestProperties.apiToken,
 					});
-					const results = (errors as any).results;
-					console.log("errors results", results);
-					return { content: [{ type: "text", text: JSON.stringify(results) }] };
+					console.log("errors results", errors.results);
+					return { content: [{ type: "text", text: JSON.stringify(errors.results) }] };
 				} catch (error) {
 					console.error("Error fetching errors:", error);
 					return { content: [{ type: "text", text: "Error fetching errors" }] };
@@ -385,12 +435,13 @@ export class MyMCP extends McpAgent<Env> {
 						data: data,
 						apiToken: this.requestProperties.apiToken,
 					});
-					const results = (errors as any).results;
-					console.log("error details results", results);
-					return { content: [{ type: "text", text: JSON.stringify(results) }] };
+					console.log("error details results", errors.results);
+					return { content: [{ type: "text", text: JSON.stringify(errors.results) }] };
 				} catch (error) {
 					console.error("Error fetching error details:", error);
-					return { content: [{ type: "text", text: "Error fetching error details" }] };
+					return {
+						content: [{ type: "text", text: "Error fetching error details" }],
+					};
 				}
 			},
 		);
@@ -414,7 +465,16 @@ export class MyMCP extends McpAgent<Env> {
 					key: flagKey,
 					data: data,
 				});
-				return { content: [{ type: "text", text: JSON.stringify(featureFlag) }] };
+
+				// Add URL field for easy navigation
+				const featureFlagWithUrl = {
+					...(featureFlag as any),
+					url: `https://app.posthog.com/project/${projectId}/feature_flags/${(featureFlag as any).id}`,
+				};
+
+				return {
+					content: [{ type: "text", text: JSON.stringify(featureFlagWithUrl) }],
+				};
 			},
 		);
 
@@ -442,7 +502,9 @@ export class MyMCP extends McpAgent<Env> {
 					flagId: flag.id,
 				});
 
-				return { content: [{ type: "text", text: JSON.stringify(featureFlag) }] };
+				return {
+					content: [{ type: "text", text: JSON.stringify(featureFlag) }],
+				};
 			},
 		);
 
@@ -468,7 +530,10 @@ export class MyMCP extends McpAgent<Env> {
 				if (!apiToken) {
 					return {
 						content: [
-							{ type: "text", text: "Error: POSTHOG_API_TOKEN is not configured." },
+							{
+								type: "text",
+								text: "Error: POSTHOG_API_TOKEN is not configured.",
+							},
 						],
 					};
 				}
@@ -530,7 +595,322 @@ export class MyMCP extends McpAgent<Env> {
 					apiToken: this.requestProperties.apiToken,
 					days: days,
 				});
-				return { content: [{ type: "text", text: JSON.stringify(totalCosts["results"]) }] }; //TODO: Fix the type issue here
+				return {
+					content: [{ type: "text", text: JSON.stringify(totalCosts.results) }],
+				};
+			},
+		);
+
+		this.server.tool(
+			"insights-get-all",
+			`
+					- Get all insights in the project with optional filtering.
+					- Can filter by saved status, favorited status, or search term.
+				`,
+			{
+				data: ListInsightsSchema.optional(),
+			},
+			async ({ data }) => {
+				try {
+					const projectId = await this.getProjectId();
+					const insights = await getInsights(
+						projectId,
+						this.requestProperties.apiToken,
+						data,
+					);
+					return { content: [{ type: "text", text: JSON.stringify(insights) }] };
+				} catch (error: any) {
+					console.error("Error fetching insights:", error);
+					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+				}
+			},
+		);
+
+		this.server.tool(
+			"insight-get",
+			`
+					- Get a specific insight by ID.
+				`,
+			{
+				insightId: z.string(),
+			},
+			async ({ insightId }) => {
+				try {
+					const projectId = await this.getProjectId();
+					const insight = await getInsight(
+						projectId,
+						insightId,
+						this.requestProperties.apiToken,
+					);
+					return { content: [{ type: "text", text: JSON.stringify(insight) }] };
+				} catch (error: any) {
+					console.error("Error fetching insight:", error);
+					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+				}
+			},
+		);
+
+		this.server.tool(
+			"insight-create",
+			`
+					- Create a new insight in the project.
+					- Requires name, filters, and other optional properties.
+				`,
+			{
+				data: CreateInsightInputSchema,
+			},
+			async ({ data }) => {
+				try {
+					const projectId = await this.getProjectId();
+					const insight = await createInsight({
+						projectId,
+						apiToken: this.requestProperties.apiToken,
+						data,
+					});
+
+					// Add URL field for easy navigation
+					const insightWithUrl = {
+						...insight,
+						url: `https://app.posthog.com/project/${projectId}/insights/${(insight as any).short_id}`,
+					};
+
+					return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
+				} catch (error: any) {
+					console.error("Error creating insight:", error);
+					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+				}
+			},
+		);
+
+		this.server.tool(
+			"insight-update",
+			`
+					- Update an existing insight by ID.
+					- Can update name, description, filters, and other properties.
+				`,
+			{
+				insightId: z.string(),
+				data: UpdateInsightInputSchema,
+			},
+			async ({ insightId, data }) => {
+				try {
+					const projectId = await this.getProjectId();
+					const insight = await updateInsight({
+						projectId,
+						insightId,
+						apiToken: this.requestProperties.apiToken,
+						data,
+					});
+
+					// Add URL field for easy navigation
+					const insightWithUrl = {
+						...insight,
+						url: `https://app.posthog.com/project/${projectId}/insights/${(insight as any).short_id}`,
+					};
+
+					return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
+				} catch (error: any) {
+					console.error("Error updating insight:", error);
+					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+				}
+			},
+		);
+
+		this.server.tool(
+			"insight-delete",
+			`
+					- Delete an insight by ID (soft delete - marks as deleted).
+				`,
+			{
+				insightId: z.string(),
+			},
+			async ({ insightId }) => {
+				try {
+					const projectId = await this.getProjectId();
+					const result = await deleteInsight({
+						projectId,
+						insightId,
+						apiToken: this.requestProperties.apiToken,
+					});
+					return { content: [{ type: "text", text: JSON.stringify(result) }] };
+				} catch (error: any) {
+					console.error("Error deleting insight:", error);
+					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+				}
+			},
+		);
+
+		// Dashboard tools
+		this.server.tool(
+			"dashboards-get-all",
+			`
+					- Get all dashboards in the project with optional filtering.
+					- Can filter by pinned status, search term, or pagination.
+				`,
+			{
+				data: ListDashboardsSchema.optional(),
+			},
+			async ({ data }) => {
+				try {
+					const projectId = await this.getProjectId();
+					const dashboards = await getDashboards(
+						projectId,
+						this.requestProperties.apiToken,
+						data,
+					);
+					return { content: [{ type: "text", text: JSON.stringify(dashboards) }] };
+				} catch (error: any) {
+					console.error("Error fetching dashboards:", error);
+					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+				}
+			},
+		);
+
+		this.server.tool(
+			"dashboard-get",
+			`
+					- Get a specific dashboard by ID.
+				`,
+			{
+				dashboardId: z.string(),
+			},
+			async ({ dashboardId }) => {
+				try {
+					const projectId = await this.getProjectId();
+					const dashboard = await getDashboard(
+						projectId,
+						dashboardId,
+						this.requestProperties.apiToken,
+					);
+					return { content: [{ type: "text", text: JSON.stringify(dashboard) }] };
+				} catch (error: any) {
+					console.error("Error fetching dashboard:", error);
+					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+				}
+			},
+		);
+
+		this.server.tool(
+			"dashboard-create",
+			`
+					- Create a new dashboard in the project.
+					- Requires name and optional description, tags, and other properties.
+				`,
+			{
+				data: CreateDashboardInputSchema,
+			},
+			async ({ data }) => {
+				try {
+					const projectId = await this.getProjectId();
+					const dashboard = await createDashboard({
+						projectId,
+						apiToken: this.requestProperties.apiToken,
+						data,
+					});
+
+					// Add URL field for easy navigation
+					const dashboardWithUrl = {
+						...(dashboard as any),
+						url: `https://app.posthog.com/project/${projectId}/dashboard/${dashboard.id}`,
+					};
+
+					return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
+				} catch (error: any) {
+					console.error("Error creating dashboard:", error);
+					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+				}
+			},
+		);
+
+		this.server.tool(
+			"dashboard-update",
+			`
+					- Update an existing dashboard by ID.
+					- Can update name, description, pinned status, tags, and other properties.
+				`,
+			{
+				dashboardId: z.string(),
+				data: UpdateDashboardInputSchema,
+			},
+			async ({ dashboardId, data }) => {
+				try {
+					const projectId = await this.getProjectId();
+					const dashboard = await updateDashboard({
+						projectId,
+						dashboardId,
+						apiToken: this.requestProperties.apiToken,
+						data,
+					});
+
+					// Add URL field for easy navigation
+					const dashboardWithUrl = {
+						...(dashboard as any),
+						url: `https://app.posthog.com/project/${projectId}/dashboard/${dashboard.id}`,
+					};
+
+					return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
+				} catch (error: any) {
+					console.error("Error updating dashboard:", error);
+					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+				}
+			},
+		);
+
+		this.server.tool(
+			"dashboard-delete",
+			`
+					- Delete a dashboard by ID (soft delete - marks as deleted).
+				`,
+			{
+				dashboardId: z.string(),
+			},
+			async ({ dashboardId }) => {
+				try {
+					const projectId = await this.getProjectId();
+					const result = await deleteDashboard({
+						projectId,
+						dashboardId,
+						apiToken: this.requestProperties.apiToken,
+					});
+					return { content: [{ type: "text", text: JSON.stringify(result) }] };
+				} catch (error: any) {
+					console.error("Error deleting dashboard:", error);
+					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+				}
+			},
+		);
+
+		this.server.tool(
+			"dashboard-add-insight",
+			`
+					- Add an existing insight to a dashboard.
+					- Requires insight ID and dashboard ID.
+					- Optionally supports layout and color customization.
+				`,
+			{
+				data: AddInsightToDashboardSchema,
+			},
+			async ({ data }) => {
+				try {
+					const projectId = await this.getProjectId();
+					const result = await addInsightToDashboard({
+						projectId,
+						apiToken: this.requestProperties.apiToken,
+						data,
+					});
+
+					// Add URLs for easy navigation
+					const resultWithUrls = {
+						...(result as any),
+						dashboard_url: `https://app.posthog.com/project/${projectId}/dashboard/${data.dashboard_id}`,
+						insight_url: `https://app.posthog.com/project/${projectId}/insights/${data.insight_id}`,
+					};
+
+					return { content: [{ type: "text", text: JSON.stringify(resultWithUrls) }] };
+				} catch (error: any) {
+					console.error("Error adding insight to dashboard:", error);
+					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+				}
 			},
 		);
 
@@ -553,7 +933,9 @@ export default {
 		const token = request.headers.get("Authorization")?.split(" ")[1];
 
 		if (!token) {
-			return new Response("No token provided, please provide a valid API token.", { status: 401 });
+			return new Response("No token provided, please provide a valid API token.", {
+				status: 401,
+			});
 		}
 
 		ctx.props = {

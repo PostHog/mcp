@@ -25,6 +25,7 @@ import { extractDataFromSSEStream } from "./lib/utils/streaming";
 import { hash } from "./lib/utils/helper-functions";
 import { MemoryCache } from "./lib/utils/cache/MemoryCache";
 import { ErrorDetailsSchema, ListErrorsSchema } from "./schema/errors";
+import { BASE_URL } from "./lib/constants";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
@@ -555,17 +556,20 @@ export default {
 		if (!token) {
 			return new Response("No token provided, please provide a valid API token.", { status: 401 });
 		}
+		// check if eu is passed in the url /eu/mcp or /eu/sse
+		const eu = url.pathname.startsWith("/eu/");
 
 		ctx.props = {
 			apiToken: token,
 			userHash: hash(token),
+			baseUrl: eu ? "https://eu.posthog.com" : BASE_URL,
 		};
 
-		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
+		if (url.pathname.endsWith("/sse") || url.pathname.endsWith("/sse/message")) {
 			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
 		}
 
-		if (url.pathname === "/mcp") {
+		if (url.pathname.endsWith("/mcp")) {
 			return MyMCP.serve("/mcp").fetch(request, env, ctx);
 		}
 

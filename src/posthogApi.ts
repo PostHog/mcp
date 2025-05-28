@@ -69,7 +69,6 @@ export async function getFeatureFlags(
 }
 
 export async function getOrganizations(apiToken: string): Promise<Organization[]> {
-	console.log("loading organizations");
 	const response = await fetch(`${BASE_URL}/api/organizations/`, {
 		headers: {
 			Authorization: `Bearer ${apiToken}`,
@@ -86,7 +85,6 @@ export async function getOrganizations(apiToken: string): Promise<Organization[]
 }
 
 export async function getOrganizationDetails(orgId: string, apiToken: string) {
-	console.log("loading organization details", orgId);
 	const response = await fetch(`${BASE_URL}/api/organizations/${orgId}/`, {
 		headers: {
 			Authorization: `Bearer ${apiToken}`,
@@ -99,10 +97,7 @@ export async function getOrganizationDetails(orgId: string, apiToken: string) {
 }
 
 export async function getProjects(orgId: string, apiToken: string): Promise<Project[]> {
-	console.log("loading projects", orgId);
 
-	console.log(`${BASE_URL}/api/organizations/${orgId}/projects/`);
-	console.log(`Bearer ${apiToken}`);
 	const response = await fetch(`${BASE_URL}/api/organizations/${orgId}/projects/`, {
 		headers: {
 			Authorization: `Bearer ${apiToken}`,
@@ -122,7 +117,6 @@ export async function getPropertyDefinitions({
 	projectId,
 	apiToken,
 }: { projectId: string; apiToken: string }) {
-	console.log("loading property definitions", projectId);
 	const propertyDefinitions = await withPagination(
 		`${BASE_URL}/api/projects/${projectId}/property_definitions/`,
 		apiToken,
@@ -139,7 +133,6 @@ export async function createFeatureFlag({
 	apiToken,
 	data,
 }: { projectId: string; apiToken: string; data: CreateFeatureFlagInput }) {
-	console.log("creating feature flag for project", projectId, data);
 	const body = {
 		key: data.key,
 		name: data.name,
@@ -200,7 +193,6 @@ export async function listErrors({
 }: { projectId: string; data: ListErrorsData; apiToken: string | undefined }): Promise<{
 	results: unknown[];
 }> {
-	console.log("listing errors for project", projectId, data);
 	const date = new Date();
 	date.setDate(date.getDate() - 7);
 	const dateFromToUse = data.dateFrom?.toISOString() ?? date.toISOString();
@@ -225,7 +217,6 @@ export async function listErrors({
 			status: statusToUse,
 		},
 	};
-	console.log("data", body);
 
 	const response = await fetch(`${BASE_URL}/api/environments/${projectId}/query/`, {
 		method: "POST",
@@ -256,7 +247,6 @@ export async function errorDetails({
 }: { projectId: string; data: ErrorDetailsData; apiToken: string | undefined }): Promise<{
 	results: unknown[];
 }> {
-	console.log("error details for project", projectId, data);
 	const date = new Date();
 	date.setDate(date.getDate() - 7);
 	const dateFromToUse = data.dateFrom?.toISOString() ?? date.toISOString();
@@ -272,7 +262,6 @@ export async function errorDetails({
 			issueId: data.issueId,
 		},
 	};
-	console.log("data", body);
 
 	const response = await fetch(`https://us.posthog.com/api/environments/${projectId}/query/`, {
 		method: "POST",
@@ -447,7 +436,6 @@ export async function getLLMTotalCostsForProject({
 
 	if (!response.ok) {
 		const errorText = await response.text();
-		console.log("errorText", errorText);
 		throw new Error(`Failed to fetch llm total costs for project: ${response.statusText}`);
 	}
 
@@ -457,7 +445,6 @@ export async function getLLMTotalCostsForProject({
 		throw new Error("Invalid response format: expected object with results array");
 	}
 
-	console.log("responseData", responseData);
 	return responseData;
 }
 
@@ -466,7 +453,6 @@ export async function getInsights(
 	apiToken: string,
 	params?: ListInsightsData,
 ): Promise<PostHogInsight[]> {
-	console.log("loading insights for project", projectId);
 
 	const searchParams = new URLSearchParams();
 	if (params?.limit) searchParams.append("limit", String(params.limit));
@@ -504,10 +490,9 @@ export async function getInsights(
 
 export async function getInsight(
 	projectId: string,
-	insightId: string,
+	insightId: number,
 	apiToken: string,
 ): Promise<PostHogInsight> {
-	console.log("loading insight", insightId, "for project", projectId);
 
 	const response = await fetch(`${BASE_URL}/api/projects/${projectId}/insights/${insightId}/`, {
 		headers: {
@@ -527,7 +512,6 @@ export async function createInsight({
 	apiToken,
 	data,
 }: { projectId: string; apiToken: string; data: CreateInsightInput }): Promise<PostHogInsight> {
-	console.log("creating insight for project", projectId, data);
 
 	const response = await fetch(`${BASE_URL}/api/projects/${projectId}/insights/`, {
 		method: "POST",
@@ -553,11 +537,10 @@ export async function updateInsight({
 	data,
 }: {
 	projectId: string;
-	insightId: string;
+	insightId: number;
 	apiToken: string;
 	data: UpdateInsightInput;
 }): Promise<PostHogInsight> {
-	console.log("updating insight", insightId, "for project", projectId, data);
 
 	const response = await fetch(`${BASE_URL}/api/projects/${projectId}/insights/${insightId}/`, {
 		method: "PATCH",
@@ -580,8 +563,7 @@ export async function deleteInsight({
 	projectId,
 	insightId,
 	apiToken,
-}: { projectId: string; insightId: string; apiToken: string }) {
-	console.log("deleting insight", insightId, "for project", projectId);
+}: { projectId: string; insightId: number; apiToken: string }) {
 
 	const response = await fetch(`${BASE_URL}/api/projects/${projectId}/insights/${insightId}/`, {
 		method: "PATCH",
@@ -617,7 +599,6 @@ export async function getDashboards(
 	apiToken: string,
 	params?: ListDashboardsData,
 ): Promise<PostHogDashboard[]> {
-	console.log("loading dashboards for project", projectId);
 
 	const searchParams = new URLSearchParams();
 	if (params?.limit) searchParams.append("limit", String(params.limit));
@@ -654,10 +635,9 @@ export async function getDashboards(
 
 export async function getDashboard(
 	projectId: string,
-	dashboardId: string,
+	dashboardId: number,
 	apiToken: string,
 ): Promise<PostHogDashboard> {
-	console.log("loading dashboard", dashboardId, "for project", projectId);
 
 	const response = await fetch(
 		`${BASE_URL}/api/projects/${projectId}/dashboards/${dashboardId}/`,
@@ -680,7 +660,6 @@ export async function createDashboard({
 	apiToken,
 	data,
 }: { projectId: string; apiToken: string; data: CreateDashboardInput }): Promise<PostHogDashboard> {
-	console.log("creating dashboard for project", projectId, data);
 
 	const response = await fetch(`${BASE_URL}/api/projects/${projectId}/dashboards/`, {
 		method: "POST",
@@ -706,11 +685,10 @@ export async function updateDashboard({
 	data,
 }: {
 	projectId: string;
-	dashboardId: string;
+	dashboardId: number;
 	apiToken: string;
 	data: UpdateDashboardInput;
 }): Promise<PostHogDashboard> {
-	console.log("updating dashboard", dashboardId, "for project", projectId, data);
 
 	const response = await fetch(
 		`${BASE_URL}/api/projects/${projectId}/dashboards/${dashboardId}/`,
@@ -736,8 +714,7 @@ export async function deleteDashboard({
 	projectId,
 	dashboardId,
 	apiToken,
-}: { projectId: string; dashboardId: string; apiToken: string }) {
-	console.log("deleting dashboard", dashboardId, "for project", projectId);
+}: { projectId: string; dashboardId: number; apiToken: string }) {
 
 	const response = await fetch(
 		`${BASE_URL}/api/projects/${projectId}/dashboards/${dashboardId}/`,
@@ -766,7 +743,6 @@ export async function addInsightToDashboard({
 	apiToken,
 	data,
 }: { projectId: string; apiToken: string; data: AddInsightToDashboardInput }) {
-	console.log("adding insight to dashboard for project", projectId, data);
 
 	// Based on PostHog API documentation and community feedback:
 	// - The dashboard_tiles endpoint doesn't exist for creation
@@ -776,14 +752,6 @@ export async function addInsightToDashboard({
 	const updateData: any = {
 		dashboards: [data.dashboard_id], // Use deprecated array field - only working approach
 	};
-
-	// Include optional layout and color if provided
-	if (data.layouts) {
-		updateData.layouts = data.layouts;
-	}
-	if (data.color) {
-		updateData.color = data.color;
-	}
 
 	const response = await fetch(
 		`${BASE_URL}/api/projects/${projectId}/insights/${data.insight_id}/`,

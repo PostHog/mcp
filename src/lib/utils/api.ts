@@ -31,3 +31,11 @@ export const withPagination = async <T>(
 
 	return results;
 };
+
+export const getProjectBaseUrl = (projectId: string) => {
+	if (projectId === "@current") {
+		return "https://us.posthog.com";
+	}
+
+	return `https://us.posthog.com/project/${projectId}`;
+};

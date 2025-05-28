@@ -46,13 +46,6 @@ export const CreateDashboardInputSchema = z.object({
 	description: z.string().optional(),
 	pinned: z.boolean().optional().default(false),
 	tags: z.array(z.string()).optional(),
-	filters: z.record(z.any()).optional(),
-	variables: z.record(z.any()).optional(),
-	use_template: z.string().optional(),
-	use_dashboard: z.number().optional(),
-	delete_insights: z.boolean().optional().default(false),
-	restriction_level: z.number().optional(),
-	_create_in_folder: z.string().optional(),
 });
 
 // Input schema for updating dashboards
@@ -61,11 +54,6 @@ export const UpdateDashboardInputSchema = z.object({
 	description: z.string().optional(),
 	pinned: z.boolean().optional(),
 	tags: z.array(z.string()).optional(),
-	filters: z.record(z.any()).optional(),
-	variables: z.record(z.any()).optional(),
-	breakdown_colors: z.any().optional(),
-	data_color_theme_id: z.number().optional(),
-	restriction_level: z.number().optional(),
 });
 
 // Input schema for listing dashboards
@@ -80,9 +68,6 @@ export const ListDashboardsSchema = z.object({
 export const AddInsightToDashboardSchema = z.object({
 	insight_id: z.number().int().positive(),
 	dashboard_id: z.number().int().positive(),
-	// Optional positioning and layout
-	layouts: z.record(z.any()).optional(),
-	color: z.string().optional(),
 });
 
 // Type exports

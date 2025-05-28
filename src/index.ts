@@ -47,6 +47,7 @@ import { MemoryCache } from "./lib/utils/cache/MemoryCache";
 import { hash } from "./lib/utils/helper-functions";
 import { extractDataFromSSEStream } from "./lib/utils/streaming";
 import { ErrorDetailsSchema, ListErrorsSchema } from "./schema/errors";
+import { getProjectBaseUrl } from "./lib/utils/api";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
@@ -389,7 +390,7 @@ export class MyMCP extends McpAgent<Env> {
 				// Add URL field for easy navigation
 				const featureFlagWithUrl = {
 					...(featureFlag as any),
-					url: `https://app.posthog.com/project/${projectId}/feature_flags/${(featureFlag as any).id}`,
+					url: `${getProjectBaseUrl(projectId)}/feature_flags/${(featureFlag as any).id}`,
 				};
 
 				return {
@@ -469,7 +470,7 @@ export class MyMCP extends McpAgent<Env> {
 				// Add URL field for easy navigation
 				const featureFlagWithUrl = {
 					...(featureFlag as any),
-					url: `https://app.posthog.com/project/${projectId}/feature_flags/${(featureFlag as any).id}`,
+					url: `${getProjectBaseUrl(projectId)}/feature_flags/${(featureFlag as any).id}`,
 				};
 
 				return {
@@ -632,7 +633,7 @@ export class MyMCP extends McpAgent<Env> {
 					- Get a specific insight by ID.
 				`,
 			{
-				insightId: z.string(),
+				insightId: z.number(),
 			},
 			async ({ insightId }) => {
 				try {
@@ -671,7 +672,7 @@ export class MyMCP extends McpAgent<Env> {
 					// Add URL field for easy navigation
 					const insightWithUrl = {
 						...insight,
-						url: `https://app.posthog.com/project/${projectId}/insights/${(insight as any).short_id}`,
+						url: `${getProjectBaseUrl(projectId)}/insights/${(insight as any).short_id}`,
 					};
 
 					return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
@@ -689,7 +690,7 @@ export class MyMCP extends McpAgent<Env> {
 					- Can update name, description, filters, and other properties.
 				`,
 			{
-				insightId: z.string(),
+				insightId: z.number(),
 				data: UpdateInsightInputSchema,
 			},
 			async ({ insightId, data }) => {
@@ -705,7 +706,7 @@ export class MyMCP extends McpAgent<Env> {
 					// Add URL field for easy navigation
 					const insightWithUrl = {
 						...insight,
-						url: `https://app.posthog.com/project/${projectId}/insights/${(insight as any).short_id}`,
+						url: `${getProjectBaseUrl(projectId)}/insights/${(insight as any).short_id}`,
 					};
 
 					return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
@@ -722,7 +723,7 @@ export class MyMCP extends McpAgent<Env> {
 					- Delete an insight by ID (soft delete - marks as deleted).
 				`,
 			{
-				insightId: z.string(),
+				insightId: z.number(),
 			},
 			async ({ insightId }) => {
 				try {
@@ -772,7 +773,7 @@ export class MyMCP extends McpAgent<Env> {
 					- Get a specific dashboard by ID.
 				`,
 			{
-				dashboardId: z.string(),
+				dashboardId: z.number(),
 			},
 			async ({ dashboardId }) => {
 				try {
@@ -811,7 +812,7 @@ export class MyMCP extends McpAgent<Env> {
 					// Add URL field for easy navigation
 					const dashboardWithUrl = {
 						...(dashboard as any),
-						url: `https://app.posthog.com/project/${projectId}/dashboard/${dashboard.id}`,
+						url: `${getProjectBaseUrl(projectId)}/dashboard/${dashboard.id}`,
 					};
 
 					return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
@@ -826,10 +827,10 @@ export class MyMCP extends McpAgent<Env> {
 			"dashboard-update",
 			`
 					- Update an existing dashboard by ID.
-					- Can update name, description, pinned status, tags, and other properties.
+					- Can update name, description, pinned status or tags.
 				`,
 			{
-				dashboardId: z.string(),
+				dashboardId: z.number(),
 				data: UpdateDashboardInputSchema,
 			},
 			async ({ dashboardId, data }) => {
@@ -845,7 +846,7 @@ export class MyMCP extends McpAgent<Env> {
 					// Add URL field for easy navigation
 					const dashboardWithUrl = {
 						...(dashboard as any),
-						url: `https://app.posthog.com/project/${projectId}/dashboard/${dashboard.id}`,
+						url: `${getProjectBaseUrl(projectId)}/dashboard/${dashboard.id}`,
 					};
 
 					return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
@@ -862,7 +863,7 @@ export class MyMCP extends McpAgent<Env> {
 					- Delete a dashboard by ID (soft delete - marks as deleted).
 				`,
 			{
-				dashboardId: z.string(),
+				dashboardId: z.number(),
 			},
 			async ({ dashboardId }) => {
 				try {
@@ -881,7 +882,7 @@ export class MyMCP extends McpAgent<Env> {
 		);
 
 		this.server.tool(
-			"dashboard-add-insight",
+			"add-insight-to-dashboard",
 			`
 					- Add an existing insight to a dashboard.
 					- Requires insight ID and dashboard ID.
@@ -902,8 +903,8 @@ export class MyMCP extends McpAgent<Env> {
 					// Add URLs for easy navigation
 					const resultWithUrls = {
 						...(result as any),
-						dashboard_url: `https://app.posthog.com/project/${projectId}/dashboard/${data.dashboard_id}`,
-						insight_url: `https://app.posthog.com/project/${projectId}/insights/${data.insight_id}`,
+						dashboard_url: `${getProjectBaseUrl(projectId)}/dashboard/${data.dashboard_id}`,
+						insight_url: `${getProjectBaseUrl(projectId)}/insights/${data.insight_id}`,
 					};
 
 					return { content: [{ type: "text", text: JSON.stringify(resultWithUrls) }] };

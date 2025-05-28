@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Base dashboard schema from PostHog API
 export const DashboardSchema = z.object({
-	id: z.number(),
+	id: z.number().int().positive(),
 	name: z.string(),
 	description: z.string().optional(),
 	pinned: z.boolean().optional(),

@@ -517,6 +517,7 @@ export class MyMCP extends McpAgent<Env> {
 				- Use this tool to get a quick answer to a question about the data in the project, which can't be answered using other, more dedicated tools.
 				- Fetches the result as a Server-Sent Events (SSE) stream and provides the concatenated data content.
 				- When giving the results back to the user, first show the SQL query that was used, then briefly explain the query, then provide results in reasily readable format.
+				- You should also offer to save the query as an insight if the user wants to.
 			`,
 			{
 				query: z
@@ -544,7 +545,7 @@ export class MyMCP extends McpAgent<Env> {
 
 					const sseStream = await getSqlInsight({ projectId, apiToken, query });
 					const extractedData = await extractDataFromSSEStream(sseStream);
-					console.log("extractedData", extractedData);
+	
 					if (extractedData.length === 0) {
 						return {
 							content: [
@@ -652,10 +653,26 @@ export class MyMCP extends McpAgent<Env> {
 		);
 
 		this.server.tool(
-			"insight-create",
+			"insight-create-from-query",
 			`
-					- Create a new insight in the project.
-					- Requires name, filters, and other optional properties.
+					- You can use this to save a query as an insight. You should only do this with a valid query that you have seen, or one you have modified slightly.
+					- If the user wants to see data, you should use the "get-sql-insight" tool to get that data instead.
+					- An insight requires a name, query, and other optional properties.
+					- The query should use HogQL, which is a variant of Clickhouse SQL. Here is an example query:
+					Here is an example of a validquery:
+					{
+						"kind": "DataVisualizationNode",
+						"source": {
+							"kind": "HogQLQuery",
+							"query": "SELECT\n  event,\n  count() AS event_count\nFROM\n  events\nWHERE\n  timestamp >= now() - INTERVAL 7 day\nGROUP BY\n  event\nORDER BY\n  event_count DESC\nLIMIT 10",
+							"explain": true,
+							"filters": {
+								"dateRange": {
+									"date_from": "-7d"
+								}
+							}
+						},
+					}
 				`,
 			{
 				data: CreateInsightInputSchema,

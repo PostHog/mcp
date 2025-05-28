@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { InsightQuerySchema } from "./query";
 
 export const InsightSchema = z.object({
 	id: z.number(),
@@ -29,11 +30,10 @@ export const InsightSchema = z.object({
 
 export const CreateInsightInputSchema = z.object({
 	name: z.string(),
+	query: InsightQuerySchema,
 	description: z.string().optional(),
-	filters: z.record(z.any()),
-	query: z.record(z.any()).optional(),
 	saved: z.boolean().default(true),
-	dashboard: z.number().optional(),
+	favorited: z.boolean().default(false),
 	tags: z.array(z.string()).optional(),
 });
 

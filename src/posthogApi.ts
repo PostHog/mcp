@@ -628,7 +628,7 @@ export async function getDashboards(
 		try {
 			return data.results.map((dashboard) => DashboardSchema.parse(dashboard));
 		} catch (error) {
-			throw new Error("Error parsing dashboard: " + error);
+			throw new Error(`Error parsing dashboard: ${error}`);
 		}
 	}
 

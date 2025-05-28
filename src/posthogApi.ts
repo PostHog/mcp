@@ -625,12 +625,17 @@ export async function getDashboards(
 	}
 
 	if (hasDashboardResults(data)) {
-		return data.results;
+		try {
+			return data.results.map((dashboard) => DashboardSchema.parse(dashboard));
+		} catch (error) {
+			throw new Error("Error parsing dashboard: " + error);
+		}
 	}
 
 	throw new Error(
 		"Invalid response format: expected PostHogDashboard array or object with results property",
 	);
+	
 }
 
 export async function getDashboard(

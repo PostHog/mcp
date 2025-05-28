@@ -368,7 +368,7 @@ export class MyMCP extends McpAgent<Env> {
 			"create-feature-flag",
 			`Creates a new feature flag in the project. Once you have created a feature flag, you should:
 			 - Ask the user if they want to add it to their codebase
-			 - Use the "search-docs" tool to find documentation on how to add feature flags to the codebase (search for the right language / framework)
+			 - Use the "docs-search" tool to find documentation on how to add feature flags to the codebase (search for the right language / framework)
 			 - Clarify where it should be added and then add it.
 			`,
 			{

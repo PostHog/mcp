@@ -2,7 +2,17 @@
 
 ## Use the MCP Server
 
-1. Obtain a [personal API key](https://posthog.com/docs/api#how-to-obtain-a-personal-api-key) on PostHog with appropriate permissions
+### Quick install
+
+You can install the MCP server automatically into popular clients by running the following command:
+
+```
+npx @posthog/wizard@latest mcp add
+```
+
+### Manual install
+
+1. Obtain a personal API key using the MCP Server preset [here](https://app.posthog.com/settings/user-api-keys?preset=mcp_server).
 
 2. Add the MCP configuration to your desktop client (e.g. Cursor, Windsurf, Claude Desktop) and add your personal API key
 
@@ -16,10 +26,10 @@
         "mcp-remote@latest",
         "https://mcp.posthog.com/sse",
         "--header",
-        "Authorization:${POSTHOG_API_TOKEN}"
+        "Authorization:${POSTHOG_AUTH_HEADER}"
       ],
       "env": {
-        "POSTHOG_API_TOKEN": "Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}"
+        "POSTHOG_AUTH_HEADER": "Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}"
       }
     }
   }

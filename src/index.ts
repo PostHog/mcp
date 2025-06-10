@@ -108,11 +108,15 @@ export class MyMCP extends McpAgent<Env> {
 	}
 
 	async trackEvent(event: string, properties: Record<string, any> = {}) {
-		const distinctId = await this.getDistinctId();
+		try {
+			const distinctId = await this.getDistinctId();
 
 		const client = getPostHogClient();
 
-		client.capture({ distinctId, event, properties });
+			await client.capture({ distinctId, event, properties });
+		} catch (error) {
+			//
+		}
 	}
 
 	registerTool<TSchema extends z.ZodRawShape>(

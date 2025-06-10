@@ -11,7 +11,7 @@ export class MemoryCache<T extends Record<string, any>> extends ScopedCache<T> {
 		_cacheStore.set(scope, this.cache);
 	}
 
-	async get<K extends keyof T>(key: K): Promise<T[K]> {
+	async get<K extends keyof T>(key: K): Promise<T[K] | undefined> {
 		return this.cache.get(key as string);
 	}
 

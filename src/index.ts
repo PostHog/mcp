@@ -1,4 +1,4 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer, type ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { McpAgent } from "agents/mcp";
 import { z } from "zod";
 
@@ -23,6 +23,7 @@ import {
 	getProjects,
 	getPropertyDefinitions,
 	getSqlInsight,
+	getUser,
 	listErrors,
 	updateDashboard,
 	updateFeatureFlag,
@@ -43,11 +44,12 @@ import {
 } from "./schema/insights";
 
 import { docsSearch } from "./inkeepApi";
-import { MemoryCache } from "./lib/utils/cache/MemoryCache";
+import { DurableObjectCache } from "./lib/utils/cache/DurableObjectCache";
 import { hash } from "./lib/utils/helper-functions";
 import { extractDataFromSSEStream } from "./lib/utils/streaming";
 import { ErrorDetailsSchema, ListErrorsSchema } from "./schema/errors";
 import { getProjectBaseUrl } from "./lib/utils/api";
+import { getPostHogClient } from "./lib/client";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
@@ -63,6 +65,7 @@ type RequestProperties = {
 type State = {
 	projectId: string | undefined;
 	orgId: string | undefined;
+	distinctId: string | undefined;
 };
 // Define our MCP agent with tools
 export class MyMCP extends McpAgent<Env> {
@@ -75,9 +78,10 @@ export class MyMCP extends McpAgent<Env> {
 	initialState: State = {
 		projectId: undefined,
 		orgId: undefined,
+		distinctId: undefined,
 	};
 
-	_cache: MemoryCache<State> | undefined;
+	_cache: DurableObjectCache<State> | undefined;
 
 	get requestProperties() {
 		return this.props as RequestProperties;
@@ -85,9 +89,48 @@ export class MyMCP extends McpAgent<Env> {
 
 	get cache() {
 		if (!this._cache) {
-			this._cache = new MemoryCache<State>(this.requestProperties.userHash);
+			this._cache = new DurableObjectCache<State>(this.requestProperties.userHash, this.ctx.storage);
 		}
+		
 		return this._cache;
+	}
+
+	async getDistinctId() {
+		let _distinctId = await this.cache.get("distinctId");
+
+		if (!_distinctId) {
+			const user = await getUser(this.requestProperties.apiToken);
+			await this.cache.set("distinctId", user.distinctId);
+			_distinctId = user.distinctId;
+		}
+
+		return _distinctId;
+	}
+
+	async trackEvent(event: string, properties: Record<string, any> = {}) {
+		const distinctId = await this.getDistinctId();
+
+		const client = getPostHogClient();
+
+		client.capture({ distinctId, event, properties });
+	}
+
+	registerTool<TSchema extends z.ZodRawShape>(
+		name: string,
+		description: string,
+		schema: TSchema,
+		handler: (params: z.infer<z.ZodObject<TSchema>>) => Promise<any>
+	): void {
+		const wrappedHandler = async (params: z.infer<z.ZodObject<TSchema>>) => {
+
+			await this.trackEvent('mcp tool call', {
+				tool: name,
+			});
+			
+			return await handler(params);
+		};
+		
+		this.server.tool(name, description, schema, wrappedHandler as unknown as ToolCallback<TSchema>);
 	}
 
 	async getOrgID() {
@@ -128,7 +171,7 @@ export class MyMCP extends McpAgent<Env> {
 	}
 
 	async init() {
-		this.server.tool(
+		this.registerTool(
 			"feature-flag-get-definition",
 			`
 				- Use this tool to get the definition of a feature flag. 
@@ -210,7 +253,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"feature-flag-get-all",
 			`
 				- Use this tool to get all feature flags in the project.
@@ -225,7 +268,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"docs-search",
 			`
 				- Use this tool to search the PostHog documentation for information that can help the user with their request. 
@@ -265,7 +308,11 @@ export class MyMCP extends McpAgent<Env> {
 				}
 			},
 		);
-		this.server.tool("organizations-get", {}, async () => {
+		this.registerTool("organizations-get", `
+				- Use this tool to get the organizations the user has access to.
+			`,
+			{},
+			async () => {
 			try {
 				const organizations = await getOrganizations(this.requestProperties.apiToken);
 				console.log("organizations", organizations);
@@ -280,8 +327,11 @@ export class MyMCP extends McpAgent<Env> {
 			}
 		});
 
-		this.server.tool(
+		this.registerTool(
 			"project-set-active",
+			`
+				- Use this tool to set the active project.
+			`,
 			{
 				projectId: z.string(),
 			},
@@ -294,8 +344,11 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"organization-set-active",
+			`
+				- Use this tool to set the active organization.
+			`,
 			{
 				orgId: z.string(),
 			},
@@ -308,7 +361,11 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool("organization-details-get", {}, async () => {
+		this.registerTool("organization-details-get", `
+				- Use this tool to get the details of the active organization.
+			`,
+			{},
+			async () => {
 			try {
 				const orgId = await this.getOrgID();
 
@@ -328,7 +385,7 @@ export class MyMCP extends McpAgent<Env> {
 			}
 		});
 
-		this.server.tool(
+		this.registerTool(
 			"projects-get",
 			`
 				- Fetches projects that the user has access to - the orgId is optional. 
@@ -352,7 +409,11 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool("property-definitions", {}, async () => {
+		this.registerTool("property-definitions", `
+				- Use this tool to get the property definitions of the active project.
+			`,
+			{},
+			async () => {
 			const projectId = await this.getProjectId();
 
 			const propertyDefinitions = await getPropertyDefinitions({
@@ -364,7 +425,7 @@ export class MyMCP extends McpAgent<Env> {
 			};
 		});
 
-		this.server.tool(
+		this.registerTool(
 			"create-feature-flag",
 			`Creates a new feature flag in the project. Once you have created a feature flag, you should:
 			 - Ask the user if they want to add it to their codebase
@@ -399,8 +460,11 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"list-errors",
+			`
+				- Use this tool to list errors in the project.
+			`,
 			{
 				data: ListErrorsSchema,
 			},
@@ -422,8 +486,11 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"error-details",
+			`
+				- Use this tool to get the details of an error in the project.
+			`,
 			{
 				data: ErrorDetailsSchema,
 			},
@@ -447,7 +514,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"update-feature-flag",
 			`Update a new feature flag in the project.
 			- To enable a feature flag, you should make sure it is active and the rollout percentage is set to 100 for the group you want to target.
@@ -479,8 +546,11 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"delete-feature-flag",
+			`
+				- Use this tool to delete a feature flag in the project.
+			`,
 			{
 				flagKey: z.string(),
 			},
@@ -509,7 +579,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"get-sql-insight",
 			`
 				- Queries project's PostHog data warehouse based on a provided natural language question - don't provide SQL query as input but describe the output you want.
@@ -571,7 +641,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"get-llm-total-costs-for-project",
 			`
 				- Fetches the total LLM daily costs for each model for a project over a given number of days.
@@ -603,7 +673,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"insights-get-all",
 			`
 					- Get all insights in the project with optional filtering.
@@ -628,7 +698,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"insight-get",
 			`
 					- Get a specific insight by ID.
@@ -652,7 +722,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"insight-create-from-query",
 			`
 					- You can use this to save a query as an insight. You should only do this with a valid query that you have seen, or one you have modified slightly.
@@ -700,7 +770,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"insight-update",
 			`
 					- Update an existing insight by ID.
@@ -734,7 +804,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"insight-delete",
 			`
 					- Delete an insight by ID (soft delete - marks as deleted).
@@ -759,7 +829,7 @@ export class MyMCP extends McpAgent<Env> {
 		);
 
 		// Dashboard tools
-		this.server.tool(
+		this.registerTool(
 			"dashboards-get-all",
 			`
 					- Get all dashboards in the project with optional filtering.
@@ -784,7 +854,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"dashboard-get",
 			`
 					- Get a specific dashboard by ID.
@@ -808,7 +878,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"dashboard-create",
 			`
 					- Create a new dashboard in the project.
@@ -840,7 +910,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"dashboard-update",
 			`
 					- Update an existing dashboard by ID.
@@ -874,7 +944,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"dashboard-delete",
 			`
 					- Delete a dashboard by ID (soft delete - marks as deleted).
@@ -898,7 +968,7 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.server.tool(
+		this.registerTool(
 			"add-insight-to-dashboard",
 			`
 					- Add an existing insight to a dashboard.

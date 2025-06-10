@@ -113,7 +113,7 @@ export class MyMCP extends McpAgent<Env> {
 
 		const client = getPostHogClient();
 
-			await client.capture({ distinctId, event, properties });
+			client.capture({ distinctId, event, properties });
 		} catch (error) {
 			//
 		}

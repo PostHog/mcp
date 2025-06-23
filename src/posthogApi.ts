@@ -26,9 +26,9 @@ import {
 } from "./schema/flags";
 import {
 	type CreateInsightInput,
-	InsightSchema,
 	type ListInsightsData,
 	type PostHogInsight,
+	SQLInsightResponseSchema,
 	type UpdateInsightInput,
 } from "./schema/insights";
 import type { Organization } from "./schema/orgs";
@@ -359,7 +359,7 @@ export async function getSqlInsight({
 	projectId: string;
 	apiToken: string;
 	query: string;
-}): Promise<ReadableStream<Uint8Array>> {
+}) {
 	const requestBody = {
 		query: query,
 		insight_type: "sql",
@@ -384,11 +384,15 @@ export async function getSqlInsight({
 		);
 	}
 
-	if (!response.body) {
-		throw new Error("Response body is null, but an SSE stream was expected.");
+	const responseData = await response.json();
+
+	const parsedData = SQLInsightResponseSchema.safeParse(responseData);
+
+	if (!parsedData.success) {
+		throw new Error(`Failed to parse SQL insight response: ${parsedData.error}`);
 	}
 
-	return response.body;
+	return parsedData.data;
 }
 
 // Type guards for API responses

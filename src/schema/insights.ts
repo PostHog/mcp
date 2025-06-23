@@ -60,3 +60,10 @@ export type PostHogInsight = z.infer<typeof InsightSchema>;
 export type CreateInsightInput = z.infer<typeof CreateInsightInputSchema>;
 export type UpdateInsightInput = z.infer<typeof UpdateInsightInputSchema>;
 export type ListInsightsData = z.infer<typeof ListInsightsSchema>;
+
+export const SQLInsightResponseSchema = z.array(z.object({
+		type: z.string(),
+		data: z.record(z.any()),
+	}));
+
+export type SQLInsightResponse = z.infer<typeof SQLInsightResponseSchema>;

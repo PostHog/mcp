@@ -46,7 +46,6 @@ import {
 import { docsSearch } from "./inkeepApi";
 import { DurableObjectCache } from "./lib/utils/cache/DurableObjectCache";
 import { hash } from "./lib/utils/helper-functions";
-import { extractDataFromSSEStream } from "./lib/utils/streaming";
 import { ErrorDetailsSchema, ListErrorsSchema } from "./schema/errors";
 import { getProjectBaseUrl } from "./lib/utils/api";
 import { getPostHogClient } from "./lib/client";
@@ -617,10 +616,9 @@ export class MyMCP extends McpAgent<Env> {
 				try {
 					const projectId = await this.getProjectId();
 
-					const sseStream = await getSqlInsight({ projectId, apiToken, query });
-					const extractedData = await extractDataFromSSEStream(sseStream);
-	
-					if (extractedData.length === 0) {
+					const result = await getSqlInsight({ projectId, apiToken, query });
+
+					if (result.length === 0) {
 						return {
 							content: [
 								{
@@ -630,7 +628,7 @@ export class MyMCP extends McpAgent<Env> {
 							],
 						};
 					}
-					return { content: [{ type: "text", text: extractedData }] };
+					return { content: [{ type: "text", text: JSON.stringify(result) }] };
 				} catch (error: any) {
 					console.error("Error in get-sql-insight tool:", error);
 					return {

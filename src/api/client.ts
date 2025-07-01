@@ -126,55 +126,46 @@ export class ApiClient {
     }
 
     organizations() {
-        const baseUrl = this.baseUrl;
-        const fetchWithSchema = this.fetchWithSchema.bind(this);
-
         return {
             list: async (): Promise<Result<Organization[]>> => {
-
                 const responseSchema = z.object({
                     results: z.array(OrganizationSchema)
                 });
-
-                const result = await fetchWithSchema(
-                    `${baseUrl}/api/organizations/`,
+                
+                const result = await this.fetchWithSchema(
+                    `${this.baseUrl}/api/organizations/`,
                     responseSchema
                 );
-
+                
                 if (result.success) {
                     return { success: true, data: result.data.results };
                 }
-
                 return result;
             },
 
-            get: async (orgId: string): Promise<Result<Organization>> => {
-                return fetchWithSchema(
-                    `${baseUrl}/api/organizations/${orgId}/`,
+            get: async ({ orgId }: { orgId: string }): Promise<Result<Organization>> => {
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/organizations/${orgId}/`,
                     OrganizationSchema
                 );
             },
 
-            projects: (orgId: string) => {
-                const baseUrl = this.baseUrl;
-                const fetchWithSchema = this.fetchWithSchema.bind(this);
-
+            projects: ({ orgId }: { orgId: string }) => {
                 return {
                     list: async (): Promise<Result<Project[]>> => {
                         const responseSchema = z.object({
                             results: z.array(ProjectSchema)
                         });
-
-                const result = await fetchWithSchema(
-                    `${baseUrl}/api/organizations/${orgId}/projects/`,
-                    responseSchema
-                );
-
-                if (result.success) {
-                    return { success: true, data: result.data.results };
-                }
-
-                return result;
+                        
+                        const result = await this.fetchWithSchema(
+                            `${this.baseUrl}/api/organizations/${orgId}/projects/`,
+                            responseSchema
+                        );
+                        
+                        if (result.success) {
+                            return { success: true, data: result.data.results };
+                        }
+                        return result;
                     }
                 }
             },
@@ -182,21 +173,18 @@ export class ApiClient {
     }
 
     projects() {
-        const baseUrl = this.baseUrl;
-        const fetchWithSchema = this.fetchWithSchema.bind(this);
-
         return {
-            get: async (projectId: string): Promise<Result<Project>> => {
-                return fetchWithSchema(
-                    `${baseUrl}/api/projects/${projectId}/`,
+            get: async ({ projectId }: { projectId: string }): Promise<Result<Project>> => {
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/projects/${projectId}/`,
                     ProjectSchema
                 );
             },
 
-            propertyDefinitions: async (projectId: string): Promise<Result<any[]>> => {
+            propertyDefinitions: async ({ projectId }: { projectId: string }): Promise<Result<any[]>> => {
                 try {
                     const propertyDefinitions = await withPagination(
-                        `${baseUrl}/api/projects/${projectId}/property_definitions/`,
+                        `${this.baseUrl}/api/projects/${projectId}/property_definitions/`,
                         this.config.apiToken,
                         ApiPropertyDefinitionSchema,
                     );
@@ -217,11 +205,7 @@ export class ApiClient {
         };
     }
 
-    featureFlags(projectId: string) {
-        const baseUrl = this.baseUrl;
-        const fetchWithSchema = this.fetchWithSchema.bind(this);
-        const apiToken = this.config.apiToken;
-
+    featureFlags({ projectId }: { projectId: string }) {
         return {
             list: async (): Promise<Result<Array<{ id: number; key: string; name: string; active: boolean }>>> => {
                 try {
@@ -233,20 +217,20 @@ export class ApiClient {
                     });
 
                     const response = await withPagination(
-                        `${baseUrl}/api/projects/${projectId}/feature_flags/`,
-                        apiToken,
+                        `${this.baseUrl}/api/projects/${projectId}/feature_flags/`,
+                        this.config.apiToken,
                         schema,
                     );
 
-                    return { success: true, data: response };
+                    return { success: true, data: response as Array<{ id: number; key: string; name: string; active: boolean }> };
                 } catch (error) {
                     return { success: false, error: error as Error };
                 }
             },
 
-            get: async (flagId: string | number): Promise<Result<{ id: number; key: string; name: string; active: boolean; description?: string }>> => {
-                return fetchWithSchema(
-                    `${baseUrl}/api/projects/${projectId}/feature_flags/${flagId}/`,
+            get: async ({ flagId }: { flagId: string | number }): Promise<Result<{ id: number; key: string; name: string; active: boolean; description?: string }>> => {
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/projects/${projectId}/feature_flags/${flagId}/`,
                     FeatureFlagSchema.pick({
                         id: true,
                         key: true,
@@ -257,18 +241,18 @@ export class ApiClient {
                 );
             },
 
-            findByKey: async (key: string): Promise<Result<{ id: number; key: string; name: string; active: boolean } | undefined>> => {
-                const listResult = await this.featureFlags(projectId).list();
+            findByKey: async ({ key }: { key: string }): Promise<Result<{ id: number; key: string; name: string; active: boolean } | undefined>> => {
+                const listResult = await this.featureFlags({ projectId }).list();
                 
                 if (!listResult.success) {
-                    return listResult;
+                    return { success: false, error: listResult.error };
                 }
 
                 const found = listResult.data.find((f) => f.key === key);
                 return { success: true, data: found };
             },
 
-            create: async (data: CreateFeatureFlagInput): Promise<Result<{ id: number; key: string; name: string; active: boolean }>> => {
+            create: async ({ data }: { data: CreateFeatureFlagInput }): Promise<Result<{ id: number; key: string; name: string; active: boolean }>> => {
                 const validatedInput = CreateFeatureFlagInputSchema.parse(data);
                 
                 const body = {
@@ -279,8 +263,8 @@ export class ApiClient {
                     filters: validatedInput.filters,
                 };
 
-                return fetchWithSchema(
-                    `${baseUrl}/api/projects/${projectId}/feature_flags/`,
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/projects/${projectId}/feature_flags/`,
                     FeatureFlagSchema.pick({
                         id: true,
                         key: true,
@@ -294,9 +278,9 @@ export class ApiClient {
                 );
             },
 
-            update: async (key: string, data: UpdateFeatureFlagInput): Promise<Result<{ id: number; key: string; name: string; active: boolean }>> => {
+            update: async ({ key, data }: { key: string; data: UpdateFeatureFlagInput }): Promise<Result<{ id: number; key: string; name: string; active: boolean }>> => {
                 const validatedInput = UpdateFeatureFlagInputSchema.parse(data);
-                const findResult = await this.featureFlags(projectId).findByKey(key);
+                const findResult = await this.featureFlags({ projectId }).findByKey({ key });
                 
                 if (!findResult.success) {
                     return findResult;
@@ -317,8 +301,8 @@ export class ApiClient {
                     filters: validatedInput.filters,
                 };
 
-                return fetchWithSchema(
-                    `${baseUrl}/api/projects/${projectId}/feature_flags/${findResult.data.id}/`,
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/projects/${projectId}/feature_flags/${findResult.data.id}/`,
                     FeatureFlagSchema.pick({
                         id: true,
                         key: true,
@@ -332,9 +316,9 @@ export class ApiClient {
                 );
             },
 
-            delete: async (flagId: number): Promise<Result<{ success: boolean; message: string }>> => {
+            delete: async ({ flagId }: { flagId: number }): Promise<Result<{ success: boolean; message: string }>> => {
                 try {
-                    const response = await fetch(`${baseUrl}/api/projects/${projectId}/feature_flags/${flagId}/`, {
+                    const response = await fetch(`${this.baseUrl}/api/projects/${projectId}/feature_flags/${flagId}/`, {
                         method: "PATCH",
                         headers: this.buildHeaders(),
                         body: JSON.stringify({ deleted: true }),
@@ -358,12 +342,9 @@ export class ApiClient {
         };
     }
 
-    insights(projectId: string) {
-        const baseUrl = this.baseUrl;
-        const fetchWithSchema = this.fetchWithSchema.bind(this);
-
+    insights({ projectId }: { projectId: string }) {
         return {
-            list: async (params?: ListInsightsData): Promise<Result<Array<{ id: number; name: string; description?: string }>>> => {
+            list: async ({ params }: { params?: ListInsightsData } = {}): Promise<Result<Array<{ id: number; name: string; description?: string }>>> => {
                 const validatedParams = params ? ListInsightsSchema.parse(params) : undefined;
                 const searchParams = new URLSearchParams();
                 
@@ -372,7 +353,7 @@ export class ApiClient {
                 if (validatedParams?.saved !== undefined) searchParams.append("saved", String(validatedParams.saved));
                 if (validatedParams?.search) searchParams.append("search", validatedParams.search);
 
-                const url = `${baseUrl}/api/projects/${projectId}/insights/${searchParams.toString() ? `?${searchParams}` : ""}`;
+                const url = `${this.baseUrl}/api/projects/${projectId}/insights/${searchParams.toString() ? `?${searchParams}` : ""}`;
                 
                 const simpleInsightSchema = z.object({
                     id: z.number(),
@@ -384,14 +365,14 @@ export class ApiClient {
                     results: z.array(simpleInsightSchema)
                 });
 
-                const result = await fetchWithSchema(url, responseSchema);
+                const result = await this.fetchWithSchema(url, responseSchema);
                 if (result.success) {
                     return { success: true, data: result.data.results };
                 }
                 return result;
             },
 
-            create: async (data: CreateInsightInput): Promise<Result<{ id: number; name: string }>> => {
+            create: async ({ data }: { data: CreateInsightInput }): Promise<Result<{ id: number; name: string }>> => {
                 const validatedInput = CreateInsightInputSchema.parse(data);
                 
                 const createResponseSchema = z.object({
@@ -399,8 +380,8 @@ export class ApiClient {
                     name: z.string(),
                 });
                 
-                return fetchWithSchema(
-                    `${baseUrl}/api/projects/${projectId}/insights/`,
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/projects/${projectId}/insights/`,
                     createResponseSchema,
                     {
                         method: "POST",
@@ -409,27 +390,27 @@ export class ApiClient {
                 );
             },
 
-            get: async (insightId: number): Promise<Result<{ id: number; name: string; description?: string }>> => {
+            get: async ({ insightId }: { insightId: number }): Promise<Result<{ id: number; name: string; description?: string }>> => {
                 const simpleInsightSchema = z.object({
                     id: z.number(),
                     name: z.string(),
-                    description: z.string().optional(),
+                    description: z.string().nullable().optional(),
                 });
 
-                return fetchWithSchema(
-                    `${baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
                     simpleInsightSchema
                 );
             },
 
-            update: async (insightId: number, data: any): Promise<Result<{ id: number; name: string }>> => {
+            update: async ({ insightId, data }: { insightId: number; data: any }): Promise<Result<{ id: number; name: string }>> => {
                 const updateResponseSchema = z.object({
                     id: z.number(),
                     name: z.string(),
                 });
                 
-                return fetchWithSchema(
-                    `${baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
                     updateResponseSchema,
                     {
                         method: "PATCH",
@@ -438,9 +419,9 @@ export class ApiClient {
                 );
             },
 
-            delete: async (insightId: number): Promise<Result<{ success: boolean; message: string }>> => {
+            delete: async ({ insightId }: { insightId: number }): Promise<Result<{ success: boolean; message: string }>> => {
                 try {
-                    const response = await fetch(`${baseUrl}/api/projects/${projectId}/insights/${insightId}/`, {
+                    const response = await fetch(`${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`, {
                         method: "PATCH",
                         headers: this.buildHeaders(),
                         body: JSON.stringify({ deleted: true }),
@@ -462,35 +443,75 @@ export class ApiClient {
                 }
             },
 
-            sqlInsight: async (query: string): Promise<Result<{ columns: string[]; results: any[] }>> => {
+            sqlInsight: async ({ query }: { query: string }): Promise<Result<{ columns: string[]; results: any[] }>> => {
                 const requestBody = {
                     query: query,
                     insight_type: "sql",
                 };
 
-                const sqlResponseSchema = z.object({
-                    columns: z.array(z.string()),
-                    results: z.array(z.any()),
-                });
+                const sqlResponseSchema = z.array(z.any());
 
-                return fetchWithSchema(
-                    `${baseUrl}/api/environments/${projectId}/max_tools/create_and_query_insight/`,
+                const result = await this.fetchWithSchema(
+                    `${this.baseUrl}/api/environments/${projectId}/max_tools/create_and_query_insight/`,
                     sqlResponseSchema,
                     {
                         method: "POST",
                         body: JSON.stringify(requestBody),
                     }
                 );
+
+                if (result.success) {
+                    const dataObject = result.data.find((item: any) => 
+                        item && typeof item === 'object' && 
+                        'columns' in item && 'results' in item
+                    );
+                    
+                    if (dataObject) {
+                        return { 
+                            success: true, 
+                            data: {
+                                columns: dataObject.columns || [],
+                                results: dataObject.results || []
+                            }
+                        };
+                    }
+                    
+                    const anyDataObject = result.data.find((item: any) => 
+                        item && typeof item === 'object' && 
+                        (Array.isArray(item) || Object.keys(item).length > 0)
+                    );
+                    
+                    if (anyDataObject) {
+                        if (Array.isArray(anyDataObject)) {
+                            return {
+                                success: true,
+                                data: {
+                                    columns: ['result'],
+                                    results: anyDataObject
+                                }
+                            };
+                        }
+                        
+                        return {
+                            success: true,
+                            data: {
+                                columns: Object.keys(anyDataObject),
+                                results: [anyDataObject]
+                            }
+                        };
+                    }
+                    
+                    return { success: false, error: new Error('No SQL data found in response') };
+                }
+                
+                return result;
             },
         };
     }
 
-    dashboards(projectId: string) {
-        const baseUrl = this.baseUrl;
-        const fetchWithSchema = this.fetchWithSchema.bind(this);
-
+    dashboards({ projectId }: { projectId: string }) {
         return {
-            list: async (params?: ListDashboardsData): Promise<Result<Array<{ id: number; name: string; description?: string }>>> => {
+            list: async ({ params }: { params?: ListDashboardsData } = {}): Promise<Result<Array<{ id: number; name: string; description?: string }>>> => {
                 const validatedParams = params ? ListDashboardsSchema.parse(params) : undefined;
                 const searchParams = new URLSearchParams();
                 
@@ -498,7 +519,7 @@ export class ApiClient {
                 if (validatedParams?.offset) searchParams.append("offset", String(validatedParams.offset));
                 if (validatedParams?.search) searchParams.append("search", validatedParams.search);
 
-                const url = `${baseUrl}/api/projects/${projectId}/dashboards/${searchParams.toString() ? `?${searchParams}` : ""}`;
+                const url = `${this.baseUrl}/api/projects/${projectId}/dashboards/${searchParams.toString() ? `?${searchParams}` : ""}`;
                 
                 const simpleDashboardSchema = z.object({
                     id: z.number(),
@@ -510,7 +531,7 @@ export class ApiClient {
                     results: z.array(simpleDashboardSchema)
                 });
                 
-                const result = await fetchWithSchema(url, responseSchema);
+                const result = await this.fetchWithSchema(url, responseSchema);
 
                 if (result.success) {
                     return { success: true, data: result.data.results };
@@ -519,20 +540,20 @@ export class ApiClient {
                 return result;
             },
 
-            get: async (dashboardId: number): Promise<Result<{ id: number; name: string; description?: string }>> => {
+            get: async ({ dashboardId }: { dashboardId: number }): Promise<Result<{ id: number; name: string; description?: string }>> => {
                 const simpleDashboardSchema = z.object({
                     id: z.number(),
                     name: z.string(),
                     description: z.string().optional(),
                 });
 
-                return fetchWithSchema(
-                    `${baseUrl}/api/projects/${projectId}/dashboards/${dashboardId}/`,
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/projects/${projectId}/dashboards/${dashboardId}/`,
                     simpleDashboardSchema
                 );
             },
 
-            create: async (data: CreateDashboardInput): Promise<Result<{ id: number; name: string }>> => {
+            create: async ({ data }: { data: CreateDashboardInput }): Promise<Result<{ id: number; name: string }>> => {
                 const validatedInput = CreateDashboardInputSchema.parse(data);
                 
                 const createResponseSchema = z.object({
@@ -540,8 +561,8 @@ export class ApiClient {
                     name: z.string(),
                 });
                 
-                return fetchWithSchema(
-                    `${baseUrl}/api/projects/${projectId}/dashboards/`,
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/projects/${projectId}/dashboards/`,
                     createResponseSchema,
                     {
                         method: "POST",
@@ -550,14 +571,14 @@ export class ApiClient {
                 );
             },
 
-            update: async (dashboardId: number, data: any): Promise<Result<{ id: number; name: string }>> => {
+            update: async ({ dashboardId, data }: { dashboardId: number; data: any }): Promise<Result<{ id: number; name: string }>> => {
                 const updateResponseSchema = z.object({
                     id: z.number(),
                     name: z.string(),
                 });
                 
-                return fetchWithSchema(
-                    `${baseUrl}/api/projects/${projectId}/dashboards/${dashboardId}/`,
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/projects/${projectId}/dashboards/${dashboardId}/`,
                     updateResponseSchema,
                     {
                         method: "PATCH",
@@ -566,9 +587,9 @@ export class ApiClient {
                 );
             },
 
-            delete: async (dashboardId: number): Promise<Result<{ success: boolean; message: string }>> => {
+            delete: async ({ dashboardId }: { dashboardId: number }): Promise<Result<{ success: boolean; message: string }>> => {
                 try {
-                    const response = await fetch(`${baseUrl}/api/projects/${projectId}/dashboards/${dashboardId}/`, {
+                    const response = await fetch(`${this.baseUrl}/api/projects/${projectId}/dashboards/${dashboardId}/`, {
                         method: "PATCH",
                         headers: this.buildHeaders(),
                         body: JSON.stringify({ deleted: true }),
@@ -590,9 +611,9 @@ export class ApiClient {
                 }
             },
 
-            addInsight: async (data: { insight_id: number; dashboard_id: number }): Promise<Result<any>> => {
-                return fetchWithSchema(
-                    `${baseUrl}/api/projects/${projectId}/insights/${data.insight_id}/`,
+            addInsight: async ({ data }: { data: { insight_id: number; dashboard_id: number } }): Promise<Result<any>> => {
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/projects/${projectId}/insights/${data.insight_id}/`,
                     z.any(),
                     {
                         method: "PATCH",
@@ -603,18 +624,15 @@ export class ApiClient {
         };
     }
 
-    query(projectId: string) {
-        const baseUrl = this.baseUrl;
-        const fetchWithSchema = this.fetchWithSchema.bind(this);
-
+    query({ projectId }: { projectId: string }) {
         return {
-            execute: async (queryBody: any): Promise<Result<{ results: any[] }>> => {
+            execute: async ({ queryBody }: { queryBody: any }): Promise<Result<{ results: any[] }>> => {
                 const responseSchema = z.object({
                     results: z.array(z.any())
                 });
 
-                return fetchWithSchema(
-                    `${baseUrl}/api/environments/${projectId}/query/`,
+                return this.fetchWithSchema(
+                    `${this.baseUrl}/api/environments/${projectId}/query/`,
                     responseSchema,
                     {
                         method: "POST",
@@ -626,13 +644,10 @@ export class ApiClient {
     }
 
     users() {
-        const baseUrl = this.baseUrl;
-        const fetchWithSchema = this.fetchWithSchema.bind(this);
-
         return {
             me: async (): Promise<Result<{ distinctId: string }>> => {
-                const result = await fetchWithSchema(
-                    `${baseUrl}/api/users/@me/`,
+                const result = await this.fetchWithSchema(
+                    `${this.baseUrl}/api/users/@me/`,
                     z.object({ distinct_id: z.string() })
                 );
                 

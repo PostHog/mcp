@@ -7,17 +7,22 @@
 		"dev": "wrangler dev",
 		"format": "biome format --write",
 		"lint:fix": "biome lint --fix",
+		"test": "vitest",
+		"test:watch": "vitest watch",
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"@types/node": "^22.15.18",
+		"@types/node": "^22.15.34",
+		"dotenv": "^16.4.7",
 		"typescript": "^5.8.3",
+		"vitest": "^3.2.4",
 		"wrangler": "^4.14.4"
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.11.1",
+		"@types/dotenv": "^6.1.1",
 		"agents": "^0.0.80",
 		"posthog-node": "^4.18.0",
 		"zod": "^3.24.4"

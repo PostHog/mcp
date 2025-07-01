@@ -4,6 +4,7 @@ node_modules
 .wrangler
 .dev.vars*
 .mcp.json
+.env.test
 
 # Editor-specific files
 .cursor/

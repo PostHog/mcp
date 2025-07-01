@@ -441,14 +441,15 @@ export class MyMCP extends McpAgent<Env> {
 				description: z.string(),
 				filters: FilterGroupsSchema,
 				active: z.boolean(),
+				tags: z.array(z.string()).optional(),
 			},
-			async ({ name, key, description, filters, active }) => {
+			async ({ name, key, description, filters, active, tags }) => {
 				const projectId = await this.getProjectId();
 
 				const featureFlag = await createFeatureFlag({
 					projectId: projectId,
 					apiToken: this.requestProperties.apiToken,
-					data: { name, key, description, filters, active },
+					data: { name, key, description, filters, active, tags },
 				});
 
 				// Add URL field for easy navigation

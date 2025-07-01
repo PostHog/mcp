@@ -139,6 +139,7 @@ export async function createFeatureFlag({
 		description: data.description,
 		active: data.active,
 		filters: data.filters,
+		tags: data.tags,
 	};
 
 	const response = await fetch(`${BASE_URL}/api/projects/${projectId}/feature_flags/`, {
@@ -304,6 +305,7 @@ export async function updateFeatureFlag({
 		description: data.description,
 		active: data.active,
 		filters: data.filters,
+		tags: data.tags,
 	};
 
 	const response = await fetch(

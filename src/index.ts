@@ -2,33 +2,7 @@ import { McpServer, type ToolCallback } from "@modelcontextprotocol/sdk/server/m
 import { McpAgent } from "agents/mcp";
 import { z } from "zod";
 
-import {
-	addInsightToDashboard,
-	createDashboard,
-	createFeatureFlag,
-	createInsight,
-	deleteDashboard,
-	deleteFeatureFlag,
-	deleteInsight,
-	errorDetails,
-	getDashboard,
-	getDashboards,
-	getFeatureFlagDefinition,
-	getFeatureFlags,
-	getInsight,
-	getInsights,
-	getLLMTotalCostsForProject,
-	getOrganizationDetails,
-	getOrganizations,
-	getProjects,
-	getPropertyDefinitions,
-	getSqlInsight,
-	getUser,
-	listErrors,
-	updateDashboard,
-	updateFeatureFlag,
-	updateInsight,
-} from "./posthogApi";
+import { ApiClient } from "./api/client";
 
 import {
 	AddInsightToDashboardSchema,
@@ -94,13 +68,22 @@ export class MyMCP extends McpAgent<Env> {
 		return this._cache;
 	}
 
+	get api() {
+		return new ApiClient({
+			apiToken: this.requestProperties.apiToken
+		});
+	}
+
 	async getDistinctId() {
 		let _distinctId = await this.cache.get("distinctId");
 
 		if (!_distinctId) {
-			const user = await getUser(this.requestProperties.apiToken);
-			await this.cache.set("distinctId", user.distinctId);
-			_distinctId = user.distinctId;
+			const userResult = await this.api.users().me();
+			if (!userResult.success) {
+				throw new Error(`Failed to get user: ${userResult.error.message}`);
+			}
+			await this.cache.set("distinctId", userResult.data.distinctId);
+			_distinctId = userResult.data.distinctId;
 		}
 
 		return _distinctId;
@@ -140,12 +123,15 @@ export class MyMCP extends McpAgent<Env> {
 		const orgId = await this.cache.get("orgId");
 
 		if (!orgId) {
-			const orgs = await getOrganizations(this.requestProperties.apiToken);
+			const orgsResult = await this.api.organizations().list();
+			if (!orgsResult.success) {
+				throw new Error(`Failed to get organizations: ${orgsResult.error.message}`);
+			}
 
 			// If there is only one org, set it as the active org
-			if (orgs.length === 1) {
-				await this.cache.set("orgId", orgs[0].id);
-				return orgs[0].id;
+			if (orgsResult.data.length === 1) {
+				await this.cache.set("orgId", orgsResult.data[0].id);
+				return orgsResult.data[0].id;
 			}
 
 			return "@current";
@@ -159,12 +145,15 @@ export class MyMCP extends McpAgent<Env> {
 
 		if (!projectId) {
 			const orgId = await this.getOrgID();
-			const projects = await getProjects(orgId, this.requestProperties.apiToken);
+			const projectsResult = await this.api.organizations().projects({ orgId }).list();
+			if (!projectsResult.success) {
+				throw new Error(`Failed to get projects: ${projectsResult.error.message}`);
+			}
 
 			// If there is only one project, set it as the active project
-			if (projects.length === 1) {
-				await this.cache.set("projectId", projects[0].id);
-				return projects[0].id;
+			if (projectsResult.data.length === 1) {
+				await this.cache.set("projectId", projectsResult.data[0].id.toString());
+				return projectsResult.data[0].id.toString();
 			}
 
 			return "@current";
@@ -204,22 +193,23 @@ export class MyMCP extends McpAgent<Env> {
 
 					const projectId = await this.getProjectId();
 					if (flagId) {
-						flagDefinition = await getFeatureFlagDefinition(
-							projectId,
-							String(flagId),
-							posthogToken,
-						);
+						const flagResult = await this.api.featureFlags({ projectId }).get({ flagId: String(flagId) });
+						if (!flagResult.success) {
+							throw new Error(`Failed to get feature flag: ${flagResult.error.message}`);
+						}
 						return {
-							content: [{ type: "text", text: JSON.stringify(flagDefinition) }],
+							content: [{ type: "text", text: JSON.stringify(flagResult.data) }],
 						};
 					}
 
 					if (flagName) {
-						const allFlags = await getFeatureFlags(projectId, posthogToken);
-						const foundFlag = allFlags.find((f) => f.key === flagName);
-						if (foundFlag) {
+						const flagResult = await this.api.featureFlags({ projectId }).findByKey({ key: flagName });
+						if (!flagResult.success) {
+							throw new Error(`Failed to find feature flag: ${flagResult.error.message}`);
+						}
+						if (flagResult.data) {
 							return {
-								content: [{ type: "text", text: JSON.stringify(foundFlag) }],
+								content: [{ type: "text", text: JSON.stringify(flagResult.data) }],
 							};
 						}
 						return {
@@ -265,9 +255,12 @@ export class MyMCP extends McpAgent<Env> {
 			async () => {
 				const projectId = await this.getProjectId();
 
-				const allFlags = await getFeatureFlags(projectId, this.requestProperties.apiToken);
+				const flagsResult = await this.api.featureFlags({ projectId }).list();
+				if (!flagsResult.success) {
+					throw new Error(`Failed to get feature flags: ${flagsResult.error.message}`);
+				}
 
-				return { content: [{ type: "text", text: JSON.stringify(allFlags) }] };
+				return { content: [{ type: "text", text: JSON.stringify(flagsResult.data) }] };
 			},
 		);
 
@@ -317,10 +310,13 @@ export class MyMCP extends McpAgent<Env> {
 			{},
 			async () => {
 			try {
-				const organizations = await getOrganizations(this.requestProperties.apiToken);
-				console.log("organizations", organizations);
+				const orgsResult = await this.api.organizations().list();
+				if (!orgsResult.success) {
+					throw new Error(`Failed to get organizations: ${orgsResult.error.message}`);
+				}
+				console.log("organizations", orgsResult.data);
 				return {
-					content: [{ type: "text", text: JSON.stringify(organizations) }],
+					content: [{ type: "text", text: JSON.stringify(orgsResult.data) }],
 				};
 			} catch (error) {
 				console.error("Error fetching organizations:", error);
@@ -372,13 +368,13 @@ export class MyMCP extends McpAgent<Env> {
 			try {
 				const orgId = await this.getOrgID();
 
-				const organizationDetails = await getOrganizationDetails(
-					orgId,
-					this.requestProperties.apiToken,
-				);
-				console.log("organization details", organizationDetails);
+				const orgResult = await this.api.organizations().get({ orgId });
+				if (!orgResult.success) {
+					throw new Error(`Failed to get organization details: ${orgResult.error.message}`);
+				}
+				console.log("organization details", orgResult.data);
 				return {
-					content: [{ type: "text", text: JSON.stringify(organizationDetails) }],
+					content: [{ type: "text", text: JSON.stringify(orgResult.data) }],
 				};
 			} catch (error) {
 				console.error("Error fetching organization details:", error);
@@ -398,10 +394,13 @@ export class MyMCP extends McpAgent<Env> {
 			async () => {
 				try {
 					const orgId = await this.getOrgID();
-					const projects = await getProjects(orgId, this.requestProperties.apiToken);
-					console.log("projects", projects);
+					const projectsResult = await this.api.organizations().projects({ orgId }).list();
+					if (!projectsResult.success) {
+						throw new Error(`Failed to get projects: ${projectsResult.error.message}`);
+					}
+					console.log("projects", projectsResult.data);
 					return {
-						content: [{ type: "text", text: JSON.stringify(projects) }],
+						content: [{ type: "text", text: JSON.stringify(projectsResult.data) }],
 					};
 				} catch (error) {
 					console.error("Error fetching projects:", error);
@@ -419,12 +418,12 @@ export class MyMCP extends McpAgent<Env> {
 			async () => {
 			const projectId = await this.getProjectId();
 
-			const propertyDefinitions = await getPropertyDefinitions({
-				projectId: projectId,
-				apiToken: this.requestProperties.apiToken,
-			});
+			const propDefsResult = await this.api.projects().propertyDefinitions({ projectId });
+			if (!propDefsResult.success) {
+				throw new Error(`Failed to get property definitions: ${propDefsResult.error.message}`);
+			}
 			return {
-				content: [{ type: "text", text: JSON.stringify(propertyDefinitions) }],
+				content: [{ type: "text", text: JSON.stringify(propDefsResult.data) }],
 			};
 		});
 
@@ -445,16 +444,17 @@ export class MyMCP extends McpAgent<Env> {
 			async ({ name, key, description, filters, active }) => {
 				const projectId = await this.getProjectId();
 
-				const featureFlag = await createFeatureFlag({
-					projectId: projectId,
-					apiToken: this.requestProperties.apiToken,
-					data: { name, key, description, filters, active },
+				const flagResult = await this.api.featureFlags({ projectId }).create({
+					data: { name, key, description, filters, active }
 				});
+				if (!flagResult.success) {
+					throw new Error(`Failed to create feature flag: ${flagResult.error.message}`);
+				}
 
 				// Add URL field for easy navigation
 				const featureFlagWithUrl = {
-					...(featureFlag as any),
-					url: `${getProjectBaseUrl(projectId)}/feature_flags/${(featureFlag as any).id}`,
+					...flagResult.data,
+					url: `${getProjectBaseUrl(projectId)}/feature_flags/${flagResult.data.id}`,
 				};
 
 				return {
@@ -475,13 +475,25 @@ export class MyMCP extends McpAgent<Env> {
 				try {
 					const projectId = await this.getProjectId();
 
-					const errors = await listErrors({
-						projectId: projectId,
-						data: data,
-						apiToken: this.requestProperties.apiToken,
-					});
-					console.log("errors results", errors.results);
-					return { content: [{ type: "text", text: JSON.stringify(errors.results) }] };
+					const errorQuery = {
+						kind: "ErrorTrackingQuery",
+						orderBy: data.orderBy || "occurrences",
+						dateRange: {
+							date_from: data.dateFrom?.toISOString() || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+							date_to: data.dateTo?.toISOString() || new Date().toISOString(),
+						},
+						volumeResolution: 1,
+						orderDirection: data.orderDirection || "DESC",
+						filterTestAccounts: data.filterTestAccounts ?? true,
+						status: data.status || "active",
+					};
+
+					const errorsResult = await this.api.query({ projectId }).execute({ queryBody: errorQuery });
+					if (!errorsResult.success) {
+						throw new Error(`Failed to list errors: ${errorsResult.error.message}`);
+					}
+					console.log("errors results", errorsResult.data.results);
+					return { content: [{ type: "text", text: JSON.stringify(errorsResult.data.results) }] };
 				} catch (error) {
 					console.error("Error fetching errors:", error);
 					return { content: [{ type: "text", text: "Error fetching errors" }] };
@@ -501,13 +513,22 @@ export class MyMCP extends McpAgent<Env> {
 				try {
 					const projectId = await this.getProjectId();
 
-					const errors = await errorDetails({
-						projectId: projectId,
-						data: data,
-						apiToken: this.requestProperties.apiToken,
-					});
-					console.log("error details results", errors.results);
-					return { content: [{ type: "text", text: JSON.stringify(errors.results) }] };
+					const errorQuery = {
+						kind: "ErrorTrackingQuery",
+						dateRange: {
+							date_from: data.dateFrom?.toISOString() || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+							date_to: data.dateTo?.toISOString() || new Date().toISOString(),
+						},
+						volumeResolution: 0,
+						issueId: data.issueId,
+					};
+
+					const errorsResult = await this.api.query({ projectId }).execute({ queryBody: errorQuery });
+					if (!errorsResult.success) {
+						throw new Error(`Failed to get error details: ${errorsResult.error.message}`);
+					}
+					console.log("error details results", errorsResult.data.results);
+					return { content: [{ type: "text", text: JSON.stringify(errorsResult.data.results) }] };
 				} catch (error) {
 					console.error("Error fetching error details:", error);
 					return {
@@ -530,17 +551,18 @@ export class MyMCP extends McpAgent<Env> {
 			async ({ flagKey, data }) => {
 				const projectId = await this.getProjectId();
 
-				const featureFlag = await updateFeatureFlag({
-					projectId: projectId,
-					apiToken: this.requestProperties.apiToken,
+				const flagResult = await this.api.featureFlags({ projectId }).update({
 					key: flagKey,
 					data: data,
 				});
+				if (!flagResult.success) {
+					throw new Error(`Failed to update feature flag: ${flagResult.error.message}`);
+				}
 
 				// Add URL field for easy navigation
 				const featureFlagWithUrl = {
-					...(featureFlag as any),
-					url: `${getProjectBaseUrl(projectId)}/feature_flags/${(featureFlag as any).id}`,
+					...flagResult.data,
+					url: `${getProjectBaseUrl(projectId)}/feature_flags/${flagResult.data.id}`,
 				};
 
 				return {
@@ -560,24 +582,26 @@ export class MyMCP extends McpAgent<Env> {
 			async ({ flagKey }) => {
 				const projectId = await this.getProjectId();
 
-				const allFlags = await getFeatureFlags(projectId, this.requestProperties.apiToken);
+				const flagResult = await this.api.featureFlags({ projectId }).findByKey({ key: flagKey });
+				if (!flagResult.success) {
+					throw new Error(`Failed to find feature flag: ${flagResult.error.message}`);
+				}
 
-				const flag = allFlags.find((f) => f.key === flagKey);
-
-				if (!flag) {
+				if (!flagResult.data) {
 					return {
 						content: [{ type: "text", text: "Feature flag is already deleted." }],
 					};
 				}
 
-				const featureFlag = await deleteFeatureFlag({
-					projectId: projectId,
-					apiToken: this.requestProperties.apiToken,
-					flagId: flag.id,
+				const deleteResult = await this.api.featureFlags({ projectId }).delete({
+					flagId: flagResult.data.id,
 				});
+				if (!deleteResult.success) {
+					throw new Error(`Failed to delete feature flag: ${deleteResult.error.message}`);
+				}
 
 				return {
-					content: [{ type: "text", text: JSON.stringify(featureFlag) }],
+					content: [{ type: "text", text: JSON.stringify(deleteResult.data) }],
 				};
 			},
 		);
@@ -616,9 +640,12 @@ export class MyMCP extends McpAgent<Env> {
 				try {
 					const projectId = await this.getProjectId();
 
-					const result = await getSqlInsight({ projectId, apiToken, query });
+					const result = await this.api.insights({ projectId }).sqlInsight({ query });
+					if (!result.success) {
+						throw new Error(`Failed to execute SQL insight: ${result.error.message}`);
+					}
 
-					if (result.length === 0) {
+					if (result.data.results.length === 0) {
 						return {
 							content: [
 								{
@@ -628,7 +655,7 @@ export class MyMCP extends McpAgent<Env> {
 							],
 						};
 					}
-					return { content: [{ type: "text", text: JSON.stringify(result) }] };
+					return { content: [{ type: "text", text: JSON.stringify(result.data) }] };
 				} catch (error: any) {
 					console.error("Error in get-sql-insight tool:", error);
 					return {
@@ -664,13 +691,34 @@ export class MyMCP extends McpAgent<Env> {
 				days: z.number().optional(),
 			},
 			async ({ projectId, days }) => {
-				const totalCosts = await getLLMTotalCostsForProject({
-					projectId: projectId,
-					apiToken: this.requestProperties.apiToken,
-					days: days,
-				});
+				const trendsQuery = {
+					kind: "TrendsQuery",
+					dateRange: {
+						date_from: `-${days || 6}d`,
+						date_to: null,
+					},
+					filterTestAccounts: true,
+					series: [
+						{
+							event: "$ai_generation",
+							name: "$ai_generation",
+							math: "sum",
+							math_property: "$ai_total_cost_usd",
+							kind: "EventsNode",
+						},
+					],
+					breakdownFilter: {
+						breakdown_type: "event",
+						breakdown: "$ai_model",
+					},
+				};
+
+				const costsResult = await this.api.query({ projectId }).execute({ queryBody: trendsQuery });
+				if (!costsResult.success) {
+					throw new Error(`Failed to get LLM costs: ${costsResult.error.message}`);
+				}
 				return {
-					content: [{ type: "text", text: JSON.stringify(totalCosts.results) }],
+					content: [{ type: "text", text: JSON.stringify(costsResult.data.results) }],
 				};
 			},
 		);
@@ -687,12 +735,11 @@ export class MyMCP extends McpAgent<Env> {
 			async ({ data }) => {
 				try {
 					const projectId = await this.getProjectId();
-					const insights = await getInsights(
-						projectId,
-						this.requestProperties.apiToken,
-						data,
-					);
-					return { content: [{ type: "text", text: JSON.stringify(insights) }] };
+					const insightsResult = await this.api.insights({ projectId }).list({ params: data });
+					if (!insightsResult.success) {
+						throw new Error(`Failed to get insights: ${insightsResult.error.message}`);
+					}
+					return { content: [{ type: "text", text: JSON.stringify(insightsResult.data) }] };
 				} catch (error: any) {
 					console.error("Error fetching insights:", error);
 					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
@@ -711,12 +758,11 @@ export class MyMCP extends McpAgent<Env> {
 			async ({ insightId }) => {
 				try {
 					const projectId = await this.getProjectId();
-					const insight = await getInsight(
-						projectId,
-						insightId,
-						this.requestProperties.apiToken,
-					);
-					return { content: [{ type: "text", text: JSON.stringify(insight) }] };
+					const insightResult = await this.api.insights({ projectId }).get({ insightId });
+					if (!insightResult.success) {
+						throw new Error(`Failed to get insight: ${insightResult.error.message}`);
+					}
+					return { content: [{ type: "text", text: JSON.stringify(insightResult.data) }] };
 				} catch (error: any) {
 					console.error("Error fetching insight:", error);
 					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
@@ -752,16 +798,15 @@ export class MyMCP extends McpAgent<Env> {
 			async ({ data }) => {
 				try {
 					const projectId = await this.getProjectId();
-					const insight = await createInsight({
-						projectId,
-						apiToken: this.requestProperties.apiToken,
-						data,
-					});
+					const insightResult = await this.api.insights({ projectId }).create({ data });
+					if (!insightResult.success) {
+						throw new Error(`Failed to create insight: ${insightResult.error.message}`);
+					}
 
 					// Add URL field for easy navigation
 					const insightWithUrl = {
-						...insight,
-						url: `${getProjectBaseUrl(projectId)}/insights/${(insight as any).short_id}`,
+						...insightResult.data,
+						url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.id}`,
 					};
 
 					return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };

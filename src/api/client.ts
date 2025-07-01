@@ -663,5 +663,3 @@ export class ApiClient {
         };
     }
 }
-
-export const api = (config: ApiConfig) => new ApiClient(config);

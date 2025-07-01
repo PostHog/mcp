@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
-import { api } from '../../src/api/client';
+import { api, ApiClient } from '../../src/api/client';
 
 const API_BASE_URL = process.env.TEST_API_BASE_URL || 'http://localhost:8010';
 const API_TOKEN = process.env.TEST_API_TOKEN;
@@ -21,7 +21,7 @@ describe('API Client Integration Tests', () => {
             throw new Error('TEST_API_TOKEN environment variable is required');
         }
 
-        client = api({
+        client = new ApiClient({
             apiToken: API_TOKEN,
             baseUrl: API_BASE_URL,
         });

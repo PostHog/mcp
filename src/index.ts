@@ -49,6 +49,7 @@ import { hash } from "./lib/utils/helper-functions";
 import { ErrorDetailsSchema, ListErrorsSchema } from "./schema/errors";
 import { getProjectBaseUrl } from "./lib/utils/api";
 import { getPostHogClient } from "./lib/client";
+import { handleToolError } from "./lib/utils/handleToolError";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
@@ -241,17 +242,7 @@ export class MyMCP extends McpAgent<Env> {
 						],
 					};
 				} catch (error: any) {
-					console.error("Error in feature-flag-get-definition tool:", error);
-					return {
-						content: [
-							{
-								type: "text",
-								text: `Error: ${
-									error.message || "Failed to process feature flag request"
-								}`,
-							},
-						],
-					};
+					return handleToolError(error, "feature-flag-get-definition");
 				}
 			},
 		);
@@ -297,17 +288,7 @@ export class MyMCP extends McpAgent<Env> {
 					const resultText = await docsSearch(inkeepApiKey, query);
 					return { content: [{ type: "text", text: resultText }] };
 				} catch (error: any) {
-					console.error("Error in docs-search tool:", error);
-					return {
-						content: [
-							{
-								type: "text",
-								text: `Error: ${
-									error.message || "Failed to process docs search request"
-								}`,
-							},
-						],
-					};
+					return handleToolError(error, "docs-search");
 				}
 			},
 		);
@@ -323,10 +304,7 @@ export class MyMCP extends McpAgent<Env> {
 					content: [{ type: "text", text: JSON.stringify(organizations) }],
 				};
 			} catch (error) {
-				console.error("Error fetching organizations:", error);
-				return {
-					content: [{ type: "text", text: "Error fetching organizations" }],
-				};
+				return handleToolError(error, "fetching organizations");
 			}
 		});
 
@@ -381,10 +359,7 @@ export class MyMCP extends McpAgent<Env> {
 					content: [{ type: "text", text: JSON.stringify(organizationDetails) }],
 				};
 			} catch (error) {
-				console.error("Error fetching organization details:", error);
-				return {
-					content: [{ type: "text", text: "Error fetching organization details" }],
-				};
+				return handleToolError(error, "organization-details-get");
 			}
 		});
 
@@ -404,10 +379,7 @@ export class MyMCP extends McpAgent<Env> {
 						content: [{ type: "text", text: JSON.stringify(projects) }],
 					};
 				} catch (error) {
-					console.error("Error fetching projects:", error);
-					return {
-						content: [{ type: "text", text: `Error fetching projects: ${error}` }],
-					};
+					return handleToolError(error, "projects-get");
 				}
 			},
 		);
@@ -484,8 +456,7 @@ export class MyMCP extends McpAgent<Env> {
 					console.log("errors results", errors.results);
 					return { content: [{ type: "text", text: JSON.stringify(errors.results) }] };
 				} catch (error) {
-					console.error("Error fetching errors:", error);
-					return { content: [{ type: "text", text: "Error fetching errors" }] };
+					return handleToolError(error, "list-errors");
 				}
 			},
 		);
@@ -510,10 +481,7 @@ export class MyMCP extends McpAgent<Env> {
 					console.log("error details results", errors.results);
 					return { content: [{ type: "text", text: JSON.stringify(errors.results) }] };
 				} catch (error) {
-					console.error("Error fetching error details:", error);
-					return {
-						content: [{ type: "text", text: "Error fetching error details" }],
-					};
+					return handleToolError(error, "error-details");
 				}
 			},
 		);
@@ -631,15 +599,7 @@ export class MyMCP extends McpAgent<Env> {
 					}
 					return { content: [{ type: "text", text: JSON.stringify(result) }] };
 				} catch (error: any) {
-					console.error("Error in get-sql-insight tool:", error);
-					return {
-						content: [
-							{
-								type: "text",
-								text: `Error: ${error.message || "Failed to generate SQL insight"}`,
-							},
-						],
-					};
+					return handleToolError(error, "get-sql-insight");
 				}
 			},
 		);
@@ -695,8 +655,7 @@ export class MyMCP extends McpAgent<Env> {
 					);
 					return { content: [{ type: "text", text: JSON.stringify(insights) }] };
 				} catch (error: any) {
-					console.error("Error fetching insights:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+					return handleToolError(error, "insights-get-all");
 				}
 			},
 		);
@@ -719,8 +678,7 @@ export class MyMCP extends McpAgent<Env> {
 					);
 					return { content: [{ type: "text", text: JSON.stringify(insight) }] };
 				} catch (error: any) {
-					console.error("Error fetching insight:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+					return handleToolError(error, "insight-get");
 				}
 			},
 		);
@@ -767,8 +725,7 @@ export class MyMCP extends McpAgent<Env> {
 
 					return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
 				} catch (error: any) {
-					console.error("Error creating insight:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+					return handleToolError(error, "insight-create-from-query");
 				}
 			},
 		);
@@ -801,8 +758,7 @@ export class MyMCP extends McpAgent<Env> {
 
 					return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
 				} catch (error: any) {
-					console.error("Error updating insight:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+					return handleToolError(error, "insight-update");
 				}
 			},
 		);
@@ -825,8 +781,7 @@ export class MyMCP extends McpAgent<Env> {
 					});
 					return { content: [{ type: "text", text: JSON.stringify(result) }] };
 				} catch (error: any) {
-					console.error("Error deleting insight:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+					return handleToolError(error, "insight-delete");
 				}
 			},
 		);
@@ -851,8 +806,7 @@ export class MyMCP extends McpAgent<Env> {
 					);
 					return { content: [{ type: "text", text: JSON.stringify(dashboards) }] };
 				} catch (error: any) {
-					console.error("Error fetching dashboards:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+					return handleToolError(error, "dashboards-get-all");
 				}
 			},
 		);
@@ -875,8 +829,7 @@ export class MyMCP extends McpAgent<Env> {
 					);
 					return { content: [{ type: "text", text: JSON.stringify(dashboard) }] };
 				} catch (error: any) {
-					console.error("Error fetching dashboard:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+					return handleToolError(error, "dashboard-get");
 				}
 			},
 		);
@@ -907,8 +860,7 @@ export class MyMCP extends McpAgent<Env> {
 
 					return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
 				} catch (error: any) {
-					console.error("Error creating dashboard:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+					return handleToolError(error, "dashboard-create");
 				}
 			},
 		);
@@ -941,8 +893,7 @@ export class MyMCP extends McpAgent<Env> {
 
 					return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
 				} catch (error: any) {
-					console.error("Error updating dashboard:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+					return handleToolError(error, "dashboard-update");
 				}
 			},
 		);
@@ -965,8 +916,7 @@ export class MyMCP extends McpAgent<Env> {
 					});
 					return { content: [{ type: "text", text: JSON.stringify(result) }] };
 				} catch (error: any) {
-					console.error("Error deleting dashboard:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+					return handleToolError(error, "dashboard-delete");
 				}
 			},
 		);
@@ -999,8 +949,7 @@ export class MyMCP extends McpAgent<Env> {
 
 					return { content: [{ type: "text", text: JSON.stringify(resultWithUrls) }] };
 				} catch (error: any) {
-					console.error("Error adding insight to dashboard:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+					return handleToolError(error, "add-insight-to-dashboard");
 				}
 			},
 		);

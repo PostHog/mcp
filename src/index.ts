@@ -242,7 +242,7 @@ export class MyMCP extends McpAgent<Env> {
 						],
 					};
 				} catch (error: any) {
-					return handleToolError(error, "feature-flag-get-definition");
+					return handleToolError(error, "feature-flag-get-definition", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -288,7 +288,7 @@ export class MyMCP extends McpAgent<Env> {
 					const resultText = await docsSearch(inkeepApiKey, query);
 					return { content: [{ type: "text", text: resultText }] };
 				} catch (error: any) {
-					return handleToolError(error, "docs-search");
+					return handleToolError(error, "docs-search", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -304,7 +304,7 @@ export class MyMCP extends McpAgent<Env> {
 					content: [{ type: "text", text: JSON.stringify(organizations) }],
 				};
 			} catch (error) {
-				return handleToolError(error, "fetching organizations");
+				return handleToolError(error, "fetching organizations", this.trackEvent?.bind(this));
 			}
 		});
 
@@ -359,7 +359,7 @@ export class MyMCP extends McpAgent<Env> {
 					content: [{ type: "text", text: JSON.stringify(organizationDetails) }],
 				};
 			} catch (error) {
-				return handleToolError(error, "organization-details-get");
+				return handleToolError(error, "organization-details-get", this.trackEvent?.bind(this));
 			}
 		});
 
@@ -379,7 +379,7 @@ export class MyMCP extends McpAgent<Env> {
 						content: [{ type: "text", text: JSON.stringify(projects) }],
 					};
 				} catch (error) {
-					return handleToolError(error, "projects-get");
+					return handleToolError(error, "projects-get", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -456,7 +456,7 @@ export class MyMCP extends McpAgent<Env> {
 					console.log("errors results", errors.results);
 					return { content: [{ type: "text", text: JSON.stringify(errors.results) }] };
 				} catch (error) {
-					return handleToolError(error, "list-errors");
+					return handleToolError(error, "list-errors", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -481,7 +481,7 @@ export class MyMCP extends McpAgent<Env> {
 					console.log("error details results", errors.results);
 					return { content: [{ type: "text", text: JSON.stringify(errors.results) }] };
 				} catch (error) {
-					return handleToolError(error, "error-details");
+					return handleToolError(error, "error-details", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -599,7 +599,7 @@ export class MyMCP extends McpAgent<Env> {
 					}
 					return { content: [{ type: "text", text: JSON.stringify(result) }] };
 				} catch (error: any) {
-					return handleToolError(error, "get-sql-insight");
+					return handleToolError(error, "get-sql-insight", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -654,8 +654,8 @@ export class MyMCP extends McpAgent<Env> {
 						data,
 					);
 					return { content: [{ type: "text", text: JSON.stringify(insights) }] };
-				} catch (error: any) {
-					return handleToolError(error, "insights-get-all");
+				} catch (error) {
+					return handleToolError(error, "insights-get-all", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -678,7 +678,7 @@ export class MyMCP extends McpAgent<Env> {
 					);
 					return { content: [{ type: "text", text: JSON.stringify(insight) }] };
 				} catch (error: any) {
-					return handleToolError(error, "insight-get");
+					return handleToolError(error, "insight-get", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -725,7 +725,7 @@ export class MyMCP extends McpAgent<Env> {
 
 					return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
 				} catch (error: any) {
-					return handleToolError(error, "insight-create-from-query");
+					return handleToolError(error, "insight-create-from-query", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -758,7 +758,7 @@ export class MyMCP extends McpAgent<Env> {
 
 					return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
 				} catch (error: any) {
-					return handleToolError(error, "insight-update");
+					return handleToolError(error, "insight-update", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -781,7 +781,7 @@ export class MyMCP extends McpAgent<Env> {
 					});
 					return { content: [{ type: "text", text: JSON.stringify(result) }] };
 				} catch (error: any) {
-					return handleToolError(error, "insight-delete");
+					return handleToolError(error, "insight-delete", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -806,7 +806,7 @@ export class MyMCP extends McpAgent<Env> {
 					);
 					return { content: [{ type: "text", text: JSON.stringify(dashboards) }] };
 				} catch (error: any) {
-					return handleToolError(error, "dashboards-get-all");
+					return handleToolError(error, "dashboards-get-all", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -829,7 +829,7 @@ export class MyMCP extends McpAgent<Env> {
 					);
 					return { content: [{ type: "text", text: JSON.stringify(dashboard) }] };
 				} catch (error: any) {
-					return handleToolError(error, "dashboard-get");
+					return handleToolError(error, "dashboard-get", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -860,7 +860,7 @@ export class MyMCP extends McpAgent<Env> {
 
 					return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
 				} catch (error: any) {
-					return handleToolError(error, "dashboard-create");
+					return handleToolError(error, "dashboard-create", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -893,7 +893,7 @@ export class MyMCP extends McpAgent<Env> {
 
 					return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
 				} catch (error: any) {
-					return handleToolError(error, "dashboard-update");
+					return handleToolError(error, "dashboard-update", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -916,7 +916,7 @@ export class MyMCP extends McpAgent<Env> {
 					});
 					return { content: [{ type: "text", text: JSON.stringify(result) }] };
 				} catch (error: any) {
-					return handleToolError(error, "dashboard-delete");
+					return handleToolError(error, "dashboard-delete", this.trackEvent?.bind(this));
 				}
 			},
 		);
@@ -949,7 +949,7 @@ export class MyMCP extends McpAgent<Env> {
 
 					return { content: [{ type: "text", text: JSON.stringify(resultWithUrls) }] };
 				} catch (error: any) {
-					return handleToolError(error, "add-insight-to-dashboard");
+					return handleToolError(error, "add-insight-to-dashboard", this.trackEvent?.bind(this));
 				}
 			},
 		);

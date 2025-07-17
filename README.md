@@ -47,7 +47,7 @@ npx @posthog/wizard@latest mcp add
 To run the MCP server locally, run the following command:
 
 ```
-npm run dev
+pnpm run dev
 ```
 
 And replace `https://mcp.posthog.com/sse` with `http://localhost:8787/sse` in the MCP configuration.

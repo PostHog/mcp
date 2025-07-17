@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
-- `npm run dev` - Start development server using Wrangler
-- `npm run deploy` - Deploy to Cloudflare Workers
-- `npm run format` - Format code using Biome
-- `npm run lint:fix` - Lint and fix code using Biome
+- `pnpm run dev` - Start development server using Wrangler
+- `pnpm run deploy` - Deploy to Cloudflare Workers
+- `pnpm run format` - Format code using Biome
+- `pnpm run lint:fix` - Lint and fix code using Biome
 - `wrangler types` - Generate TypeScript types for Cloudflare Workers
 
 ## Code Architecture

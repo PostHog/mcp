@@ -55,7 +55,7 @@ And replace `https://mcp.posthog.com/sse` with `http://localhost:8787/sse` in th
 ### Environment variables
 
 - Create `.dev.vars` in the root
-- Add Inkeep API key to enable `docs-search` tool (see `Inkeep API key - mcp`)#
+- Add Inkeep API key to enable `docs-search` tool (see `Inkeep API key - mcp`)
 
 ```
 INKEEP_API_KEY="..."

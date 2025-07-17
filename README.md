@@ -66,6 +66,14 @@ INKEEP_API_KEY="..."
 
 During development you can directly inspect the MCP tool call results using the [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector). 
 
+You can run it using the following command:
+
+```bash
+npx @modelcontextprotocol/inspector npx -y mcp-remote@latest http://localhost:8787/sse --header "\"Authorization: Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}\""
+```
+
+Alternatively, you can use the following configuration in the MCP Inspector:
+
 Use transport type `STDIO`.
 
 **Command:**

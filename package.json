@@ -8,11 +8,13 @@
 		"format": "biome format --write",
 		"lint:fix": "biome lint --fix",
 		"start": "wrangler dev",
-		"cf-typegen": "wrangler types"
+		"cf-typegen": "wrangler types",
+		"prepare": "husky"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@types/node": "^22.15.18",
+		"husky": "^9.1.7",
 		"typescript": "^5.8.3",
 		"wrangler": "^4.14.4"
 	},

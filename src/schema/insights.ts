@@ -10,13 +10,15 @@ export const InsightSchema = z.object({
 	result: z.any().optional(),
 	created_at: z.string(),
 	updated_at: z.string(),
-	created_by: z.object({
-		id: z.number(),
-		uuid: z.string(),
-		distinct_id: z.string(),
-		first_name: z.string(),
-		email: z.string(),
-	}).optional(),
+	created_by: z
+		.object({
+			id: z.number(),
+			uuid: z.string(),
+			distinct_id: z.string(),
+			first_name: z.string(),
+			email: z.string(),
+		})
+		.optional(),
 	saved: z.boolean(),
 	favorited: z.boolean().optional(),
 	deleted: z.boolean(),
@@ -61,9 +63,11 @@ export type CreateInsightInput = z.infer<typeof CreateInsightInputSchema>;
 export type UpdateInsightInput = z.infer<typeof UpdateInsightInputSchema>;
 export type ListInsightsData = z.infer<typeof ListInsightsSchema>;
 
-export const SQLInsightResponseSchema = z.array(z.object({
+export const SQLInsightResponseSchema = z.array(
+	z.object({
 		type: z.string(),
 		data: z.record(z.any()),
-	}));
+	}),
+);
 
 export type SQLInsightResponse = z.infer<typeof SQLInsightResponseSchema>;

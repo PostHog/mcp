@@ -89,9 +89,12 @@ export class MyMCP extends McpAgent<Env> {
 
 	get cache() {
 		if (!this._cache) {
-			this._cache = new DurableObjectCache<State>(this.requestProperties.userHash, this.ctx.storage);
+			this._cache = new DurableObjectCache<State>(
+				this.requestProperties.userHash,
+				this.ctx.storage,
+			);
 		}
-		
+
 		return this._cache;
 	}
 
@@ -111,7 +114,7 @@ export class MyMCP extends McpAgent<Env> {
 		try {
 			const distinctId = await this.getDistinctId();
 
-		const client = getPostHogClient();
+			const client = getPostHogClient();
 
 			client.capture({ distinctId, event, properties });
 		} catch (error) {
@@ -123,18 +126,22 @@ export class MyMCP extends McpAgent<Env> {
 		name: string,
 		description: string,
 		schema: TSchema,
-		handler: (params: z.infer<z.ZodObject<TSchema>>) => Promise<any>
+		handler: (params: z.infer<z.ZodObject<TSchema>>) => Promise<any>,
 	): void {
 		const wrappedHandler = async (params: z.infer<z.ZodObject<TSchema>>) => {
-
-			await this.trackEvent('mcp tool call', {
+			await this.trackEvent("mcp tool call", {
 				tool: name,
 			});
-			
+
 			return await handler(params);
 		};
-		
-		this.server.tool(name, description, schema, wrappedHandler as unknown as ToolCallback<TSchema>);
+
+		this.server.tool(
+			name,
+			description,
+			schema,
+			wrappedHandler as unknown as ToolCallback<TSchema>,
+		);
 	}
 
 	async getOrgID() {
@@ -292,21 +299,24 @@ export class MyMCP extends McpAgent<Env> {
 				}
 			},
 		);
-		this.registerTool("organizations-get", `
+		this.registerTool(
+			"organizations-get",
+			`
 				- Use this tool to get the organizations the user has access to.
 			`,
 			{},
 			async () => {
-			try {
-				const organizations = await getOrganizations(this.requestProperties.apiToken);
-				console.log("organizations", organizations);
-				return {
-					content: [{ type: "text", text: JSON.stringify(organizations) }],
-				};
-			} catch (error) {
-				return handleToolError(error, "fetching organizations");
-			}
-		});
+				try {
+					const organizations = await getOrganizations(this.requestProperties.apiToken);
+					console.log("organizations", organizations);
+					return {
+						content: [{ type: "text", text: JSON.stringify(organizations) }],
+					};
+				} catch (error) {
+					return handleToolError(error, "fetching organizations");
+				}
+			},
+		);
 
 		this.registerTool(
 			"project-set-active",
@@ -342,26 +352,29 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.registerTool("organization-details-get", `
+		this.registerTool(
+			"organization-details-get",
+			`
 				- Use this tool to get the details of the active organization.
 			`,
 			{},
 			async () => {
-			try {
-				const orgId = await this.getOrgID();
+				try {
+					const orgId = await this.getOrgID();
 
-				const organizationDetails = await getOrganizationDetails(
-					orgId,
-					this.requestProperties.apiToken,
-				);
-				console.log("organization details", organizationDetails);
-				return {
-					content: [{ type: "text", text: JSON.stringify(organizationDetails) }],
-				};
-			} catch (error) {
-				return handleToolError(error, "organization-details-get");
-			}
-		});
+					const organizationDetails = await getOrganizationDetails(
+						orgId,
+						this.requestProperties.apiToken,
+					);
+					console.log("organization details", organizationDetails);
+					return {
+						content: [{ type: "text", text: JSON.stringify(organizationDetails) }],
+					};
+				} catch (error) {
+					return handleToolError(error, "organization-details-get");
+				}
+			},
+		);
 
 		this.registerTool(
 			"projects-get",
@@ -384,21 +397,24 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.registerTool("property-definitions", `
+		this.registerTool(
+			"property-definitions",
+			`
 				- Use this tool to get the property definitions of the active project.
 			`,
 			{},
 			async () => {
-			const projectId = await this.getProjectId();
+				const projectId = await this.getProjectId();
 
-			const propertyDefinitions = await getPropertyDefinitions({
-				projectId: projectId,
-				apiToken: this.requestProperties.apiToken,
-			});
-			return {
-				content: [{ type: "text", text: JSON.stringify(propertyDefinitions) }],
-			};
-		});
+				const propertyDefinitions = await getPropertyDefinitions({
+					projectId: projectId,
+					apiToken: this.requestProperties.apiToken,
+				});
+				return {
+					content: [{ type: "text", text: JSON.stringify(propertyDefinitions) }],
+				};
+			},
+		);
 
 		this.registerTool(
 			"create-feature-flag",

@@ -11,7 +11,8 @@ export const DashboardSchema = z.object({
 		.object({
 			email: z.string().email(),
 		})
-		.optional().nullable(),
+		.optional()
+		.nullable(),
 	is_shared: z.boolean().optional().nullable(),
 	deleted: z.boolean().optional().nullable(),
 	filters: z.record(z.any()).optional().nullable(),

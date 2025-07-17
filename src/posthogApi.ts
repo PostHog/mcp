@@ -97,7 +97,6 @@ export async function getOrganizationDetails(orgId: string, apiToken: string) {
 }
 
 export async function getProjects(orgId: string, apiToken: string): Promise<Project[]> {
-
 	const response = await fetch(`${BASE_URL}/api/organizations/${orgId}/projects/`, {
 		headers: {
 			Authorization: `Bearer ${apiToken}`,
@@ -459,7 +458,6 @@ export async function getInsights(
 	apiToken: string,
 	params?: ListInsightsData,
 ): Promise<PostHogInsight[]> {
-
 	const searchParams = new URLSearchParams();
 	if (params?.limit) searchParams.append("limit", String(params.limit));
 	if (params?.offset) searchParams.append("offset", String(params.offset));
@@ -499,7 +497,6 @@ export async function getInsight(
 	insightId: number,
 	apiToken: string,
 ): Promise<PostHogInsight> {
-
 	const response = await fetch(`${BASE_URL}/api/projects/${projectId}/insights/${insightId}/`, {
 		headers: {
 			Authorization: `Bearer ${apiToken}`,
@@ -518,7 +515,6 @@ export async function createInsight({
 	apiToken,
 	data,
 }: { projectId: string; apiToken: string; data: CreateInsightInput }): Promise<PostHogInsight> {
-
 	const response = await fetch(`${BASE_URL}/api/projects/${projectId}/insights/`, {
 		method: "POST",
 		headers: {
@@ -547,7 +543,6 @@ export async function updateInsight({
 	apiToken: string;
 	data: UpdateInsightInput;
 }): Promise<PostHogInsight> {
-
 	const response = await fetch(`${BASE_URL}/api/projects/${projectId}/insights/${insightId}/`, {
 		method: "PATCH",
 		headers: {
@@ -570,7 +565,6 @@ export async function deleteInsight({
 	insightId,
 	apiToken,
 }: { projectId: string; insightId: number; apiToken: string }) {
-
 	const response = await fetch(`${BASE_URL}/api/projects/${projectId}/insights/${insightId}/`, {
 		method: "PATCH",
 		headers: {
@@ -605,7 +599,6 @@ export async function getDashboards(
 	apiToken: string,
 	params?: ListDashboardsData,
 ): Promise<PostHogDashboard[]> {
-
 	const searchParams = new URLSearchParams();
 	if (params?.limit) searchParams.append("limit", String(params.limit));
 	if (params?.offset) searchParams.append("offset", String(params.offset));
@@ -641,7 +634,6 @@ export async function getDashboards(
 	throw new Error(
 		"Invalid response format: expected PostHogDashboard array or object with results property",
 	);
-	
 }
 
 export async function getDashboard(
@@ -649,7 +641,6 @@ export async function getDashboard(
 	dashboardId: number,
 	apiToken: string,
 ): Promise<PostHogDashboard> {
-
 	const response = await fetch(
 		`${BASE_URL}/api/projects/${projectId}/dashboards/${dashboardId}/`,
 		{
@@ -671,7 +662,6 @@ export async function createDashboard({
 	apiToken,
 	data,
 }: { projectId: string; apiToken: string; data: CreateDashboardInput }): Promise<PostHogDashboard> {
-
 	const response = await fetch(`${BASE_URL}/api/projects/${projectId}/dashboards/`, {
 		method: "POST",
 		headers: {
@@ -700,7 +690,6 @@ export async function updateDashboard({
 	apiToken: string;
 	data: UpdateDashboardInput;
 }): Promise<PostHogDashboard> {
-
 	const response = await fetch(
 		`${BASE_URL}/api/projects/${projectId}/dashboards/${dashboardId}/`,
 		{
@@ -726,7 +715,6 @@ export async function deleteDashboard({
 	dashboardId,
 	apiToken,
 }: { projectId: string; dashboardId: number; apiToken: string }) {
-
 	const response = await fetch(
 		`${BASE_URL}/api/projects/${projectId}/dashboards/${dashboardId}/`,
 		{
@@ -754,7 +742,6 @@ export async function addInsightToDashboard({
 	apiToken,
 	data,
 }: { projectId: string; apiToken: string; data: AddInsightToDashboardInput }) {
-
 	// Based on PostHog API documentation and community feedback:
 	// - The dashboard_tiles endpoint doesn't exist for creation
 	// - The Dashboard API can only UPDATE tiles, not CREATE them
@@ -795,7 +782,7 @@ export async function getUser(apiToken: string) {
 		throw new Error(`Failed to fetch user: ${response.statusText}`);
 	}
 
-	const data = await response.json() as { distinct_id: string };
+	const data = (await response.json()) as { distinct_id: string };
 
 	const distinctId = data.distinct_id;
 

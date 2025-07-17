@@ -6,17 +6,17 @@
  */
 
 export function handleToolError(error: any, context?: string) {
-    if (context) {
-        console.error(`[MCP Error][${context}]`, error);
-    } else {
-        console.error('[MCP Error]', error);
-    }
-    return {
-        content: [
-            {
-                type: "text",
-                text: `Error: ${error?.message || "An error occurred."}${context ? ` (Context: ${context})` : ""}`,
-            },
-        ],
-    };
+	if (context) {
+		console.error(`[MCP Error][${context}]`, error);
+	} else {
+		console.error("[MCP Error]", error);
+	}
+	return {
+		content: [
+			{
+				type: "text",
+				text: `Error: ${error?.message || "An error occurred."}${context ? ` (Context: ${context})` : ""}`,
+			},
+		],
+	};
 }

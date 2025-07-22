@@ -22,8 +22,8 @@ export enum StatusErrors {
 
 export const ListErrorsSchema = z.object({
 	orderBy: z.nativeEnum(OrderByErrors).optional(),
-	dateFrom: z.date().optional(),
-	dateTo: z.date().optional(),
+	dateFrom: z.string().datetime().optional(),
+	dateTo: z.string().datetime().optional(),
 	orderDirection: z.nativeEnum(OrderDirectionErrors).optional(),
 	filterTestAccounts: z.boolean().optional(),
 	// limit: z.number().optional(),
@@ -33,8 +33,8 @@ export const ListErrorsSchema = z.object({
 
 export const ErrorDetailsSchema = z.object({
 	issueId: z.string(),
-	dateFrom: z.date().optional(),
-	dateTo: z.date().optional(),
+	dateFrom: z.string().datetime().optional(),
+	dateTo: z.string().datetime().optional(),
 });
 
 export type ListErrorsData = z.infer<typeof ListErrorsSchema>;

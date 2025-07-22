@@ -2,29 +2,27 @@ import { z } from "zod";
 import type { Context, Tool } from "../types";
 import { ListErrorsSchema } from "../../schema/errors";
 
-const schema = z.object({
-	data: ListErrorsSchema,
-});
+const schema = ListErrorsSchema;
 
 type Params = z.infer<typeof schema>;
 
 export const listErrorsHandler = async (context: Context, params: Params) => {
-	const { data } = params;
+	const { orderBy, dateFrom, dateTo, orderDirection, filterTestAccounts, status } = params;
 	const projectId = await context.getProjectId();
 
 	const errorQuery = {
 		kind: "ErrorTrackingQuery",
-		orderBy: data.orderBy || "occurrences",
+		orderBy: orderBy || "occurrences",
 		dateRange: {
 			date_from:
-				data.dateFrom?.toISOString() ||
+				dateFrom ||
 				new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-			date_to: data.dateTo?.toISOString() || new Date().toISOString(),
+			date_to: dateTo || new Date().toISOString(),
 		},
 		volumeResolution: 1,
-		orderDirection: data.orderDirection || "DESC",
-		filterTestAccounts: data.filterTestAccounts ?? true,
-		status: data.status || "active",
+		orderDirection: orderDirection || "DESC",
+		filterTestAccounts: filterTestAccounts ?? true,
+		status: status || "active",
 	};
 
 	const errorsResult = await context.api.query({ projectId }).execute({ queryBody: errorQuery });

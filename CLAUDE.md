@@ -17,10 +17,11 @@ This is a PostHog MCP (Model Context Protocol) server built on Cloudflare Worker
 ### Key Components
 
 - **Main MCP Class (`src/index.ts`)**: `MyMCP` extends `McpAgent` and defines all available tools for interacting with PostHog
-- **API Layer (`src/posthogApi.ts`)**: Functions for making requests to PostHog's REST API
+- **Unified API Client (`src/api/client.ts`)**: `ApiClient` class provides type-safe methods for all PostHog API interactions with proper error handling and schema validation
 - **Schema Validation (`src/schema/`)**: Zod schemas for validating API requests and responses
 - **Caching (`src/lib/utils/cache/`)**: User-scoped memory cache for storing project/org state
 - **Documentation Search (`src/inkeepApi.ts`)**: Integration with Inkeep for PostHog docs search
+- **Utility Functions (`src/lib/utils/api.ts`)**: Helper functions for pagination and URL generation
 
 ### Authentication & State Management
 

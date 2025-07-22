@@ -42,6 +42,10 @@ export class MyMCP extends McpAgent<Env> {
 	}
 
 	get cache() {
+		if (!this.requestProperties.userHash) {
+			throw new Error("User hash is required to use the cache");
+		}
+
 		if (!this._cache) {
 			this._cache = new DurableObjectCache<State>(
 				this.requestProperties.userHash,
@@ -185,6 +189,12 @@ export default {
 
 		if (!token) {
 			return new Response("No token provided, please provide a valid API token.", {
+				status: 401,
+			});
+		}
+
+		if (!token.startsWith("phx_")) {
+			return new Response("Invalid token, please provide a valid API token.", {
 				status: 401,
 			});
 		}

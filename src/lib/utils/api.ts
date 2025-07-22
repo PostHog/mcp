@@ -1,4 +1,5 @@
 import { ApiResponseSchema } from "../../schema/api";
+import { BASE_URL } from "../constants";
 import type { z } from "zod";
 
 export const withPagination = async <T>(
@@ -34,8 +35,8 @@ export const withPagination = async <T>(
 
 export const getProjectBaseUrl = (projectId: string) => {
 	if (projectId === "@current") {
-		return "https://us.posthog.com";
+		return BASE_URL;
 	}
 
-	return `https://us.posthog.com/project/${projectId}`;
+	return `${BASE_URL}/project/${projectId}`;
 };

@@ -24,16 +24,6 @@ import { DurableObjectCache } from "./lib/utils/cache/DurableObjectCache";
 import { handleToolError } from "./lib/utils/handleToolError";
 import { hash } from "./lib/utils/helper-functions";
 import { ErrorDetailsSchema, ListErrorsSchema } from "./schema/errors";
-import {
-	addInsightToDashboard,
-	createDashboard,
-	deleteDashboard,
-	deleteInsight,
-	getDashboard,
-	getDashboards,
-	updateDashboard,
-	updateInsight,
-} from "./posthogApi";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
@@ -190,20 +180,20 @@ export class MyMCP extends McpAgent<Env> {
 			"feature-flag-get-definition",
 			`
 				- Use this tool to get the definition of a feature flag. 
-				- You can provide either the flagId or the flagName. 
+				- You can provide either the flagId or the flagKey. 
 				- If you provide both, the flagId will be used.
 			`,
 			{
 				flagId: z.string().optional(),
-				flagName: z.string().optional(), // TODO: Support fetching by flag name or key
+				flagKey: z.string().optional(),
 			},
-			async ({ flagId, flagName }) => {
-				if (!flagId && !flagName) {
+			async ({ flagId, flagKey }) => {
+				if (!flagId && !flagKey) {
 					return {
 						content: [
 							{
 								type: "text",
-								text: "Error: Either flagId or flagName must be provided.",
+								text: "Error: Either flagId or flagKey must be provided.",
 							},
 						],
 					};
@@ -222,10 +212,10 @@ export class MyMCP extends McpAgent<Env> {
 					};
 				}
 
-				if (flagName) {
+				if (flagKey) {
 					const flagResult = await this.api
 						.featureFlags({ projectId })
-						.findByKey({ key: flagName });
+						.findByKey({ key: flagKey });
 					if (!flagResult.success) {
 						throw new Error(`Failed to find feature flag: ${flagResult.error.message}`);
 					}
@@ -238,7 +228,7 @@ export class MyMCP extends McpAgent<Env> {
 						content: [
 							{
 								type: "text",
-								text: `Error: Flag with name "${flagName}" not found.`,
+								text: `Error: Flag with key "${flagKey}" not found.`,
 							},
 						],
 					};
@@ -722,7 +712,14 @@ export class MyMCP extends McpAgent<Env> {
 				if (!insightsResult.success) {
 					throw new Error(`Failed to get insights: ${insightsResult.error.message}`);
 				}
-				return { content: [{ type: "text", text: JSON.stringify(insightsResult.data) }] };
+
+				// Add URL field to each insight for easy navigation
+				const insightsWithUrls = insightsResult.data.map((insight) => ({
+					...insight,
+					url: `${getProjectBaseUrl(projectId)}/insights/${insight.short_id}`,
+				}));
+
+				return { content: [{ type: "text", text: JSON.stringify(insightsWithUrls) }] };
 			},
 		);
 
@@ -740,7 +737,14 @@ export class MyMCP extends McpAgent<Env> {
 				if (!insightResult.success) {
 					throw new Error(`Failed to get insight: ${insightResult.error.message}`);
 				}
-				return { content: [{ type: "text", text: JSON.stringify(insightResult.data) }] };
+
+				// Add URL field for easy navigation
+				const insightWithUrl = {
+					...insightResult.data,
+					url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
+				};
+
+				return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
 			},
 		);
 
@@ -779,7 +783,7 @@ export class MyMCP extends McpAgent<Env> {
 				// Add URL field for easy navigation
 				const insightWithUrl = {
 					...insightResult.data,
-					url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.id}`,
+					url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
 				};
 
 				return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
@@ -798,17 +802,19 @@ export class MyMCP extends McpAgent<Env> {
 			},
 			async ({ insightId, data }) => {
 				const projectId = await this.getProjectId();
-				const insight = await updateInsight({
-					projectId,
+				const insightResult = await this.api.insights({ projectId }).update({
 					insightId,
-					apiToken: this.requestProperties.apiToken,
 					data,
 				});
 
+				if (!insightResult.success) {
+					throw new Error(`Failed to update insight: ${insightResult.error.message}`);
+				}
+
 				// Add URL field for easy navigation
 				const insightWithUrl = {
-					...insight,
-					url: `${getProjectBaseUrl(projectId)}/insights/${(insight as any).short_id}`,
+					...insightResult.data,
+					url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
 				};
 
 				return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
@@ -825,12 +831,13 @@ export class MyMCP extends McpAgent<Env> {
 			},
 			async ({ insightId }) => {
 				const projectId = await this.getProjectId();
-				const result = await deleteInsight({
-					projectId,
-					insightId,
-					apiToken: this.requestProperties.apiToken,
-				});
-				return { content: [{ type: "text", text: JSON.stringify(result) }] };
+				const result = await this.api.insights({ projectId }).delete({ insightId });
+
+				if (!result.success) {
+					throw new Error(`Failed to delete insight: ${result.error.message}`);
+				}
+
+				return { content: [{ type: "text", text: JSON.stringify(result.data) }] };
 			},
 		);
 
@@ -846,12 +853,15 @@ export class MyMCP extends McpAgent<Env> {
 			},
 			async ({ data }) => {
 				const projectId = await this.getProjectId();
-				const dashboards = await getDashboards(
-					projectId,
-					this.requestProperties.apiToken,
-					data,
-				);
-				return { content: [{ type: "text", text: JSON.stringify(dashboards) }] };
+				const dashboardsResult = await this.api
+					.dashboards({ projectId })
+					.list({ params: data });
+
+				if (!dashboardsResult.success) {
+					throw new Error(`Failed to get dashboards: ${dashboardsResult.error.message}`);
+				}
+
+				return { content: [{ type: "text", text: JSON.stringify(dashboardsResult.data) }] };
 			},
 		);
 
@@ -865,12 +875,15 @@ export class MyMCP extends McpAgent<Env> {
 			},
 			async ({ dashboardId }) => {
 				const projectId = await this.getProjectId();
-				const dashboard = await getDashboard(
-					projectId,
-					dashboardId,
-					this.requestProperties.apiToken,
-				);
-				return { content: [{ type: "text", text: JSON.stringify(dashboard) }] };
+				const dashboardResult = await this.api
+					.dashboards({ projectId })
+					.get({ dashboardId });
+
+				if (!dashboardResult.success) {
+					throw new Error(`Failed to get dashboard: ${dashboardResult.error.message}`);
+				}
+
+				return { content: [{ type: "text", text: JSON.stringify(dashboardResult.data) }] };
 			},
 		);
 
@@ -885,16 +898,16 @@ export class MyMCP extends McpAgent<Env> {
 			},
 			async ({ data }) => {
 				const projectId = await this.getProjectId();
-				const dashboard = await createDashboard({
-					projectId,
-					apiToken: this.requestProperties.apiToken,
-					data,
-				});
+				const dashboardResult = await this.api.dashboards({ projectId }).create({ data });
+
+				if (!dashboardResult.success) {
+					throw new Error(`Failed to create dashboard: ${dashboardResult.error.message}`);
+				}
 
 				// Add URL field for easy navigation
 				const dashboardWithUrl = {
-					...(dashboard as any),
-					url: `${getProjectBaseUrl(projectId)}/dashboard/${dashboard.id}`,
+					...dashboardResult.data,
+					url: `${getProjectBaseUrl(projectId)}/dashboard/${dashboardResult.data.id}`,
 				};
 
 				return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
@@ -913,17 +926,18 @@ export class MyMCP extends McpAgent<Env> {
 			},
 			async ({ dashboardId, data }) => {
 				const projectId = await this.getProjectId();
-				const dashboard = await updateDashboard({
-					projectId,
-					dashboardId,
-					apiToken: this.requestProperties.apiToken,
-					data,
-				});
+				const dashboardResult = await this.api
+					.dashboards({ projectId })
+					.update({ dashboardId, data });
+
+				if (!dashboardResult.success) {
+					throw new Error(`Failed to update dashboard: ${dashboardResult.error.message}`);
+				}
 
 				// Add URL field for easy navigation
 				const dashboardWithUrl = {
-					...(dashboard as any),
-					url: `${getProjectBaseUrl(projectId)}/dashboard/${dashboard.id}`,
+					...dashboardResult.data,
+					url: `${getProjectBaseUrl(projectId)}/dashboard/${dashboardResult.data.id}`,
 				};
 
 				return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
@@ -940,12 +954,13 @@ export class MyMCP extends McpAgent<Env> {
 			},
 			async ({ dashboardId }) => {
 				const projectId = await this.getProjectId();
-				const result = await deleteDashboard({
-					projectId,
-					dashboardId,
-					apiToken: this.requestProperties.apiToken,
-				});
-				return { content: [{ type: "text", text: JSON.stringify(result) }] };
+				const result = await this.api.dashboards({ projectId }).delete({ dashboardId });
+
+				if (!result.success) {
+					throw new Error(`Failed to delete dashboard: ${result.error.message}`);
+				}
+
+				return { content: [{ type: "text", text: JSON.stringify(result.data) }] };
 			},
 		);
 
@@ -961,17 +976,26 @@ export class MyMCP extends McpAgent<Env> {
 			},
 			async ({ data }) => {
 				const projectId = await this.getProjectId();
-				const result = await addInsightToDashboard({
-					projectId,
-					apiToken: this.requestProperties.apiToken,
-					data,
-				});
+
+				// Get insight to retrieve short_id for URL
+				const insightResult = await this.api
+					.insights({ projectId })
+					.get({ insightId: data.insight_id });
+				if (!insightResult.success) {
+					throw new Error(`Failed to get insight: ${insightResult.error.message}`);
+				}
+
+				const result = await this.api.dashboards({ projectId }).addInsight({ data });
+
+				if (!result.success) {
+					throw new Error(`Failed to add insight to dashboard: ${result.error.message}`);
+				}
 
 				// Add URLs for easy navigation
 				const resultWithUrls = {
-					...(result as any),
+					...result.data,
 					dashboard_url: `${getProjectBaseUrl(projectId)}/dashboard/${data.dashboard_id}`,
-					insight_url: `${getProjectBaseUrl(projectId)}/insights/${data.insight_id}`,
+					insight_url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
 				};
 
 				return { content: [{ type: "text", text: JSON.stringify(resultWithUrls) }] };

@@ -47,38 +47,6 @@ export class ApiClient {
 		};
 	}
 
-	private async fetch<T>(url: string, options?: RequestInit): Promise<Result<T>> {
-		try {
-			const response = await fetch(url, {
-				...options,
-				headers: {
-					...this.buildHeaders(),
-					...options?.headers,
-				},
-			});
-
-			if (!response.ok) {
-				if (response.status === 401) {
-					throw new Error(ErrorCode.INVALID_API_KEY);
-				}
-
-				try {
-					const errorData = (await response.json()) as any;
-					if (errorData.type === "validation_error" && errorData.code) {
-						throw new Error(`Validation error: ${errorData.code}`);
-					}
-				} catch {}
-
-				throw new Error(`Request failed: ${response.statusText}`);
-			}
-
-			const data = await response.json();
-			return { success: true, data: data as T };
-		} catch (error) {
-			return { success: false, error: error as Error };
-		}
-	}
-
 	private async fetchWithSchema<T>(
 		url: string,
 		schema: z.ZodType<T>,
@@ -383,7 +351,14 @@ export class ApiClient {
 			list: async ({
 				params,
 			}: { params?: ListInsightsData } = {}): Promise<
-				Result<Array<{ id: number; name: string; description?: string | null }>>
+				Result<
+					Array<{
+						id: number;
+						name: string;
+						short_id: string;
+						description?: string | null;
+					}>
+				>
 			> => {
 				const validatedParams = params ? ListInsightsSchema.parse(params) : undefined;
 				const searchParams = new URLSearchParams();
@@ -401,6 +376,7 @@ export class ApiClient {
 				const simpleInsightSchema = z.object({
 					id: z.number(),
 					name: z.string(),
+					short_id: z.string(),
 					description: z.string().optional().nullable(),
 				});
 
@@ -417,12 +393,15 @@ export class ApiClient {
 
 			create: async ({
 				data,
-			}: { data: CreateInsightInput }): Promise<Result<{ id: number; name: string }>> => {
+			}: { data: CreateInsightInput }): Promise<
+				Result<{ id: number; name: string; short_id: string }>
+			> => {
 				const validatedInput = CreateInsightInputSchema.parse(data);
 
 				const createResponseSchema = z.object({
 					id: z.number(),
 					name: z.string(),
+					short_id: z.string(),
 				});
 
 				return this.fetchWithSchema(
@@ -438,11 +417,12 @@ export class ApiClient {
 			get: async ({
 				insightId,
 			}: { insightId: number }): Promise<
-				Result<{ id: number; name: string; description?: string | null }>
+				Result<{ id: number; name: string; short_id: string; description?: string | null }>
 			> => {
 				const simpleInsightSchema = z.object({
 					id: z.number(),
 					name: z.string(),
+					short_id: z.string(),
 					description: z.string().nullable().optional(),
 				});
 
@@ -455,10 +435,13 @@ export class ApiClient {
 			update: async ({
 				insightId,
 				data,
-			}: { insightId: number; data: any }): Promise<Result<{ id: number; name: string }>> => {
+			}: { insightId: number; data: any }): Promise<
+				Result<{ id: number; name: string; short_id: string }>
+			> => {
 				const updateResponseSchema = z.object({
 					id: z.number(),
 					name: z.string(),
+					short_id: z.string(),
 				});
 
 				return this.fetchWithSchema(

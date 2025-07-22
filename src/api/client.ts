@@ -578,9 +578,13 @@ export class ApiClient {
 			list: async ({
 				params,
 			}: { params?: ListDashboardsData } = {}): Promise<
-				Result<Array<{
-					id: number; name: string; description?: string | null
-				}>>
+				Result<
+					Array<{
+						id: number;
+						name: string;
+						description?: string | null;
+					}>
+				>
 			> => {
 				const validatedParams = params ? ListDashboardsSchema.parse(params) : undefined;
 				const searchParams = new URLSearchParams();

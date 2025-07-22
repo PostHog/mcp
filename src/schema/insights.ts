@@ -18,7 +18,8 @@ export const InsightSchema = z.object({
 			first_name: z.string(),
 			email: z.string(),
 		})
-		.optional().nullable(),
+		.optional()
+		.nullable(),
 	saved: z.boolean(),
 	favorited: z.boolean().optional().nullable(),
 	deleted: z.boolean(),

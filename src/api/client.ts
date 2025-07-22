@@ -383,7 +383,7 @@ export class ApiClient {
 			list: async ({
 				params,
 			}: { params?: ListInsightsData } = {}): Promise<
-				Result<Array<{ id: number; name: string; description?: string }>>
+				Result<Array<{ id: number; name: string; description?: string | null }>>
 			> => {
 				const validatedParams = params ? ListInsightsSchema.parse(params) : undefined;
 				const searchParams = new URLSearchParams();
@@ -401,7 +401,7 @@ export class ApiClient {
 				const simpleInsightSchema = z.object({
 					id: z.number(),
 					name: z.string(),
-					description: z.string().optional(),
+					description: z.string().optional().nullable(),
 				});
 
 				const responseSchema = z.object({
@@ -438,7 +438,7 @@ export class ApiClient {
 			get: async ({
 				insightId,
 			}: { insightId: number }): Promise<
-				Result<{ id: number; name: string; description?: string }>
+				Result<{ id: number; name: string; description?: string | null }>
 			> => {
 				const simpleInsightSchema = z.object({
 					id: z.number(),
@@ -578,7 +578,9 @@ export class ApiClient {
 			list: async ({
 				params,
 			}: { params?: ListDashboardsData } = {}): Promise<
-				Result<Array<{ id: number; name: string; description?: string }>>
+				Result<Array<{
+					id: number; name: string; description?: string | null
+				}>>
 			> => {
 				const validatedParams = params ? ListDashboardsSchema.parse(params) : undefined;
 				const searchParams = new URLSearchParams();
@@ -594,7 +596,7 @@ export class ApiClient {
 				const simpleDashboardSchema = z.object({
 					id: z.number(),
 					name: z.string(),
-					description: z.string().optional(),
+					description: z.string().optional().nullable(),
 				});
 
 				const responseSchema = z.object({
@@ -613,12 +615,12 @@ export class ApiClient {
 			get: async ({
 				dashboardId,
 			}: { dashboardId: number }): Promise<
-				Result<{ id: number; name: string; description?: string }>
+				Result<{ id: number; name: string; description?: string | null }>
 			> => {
 				const simpleDashboardSchema = z.object({
 					id: z.number(),
 					name: z.string(),
-					description: z.string().optional(),
+					description: z.string().optional().nullable(),
 				});
 
 				return this.fetchWithSchema(

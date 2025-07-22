@@ -44,48 +44,48 @@ import addInsightToDashboard from "./dashboards/addInsight";
 import getLLMCosts from "./llmObservability/getLLMCosts";
 
 const tools = (_context: Context): Tool<ZodObjectAny>[] => [
-    // Feature Flags
-    getFeatureFlagDefinition(),
-    getAllFeatureFlags(),
-    createFeatureFlag(),
-    updateFeatureFlag(),
-    deleteFeatureFlag(),
-    
-    // Organizations
-    getOrganizations(),
-    setActiveOrganization(),
-    getOrganizationDetails(),
-    
-    // Projects
-    getProjects(),
-    setActiveProject(),
-    propertyDefinitions(),
-    
-    // Documentation
-    searchDocs(),
-    
-    // Error Tracking
-    listErrors(),
-    errorDetails(),
-    
-    // Insights
-    getAllInsights(),
-    getInsight(),
-    createInsight(),
-    updateInsight(),
-    deleteInsight(),
-    getSqlInsight(),
-    
-    // Dashboards
-    getAllDashboards(),
-    getDashboard(),
-    createDashboard(),
-    updateDashboard(),
-    deleteDashboard(),
-    addInsightToDashboard(),
-    
-    // LLM Observability
-    getLLMCosts(),
+	// Feature Flags
+	getFeatureFlagDefinition(),
+	getAllFeatureFlags(),
+	createFeatureFlag(),
+	updateFeatureFlag(),
+	deleteFeatureFlag(),
+
+	// Organizations
+	getOrganizations(),
+	setActiveOrganization(),
+	getOrganizationDetails(),
+
+	// Projects
+	getProjects(),
+	setActiveProject(),
+	propertyDefinitions(),
+
+	// Documentation
+	searchDocs(),
+
+	// Error Tracking
+	listErrors(),
+	errorDetails(),
+
+	// Insights
+	getAllInsights(),
+	getInsight(),
+	createInsight(),
+	updateInsight(),
+	deleteInsight(),
+	getSqlInsight(),
+
+	// Dashboards
+	getAllDashboards(),
+	getDashboard(),
+	createDashboard(),
+	updateDashboard(),
+	deleteDashboard(),
+	addInsightToDashboard(),
+
+	// LLM Observability
+	getLLMCosts(),
 ];
 
 export default tools;

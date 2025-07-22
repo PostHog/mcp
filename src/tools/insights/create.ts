@@ -4,30 +4,30 @@ import { CreateInsightInputSchema } from "../../schema/insights";
 import { getProjectBaseUrl } from "../../lib/utils/api";
 
 const schema = z.object({
-    data: CreateInsightInputSchema,
+	data: CreateInsightInputSchema,
 });
 
 type Params = z.infer<typeof schema>;
 
 export const createHandler = async (context: Context, params: Params) => {
-    const { data } = params;
-    const projectId = await context.getProjectId();
-    const insightResult = await context.api.insights({ projectId }).create({ data });
-    if (!insightResult.success) {
-        throw new Error(`Failed to create insight: ${insightResult.error.message}`);
-    }
+	const { data } = params;
+	const projectId = await context.getProjectId();
+	const insightResult = await context.api.insights({ projectId }).create({ data });
+	if (!insightResult.success) {
+		throw new Error(`Failed to create insight: ${insightResult.error.message}`);
+	}
 
-    const insightWithUrl = {
-        ...insightResult.data,
-        url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
-    };
+	const insightWithUrl = {
+		...insightResult.data,
+		url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
+	};
 
-    return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
+	return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
 };
 
 const tool = (): Tool<typeof schema> => ({
-    name: "insight-create-from-query",
-    description: `
+	name: "insight-create-from-query",
+	description: `
         - You can use this to save a query as an insight. You should only do this with a valid query that you have seen, or one you have modified slightly.
         - If the user wants to see data, you should use the "get-sql-insight" tool to get that data instead.
         - An insight requires a name, query, and other optional properties.
@@ -47,8 +47,8 @@ const tool = (): Tool<typeof schema> => ({
             },
         }
     `,
-    schema,
-    handler: createHandler,
+	schema,
+	handler: createHandler,
 });
 
 export default tool;

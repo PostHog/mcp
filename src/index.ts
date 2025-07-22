@@ -1,6 +1,6 @@
 import { McpServer, type ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { McpAgent } from "agents/mcp";
-import { z } from "zod";
+import type { z } from "zod";
 
 import { ApiClient } from "./api/client";
 import { getPostHogClient } from "./lib/client";
@@ -171,14 +171,10 @@ export class MyMCP extends McpAgent<Env> {
 		const allTools = tools(context);
 
 		for (const tool of allTools) {
-			this.registerTool(
-				tool.name,
-				tool.description,
-				tool.schema.shape,
-				async (params) => tool.handler(context, params),
+			this.registerTool(tool.name, tool.description, tool.schema.shape, async (params) =>
+				tool.handler(context, params),
 			);
 		}
-
 	}
 }
 

@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Context, Tool } from "../types";
 
 const schema = z.object({
-	projectId: z.string(),
+	projectId: z.number().int().positive(),
 });
 
 type Params = z.infer<typeof schema>;
@@ -10,7 +10,7 @@ type Params = z.infer<typeof schema>;
 export const setActiveHandler = async (context: Context, params: Params) => {
 	const { projectId } = params;
 
-	await context.cache.set("projectId", projectId);
+	await context.cache.set("projectId", projectId.toString());
 
 	return {
 		content: [{ type: "text", text: `Switched to project ${projectId}` }],

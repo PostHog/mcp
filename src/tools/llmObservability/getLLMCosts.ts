@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Context, Tool } from "../types";
 
 const schema = z.object({
-	projectId: z.string(),
+	projectId: z.number().int().positive(),
 	days: z.number().optional(),
 });
 

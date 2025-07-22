@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Context, Tool } from "../types";
 
 const schema = z.object({
-	orgId: z.string(),
+	orgId: z.string().uuid(),
 });
 
 type Params = z.infer<typeof schema>;

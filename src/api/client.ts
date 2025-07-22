@@ -66,12 +66,10 @@ export class ApiClient {
 					throw new Error(ErrorCode.INVALID_API_KEY);
 				}
 
-
 				const errorData = (await response.json()) as any;
 				if (errorData.type === "validation_error" && errorData.code) {
 					throw new Error(`Validation error: ${errorData.code}`);
 				}
-
 
 				throw new Error(`Request failed: ${response.statusText}`);
 			}

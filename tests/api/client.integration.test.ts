@@ -6,7 +6,7 @@ const API_TOKEN = process.env.TEST_API_TOKEN;
 const TEST_ORG_ID = process.env.TEST_ORG_ID;
 const TEST_PROJECT_ID = process.env.TEST_PROJECT_ID;
 
-describe("API Client Integration Tests", () => {
+describe("API Client Integration Tests", { concurrent: false }, () => {
 	let client: ApiClient;
 	let testOrgId: string;
 	let testProjectId: string;

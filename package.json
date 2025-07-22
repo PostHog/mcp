@@ -8,6 +8,8 @@
 		"format": "biome format --write",
 		"lint:fix": "biome lint --fix",
 		"test": "vitest",
+		"test:unit": "vitest run",
+		"test:integration": "vitest run --config vitest.integration.config.ts",
 		"test:watch": "vitest watch",
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types",

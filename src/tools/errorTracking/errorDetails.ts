@@ -1,8 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
 import { ErrorDetailsSchema } from "../../schema/errors";
 
-const schema = ErrorDetailsSchema
+const schema = ErrorDetailsSchema;
 
 type Params = z.infer<typeof schema>;
 
@@ -13,9 +13,7 @@ export const errorDetailsHandler = async (context: Context, params: Params) => {
 	const errorQuery = {
 		kind: "ErrorTrackingQuery",
 		dateRange: {
-			date_from:
-				dateFrom ||
-				new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+			date_from: dateFrom || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
 			date_to: dateTo || new Date().toISOString(),
 		},
 		volumeResolution: 0,

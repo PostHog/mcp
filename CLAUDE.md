@@ -30,19 +30,38 @@ This is a PostHog MCP (Model Context Protocol) server built on Cloudflare Worker
 - Automatic project/org selection when user has only one option
 - State persists across requests within the same session
 
+### API Architecture
+
+The codebase uses a unified API client pattern:
+
+- **API Client (`ApiClient`)**: Central class that handles all PostHog API requests with consistent error handling, authentication, and response validation
+- **Resource Methods**: API client is organized into resource-based methods:
+  - `organizations()`: Organization CRUD and project listing
+  - `projects()`: Project details and property definitions
+  - `featureFlags()`: Feature flag CRUD operations
+  - `insights()`: Insight CRUD, listing, and SQL queries
+  - `dashboards()`: Dashboard CRUD and insight management
+  - `query()`: Generic query execution for analytics
+  - `users()`: User information and authentication
+- **Type Safety**: All methods return `Result<T, Error>` types with proper TypeScript definitions
+- **URL Generation**: Uses configurable `BASE_URL` from constants for environment-aware URLs (localhost in dev, PostHog production in prod)
+
 ### Tool Categories
 
 1. **Organization/Project Management**: Get orgs, projects, set active context
-2. **Feature Flags**: CRUD operations on feature flags
-3. **Error Tracking**: Query errors and error details
-4. **Data Warehouse**: SQL insights via natural language queries
-5. **Documentation**: Search PostHog docs via Inkeep API
-6. **Analytics**: LLM cost tracking and other metrics
+2. **Feature Flags**: CRUD operations on feature flags  
+3. **Insights & Dashboards**: CRUD operations on insights and dashboards with proper URL generation
+4. **Error Tracking**: Query errors and error details
+5. **Data Warehouse**: SQL insights via natural language queries
+6. **Documentation**: Search PostHog docs via Inkeep API
+7. **Analytics**: LLM cost tracking and other metrics
 
 ### Environment Setup
 
 - Create `.dev.vars` file with `INKEEP_API_KEY` for docs search functionality
 - API token passed via Authorization header from MCP client configuration
+- **Development Mode**: Set `DEV = true` in `src/lib/constants.ts` to use `http://localhost:8010` for API calls and URLs
+- **Production Mode**: Set `DEV = false` to use `https://us.posthog.com` for API calls and URLs
 
 ### Code Style
 

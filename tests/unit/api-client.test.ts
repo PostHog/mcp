@@ -3,45 +3,44 @@ import { ApiClient } from "../../src/api/client";
 import { BASE_URL } from "../../src/lib/constants";
 
 describe("ApiClient", () => {
-
-		it("should create ApiClient with required config", () => {
-			const client = new ApiClient({
-				apiToken: "test-token",
-			});
-
-			expect(client).toBeInstanceOf(ApiClient);
+	it("should create ApiClient with required config", () => {
+		const client = new ApiClient({
+			apiToken: "test-token",
 		});
 
-		it("should use default BASE_URL when not provided", () => {
-			const client = new ApiClient({
-				apiToken: "test-token",
-			});
+		expect(client).toBeInstanceOf(ApiClient);
+	});
 
-			// Access private property through type assertion for testing
-			const baseUrl = (client as any).baseUrl;
-			expect(baseUrl).toBe(BASE_URL);
+	it("should use default BASE_URL when not provided", () => {
+		const client = new ApiClient({
+			apiToken: "test-token",
 		});
 
-		it("should use custom baseUrl when provided", () => {
-			const customUrl = "https://custom.example.com";
-			const client = new ApiClient({
-				apiToken: "test-token",
-				baseUrl: customUrl,
-			});
+		// Access private property through type assertion for testing
+		const baseUrl = (client as any).baseUrl;
+		expect(baseUrl).toBe(BASE_URL);
+	});
 
-			const baseUrl = (client as any).baseUrl;
-			expect(baseUrl).toBe(customUrl);
+	it("should use custom baseUrl when provided", () => {
+		const customUrl = "https://custom.example.com";
+		const client = new ApiClient({
+			apiToken: "test-token",
+			baseUrl: customUrl,
 		});
 
-		it("should build correct headers", () => {
-			const client = new ApiClient({
-				apiToken: "test-token-123",
-			});
+		const baseUrl = (client as any).baseUrl;
+		expect(baseUrl).toBe(customUrl);
+	});
 
-			const headers = (client as any).buildHeaders();
-			expect(headers).toEqual({
-				Authorization: "Bearer test-token-123",
-				"Content-Type": "application/json",
-			});
+	it("should build correct headers", () => {
+		const client = new ApiClient({
+			apiToken: "test-token-123",
 		});
+
+		const headers = (client as any).buildHeaders();
+		expect(headers).toEqual({
+			Authorization: "Bearer test-token-123",
+			"Content-Type": "application/json",
+		});
+	});
 });

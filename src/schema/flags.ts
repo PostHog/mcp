@@ -93,6 +93,7 @@ export const CreateFeatureFlagInputSchema = z.object({
 	description: z.string(),
 	filters: FilterGroupsSchema,
 	active: z.boolean(),
+	tags: z.array(z.string()).optional(),
 });
 
 export type CreateFeatureFlagInput = z.infer<typeof CreateFeatureFlagInputSchema>;
@@ -110,6 +111,7 @@ export const FeatureFlagSchema = z.object({
 	description: z.string().optional(),
 	filters: FiltersSchema.optional(),
 	active: z.boolean(),
+	tags: z.array(z.string()).optional(),
 });
 
 export type FeatureFlag = z.infer<typeof FeatureFlagSchema>;

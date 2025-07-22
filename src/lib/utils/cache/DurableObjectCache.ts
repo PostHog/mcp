@@ -5,7 +5,13 @@ interface DurableObjectStorage {
 	put<T>(key: string, value: T): Promise<void>;
 	delete(key: string): Promise<boolean>;
 	delete(keys: string[]): Promise<number>;
-	list(options?: { prefix?: string; start?: string; end?: string; limit?: number; reverse?: boolean }): Promise<Map<string, unknown>>;
+	list(options?: {
+		prefix?: string;
+		start?: string;
+		end?: string;
+		limit?: number;
+		reverse?: boolean;
+	}): Promise<Map<string, unknown>>;
 }
 
 export class DurableObjectCache<T extends Record<string, any>> extends ScopedCache<T> {
@@ -43,4 +49,4 @@ export class DurableObjectCache<T extends Record<string, any>> extends ScopedCac
 		const keysArray = Array.from(keys.keys());
 		await this.storage.delete(keysArray);
 	}
-} 
+}

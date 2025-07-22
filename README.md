@@ -36,21 +36,55 @@ npx @posthog/wizard@latest mcp add
 }
 ```
 
-
 **Here are some examples of prompts you can use:**
 - What feature flags do I have active?
 - Add a new feature flag for our homepage redesign
 - What are my most common errors?
 
-## Running locally
+
+# Development
+
+To run the MCP server locally, run the following command:
+
+```
+pnpm run dev
+```
+
+And replace `https://mcp.posthog.com/sse` with `http://localhost:8787/sse` in the MCP configuration.
 
 ### Environment variables
 
 - Create `.dev.vars` in the root
 - Add Inkeep API key to enable `docs-search` tool (see `Inkeep API key - mcp`)
 
-
 ```
 INKEEP_API_KEY="..."
+```
+
+
+### Configuring the Model Context Protocol Inspector
+
+During development you can directly inspect the MCP tool call results using the [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector). 
+
+You can run it using the following command:
+
+```bash
+npx @modelcontextprotocol/inspector npx -y mcp-remote@latest http://localhost:8787/sse --header "\"Authorization: Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}\""
+```
+
+Alternatively, you can use the following configuration in the MCP Inspector:
+
+Use transport type `STDIO`.
+
+**Command:**
+
+```
+npx
+```
+
+**Arguments:**
+
+```
+-y mcp-remote@latest http://localhost:8787/sse --header "Authorization: Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}"
 ```
 

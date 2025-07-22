@@ -18,11 +18,13 @@ import {
 } from "./schema/insights";
 
 import { docsSearch } from "./inkeepApi";
+import { getPostHogClient } from "./lib/client";
+import { getProjectBaseUrl } from "./lib/utils/api";
 import { DurableObjectCache } from "./lib/utils/cache/DurableObjectCache";
+import { handleToolError } from "./lib/utils/handleToolError";
 import { hash } from "./lib/utils/helper-functions";
 import { ErrorDetailsSchema, ListErrorsSchema } from "./schema/errors";
-import { getProjectBaseUrl } from "./lib/utils/api";
-import { getPostHogClient } from "./lib/client";
+import { addInsightToDashboard, createDashboard, deleteDashboard, deleteInsight, getDashboard, getDashboards, updateDashboard, updateInsight } from "./posthogApi";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
@@ -62,9 +64,12 @@ export class MyMCP extends McpAgent<Env> {
 
 	get cache() {
 		if (!this._cache) {
-			this._cache = new DurableObjectCache<State>(this.requestProperties.userHash, this.ctx.storage);
+			this._cache = new DurableObjectCache<State>(
+				this.requestProperties.userHash,
+				this.ctx.storage,
+			);
 		}
-		
+
 		return this._cache;
 	}
 
@@ -93,7 +98,7 @@ export class MyMCP extends McpAgent<Env> {
 		try {
 			const distinctId = await this.getDistinctId();
 
-		const client = getPostHogClient();
+			const client = getPostHogClient();
 
 			client.capture({ distinctId, event, properties });
 		} catch (error) {
@@ -105,18 +110,27 @@ export class MyMCP extends McpAgent<Env> {
 		name: string,
 		description: string,
 		schema: TSchema,
-		handler: (params: z.infer<z.ZodObject<TSchema>>) => Promise<any>
+		handler: (params: z.infer<z.ZodObject<TSchema>>) => Promise<any>,
 	): void {
 		const wrappedHandler = async (params: z.infer<z.ZodObject<TSchema>>) => {
-
-			await this.trackEvent('mcp tool call', {
+			await this.trackEvent("mcp tool call", {
 				tool: name,
 			});
-			
-			return await handler(params);
+
+			try {
+				return await handler(params);
+			} catch (error: any) {
+				const distinctId = await this.getDistinctId();
+				return handleToolError(error, name, distinctId);
+			}
 		};
-		
-		this.server.tool(name, description, schema, wrappedHandler as unknown as ToolCallback<TSchema>);
+
+		this.server.tool(
+			name,
+			description,
+			schema,
+			wrappedHandler as unknown as ToolCallback<TSchema>,
+		);
 	}
 
 	async getOrgID() {
@@ -172,10 +186,9 @@ export class MyMCP extends McpAgent<Env> {
 			`,
 			{
 				flagId: z.string().optional(),
-				flagName: z.string().optional(),
+				flagName: z.string().optional(), // TODO: Support fetching by flag name or key
 			},
 			async ({ flagId, flagName }) => {
-				const posthogToken = this.requestProperties.apiToken;
 
 				if (!flagId && !flagName) {
 					return {
@@ -187,9 +200,6 @@ export class MyMCP extends McpAgent<Env> {
 						],
 					};
 				}
-
-				try {
-					let flagDefinition: any;
 
 					const projectId = await this.getProjectId();
 					if (flagId) {
@@ -222,27 +232,15 @@ export class MyMCP extends McpAgent<Env> {
 						};
 					}
 
-					return {
-						content: [
-							{
-								type: "text",
-								text: "Error: Could not determine or find the feature flag.",
-							},
-						],
-					};
-				} catch (error: any) {
-					console.error("Error in feature-flag-get-definition tool:", error);
-					return {
-						content: [
-							{
-								type: "text",
-								text: `Error: ${
-									error.message || "Failed to process feature flag request"
-								}`,
-							},
-						],
-					};
-				}
+				
+				return {
+					content: [
+						{
+							type: "text",
+							text: "Error: Could not determine or find the feature flag.",
+						},
+					],
+				};
 			},
 		);
 
@@ -276,40 +274,29 @@ export class MyMCP extends McpAgent<Env> {
 			async ({ query }) => {
 				const inkeepApiKey = this.env.INKEEP_API_KEY;
 
-				try {
-					if (!inkeepApiKey) {
-						return {
-							content: [
-								{
-									type: "text",
-									text: "Error: INKEEP_API_KEY is not configured.",
-								},
-							],
-						};
-					}
-					const resultText = await docsSearch(inkeepApiKey, query);
-					return { content: [{ type: "text", text: resultText }] };
-				} catch (error: any) {
-					console.error("Error in docs-search tool:", error);
+				if (!inkeepApiKey) {
 					return {
 						content: [
 							{
 								type: "text",
-								text: `Error: ${
-									error.message || "Failed to process docs search request"
-								}`,
+								text: "Error: INKEEP_API_KEY is not configured.",
 							},
 						],
 					};
 				}
+				const resultText = await docsSearch(inkeepApiKey, query);
+				return { content: [{ type: "text", text: resultText }] };
 			},
 		);
-		this.registerTool("organizations-get", `
+		this.registerTool(
+			"organizations-get",
+			`
 				- Use this tool to get the organizations the user has access to.
 			`,
 			{},
 			async () => {
-			try {
+
+
 				const orgsResult = await this.api.organizations().list();
 				if (!orgsResult.success) {
 					throw new Error(`Failed to get organizations: ${orgsResult.error.message}`);
@@ -318,13 +305,8 @@ export class MyMCP extends McpAgent<Env> {
 				return {
 					content: [{ type: "text", text: JSON.stringify(orgsResult.data) }],
 				};
-			} catch (error) {
-				console.error("Error fetching organizations:", error);
-				return {
-					content: [{ type: "text", text: "Error fetching organizations" }],
-				};
-			}
-		});
+			},
+		);
 
 		this.registerTool(
 			"project-set-active",
@@ -360,12 +342,13 @@ export class MyMCP extends McpAgent<Env> {
 			},
 		);
 
-		this.registerTool("organization-details-get", `
+		this.registerTool(
+			"organization-details-get",
+			`
 				- Use this tool to get the details of the active organization.
 			`,
 			{},
 			async () => {
-			try {
 				const orgId = await this.getOrgID();
 
 				const orgResult = await this.api.organizations().get({ orgId });
@@ -376,13 +359,8 @@ export class MyMCP extends McpAgent<Env> {
 				return {
 					content: [{ type: "text", text: JSON.stringify(orgResult.data) }],
 				};
-			} catch (error) {
-				console.error("Error fetching organization details:", error);
-				return {
-					content: [{ type: "text", text: "Error fetching organization details" }],
-				};
-			}
-		});
+			},
+		);
 
 		this.registerTool(
 			"projects-get",
@@ -392,7 +370,6 @@ export class MyMCP extends McpAgent<Env> {
 			`,
 			{},
 			async () => {
-				try {
 					const orgId = await this.getOrgID();
 					const projectsResult = await this.api.organizations().projects({ orgId }).list();
 					if (!projectsResult.success) {
@@ -402,23 +379,20 @@ export class MyMCP extends McpAgent<Env> {
 					return {
 						content: [{ type: "text", text: JSON.stringify(projectsResult.data) }],
 					};
-				} catch (error) {
-					console.error("Error fetching projects:", error);
-					return {
-						content: [{ type: "text", text: `Error fetching projects: ${error}` }],
-					};
-				}
 			},
 		);
 
-		this.registerTool("property-definitions", `
+		this.registerTool(
+			"property-definitions",
+			`
 				- Use this tool to get the property definitions of the active project.
 			`,
 			{},
 			async () => {
-			const projectId = await this.getProjectId();
+				const projectId = await this.getProjectId();
 
-			const propDefsResult = await this.api.projects().propertyDefinitions({ projectId });
+				const propDefsResult = await this.api.projects().propertyDefinitions({ projectId });
+				
 			if (!propDefsResult.success) {
 				throw new Error(`Failed to get property definitions: ${propDefsResult.error.message}`);
 			}
@@ -440,13 +414,15 @@ export class MyMCP extends McpAgent<Env> {
 				description: z.string(),
 				filters: FilterGroupsSchema,
 				active: z.boolean(),
+				tags: z.array(z.string()).optional(),
 			},
-			async ({ name, key, description, filters, active }) => {
+			async ({ name, key, description, filters, active, tags }) => {
 				const projectId = await this.getProjectId();
 
 				const flagResult = await this.api.featureFlags({ projectId }).create({
 					data: { name, key, description, filters, active }
 				});
+				
 				if (!flagResult.success) {
 					throw new Error(`Failed to create feature flag: ${flagResult.error.message}`);
 				}
@@ -472,8 +448,7 @@ export class MyMCP extends McpAgent<Env> {
 				data: ListErrorsSchema,
 			},
 			async ({ data }) => {
-				try {
-					const projectId = await this.getProjectId();
+				const projectId = await this.getProjectId();
 
 					const errorQuery = {
 						kind: "ErrorTrackingQuery",
@@ -494,10 +469,6 @@ export class MyMCP extends McpAgent<Env> {
 					}
 					console.log("errors results", errorsResult.data.results);
 					return { content: [{ type: "text", text: JSON.stringify(errorsResult.data.results) }] };
-				} catch (error) {
-					console.error("Error fetching errors:", error);
-					return { content: [{ type: "text", text: "Error fetching errors" }] };
-				}
 			},
 		);
 
@@ -510,8 +481,7 @@ export class MyMCP extends McpAgent<Env> {
 				data: ErrorDetailsSchema,
 			},
 			async ({ data }) => {
-				try {
-					const projectId = await this.getProjectId();
+				const projectId = await this.getProjectId();
 
 					const errorQuery = {
 						kind: "ErrorTrackingQuery",
@@ -529,12 +499,6 @@ export class MyMCP extends McpAgent<Env> {
 					}
 					console.log("error details results", errorsResult.data.results);
 					return { content: [{ type: "text", text: JSON.stringify(errorsResult.data.results) }] };
-				} catch (error) {
-					console.error("Error fetching error details:", error);
-					return {
-						content: [{ type: "text", text: "Error fetching error details" }],
-					};
-				}
 			},
 		);
 
@@ -637,8 +601,7 @@ export class MyMCP extends McpAgent<Env> {
 					};
 				}
 
-				try {
-					const projectId = await this.getProjectId();
+				const projectId = await this.getProjectId();
 
 					const result = await this.api.insights({ projectId }).sqlInsight({ query });
 					if (!result.success) {
@@ -656,17 +619,6 @@ export class MyMCP extends McpAgent<Env> {
 						};
 					}
 					return { content: [{ type: "text", text: JSON.stringify(result.data) }] };
-				} catch (error: any) {
-					console.error("Error in get-sql-insight tool:", error);
-					return {
-						content: [
-							{
-								type: "text",
-								text: `Error: ${error.message || "Failed to generate SQL insight"}`,
-							},
-						],
-					};
-				}
 			},
 		);
 
@@ -733,17 +685,12 @@ export class MyMCP extends McpAgent<Env> {
 				data: ListInsightsSchema.optional(),
 			},
 			async ({ data }) => {
-				try {
 					const projectId = await this.getProjectId();
 					const insightsResult = await this.api.insights({ projectId }).list({ params: data });
 					if (!insightsResult.success) {
 						throw new Error(`Failed to get insights: ${insightsResult.error.message}`);
 					}
 					return { content: [{ type: "text", text: JSON.stringify(insightsResult.data) }] };
-				} catch (error: any) {
-					console.error("Error fetching insights:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
-				}
 			},
 		);
 
@@ -756,17 +703,12 @@ export class MyMCP extends McpAgent<Env> {
 				insightId: z.number(),
 			},
 			async ({ insightId }) => {
-				try {
 					const projectId = await this.getProjectId();
 					const insightResult = await this.api.insights({ projectId }).get({ insightId });
 					if (!insightResult.success) {
 						throw new Error(`Failed to get insight: ${insightResult.error.message}`);
 					}
 					return { content: [{ type: "text", text: JSON.stringify(insightResult.data) }] };
-				} catch (error: any) {
-					console.error("Error fetching insight:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
-				}
 			},
 		);
 
@@ -796,7 +738,6 @@ export class MyMCP extends McpAgent<Env> {
 				data: CreateInsightInputSchema,
 			},
 			async ({ data }) => {
-				try {
 					const projectId = await this.getProjectId();
 					const insightResult = await this.api.insights({ projectId }).create({ data });
 					if (!insightResult.success) {
@@ -809,11 +750,7 @@ export class MyMCP extends McpAgent<Env> {
 						url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.id}`,
 					};
 
-					return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
-				} catch (error: any) {
-					console.error("Error creating insight:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
-				}
+				return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
 			},
 		);
 
@@ -828,26 +765,21 @@ export class MyMCP extends McpAgent<Env> {
 				data: UpdateInsightInputSchema,
 			},
 			async ({ insightId, data }) => {
-				try {
-					const projectId = await this.getProjectId();
-					const insight = await updateInsight({
-						projectId,
-						insightId,
-						apiToken: this.requestProperties.apiToken,
-						data,
-					});
+				const projectId = await this.getProjectId();
+				const insight = await updateInsight({
+					projectId,
+					insightId,
+					apiToken: this.requestProperties.apiToken,
+					data,
+				});
 
-					// Add URL field for easy navigation
-					const insightWithUrl = {
-						...insight,
-						url: `${getProjectBaseUrl(projectId)}/insights/${(insight as any).short_id}`,
-					};
+				// Add URL field for easy navigation
+				const insightWithUrl = {
+					...insight,
+					url: `${getProjectBaseUrl(projectId)}/insights/${(insight as any).short_id}`,
+				};
 
-					return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
-				} catch (error: any) {
-					console.error("Error updating insight:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
-				}
+				return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
 			},
 		);
 
@@ -860,18 +792,13 @@ export class MyMCP extends McpAgent<Env> {
 				insightId: z.number(),
 			},
 			async ({ insightId }) => {
-				try {
-					const projectId = await this.getProjectId();
-					const result = await deleteInsight({
-						projectId,
-						insightId,
-						apiToken: this.requestProperties.apiToken,
-					});
-					return { content: [{ type: "text", text: JSON.stringify(result) }] };
-				} catch (error: any) {
-					console.error("Error deleting insight:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
-				}
+				const projectId = await this.getProjectId();
+				const result = await deleteInsight({
+					projectId,
+					insightId,
+					apiToken: this.requestProperties.apiToken,
+				});
+				return { content: [{ type: "text", text: JSON.stringify(result) }] };
 			},
 		);
 
@@ -886,18 +813,13 @@ export class MyMCP extends McpAgent<Env> {
 				data: ListDashboardsSchema.optional(),
 			},
 			async ({ data }) => {
-				try {
-					const projectId = await this.getProjectId();
-					const dashboards = await getDashboards(
-						projectId,
-						this.requestProperties.apiToken,
-						data,
-					);
-					return { content: [{ type: "text", text: JSON.stringify(dashboards) }] };
-				} catch (error: any) {
-					console.error("Error fetching dashboards:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
-				}
+				const projectId = await this.getProjectId();
+				const dashboards = await getDashboards(
+					projectId,
+					this.requestProperties.apiToken,
+					data,
+				);
+				return { content: [{ type: "text", text: JSON.stringify(dashboards) }] };
 			},
 		);
 
@@ -910,18 +832,13 @@ export class MyMCP extends McpAgent<Env> {
 				dashboardId: z.number(),
 			},
 			async ({ dashboardId }) => {
-				try {
-					const projectId = await this.getProjectId();
-					const dashboard = await getDashboard(
-						projectId,
-						dashboardId,
-						this.requestProperties.apiToken,
-					);
-					return { content: [{ type: "text", text: JSON.stringify(dashboard) }] };
-				} catch (error: any) {
-					console.error("Error fetching dashboard:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
-				}
+				const projectId = await this.getProjectId();
+				const dashboard = await getDashboard(
+					projectId,
+					dashboardId,
+					this.requestProperties.apiToken,
+				);
+				return { content: [{ type: "text", text: JSON.stringify(dashboard) }] };
 			},
 		);
 
@@ -935,25 +852,20 @@ export class MyMCP extends McpAgent<Env> {
 				data: CreateDashboardInputSchema,
 			},
 			async ({ data }) => {
-				try {
-					const projectId = await this.getProjectId();
-					const dashboard = await createDashboard({
-						projectId,
-						apiToken: this.requestProperties.apiToken,
-						data,
-					});
+				const projectId = await this.getProjectId();
+				const dashboard = await createDashboard({
+					projectId,
+					apiToken: this.requestProperties.apiToken,
+					data,
+				});
 
-					// Add URL field for easy navigation
-					const dashboardWithUrl = {
-						...(dashboard as any),
-						url: `${getProjectBaseUrl(projectId)}/dashboard/${dashboard.id}`,
-					};
+				// Add URL field for easy navigation
+				const dashboardWithUrl = {
+					...(dashboard as any),
+					url: `${getProjectBaseUrl(projectId)}/dashboard/${dashboard.id}`,
+				};
 
-					return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
-				} catch (error: any) {
-					console.error("Error creating dashboard:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
-				}
+				return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
 			},
 		);
 
@@ -968,26 +880,21 @@ export class MyMCP extends McpAgent<Env> {
 				data: UpdateDashboardInputSchema,
 			},
 			async ({ dashboardId, data }) => {
-				try {
-					const projectId = await this.getProjectId();
-					const dashboard = await updateDashboard({
-						projectId,
-						dashboardId,
-						apiToken: this.requestProperties.apiToken,
-						data,
-					});
+				const projectId = await this.getProjectId();
+				const dashboard = await updateDashboard({
+					projectId,
+					dashboardId,
+					apiToken: this.requestProperties.apiToken,
+					data,
+				});
 
-					// Add URL field for easy navigation
-					const dashboardWithUrl = {
-						...(dashboard as any),
-						url: `${getProjectBaseUrl(projectId)}/dashboard/${dashboard.id}`,
-					};
+				// Add URL field for easy navigation
+				const dashboardWithUrl = {
+					...(dashboard as any),
+					url: `${getProjectBaseUrl(projectId)}/dashboard/${dashboard.id}`,
+				};
 
-					return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
-				} catch (error: any) {
-					console.error("Error updating dashboard:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
-				}
+				return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
 			},
 		);
 
@@ -1000,18 +907,13 @@ export class MyMCP extends McpAgent<Env> {
 				dashboardId: z.number(),
 			},
 			async ({ dashboardId }) => {
-				try {
-					const projectId = await this.getProjectId();
-					const result = await deleteDashboard({
-						projectId,
-						dashboardId,
-						apiToken: this.requestProperties.apiToken,
-					});
-					return { content: [{ type: "text", text: JSON.stringify(result) }] };
-				} catch (error: any) {
-					console.error("Error deleting dashboard:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
-				}
+				const projectId = await this.getProjectId();
+				const result = await deleteDashboard({
+					projectId,
+					dashboardId,
+					apiToken: this.requestProperties.apiToken,
+				});
+				return { content: [{ type: "text", text: JSON.stringify(result) }] };
 			},
 		);
 
@@ -1026,26 +928,21 @@ export class MyMCP extends McpAgent<Env> {
 				data: AddInsightToDashboardSchema,
 			},
 			async ({ data }) => {
-				try {
-					const projectId = await this.getProjectId();
-					const result = await addInsightToDashboard({
-						projectId,
-						apiToken: this.requestProperties.apiToken,
-						data,
-					});
+				const projectId = await this.getProjectId();
+				const result = await addInsightToDashboard({
+					projectId,
+					apiToken: this.requestProperties.apiToken,
+					data,
+				});
 
-					// Add URLs for easy navigation
-					const resultWithUrls = {
-						...(result as any),
-						dashboard_url: `${getProjectBaseUrl(projectId)}/dashboard/${data.dashboard_id}`,
-						insight_url: `${getProjectBaseUrl(projectId)}/insights/${data.insight_id}`,
-					};
+				// Add URLs for easy navigation
+				const resultWithUrls = {
+					...(result as any),
+					dashboard_url: `${getProjectBaseUrl(projectId)}/dashboard/${data.dashboard_id}`,
+					insight_url: `${getProjectBaseUrl(projectId)}/insights/${data.insight_id}`,
+				};
 
-					return { content: [{ type: "text", text: JSON.stringify(resultWithUrls) }] };
-				} catch (error: any) {
-					console.error("Error adding insight to dashboard:", error);
-					return { content: [{ type: "text", text: `Error: ${error.message}` }] };
-				}
+				return { content: [{ type: "text", text: JSON.stringify(resultWithUrls) }] };
 			},
 		);
 

@@ -10,12 +10,14 @@
 		"test": "vitest",
 		"test:watch": "vitest watch",
 		"start": "wrangler dev",
-		"cf-typegen": "wrangler types"
+		"cf-typegen": "wrangler types",
+		"prepare": "husky"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@types/node": "^22.15.34",
 		"dotenv": "^16.4.7",
+		"husky": "^9.1.7",
 		"typescript": "^5.8.3",
 		"vitest": "^3.2.4",
 		"wrangler": "^4.14.4"

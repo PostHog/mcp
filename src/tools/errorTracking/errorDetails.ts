@@ -1,27 +1,23 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
 import { ErrorDetailsSchema } from "../../schema/errors";
 
-const schema = z.object({
-	data: ErrorDetailsSchema,
-});
+const schema = ErrorDetailsSchema;
 
 type Params = z.infer<typeof schema>;
 
 export const errorDetailsHandler = async (context: Context, params: Params) => {
-	const { data } = params;
+	const { issueId, dateFrom, dateTo } = params;
 	const projectId = await context.getProjectId();
 
 	const errorQuery = {
 		kind: "ErrorTrackingQuery",
 		dateRange: {
-			date_from:
-				data.dateFrom?.toISOString() ||
-				new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-			date_to: data.dateTo?.toISOString() || new Date().toISOString(),
+			date_from: dateFrom || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+			date_to: dateTo || new Date().toISOString(),
 		},
 		volumeResolution: 0,
-		issueId: data.issueId,
+		issueId,
 	};
 
 	const errorsResult = await context.api.query({ projectId }).execute({ queryBody: errorQuery });

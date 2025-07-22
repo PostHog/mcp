@@ -40,9 +40,6 @@ import updateDashboard from "./dashboards/update";
 import deleteDashboard from "./dashboards/delete";
 import addInsightToDashboard from "./dashboards/addInsight";
 
-// LLM Observability
-import getLLMCosts from "./llmObservability/getLLMCosts";
-
 const tools = (_context: Context): Tool<ZodObjectAny>[] => [
 	// Feature Flags
 	getFeatureFlagDefinition(),
@@ -83,9 +80,6 @@ const tools = (_context: Context): Tool<ZodObjectAny>[] => [
 	updateDashboard(),
 	deleteDashboard(),
 	addInsightToDashboard(),
-
-	// LLM Observability
-	getLLMCosts(),
 ];
 
 export default tools;

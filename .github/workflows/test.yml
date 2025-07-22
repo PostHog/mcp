@@ -10,6 +10,9 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+      cancel-in-progress: true
     
     steps:
     - name: Checkout code
@@ -34,12 +37,15 @@ jobs:
       run: pnpm run format
       
     - name: Run unit tests
-      run: pnpm run test:unit
+      run: pnpm run test
 
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: unit-tests
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+      cancel-in-progress: true
     
     steps:
     - name: Checkout code

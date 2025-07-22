@@ -32,7 +32,7 @@ const tool = (): Tool<typeof schema> => ({
         - If the user wants to see data, you should use the "get-sql-insight" tool to get that data instead.
         - An insight requires a name, query, and other optional properties.
         - The query should use HogQL, which is a variant of Clickhouse SQL. Here is an example query:
-        Here is an example of a validquery:
+        Here is an example of a valid query:
         {
             "kind": "DataVisualizationNode",
             "source": {

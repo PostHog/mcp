@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterEach } from "vitest";
 import { ApiClient } from "../../src/api/client";
 
 const API_BASE_URL = process.env.TEST_API_BASE_URL || "http://localhost:8010";
 const API_TOKEN = process.env.TEST_API_TOKEN;
+const TEST_ORG_ID = process.env.TEST_ORG_ID;
+const TEST_PROJECT_ID = process.env.TEST_PROJECT_ID;
 
 describe("API Client Integration Tests", () => {
 	let client: ApiClient;
@@ -21,118 +23,24 @@ describe("API Client Integration Tests", () => {
 			throw new Error("TEST_API_TOKEN environment variable is required");
 		}
 
+		if (!TEST_ORG_ID) {
+			throw new Error("TEST_ORG_ID environment variable is required");
+		}
+
+		if (!TEST_PROJECT_ID) {
+			throw new Error("TEST_PROJECT_ID environment variable is required");
+		}
+
 		client = new ApiClient({
 			apiToken: API_TOKEN,
 			baseUrl: API_BASE_URL,
 		});
 
-		// Create test organization
-		const testOrgName = `test-org-${Date.now()}`;
-		console.log(`Creating test organization: ${testOrgName}`);
+		testOrgId = TEST_ORG_ID;
+		testProjectId = TEST_PROJECT_ID;
 
-		try {
-			const createOrgResult = await fetch(`${API_BASE_URL}/api/organizations/`, {
-				method: "POST",
-				headers: {
-					Authorization: `Bearer ${API_TOKEN}`,
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					name: testOrgName,
-				}),
-			});
-
-			if (!createOrgResult.ok) {
-				throw new Error(
-					`Failed to create test organization: ${createOrgResult.statusText}`,
-				);
-			}
-
-			const orgData = await createOrgResult.json();
-			testOrgId = orgData.id;
-			console.log(`Created test organization with ID: ${testOrgId}`);
-		} catch (error) {
-			console.error("Failed to create test organization:", error);
-			throw error;
-		}
-
-		// Create test project
-		const testProjectName = `test-project-${Date.now()}`;
-		console.log(`Creating test project: ${testProjectName} in org: ${testOrgId}`);
-
-		try {
-			const createProjectResult = await fetch(
-				`${API_BASE_URL}/api/organizations/${testOrgId}/projects/`,
-				{
-					method: "POST",
-					headers: {
-						Authorization: `Bearer ${API_TOKEN}`,
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						name: testProjectName,
-					}),
-				},
-			);
-
-			if (!createProjectResult.ok) {
-				throw new Error(`Failed to create test project: ${createProjectResult.statusText}`);
-			}
-
-			const projectData = await createProjectResult.json();
-			testProjectId = projectData.id;
-			console.log(`Created test project with ID: ${testProjectId}`);
-		} catch (error) {
-			console.error("Failed to create test project:", error);
-			throw error;
-		}
-	});
-
-	afterAll(async () => {
-		// Clean up test project
-		if (testProjectId) {
-			console.log(`Cleaning up test project: ${testProjectId}`);
-			try {
-				const deleteResult = await fetch(`${API_BASE_URL}/api/projects/${testProjectId}/`, {
-					method: "DELETE",
-					headers: {
-						Authorization: `Bearer ${API_TOKEN}`,
-					},
-				});
-
-				if (deleteResult.ok) {
-					console.log(`Successfully deleted test project: ${testProjectId}`);
-				} else {
-					console.warn(`Failed to delete test project: ${deleteResult.statusText}`);
-				}
-			} catch (error) {
-				console.warn("Error deleting test project:", error);
-			}
-		}
-
-		// Clean up test organization
-		if (testOrgId) {
-			console.log(`Cleaning up test organization: ${testOrgId}`);
-			try {
-				const deleteResult = await fetch(
-					`${API_BASE_URL}/api/organizations/${testOrgId}/`,
-					{
-						method: "DELETE",
-						headers: {
-							Authorization: `Bearer ${API_TOKEN}`,
-						},
-					},
-				);
-
-				if (deleteResult.ok) {
-					console.log(`Successfully deleted test organization: ${testOrgId}`);
-				} else {
-					console.warn(`Failed to delete test organization: ${deleteResult.statusText}`);
-				}
-			} catch (error) {
-				console.warn("Error deleting test organization:", error);
-			}
-		}
+		console.log(`Using test organization: ${testOrgId}`);
+		console.log(`Using test project: ${testProjectId}`);
 	});
 
 	afterEach(async () => {
@@ -236,7 +144,7 @@ describe("API Client Integration Tests", () => {
 			if (result.success) {
 				expect(result.data).toHaveProperty("id");
 				expect(result.data).toHaveProperty("name");
-				expect(result.data.id).toBe(testProjectId);
+				expect(result.data.id).toBe(Number(testProjectId));
 			}
 		});
 

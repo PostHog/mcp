@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
-import { type api, ApiClient } from "../../src/api/client";
+import { ApiClient } from "../../src/api/client";
 
 const API_BASE_URL = process.env.TEST_API_BASE_URL || "http://localhost:8010";
 const API_TOKEN = process.env.TEST_API_TOKEN;
 
 describe("API Client Integration Tests", () => {
-	let client: ReturnType<typeof api>;
+	let client: ApiClient;
 	let testOrgId: string;
 	let testProjectId: string;
 

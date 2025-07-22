@@ -38,9 +38,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 
 		testOrgId = TEST_ORG_ID;
 		testProjectId = TEST_PROJECT_ID;
-
-		console.log(`Using test organization: ${testOrgId}`);
-		console.log(`Using test project: ${testProjectId}`);
 	});
 
 	afterEach(async () => {

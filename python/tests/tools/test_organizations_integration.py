@@ -1,30 +1,31 @@
 import pytest
 import pytest_asyncio
+
 from tests.shared.test_utils import (
-    validate_environment_variables,
+    TEST_ORG_ID,
+    TEST_PROJECT_ID,
+    CreatedResources,
+    cleanup_resources,
     create_test_client,
     create_test_context,
-    set_active_project_and_org,
-    cleanup_resources,
     parse_tool_response,
-    TEST_PROJECT_ID,
-    TEST_ORG_ID,
-    CreatedResources
+    set_active_project_and_org,
+    validate_environment_variables,
 )
-from src.tools.organizations.get_organizations import get_organizations_tool
-from src.tools.organizations.set_active import set_active_org_tool
-from src.tools.organizations.get_details import get_organization_details_tool
-from src.tools.types import Context
+from tools.organizations.get_details import get_organization_details_tool
+from tools.organizations.get_organizations import get_organizations_tool
+from tools.organizations.set_active import set_active_org_tool
+from tools.types import Context
 
 
 class TestOrganizations:
     """Integration tests for organization tools."""
-    
+
     @pytest.fixture(scope="class", autouse=True)
     def setup_class(self):
         """Validate environment variables before running tests."""
         validate_environment_variables()
-    
+
     @pytest_asyncio.fixture
     async def context(self):
         """Create test context and set active project/org."""
@@ -33,12 +34,12 @@ class TestOrganizations:
         await set_active_project_and_org(ctx, TEST_PROJECT_ID, TEST_ORG_ID)
         yield ctx
         await client.close()
-    
+
     @pytest.fixture
     def created_resources(self):
         """Track created resources for cleanup."""
         return CreatedResources()
-    
+
     @pytest_asyncio.fixture(autouse=True)
     async def cleanup(self, context, created_resources):
         """Clean up resources after each test."""

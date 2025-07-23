@@ -1,34 +1,35 @@
 import pytest
 import pytest_asyncio
+
 from tests.shared.test_utils import (
-    validate_environment_variables,
+    SAMPLE_HOGQL_QUERIES,
+    TEST_ORG_ID,
+    TEST_PROJECT_ID,
+    CreatedResources,
+    cleanup_resources,
     create_test_client,
     create_test_context,
-    set_active_project_and_org,
-    cleanup_resources,
-    parse_tool_response,
     generate_unique_key,
-    SAMPLE_HOGQL_QUERIES,
-    TEST_PROJECT_ID,
-    TEST_ORG_ID,
-    CreatedResources
+    parse_tool_response,
+    set_active_project_and_org,
+    validate_environment_variables,
 )
-from src.tools.insights.create import create_insight_tool
-from src.tools.insights.update import update_insight_tool
-from src.tools.insights.delete import delete_insight_tool
-from src.tools.insights.get_all import get_all_insights_tool
-from src.tools.insights.get import get_insight_tool
-from src.tools.types import Context
+from tools.insights.create import create_insight_tool
+from tools.insights.delete import delete_insight_tool
+from tools.insights.get import get_insight_tool
+from tools.insights.get_all import get_all_insights_tool
+from tools.insights.update import update_insight_tool
+from tools.types import Context
 
 
 class TestInsights:
     """Integration tests for insight tools."""
-    
+
     @pytest.fixture(scope="class", autouse=True)
     def setup_class(self):
         """Validate environment variables before running tests."""
         validate_environment_variables()
-    
+
     @pytest_asyncio.fixture
     async def context(self):
         """Create test context and set active project/org."""
@@ -37,12 +38,12 @@ class TestInsights:
         await set_active_project_and_org(ctx, TEST_PROJECT_ID, TEST_ORG_ID)
         yield ctx
         await client.close()
-    
+
     @pytest.fixture
     def created_resources(self):
         """Track created resources for cleanup."""
         return CreatedResources()
-    
+
     @pytest_asyncio.fixture(autouse=True)
     async def cleanup(self, context, created_resources):
         """Clean up resources after each test."""
@@ -54,16 +55,18 @@ class TestInsights:
         """Test creating an insight with pageview query."""
         tool = create_insight_tool()
         params = tool.schema(
-            name=generate_unique_key("Test Pageview Insight"),
-            description="Integration test for pageview insight",
-            query=SAMPLE_HOGQL_QUERIES["pageviews"]
+            data={
+                "name": generate_unique_key("Test Pageview Insight"),
+                "description": "Integration test for pageview insight",
+                "query": SAMPLE_HOGQL_QUERIES["pageviews"].model_dump()
+            }
         )
 
         result = await tool.execute(context, params)
         insight_data = parse_tool_response(result.__dict__)
 
         assert "id" in insight_data
-        assert insight_data["name"] == params.name
+        assert insight_data["name"] == params.data.name
         assert "/insights/" in insight_data["url"]
 
         created_resources.insights.append(insight_data["id"])
@@ -73,16 +76,18 @@ class TestInsights:
         """Test creating an insight with top events query."""
         tool = create_insight_tool()
         params = tool.schema(
-            name=generate_unique_key("Test Top Events Insight"),
-            description="Integration test for top events insight",
-            query=SAMPLE_HOGQL_QUERIES["top_events"]
+            data={
+                "name": generate_unique_key("Test Top Events Insight"),
+                "description": "Integration test for top events insight",
+                "query": SAMPLE_HOGQL_QUERIES["top_events"].model_dump()
+            }
         )
 
         result = await tool.execute(context, params)
         insight_data = parse_tool_response(result.__dict__)
 
         assert "id" in insight_data
-        assert insight_data["name"] == params.name
+        assert insight_data["name"] == params.data.name
 
         created_resources.insights.append(insight_data["id"])
 
@@ -91,17 +96,19 @@ class TestInsights:
         """Test creating an insight with tags."""
         tool = create_insight_tool()
         params = tool.schema(
-            name=generate_unique_key("Test Tagged Insight"),
-            description="Integration test with tags",
-            query=SAMPLE_HOGQL_QUERIES["pageviews"],
-            tags=["test", "integration"]
+            data={
+                "name": generate_unique_key("Test Tagged Insight"),
+                "description": "Integration test with tags",
+                "query": SAMPLE_HOGQL_QUERIES["pageviews"].model_dump(),
+                "tags": ["test", "integration"]
+            }
         )
 
         result = await tool.execute(context, params)
         insight_data = parse_tool_response(result.__dict__)
 
         assert "id" in insight_data
-        assert insight_data["name"] == params.name
+        assert insight_data["name"] == params.data.name
 
         created_resources.insights.append(insight_data["id"])
 
@@ -113,9 +120,11 @@ class TestInsights:
 
         # Create insight
         create_params = create_tool.schema(
-            name=generate_unique_key("Original Insight Name"),
-            description="Original description",
-            query=SAMPLE_HOGQL_QUERIES["pageviews"]
+            data={
+                "name": generate_unique_key("Original Insight Name"),
+                "description": "Original description",
+                "query": SAMPLE_HOGQL_QUERIES["pageviews"].model_dump()
+            }
         )
 
         create_result = await create_tool.execute(context, create_params)
@@ -145,9 +154,11 @@ class TestInsights:
 
         # Create insight
         create_params = create_tool.schema(
-            name=generate_unique_key("Query Update Test"),
-            description="Testing query updates",
-            query=SAMPLE_HOGQL_QUERIES["pageviews"]
+            data={
+                "name": generate_unique_key("Query Update Test"),
+                "description": "Testing query updates",
+                "query": SAMPLE_HOGQL_QUERIES["pageviews"].model_dump()
+            }
         )
 
         create_result = await create_tool.execute(context, create_params)
@@ -158,7 +169,7 @@ class TestInsights:
         update_params = update_tool.schema(
             insightId=created_insight["id"],
             data={
-                "query": SAMPLE_HOGQL_QUERIES["top_events"]
+                "query": SAMPLE_HOGQL_QUERIES["top_events"].model_dump()
             }
         )
 
@@ -166,7 +177,7 @@ class TestInsights:
         updated_insight = parse_tool_response(update_result.__dict__)
 
         assert updated_insight["id"] == created_insight["id"]
-        assert updated_insight["name"] == create_params.name
+        assert updated_insight["name"] == create_params.data.name
 
     @pytest.mark.asyncio
     async def test_get_all_insights_proper_structure(self, context: Context, created_resources: CreatedResources):
@@ -193,9 +204,11 @@ class TestInsights:
 
         # Create insight
         create_params = create_tool.schema(
-            name=generate_unique_key("Get Test Insight"),
-            description="Test insight for get operation",
-            query=SAMPLE_HOGQL_QUERIES["pageviews"]
+            data={
+                "name": generate_unique_key("Get Test Insight"),
+                "description": "Test insight for get operation",
+                "query": SAMPLE_HOGQL_QUERIES["pageviews"].model_dump()
+            }
         )
 
         create_result = await create_tool.execute(context, create_params)
@@ -208,8 +221,8 @@ class TestInsights:
         retrieved_insight = parse_tool_response(get_result.__dict__)
 
         assert retrieved_insight["id"] == created_insight["id"]
-        assert retrieved_insight["name"] == create_params.name
-        assert retrieved_insight["description"] == create_params.description
+        assert retrieved_insight["name"] == create_params.data.name
+        assert retrieved_insight["description"] == create_params.data.description
         assert "/insights/" in retrieved_insight["url"]
 
     @pytest.mark.asyncio
@@ -220,9 +233,11 @@ class TestInsights:
 
         # Create insight
         create_params = create_tool.schema(
-            name=generate_unique_key("Delete Test Insight"),
-            description="Test insight for deletion",
-            query=SAMPLE_HOGQL_QUERIES["pageviews"]
+            data={
+                "name": generate_unique_key("Delete Test Insight"),
+                "description": "Test insight for deletion",
+                "query": SAMPLE_HOGQL_QUERIES["pageviews"].model_dump()
+            }
         )
 
         create_result = await create_tool.execute(context, create_params)
@@ -246,9 +261,11 @@ class TestInsights:
 
         # Create
         create_params = create_tool.schema(
-            name=generate_unique_key("Workflow Test Insight"),
-            description="Testing full workflow",
-            query=SAMPLE_HOGQL_QUERIES["pageviews"]
+            data={
+                "name": generate_unique_key("Workflow Test Insight"),
+                "description": "Testing full workflow",
+                "query": SAMPLE_HOGQL_QUERIES["pageviews"].model_dump()
+            }
         )
 
         create_result = await create_tool.execute(context, create_params)

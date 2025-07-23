@@ -1,33 +1,34 @@
 import pytest
 import pytest_asyncio
+
 from tests.shared.test_utils import (
-    validate_environment_variables,
+    TEST_ORG_ID,
+    TEST_PROJECT_ID,
+    CreatedResources,
+    cleanup_resources,
     create_test_client,
     create_test_context,
-    set_active_project_and_org,
-    cleanup_resources,
-    parse_tool_response,
     generate_unique_key,
-    TEST_PROJECT_ID,
-    TEST_ORG_ID,
-    CreatedResources
+    parse_tool_response,
+    set_active_project_and_org,
+    validate_environment_variables,
 )
-from src.tools.dashboards.create import create_dashboard_tool
-from src.tools.dashboards.update import update_dashboard_tool
-from src.tools.dashboards.delete import delete_dashboard_tool
-from src.tools.dashboards.get_all import get_all_dashboards_tool
-from src.tools.dashboards.get import get_dashboard_tool
-from src.tools.types import Context
+from tools.dashboards.create import create_dashboard_tool
+from tools.dashboards.delete import delete_dashboard_tool
+from tools.dashboards.get import get_dashboard_tool
+from tools.dashboards.get_all import get_all_dashboards_tool
+from tools.dashboards.update import update_dashboard_tool
+from tools.types import Context
 
 
 class TestDashboards:
     """Integration tests for dashboard tools."""
-    
+
     @pytest.fixture(scope="class", autouse=True)
     def setup_class(self):
         """Validate environment variables before running tests."""
         validate_environment_variables()
-    
+
     @pytest_asyncio.fixture
     async def context(self):
         """Create test context and set active project/org."""
@@ -36,12 +37,12 @@ class TestDashboards:
         await set_active_project_and_org(ctx, TEST_PROJECT_ID, TEST_ORG_ID)
         yield ctx
         await client.close()
-    
+
     @pytest.fixture
     def created_resources(self):
         """Track created resources for cleanup."""
         return CreatedResources()
-    
+
     @pytest_asyncio.fixture(autouse=True)
     async def cleanup(self, context, created_resources):
         """Clean up resources after each test."""

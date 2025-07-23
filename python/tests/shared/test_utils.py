@@ -1,16 +1,15 @@
-import os
 import json
-import time
+import os
 import random
 import string
-from typing import Dict, List, Any, Optional
+import time
 from dataclasses import dataclass
-import pytest
 from pathlib import Path
+from typing import Any
 
-from src.api.client import ApiClient, ApiConfig
-from src.tools.types import Context, State
-from src.lib.utils.cache.memory_cache import MemoryCache
+from api.client import ApiClient, ApiConfig
+from lib.utils.cache.memory_cache import MemoryCache
+from tools.types import Context
 
 
 def load_env_test_file():
@@ -18,7 +17,7 @@ def load_env_test_file():
     # Look for .env.test in the project root (parent of python directory)
     env_test_path = Path(__file__).parent.parent.parent.parent / ".env.test"
     if env_test_path.exists():
-        with open(env_test_path, 'r') as f:
+        with open(env_test_path) as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith('#'):
@@ -39,9 +38,9 @@ TEST_PROJECT_ID = os.getenv("TEST_PROJECT_ID")
 
 @dataclass
 class CreatedResources:
-    feature_flags: List[int]
-    insights: List[int]
-    dashboards: List[int]
+    feature_flags: list[int]
+    insights: list[int]
+    dashboards: list[int]
 
     def __init__(self):
         self.feature_flags = []
@@ -53,10 +52,10 @@ def validate_environment_variables():
     """Validate that required environment variables are set."""
     if not API_TOKEN:
         raise ValueError("TEST_API_TOKEN environment variable is required")
-    
+
     if not TEST_ORG_ID:
         raise ValueError("TEST_ORG_ID environment variable is required")
-    
+
     if not TEST_PROJECT_ID:
         raise ValueError("TEST_PROJECT_ID environment variable is required")
 
@@ -72,7 +71,7 @@ def create_test_client() -> ApiClient:
 def create_test_context(client: ApiClient) -> Context:
     """Create a test context with mocked cache and helper functions."""
     cache = MemoryCache()
-    env: Dict[str, Any] = {}
+    env: dict[str, Any] = {}
 
     async def get_project_id() -> str:
         state = await cache.get("state") or {}
@@ -111,7 +110,7 @@ async def set_active_project_and_org(context: Context, project_id: str, org_id: 
 
 async def cleanup_resources(client: ApiClient, project_id: str, resources: CreatedResources):
     """Clean up test resources."""
-    
+
     # Clean up feature flags
     for flag_id in resources.feature_flags:
         try:
@@ -119,7 +118,7 @@ async def cleanup_resources(client: ApiClient, project_id: str, resources: Creat
         except Exception as e:
             print(f"Failed to cleanup feature flag {flag_id}: {e}")
     resources.feature_flags.clear()
-    
+
     # Clean up insights
     for insight_id in resources.insights:
         try:
@@ -127,7 +126,7 @@ async def cleanup_resources(client: ApiClient, project_id: str, resources: Creat
         except Exception as e:
             print(f"Failed to cleanup insight {insight_id}: {e}")
     resources.insights.clear()
-    
+
     # Clean up dashboards
     for dashboard_id in resources.dashboards:
         try:
@@ -137,7 +136,7 @@ async def cleanup_resources(client: ApiClient, project_id: str, resources: Creat
     resources.dashboards.clear()
 
 
-def parse_tool_response(result: Dict[str, Any]) -> Any:
+def parse_tool_response(result: dict[str, Any]) -> Any:
     """Parse the JSON response from a tool execution."""
     assert "content" in result
     assert len(result["content"]) > 0
@@ -159,7 +158,8 @@ def generate_unique_key(prefix: str) -> str:
 
 
 # Import schema types for proper query construction
-from src.schema.query import InsightQuery, HogQLQuery, HogQLFilters, DateRange
+from schema.query import DateRange, HogQLFilters, HogQLQuery, InsightQuery
+
 
 # Sample HogQL queries for testing
 def create_sample_queries():
@@ -176,7 +176,7 @@ def create_sample_queries():
             )
         )
     )
-    
+
     top_events_query = InsightQuery(
         kind="DataVisualizationNode",
         source=HogQLQuery(
@@ -190,7 +190,7 @@ def create_sample_queries():
             )
         )
     )
-    
+
     return {
         "pageviews": pageviews_query,
         "top_events": top_events_query

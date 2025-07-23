@@ -1,31 +1,33 @@
+from datetime import datetime, timedelta
+
 import pytest
 import pytest_asyncio
-from datetime import datetime, timedelta
+
+from schema.errors import OrderByErrors, OrderDirectionErrors, StatusErrors
 from tests.shared.test_utils import (
-    validate_environment_variables,
+    TEST_ORG_ID,
+    TEST_PROJECT_ID,
+    CreatedResources,
+    cleanup_resources,
     create_test_client,
     create_test_context,
-    set_active_project_and_org,
-    cleanup_resources,
     parse_tool_response,
-    TEST_PROJECT_ID,
-    TEST_ORG_ID,
-    CreatedResources
+    set_active_project_and_org,
+    validate_environment_variables,
 )
-from src.tools.error_tracking.list_errors import list_errors_tool
-from src.tools.error_tracking.error_details import error_details_tool
-from src.tools.types import Context
-from src.schema.errors import OrderByErrors, OrderDirectionErrors, StatusErrors
+from tools.error_tracking.error_details import error_details_tool
+from tools.error_tracking.list_errors import list_errors_tool
+from tools.types import Context
 
 
 class TestErrorTracking:
     """Integration tests for error tracking tools."""
-    
+
     @pytest.fixture(scope="class", autouse=True)
     def setup_class(self):
         """Validate environment variables before running tests."""
         validate_environment_variables()
-    
+
     @pytest_asyncio.fixture
     async def context(self):
         """Create test context and set active project/org."""
@@ -34,12 +36,12 @@ class TestErrorTracking:
         await set_active_project_and_org(ctx, TEST_PROJECT_ID, TEST_ORG_ID)
         yield ctx
         await client.close()
-    
+
     @pytest.fixture
     def created_resources(self):
         """Track created resources for cleanup."""
         return CreatedResources()
-    
+
     @pytest_asyncio.fixture(autouse=True)
     async def cleanup(self, context, created_resources):
         """Clean up resources after each test."""
@@ -61,10 +63,10 @@ class TestErrorTracking:
     async def test_list_errors_with_custom_date_range(self, context: Context, created_resources: CreatedResources):
         """Test listing errors with custom date range."""
         tool = list_errors_tool()
-        
+
         date_from = datetime.now() - timedelta(days=14)
         date_to = datetime.now()
-        
+
         params = tool.schema(
             dateFrom=date_from,
             dateTo=date_to,
@@ -92,11 +94,11 @@ class TestErrorTracking:
     async def test_handle_empty_results(self, context: Context, created_resources: CreatedResources):
         """Test handling empty results with narrow date range."""
         tool = list_errors_tool()
-        
+
         # Very narrow date range in the past to likely get no results
         date_from = datetime.now() - timedelta(minutes=1)
         date_to = datetime.now() - timedelta(seconds=30)
-        
+
         params = tool.schema(
             dateFrom=date_from,
             dateTo=date_to
@@ -112,7 +114,7 @@ class TestErrorTracking:
         """Test getting error details by issue ID."""
         tool = error_details_tool()
         test_issue_id = "00000000-0000-0000-0000-000000000000"
-        
+
         params = tool.schema(issueId=test_issue_id)
 
         result = await tool.execute(context, params)
@@ -125,10 +127,10 @@ class TestErrorTracking:
         """Test getting error details with custom date range."""
         tool = error_details_tool()
         test_issue_id = "00000000-0000-0000-0000-000000000000"
-        
+
         date_from = datetime.now() - timedelta(days=7)
         date_to = datetime.now()
-        
+
         params = tool.schema(
             issueId=test_issue_id,
             dateFrom=date_from,

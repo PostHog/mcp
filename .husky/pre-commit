@@ -5,11 +5,11 @@
 pnpm run lint:fix
 pnpm run format
 
-# Check if anything changed
-if ! git diff --quiet; then
-  # Stage changed files
-  git diff --name-only | xargs git add
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
 
-  echo "❌ Code was auto-fixed. Changes were staged. Please commit again."
-  exit 1
-fi
+pnpm run lint:fix
+pnpm run format
+
+# Stage any modified files after formatting/linting
+git diff --name-only | xargs git add

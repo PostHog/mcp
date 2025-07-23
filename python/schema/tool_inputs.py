@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import StrEnum
+from enum import Enum, StrEnum
 from typing import Annotated, Any, Literal
 from uuid import UUID
 

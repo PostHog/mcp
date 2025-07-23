@@ -13,7 +13,7 @@ export const addInsightHandler = async (context: Context, params: Params) => {
 
 	const insightResult = await context.api
 		.insights({ projectId })
-		.get({ insightId: data.insight_id });
+		.get({ insightId: data.insightId });
 
 	if (!insightResult.success) {
 		throw new Error(`Failed to get insight: ${insightResult.error.message}`);

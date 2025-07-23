@@ -18,7 +18,7 @@ async def get_all_insights_handler(context: Context, params: InsightGetAllSchema
             offset=int(data.offset) if data.offset else None,
             saved=data.saved,
             favorited=data.favorited,
-            search=data.search
+            search=data.search,
         )
     else:
         list_params = ListInsights()
@@ -34,7 +34,7 @@ async def get_all_insights_handler(context: Context, params: InsightGetAllSchema
         insight_dict = insight.model_dump()
         insight_dict["url"] = f"{get_project_base_url(project_id)}/insights/{insight.short_id}"
         insights_with_urls.append(insight_dict)
-    
+
     return ToolResult(content=[TextContent(text=json.dumps(insights_with_urls))])
 
 
@@ -43,5 +43,5 @@ def get_all_insights_tool() -> Tool[InsightGetAllSchema]:
         name="insights-get-all",
         description="Use this tool to get all insights for the project. Supports filtering by saved, favorited, and search query.",
         schema=InsightGetAllSchema,
-        handler=get_all_insights_handler
+        handler=get_all_insights_handler,
     )

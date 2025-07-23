@@ -20,5 +20,5 @@ def get_sql_insight_tool() -> Tool[InsightGetSqlSchema]:
         name="get-sql-insight",
         description="Executes a SQL query and returns the results as an insight.",
         schema=InsightGetSqlSchema,
-        handler=get_sql_insight_handler
+        handler=get_sql_insight_handler,
     )

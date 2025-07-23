@@ -23,5 +23,5 @@ def search_docs_tool() -> Tool[DocumentationSearchSchema]:
         - Use it as a fallback when you cannot answer the user's request using other tools in this MCP.
         """,
         schema=DocumentationSearchSchema,
-        handler=search_docs_handler
+        handler=search_docs_handler,
     )

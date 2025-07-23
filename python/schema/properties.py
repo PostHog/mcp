@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel
 
 from schema.api import ApiPropertyDefinition, PropertyType

@@ -1,8 +1,8 @@
-from typing import Optional
-from pydantic import BaseModel
-from enum import Enum
 from datetime import datetime
+from enum import Enum
 from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class OrderByErrors(str, Enum):
@@ -26,15 +26,15 @@ class StatusErrors(str, Enum):
 
 
 class ListErrors(BaseModel):
-    orderBy: Optional[OrderByErrors] = None
-    dateFrom: Optional[datetime] = None
-    dateTo: Optional[datetime] = None
-    orderDirection: Optional[OrderDirectionErrors] = None
-    filterTestAccounts: Optional[bool] = None
-    status: Optional[StatusErrors] = None
+    orderBy: OrderByErrors | None = None
+    dateFrom: datetime | None = None
+    dateTo: datetime | None = None
+    orderDirection: OrderDirectionErrors | None = None
+    filterTestAccounts: bool | None = None
+    status: StatusErrors | None = None
 
 
 class ErrorDetails(BaseModel):
     issueId: UUID
-    dateFrom: Optional[datetime] = None
-    dateTo: Optional[datetime] = None
+    dateFrom: datetime | None = None
+    dateTo: datetime | None = None

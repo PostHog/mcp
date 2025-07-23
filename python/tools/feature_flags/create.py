@@ -5,7 +5,9 @@ from schema.tool_inputs import FeatureFlagCreateSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
 
-async def create_feature_flag_handler(context: Context, params: FeatureFlagCreateSchema) -> ToolResult:
+async def create_feature_flag_handler(
+    context: Context, params: FeatureFlagCreateSchema
+) -> ToolResult:
     project_id = await context.get_project_id()
 
     flag_result = await context.api.feature_flags(project_id).create(params)
@@ -15,7 +17,7 @@ async def create_feature_flag_handler(context: Context, params: FeatureFlagCreat
 
     feature_flag_with_url = {
         **flag_result.data.model_dump(),
-        "url": f"{get_project_base_url(project_id)}/feature_flags/{flag_result.data.id}"
+        "url": f"{get_project_base_url(project_id)}/feature_flags/{flag_result.data.id}",
     }
 
     return ToolResult(content=[TextContent(text=json.dumps(feature_flag_with_url))])
@@ -30,5 +32,5 @@ def create_feature_flag_tool() -> Tool[FeatureFlagCreateSchema]:
      - Clarify where it should be added and then add it.
         """,
         schema=FeatureFlagCreateSchema,
-        handler=create_feature_flag_handler
+        handler=create_feature_flag_handler,
     )

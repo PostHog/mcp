@@ -4,7 +4,9 @@ from schema.tool_inputs import OrganizationGetDetailsSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
 
-async def get_organization_details_handler(context: Context, _params: OrganizationGetDetailsSchema) -> ToolResult:
+async def get_organization_details_handler(
+    context: Context, _params: OrganizationGetDetailsSchema
+) -> ToolResult:
     org_id = await context.get_org_id()
     org_result = await context.api.organizations().get(org_id)
 
@@ -19,5 +21,5 @@ def get_organization_details_tool() -> Tool[OrganizationGetDetailsSchema]:
         name="organization-details-get",
         description="Use this tool to get the details of the active organization.",
         schema=OrganizationGetDetailsSchema,
-        handler=get_organization_details_handler
+        handler=get_organization_details_handler,
     )

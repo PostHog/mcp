@@ -15,7 +15,11 @@
 		"prepare": "husky",
 		"schema:build:json": "tsx typescript/scripts/generate-tool-schema.ts",
 		"schema:build:python": "bash python/scripts/generate-pydantic-models.sh",
-		"schema:build": "pnpm run schema:build:json && pnpm run schema:build:python"
+		"schema:build": "pnpm run schema:build:json && pnpm run schema:build:python",
+		"test:python": "cd python && uv run pytest tests/ -v",
+		"test:python:integration": "cd python && uv run pytest tests/tools/ -v",
+		"lint:python": "cd python && uv run ruff check --fix .",
+		"format:python": "cd python && uv run ruff format ."
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",

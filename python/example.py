@@ -1,12 +1,13 @@
 """
 Example usage of the PostHog MCP Python tools.
 
-This demonstrates how to use the Python implementation equivalent 
+This demonstrates how to use the Python implementation equivalent
 to the TypeScript MCP server.
 """
 
 import asyncio
 import json
+
 from src.tools.registry import ToolRegistry
 
 

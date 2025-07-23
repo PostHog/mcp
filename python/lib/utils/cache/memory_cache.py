@@ -2,7 +2,7 @@ from typing import Any, TypeVar
 
 from tools.types import ScopedCache
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class MemoryCache(ScopedCache[T]):

@@ -20,10 +20,10 @@ def load_env_test_file():
         with open(env_test_path) as f:
             for line in f:
                 line = line.strip()
-                if line and not line.startswith('#'):
-                    key, value = line.split('=', 1)
+                if line and not line.startswith("#"):
+                    key, value = line.split("=", 1)
                     # Remove quotes if present
-                    value = value.strip('"\'')
+                    value = value.strip("\"'")
                     os.environ[key] = value
 
 
@@ -62,10 +62,7 @@ def validate_environment_variables():
 
 def create_test_client() -> ApiClient:
     """Create a test API client."""
-    return ApiClient(ApiConfig(
-        api_token=API_TOKEN,
-        base_url=API_BASE_URL
-    ))
+    return ApiClient(ApiConfig(api_token=API_TOKEN, base_url=API_BASE_URL))
 
 
 def create_test_context(client: ApiClient) -> Context:
@@ -95,16 +92,13 @@ def create_test_context(client: ApiClient) -> Context:
         env=env,
         get_project_id=get_project_id,
         get_org_id=get_org_id,
-        get_distinct_id=get_distinct_id
+        get_distinct_id=get_distinct_id,
     )
 
 
 async def set_active_project_and_org(context: Context, project_id: str, org_id: str):
     """Set active project and organization in the cache."""
-    state = {
-        "project_id": project_id,
-        "org_id": org_id
-    }
+    state = {"project_id": project_id, "org_id": org_id}
     await context.cache.set("state", state)
 
 
@@ -142,7 +136,7 @@ def parse_tool_response(result: dict[str, Any]) -> Any:
     assert len(result["content"]) > 0
     content_item = result["content"][0]
     # Handle both dict and object formats
-    if hasattr(content_item, 'type') and hasattr(content_item, 'text'):
+    if hasattr(content_item, "type") and hasattr(content_item, "text"):
         assert content_item.type == "text"
         return json.loads(content_item.text)
     else:
@@ -153,7 +147,7 @@ def parse_tool_response(result: dict[str, Any]) -> Any:
 def generate_unique_key(prefix: str) -> str:
     """Generate a unique key for testing."""
     timestamp = int(time.time() * 1000)
-    random_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=7))
+    random_suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=7))
     return f"{prefix}-{timestamp}-{random_suffix}"
 
 
@@ -168,13 +162,8 @@ def create_sample_queries():
         source=HogQLQuery(
             kind="HogQLQuery",
             query="SELECT event, count() AS event_count FROM events WHERE timestamp >= now() - INTERVAL 7 DAY AND event = '$pageview' GROUP BY event ORDER BY event_count DESC LIMIT 10",
-            filters=HogQLFilters(
-                dateRange=DateRange(
-                    date_from="-7d",
-                    date_to="-1d"
-                )
-            )
-        )
+            filters=HogQLFilters(dateRange=DateRange(date_from="-7d", date_to="-1d")),
+        ),
     )
 
     top_events_query = InsightQuery(
@@ -182,40 +171,27 @@ def create_sample_queries():
         source=HogQLQuery(
             kind="HogQLQuery",
             query="SELECT event, count() AS event_count FROM events WHERE timestamp >= now() - INTERVAL 7 DAY GROUP BY event ORDER BY event_count DESC LIMIT 10",
-            filters=HogQLFilters(
-                dateRange=DateRange(
-                    date_from="-7d",
-                    date_to="-1d"
-                )
-            )
-        )
+            filters=HogQLFilters(dateRange=DateRange(date_from="-7d", date_to="-1d")),
+        ),
     )
 
-    return {
-        "pageviews": pageviews_query,
-        "top_events": top_events_query
-    }
+    return {"pageviews": pageviews_query, "top_events": top_events_query}
+
 
 SAMPLE_HOGQL_QUERIES = create_sample_queries()
 
 
 # Sample feature flag filters for testing
-SAMPLE_FEATURE_FLAG_FILTERS = {
-    "groups": [{
-        "properties": [],
-        "rollout_percentage": 100
-    }]
-}
+SAMPLE_FEATURE_FLAG_FILTERS = {"groups": [{"properties": [], "rollout_percentage": 100}]}
 
 
 SAMPLE_FEATURE_FLAG_FILTERS_WITH_PROPERTIES = {
-    "groups": [{
-        "properties": [{
-            "key": "email",
-            "value": "test@posthog.com",
-            "operator": "exact",
-            "type": "person"
-        }],
-        "rollout_percentage": 50
-    }]
+    "groups": [
+        {
+            "properties": [
+                {"key": "email", "value": "test@posthog.com", "operator": "exact", "type": "person"}
+            ],
+            "rollout_percentage": 50,
+        }
+    ]
 }

@@ -1,6 +1,4 @@
-from typing import Any, Dict, Optional
 from pydantic import BaseModel, Field
-from enum import Enum
 
 
 class DateRange(BaseModel):
@@ -13,14 +11,14 @@ class DateRange(BaseModel):
 
 
 class HogQLFilters(BaseModel):
-    dateRange: Optional[DateRange] = None
+    dateRange: DateRange | None = None
 
 
 class HogQLQuery(BaseModel):
     kind: str = "HogQLQuery"
     query: str
-    explain: Optional[bool] = None
-    filters: Optional[HogQLFilters] = None
+    explain: bool | None = None
+    filters: HogQLFilters | None = None
 
 
 class InsightQuery(BaseModel):

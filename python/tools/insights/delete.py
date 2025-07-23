@@ -19,5 +19,5 @@ def delete_insight_tool() -> Tool[InsightDeleteSchema]:
         name="insight-delete",
         description="Delete an insight by ID (soft delete - marks as deleted).",
         schema=InsightDeleteSchema,
-        handler=delete_insight_handler
+        handler=delete_insight_handler,
     )

@@ -1,4 +1,3 @@
-from uuid import UUID
 
 from schema.tool_inputs import OrganizationSetActiveSchema
 from tools.types import Context, TextContent, Tool, ToolResult
@@ -18,5 +17,5 @@ def set_active_org_tool() -> Tool[OrganizationSetActiveSchema]:
         name="organization-set-active",
         description="Use this tool to set the active organization.",
         schema=OrganizationSetActiveSchema,
-        handler=set_active_handler
+        handler=set_active_handler,
     )

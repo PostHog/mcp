@@ -1,6 +1,6 @@
-from typing import Any, Dict, List, Optional, Union
-from pydantic import BaseModel, field_validator, model_validator
 from enum import Enum
+
+from pydantic import BaseModel, model_validator
 
 
 class PostHogFeatureFlag(BaseModel):
@@ -10,7 +10,7 @@ class PostHogFeatureFlag(BaseModel):
 
 
 class PostHogFlagsResponse(BaseModel):
-    results: Optional[List[PostHogFeatureFlag]] = None
+    results: list[PostHogFeatureFlag] | None = None
 
 
 class OperatorType(str, Enum):
@@ -33,11 +33,11 @@ class OperatorType(str, Enum):
 
 class PersonPropertyFilter(BaseModel):
     key: str
-    value: Union[str, int, bool, List[str], List[int]]
-    operator: Optional[OperatorType] = None
+    value: str | int | bool | list[str] | list[int]
+    operator: OperatorType | None = None
     type: str = "person"
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_operator_value_compatibility(self):
         if not self.operator:
             return self
@@ -46,19 +46,33 @@ class PersonPropertyFilter(BaseModel):
         operator = self.operator
         is_array = isinstance(value, list)
 
-        string_ops = {OperatorType.EXACT, OperatorType.IS_NOT, OperatorType.ICONTAINS, 
-                     OperatorType.NOT_ICONTAINS, OperatorType.REGEX, OperatorType.NOT_REGEX, 
-                     OperatorType.IS_CLEANED_PATH_EXACT}
-        number_ops = {OperatorType.EXACT, OperatorType.IS_NOT, OperatorType.GT, OperatorType.GTE, 
-                     OperatorType.LT, OperatorType.LTE, OperatorType.MIN, OperatorType.MAX}
+        string_ops = {
+            OperatorType.EXACT,
+            OperatorType.IS_NOT,
+            OperatorType.ICONTAINS,
+            OperatorType.NOT_ICONTAINS,
+            OperatorType.REGEX,
+            OperatorType.NOT_REGEX,
+            OperatorType.IS_CLEANED_PATH_EXACT,
+        }
+        number_ops = {
+            OperatorType.EXACT,
+            OperatorType.IS_NOT,
+            OperatorType.GT,
+            OperatorType.GTE,
+            OperatorType.LT,
+            OperatorType.LTE,
+            OperatorType.MIN,
+            OperatorType.MAX,
+        }
         boolean_ops = {OperatorType.EXACT, OperatorType.IS_NOT}
         array_ops = {OperatorType.IN, OperatorType.NOT_IN}
 
         valid = (
-            (isinstance(value, str) and operator in string_ops) or
-            (isinstance(value, (int, float)) and operator in number_ops) or
-            (isinstance(value, bool) and operator in boolean_ops) or
-            (is_array and operator in array_ops)
+            (isinstance(value, str) and operator in string_ops)
+            or (isinstance(value, (int, float)) and operator in number_ops)
+            or (isinstance(value, bool) and operator in boolean_ops)
+            or (is_array and operator in array_ops)
         )
 
         if not valid:
@@ -72,12 +86,12 @@ class PersonPropertyFilter(BaseModel):
 
 
 class Filters(BaseModel):
-    properties: List[PersonPropertyFilter]
+    properties: list[PersonPropertyFilter]
     rollout_percentage: int
 
 
 class FilterGroups(BaseModel):
-    groups: List[Filters]
+    groups: list[Filters]
 
 
 class CreateFeatureFlagInput(BaseModel):
@@ -86,22 +100,22 @@ class CreateFeatureFlagInput(BaseModel):
     description: str
     filters: FilterGroups
     active: bool
-    tags: Optional[List[str]] = None
+    tags: list[str] | None = None
 
 
 class UpdateFeatureFlagInput(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    filters: Optional[FilterGroups] = None
-    active: Optional[bool] = None
-    tags: Optional[List[str]] = None
+    name: str | None = None
+    description: str | None = None
+    filters: FilterGroups | None = None
+    active: bool | None = None
+    tags: list[str] | None = None
 
 
 class FeatureFlag(BaseModel):
     id: int
     key: str
     name: str
-    description: Optional[str] = None
-    filters: Optional[Filters] = None
+    description: str | None = None
+    filters: Filters | None = None
     active: bool
-    tags: Optional[List[str]] = None
+    tags: list[str] | None = None

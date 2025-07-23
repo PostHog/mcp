@@ -14,7 +14,7 @@ async def create_dashboard_handler(context: Context, params: DashboardCreateSche
 
     dashboard_with_url = {
         **dashboard_result.data.model_dump(),
-        "url": f"{get_project_base_url(project_id)}/dashboard/{dashboard_result.data.id}"
+        "url": f"{get_project_base_url(project_id)}/dashboard/{dashboard_result.data.id}",
     }
 
     return ToolResult(content=[TextContent(text=json.dumps(dashboard_with_url))])
@@ -28,5 +28,5 @@ def create_dashboard_tool() -> Tool[DashboardCreateSchema]:
         - Requires name and optional description, tags, and other properties.
         """,
         schema=DashboardCreateSchema,
-        handler=create_dashboard_handler
+        handler=create_dashboard_handler,
     )

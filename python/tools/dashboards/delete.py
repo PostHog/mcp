@@ -19,5 +19,5 @@ def delete_dashboard_tool() -> Tool[DashboardDeleteSchema]:
         name="dashboard-delete",
         description="Delete a dashboard by ID (soft delete - marks as deleted).",
         schema=DashboardDeleteSchema,
-        handler=delete_dashboard_handler
+        handler=delete_dashboard_handler,
     )

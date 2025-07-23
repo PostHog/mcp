@@ -21,7 +21,7 @@ from schema.orgs import Organization
 from schema.projects import Project
 from schema.properties import PropertyDefinition
 
-T = TypeVar('T', bound=BaseModel)
+T = TypeVar("T", bound=BaseModel)
 
 
 @dataclass
@@ -31,11 +31,11 @@ class Result:
     error: Exception | None = None
 
     @classmethod
-    def ok(cls, data: Any) -> 'Result':
+    def ok(cls, data: Any) -> "Result":
         return cls(success=True, data=data)
 
     @classmethod
-    def err(cls, error: Exception) -> 'Result':
+    def err(cls, error: Exception) -> "Result":
         return cls(success=False, error=error)
 
 
@@ -54,7 +54,7 @@ class ApiClient:
     def _build_headers(self) -> dict[str, str]:
         return {
             "Authorization": f"Bearer {self.config.api_token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
     async def _fetch_with_schema(
@@ -62,7 +62,7 @@ class ApiClient:
         url: str,
         response_class: type[T],
         method: str = "GET",
-        data: dict[str, Any] | None = None
+        data: dict[str, Any] | None = None,
     ) -> Result:
         try:
             headers = self._build_headers()
@@ -71,15 +71,11 @@ class ApiClient:
                 response = await self.client.get(url, headers=headers)
             elif method == "POST":
                 response = await self.client.post(
-                    url,
-                    headers=headers,
-                    content=json.dumps(data) if data else None
+                    url, headers=headers, content=json.dumps(data) if data else None
                 )
             elif method == "PATCH":
                 response = await self.client.patch(
-                    url,
-                    headers=headers,
-                    content=json.dumps(data) if data else None
+                    url, headers=headers, content=json.dumps(data) if data else None
                 )
             elif method == "DELETE":
                 response = await self.client.delete(url, headers=headers)
@@ -144,8 +140,7 @@ class OrganizationResource:
             results: list[Organization]
 
         result = await self.client._fetch_with_schema(
-            f"{self.client.base_url}/api/organizations/",
-            OrgListResponse
+            f"{self.client.base_url}/api/organizations/", OrgListResponse
         )
 
         if result.success:
@@ -154,8 +149,7 @@ class OrganizationResource:
 
     async def get(self, org_id: str) -> Result:
         return await self.client._fetch_with_schema(
-            f"{self.client.base_url}/api/organizations/{org_id}/",
-            Organization
+            f"{self.client.base_url}/api/organizations/{org_id}/", Organization
         )
 
     def projects(self, org_id: str):
@@ -172,8 +166,7 @@ class OrganizationProjectResource:
             results: list[Project]
 
         result = await self.client._fetch_with_schema(
-            f"{self.client.base_url}/api/organizations/{self.org_id}/projects/",
-            ProjectListResponse
+            f"{self.client.base_url}/api/organizations/{self.org_id}/projects/", ProjectListResponse
         )
 
         if result.success:
@@ -187,8 +180,7 @@ class ProjectResource:
 
     async def get(self, project_id: str) -> Result:
         return await self.client._fetch_with_schema(
-            f"{self.client.base_url}/api/projects/{project_id}/",
-            Project
+            f"{self.client.base_url}/api/projects/{project_id}/", Project
         )
 
     async def property_definitions(self, project_id: str) -> Result:
@@ -196,12 +188,10 @@ class ProjectResource:
             property_definitions = await with_pagination(
                 f"{self.client.base_url}/api/projects/{project_id}/property_definitions/",
                 self.client.config.api_token,
-                ApiPropertyDefinition
+                ApiPropertyDefinition,
             )
 
-            filtered_definitions = [
-                def_ for def_ in property_definitions if not def_.hidden
-            ]
+            filtered_definitions = [def_ for def_ in property_definitions if not def_.hidden]
 
             validated = [
                 PropertyDefinition(name=def_.name, property_type=def_.property_type)
@@ -220,6 +210,7 @@ class FeatureFlagResource:
 
     async def list(self) -> Result:
         try:
+
             class FeatureFlagListItem(BaseModel):
                 id: int
                 key: str
@@ -229,7 +220,7 @@ class FeatureFlagResource:
             flags = await with_pagination(
                 f"{self.client.base_url}/api/projects/{self.project_id}/feature_flags/",
                 self.client.config.api_token,
-                FeatureFlagListItem
+                FeatureFlagListItem,
             )
 
             return Result.ok(flags)
@@ -246,7 +237,7 @@ class FeatureFlagResource:
 
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/feature_flags/{flag_id}/",
-            FeatureFlagGetResponse
+            FeatureFlagGetResponse,
         )
 
     async def find_by_key(self, key: str) -> Result:
@@ -271,7 +262,7 @@ class FeatureFlagResource:
             f"{self.client.base_url}/api/projects/{self.project_id}/feature_flags/",
             FeatureFlagCreateResponse,
             method="POST",
-            data=data.model_dump(exclude_unset=True)
+            data=data.model_dump(exclude_unset=True),
         )
 
     async def update(self, key: str, data: UpdateFeatureFlagInput) -> Result:
@@ -294,7 +285,7 @@ class FeatureFlagResource:
             f"{self.client.base_url}/api/projects/{self.project_id}/feature_flags/{flag_id}/",
             FeatureFlagUpdateResponse,
             method="PATCH",
-            data=data.model_dump(exclude_unset=True)
+            data=data.model_dump(exclude_unset=True),
         )
 
     async def delete(self, flag_id: int) -> Result:
@@ -306,7 +297,7 @@ class FeatureFlagResource:
             f"{self.client.base_url}/api/projects/{self.project_id}/feature_flags/{flag_id}/",
             DeleteResponse,
             method="PATCH",
-            data={"deleted": True}
+            data={"deleted": True},
         )
 
         if result.success:
@@ -348,7 +339,7 @@ class InsightResource:
             f"{self.client.base_url}/api/projects/{self.project_id}/insights/",
             InsightCreateResponse,
             method="POST",
-            data=data.model_dump(exclude_unset=True)
+            data=data.model_dump(exclude_unset=True),
         )
 
     async def get(self, insight_id: int) -> Result:
@@ -360,7 +351,7 @@ class InsightResource:
 
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/insights/{insight_id}/",
-            InsightGetResponse
+            InsightGetResponse,
         )
 
     async def update(self, insight_id: int, data: UpdateInsightInput) -> Result:
@@ -373,7 +364,7 @@ class InsightResource:
             f"{self.client.base_url}/api/projects/{self.project_id}/insights/{insight_id}/",
             InsightUpdateResponse,
             method="PATCH",
-            data=data.model_dump(exclude_unset=True)
+            data=data.model_dump(exclude_unset=True),
         )
 
     async def delete(self, insight_id: int) -> Result:
@@ -385,7 +376,7 @@ class InsightResource:
             f"{self.client.base_url}/api/projects/{self.project_id}/insights/{insight_id}/",
             DeleteResponse,
             method="PATCH",
-            data={"deleted": True}
+            data={"deleted": True},
         )
 
         if result.success:
@@ -401,7 +392,7 @@ class InsightResource:
             f"{self.client.base_url}/api/environments/{self.project_id}/max_tools/create_and_query_insight/",
             dict,  # Raw response handling
             method="POST",
-            data={"query": query}
+            data={"query": query},
         )
 
         if result.success:
@@ -454,7 +445,7 @@ class DashboardResource:
 
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/dashboards/{dashboard_id}/",
-            DashboardGetResponse
+            DashboardGetResponse,
         )
 
     async def create(self, data: CreateDashboardInput) -> Result:
@@ -466,7 +457,7 @@ class DashboardResource:
             f"{self.client.base_url}/api/projects/{self.project_id}/dashboards/",
             DashboardCreateResponse,
             method="POST",
-            data=data.model_dump(exclude_unset=True)
+            data=data.model_dump(exclude_unset=True),
         )
 
     async def update(self, dashboard_id: int, data: UpdateDashboardInput) -> Result:
@@ -478,7 +469,7 @@ class DashboardResource:
             f"{self.client.base_url}/api/projects/{self.project_id}/dashboards/{dashboard_id}/",
             DashboardUpdateResponse,
             method="PATCH",
-            data=data.model_dump(exclude_unset=True)
+            data=data.model_dump(exclude_unset=True),
         )
 
     async def delete(self, dashboard_id: int) -> Result:
@@ -490,7 +481,7 @@ class DashboardResource:
             f"{self.client.base_url}/api/projects/{self.project_id}/dashboards/{dashboard_id}/",
             DeleteResponse,
             method="PATCH",
-            data={"deleted": True}
+            data={"deleted": True},
         )
 
         if result.success:
@@ -502,7 +493,7 @@ class DashboardResource:
             f"{self.client.base_url}/api/projects/{self.project_id}/insights/{data.insight_id}/",
             dict,
             method="PATCH",
-            data={"dashboard": data.dashboard_id}
+            data={"dashboard": data.dashboard_id},
         )
 
 
@@ -519,7 +510,7 @@ class QueryResource:
             f"{self.client.base_url}/api/environments/{self.project_id}/query/",
             QueryResponse,
             method="POST",
-            data=query_body
+            data=query_body,
         )
 
 
@@ -532,8 +523,7 @@ class UserResource:
             distinct_id: str
 
         result = await self.client._fetch_with_schema(
-            f"{self.client.base_url}/api/users/@me/",
-            UserResponse
+            f"{self.client.base_url}/api/users/@me/", UserResponse
         )
 
         if result.success:

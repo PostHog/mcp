@@ -1,6 +1,7 @@
-from typing import Any, Dict, Generic, List, Optional, TypeVar
-from pydantic import BaseModel
 from enum import Enum
+from typing import Generic, TypeVar
+
+from pydantic import BaseModel
 
 
 class PropertyType(str, Enum):
@@ -13,24 +14,24 @@ class PropertyType(str, Enum):
 class ApiPropertyDefinition(BaseModel):
     id: str
     name: str
-    description: Optional[str] = None
-    is_numerical: Optional[bool] = None
-    updated_at: Optional[str] = None
-    updated_by: Optional[str] = None
-    is_seen_on_filtered_events: Optional[bool] = None
-    property_type: Optional[PropertyType] = None
-    verified: Optional[bool] = None
-    verified_at: Optional[str] = None
-    verified_by: Optional[str] = None
-    hidden: Optional[bool] = None
-    tags: List[str] = []
+    description: str | None = None
+    is_numerical: bool | None = None
+    updated_at: str | None = None
+    updated_by: str | None = None
+    is_seen_on_filtered_events: bool | None = None
+    property_type: PropertyType | None = None
+    verified: bool | None = None
+    verified_at: str | None = None
+    verified_by: str | None = None
+    hidden: bool | None = None
+    tags: list[str] = []
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class ApiResponse(BaseModel, Generic[T]):
     count: int
-    next: Optional[str] = None
-    previous: Optional[str] = None
-    results: List[T]
+    next: str | None = None
+    previous: str | None = None
+    results: list[T]

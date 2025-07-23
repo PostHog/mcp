@@ -5,7 +5,9 @@ from schema.tool_inputs import DashboardAddInsightSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
 
-async def add_insight_to_dashboard_handler(context: Context, params: DashboardAddInsightSchema) -> ToolResult:
+async def add_insight_to_dashboard_handler(
+    context: Context, params: DashboardAddInsightSchema
+) -> ToolResult:
     project_id = await context.get_project_id()
 
     # First get the insight to get its short_id for URL generation
@@ -16,9 +18,9 @@ async def add_insight_to_dashboard_handler(context: Context, params: DashboardAd
 
     # Then add the insight to the dashboard
     from schema.dashboards import AddInsightToDashboard
+
     add_insight_data = AddInsightToDashboard(
-        insight_id=params.data.insightId,
-        dashboard_id=params.data.dashboardId
+        insight_id=params.data.insightId, dashboard_id=params.data.dashboardId
     )
     result = await context.api.dashboards(project_id).add_insight(add_insight_data)
 
@@ -28,7 +30,7 @@ async def add_insight_to_dashboard_handler(context: Context, params: DashboardAd
     result_with_urls = {
         **result.data,
         "dashboard_url": f"{get_project_base_url(project_id)}/dashboard/{params.data.dashboardId}",
-        "insight_url": f"{get_project_base_url(project_id)}/insights/{insight_result.data.short_id}"
+        "insight_url": f"{get_project_base_url(project_id)}/insights/{insight_result.data.short_id}",
     }
 
     return ToolResult(content=[TextContent(text=json.dumps(result_with_urls))])
@@ -43,5 +45,5 @@ def add_insight_to_dashboard_tool() -> Tool[DashboardAddInsightSchema]:
         - Optionally supports layout and color customization.
         """,
         schema=DashboardAddInsightSchema,
-        handler=add_insight_to_dashboard_handler
+        handler=add_insight_to_dashboard_handler,
     )

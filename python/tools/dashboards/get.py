@@ -19,5 +19,5 @@ def get_dashboard_tool() -> Tool[DashboardGetSchema]:
         name="dashboard-get",
         description="Get a specific dashboard by ID.",
         schema=DashboardGetSchema,
-        handler=get_dashboard_handler
+        handler=get_dashboard_handler,
     )

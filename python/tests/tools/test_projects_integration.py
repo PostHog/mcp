@@ -47,7 +47,9 @@ class TestProjects:
         await cleanup_resources(context.api, TEST_PROJECT_ID, created_resources)
 
     @pytest.mark.asyncio
-    async def test_list_all_projects_for_active_organization(self, context: Context, created_resources: CreatedResources):
+    async def test_list_all_projects_for_active_organization(
+        self, context: Context, created_resources: CreatedResources
+    ):
         """Test listing all projects for the active organization."""
         tool = get_projects_tool()
         params = tool.schema()
@@ -63,7 +65,9 @@ class TestProjects:
         assert "name" in project
 
     @pytest.mark.asyncio
-    async def test_projects_proper_structure(self, context: Context, created_resources: CreatedResources):
+    async def test_projects_proper_structure(
+        self, context: Context, created_resources: CreatedResources
+    ):
         """Test that projects have proper structure."""
         tool = get_projects_tool()
         params = tool.schema()
@@ -95,7 +99,9 @@ class TestProjects:
         assert set_result.content[0].text == f"Switched to project {target_project['id']}"
 
     @pytest.mark.asyncio
-    async def test_set_project_id_as_expected(self, context: Context, created_resources: CreatedResources):
+    async def test_set_project_id_as_expected(
+        self, context: Context, created_resources: CreatedResources
+    ):
         """Test setting a specific project ID."""
         tool = set_active_project_tool()
         project_id = 123456
@@ -106,7 +112,9 @@ class TestProjects:
 
     @pytest.mark.asyncio
     @pytest.mark.skip(reason="Property definitions test skipped - matching TypeScript")
-    async def test_get_property_definitions_for_active_project(self, context: Context, created_resources: CreatedResources):
+    async def test_get_property_definitions_for_active_project(
+        self, context: Context, created_resources: CreatedResources
+    ):
         """Test getting property definitions for active project."""
         tool = property_definitions_tool()
         params = tool.schema()
@@ -124,7 +132,9 @@ class TestProjects:
 
     @pytest.mark.asyncio
     @pytest.mark.skip(reason="Property definitions test skipped - matching TypeScript")
-    async def test_property_definitions_proper_structure(self, context: Context, created_resources: CreatedResources):
+    async def test_property_definitions_proper_structure(
+        self, context: Context, created_resources: CreatedResources
+    ):
         """Test that property definitions have proper structure."""
         tool = property_definitions_tool()
         params = tool.schema()

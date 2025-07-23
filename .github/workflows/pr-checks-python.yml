@@ -1,0 +1,129 @@
+name: PR Checks (Python)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-format:
+    name: Python Lint and Format Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          
+      - name: Install dependencies
+        run: |
+          cd python
+          uv sync --dev
+          
+      - name: Run ruff linter
+        run: |
+          cd python
+          uv run ruff check --fix .
+          
+      - name: Run ruff formatter
+        run: |
+          cd python
+          uv run ruff format .
+          
+      - name: Check for changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Code formatting or linting changes detected!"
+            git diff
+            exit 1
+          fi
+
+  type-check:
+    name: Python Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          
+      - name: Install dependencies
+        run: |
+          cd python
+          uv sync --dev
+          
+      - name: Install mypy
+        run: |
+          cd python
+          uv add --dev mypy
+          
+      - name: Run type checking
+        run: |
+          cd python
+          uv run mypy . --ignore-missing-imports --check-untyped-defs
+
+  schema-sync:
+    name: Schema Synchronization Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          
+      - name: Install Node.js dependencies
+        run: pnpm install
+        
+      - name: Install Python dependencies
+        run: |
+          cd python
+          uv sync --dev
+          
+      - name: Generate schemas
+        run: pnpm run schema:build
+        
+      - name: Check if schemas are up to date
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Python schemas are out of sync with TypeScript definitions!"
+            echo "Please run 'pnpm run schema:build' to regenerate the schemas."
+            git diff
+            exit 1
+          fi

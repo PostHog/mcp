@@ -112,7 +112,7 @@ class ToolRegistry:
             env=self.env,
             get_project_id=self.get_project_id,
             get_org_id=self.get_org_id,
-            get_distinct_id=self.get_distinct_id
+            get_distinct_id=self.get_distinct_id,
         )
 
     async def execute_tool(self, tool_name: str, params: dict[str, Any]) -> dict[str, Any]:

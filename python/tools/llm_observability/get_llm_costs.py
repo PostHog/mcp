@@ -4,27 +4,25 @@ from schema.tool_inputs import LLMObservabilityGetCostsSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
 
-async def get_llm_costs_handler(context: Context, params: LLMObservabilityGetCostsSchema) -> ToolResult:
+async def get_llm_costs_handler(
+    context: Context, params: LLMObservabilityGetCostsSchema
+) -> ToolResult:
     days = int(params.days) if params.days else 6
 
     trends_query = {
         "kind": "TrendsQuery",
-        "dateRange": {
-            "date_from": f"-{days}d",
-            "date_to": None
-        },
+        "dateRange": {"date_from": f"-{days}d", "date_to": None},
         "filterTestAccounts": True,
-        "series": [{
-            "event": "$ai_generation",
-            "name": "$ai_generation",
-            "math": "sum",
-            "math_property": "$ai_total_cost_usd",
-            "kind": "EventsNode"
-        }],
-        "breakdownFilter": {
-            "breakdown_type": "event",
-            "breakdown": "$ai_model"
-        }
+        "series": [
+            {
+                "event": "$ai_generation",
+                "name": "$ai_generation",
+                "math": "sum",
+                "math_property": "$ai_total_cost_usd",
+                "kind": "EventsNode",
+            }
+        ],
+        "breakdownFilter": {"breakdown_type": "event", "breakdown": "$ai_model"},
     }
 
     costs_result = await context.api.query(str(params.projectId)).execute(trends_query)
@@ -52,5 +50,5 @@ def get_llm_costs_tool() -> Tool[LLMObservabilityGetCostsSchema]:
         - Properly render the markdown table in the response.
         """,
         schema=LLMObservabilityGetCostsSchema,
-        handler=get_llm_costs_handler
+        handler=get_llm_costs_handler,
     )

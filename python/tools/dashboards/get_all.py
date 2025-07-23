@@ -11,7 +11,13 @@ async def get_all_dashboards_handler(context: Context, params: DashboardGetAllSc
     if not dashboards_result.success:
         raise Exception(f"Failed to get dashboards: {dashboards_result.error}")
 
-    return ToolResult(content=[TextContent(text=json.dumps([dashboard.model_dump() for dashboard in dashboards_result.data]))])
+    return ToolResult(
+        content=[
+            TextContent(
+                text=json.dumps([dashboard.model_dump() for dashboard in dashboards_result.data])
+            )
+        ]
+    )
 
 
 def get_all_dashboards_tool() -> Tool[DashboardGetAllSchema]:
@@ -22,5 +28,5 @@ def get_all_dashboards_tool() -> Tool[DashboardGetAllSchema]:
         - Can filter by pinned status, search term, or pagination.
         """,
         schema=DashboardGetAllSchema,
-        handler=get_all_dashboards_handler
+        handler=get_all_dashboards_handler,
     )

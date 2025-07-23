@@ -1,8 +1,10 @@
-name: PR Checks
+name: PR Checks (TypeScript)
 
 on:
+  push:
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   lint-and-format:

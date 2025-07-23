@@ -4,7 +4,9 @@ from schema.tool_inputs import FeatureFlagGetDefinitionSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
 
-async def get_feature_flag_definition_handler(context: Context, params: FeatureFlagGetDefinitionSchema) -> ToolResult:
+async def get_feature_flag_definition_handler(
+    context: Context, params: FeatureFlagGetDefinitionSchema
+) -> ToolResult:
     # Validate that either flagId or flagKey is provided
     if not params.flagId and not params.flagKey:
         raise ValueError("Either flagId or flagKey must be provided")
@@ -26,9 +28,13 @@ async def get_feature_flag_definition_handler(context: Context, params: FeatureF
         if flag_result.data:
             return ToolResult(content=[TextContent(text=json.dumps(flag_result.data.model_dump()))])
         else:
-            return ToolResult(content=[TextContent(text=f'Error: Flag with key "{params.flagKey}" not found.')])
+            return ToolResult(
+                content=[TextContent(text=f'Error: Flag with key "{params.flagKey}" not found.')]
+            )
 
-    return ToolResult(content=[TextContent(text="Error: Could not determine or find the feature flag.")])
+    return ToolResult(
+        content=[TextContent(text="Error: Could not determine or find the feature flag.")]
+    )
 
 
 def get_feature_flag_definition_tool() -> Tool[FeatureFlagGetDefinitionSchema]:
@@ -40,5 +46,5 @@ def get_feature_flag_definition_tool() -> Tool[FeatureFlagGetDefinitionSchema]:
         - If you provide both, the flagId will be used.
         """,
         schema=FeatureFlagGetDefinitionSchema,
-        handler=get_feature_flag_definition_handler
+        handler=get_feature_flag_definition_handler,
     )

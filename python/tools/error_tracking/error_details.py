@@ -14,12 +14,9 @@ async def error_details_handler(context: Context, params: ErrorTrackingDetailsSc
 
     error_query = {
         "kind": "ErrorTrackingQuery",
-        "dateRange": {
-            "date_from": date_from.isoformat(),
-            "date_to": date_to.isoformat()
-        },
+        "dateRange": {"date_from": date_from.isoformat(), "date_to": date_to.isoformat()},
         "volumeResolution": 0,
-        "issueId": str(params.issueId)
+        "issueId": str(params.issueId),
     }
 
     errors_result = await context.api.query(project_id).execute({"query": error_query})
@@ -34,5 +31,5 @@ def error_details_tool() -> Tool[ErrorTrackingDetailsSchema]:
         name="error-details",
         description="Use this tool to get the details of an error in the project.",
         schema=ErrorTrackingDetailsSchema,
-        handler=error_details_handler
+        handler=error_details_handler,
     )

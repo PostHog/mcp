@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from api.client import ApiClient
 
-T = TypeVar('T', bound=BaseModel)
+T = TypeVar("T", bound=BaseModel)
 
 
 @dataclass
@@ -54,7 +54,7 @@ class Tool(Generic[T]):
         name: str,
         description: str,
         schema: type[T],
-        handler: Callable[[Context, T], Awaitable[ToolResult]]
+        handler: Callable[[Context, T], Awaitable[ToolResult]],
     ):
         self.name = name
         self.description = description

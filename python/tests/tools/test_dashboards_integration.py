@@ -50,13 +50,17 @@ class TestDashboards:
         await cleanup_resources(context.api, TEST_PROJECT_ID, created_resources)
 
     @pytest.mark.asyncio
-    async def test_create_dashboard_with_minimal_fields(self, context: Context, created_resources: CreatedResources):
+    async def test_create_dashboard_with_minimal_fields(
+        self, context: Context, created_resources: CreatedResources
+    ):
         """Test creating a dashboard with minimal fields."""
         tool = create_dashboard_tool()
-        params = tool.schema(data={
-            "name": generate_unique_key("Test Dashboard"),
-            "description": "Integration test dashboard"
-        })
+        params = tool.schema(
+            data={
+                "name": generate_unique_key("Test Dashboard"),
+                "description": "Integration test dashboard",
+            }
+        )
 
         result = await tool.execute(context, params)
         dashboard_data = parse_tool_response(result.__dict__)
@@ -68,14 +72,18 @@ class TestDashboards:
         created_resources.dashboards.append(dashboard_data["id"])
 
     @pytest.mark.asyncio
-    async def test_create_dashboard_with_tags(self, context: Context, created_resources: CreatedResources):
+    async def test_create_dashboard_with_tags(
+        self, context: Context, created_resources: CreatedResources
+    ):
         """Test creating a dashboard with tags."""
         tool = create_dashboard_tool()
-        params = tool.schema(data={
-            "name": generate_unique_key("Tagged Dashboard"),
-            "description": "Dashboard with tags",
-            "tags": ["test", "integration"]
-        })
+        params = tool.schema(
+            data={
+                "name": generate_unique_key("Tagged Dashboard"),
+                "description": "Dashboard with tags",
+                "tags": ["test", "integration"],
+            }
+        )
 
         result = await tool.execute(context, params)
         dashboard_data = parse_tool_response(result.__dict__)
@@ -86,16 +94,20 @@ class TestDashboards:
         created_resources.dashboards.append(dashboard_data["id"])
 
     @pytest.mark.asyncio
-    async def test_update_dashboard_name_and_description(self, context: Context, created_resources: CreatedResources):
+    async def test_update_dashboard_name_and_description(
+        self, context: Context, created_resources: CreatedResources
+    ):
         """Test updating dashboard name and description."""
         create_tool = create_dashboard_tool()
         update_tool = update_dashboard_tool()
 
         # Create dashboard
-        create_params = create_tool.schema(data={
-            "name": generate_unique_key("Original Dashboard"),
-            "description": "Original description"
-        })
+        create_params = create_tool.schema(
+            data={
+                "name": generate_unique_key("Original Dashboard"),
+                "description": "Original description",
+            }
+        )
 
         create_result = await create_tool.execute(context, create_params)
         created_dashboard = parse_tool_response(create_result.__dict__)
@@ -104,10 +116,7 @@ class TestDashboards:
         # Update dashboard
         update_params = update_tool.schema(
             dashboardId=created_dashboard["id"],
-            data={
-                "name": "Updated Dashboard Name",
-                "description": "Updated description"
-            }
+            data={"name": "Updated Dashboard Name", "description": "Updated description"},
         )
 
         update_result = await update_tool.execute(context, update_params)
@@ -117,7 +126,9 @@ class TestDashboards:
         assert updated_dashboard["name"] == update_params.data.name
 
     @pytest.mark.asyncio
-    async def test_get_all_dashboards_proper_structure(self, context: Context, created_resources: CreatedResources):
+    async def test_get_all_dashboards_proper_structure(
+        self, context: Context, created_resources: CreatedResources
+    ):
         """Test that get-all-dashboards returns proper structure."""
         tool = get_all_dashboards_tool()
         params = tool.schema()
@@ -132,16 +143,20 @@ class TestDashboards:
             assert "name" in dashboard
 
     @pytest.mark.asyncio
-    async def test_get_specific_dashboard_by_id(self, context: Context, created_resources: CreatedResources):
+    async def test_get_specific_dashboard_by_id(
+        self, context: Context, created_resources: CreatedResources
+    ):
         """Test getting a specific dashboard by ID."""
         create_tool = create_dashboard_tool()
         get_tool = get_dashboard_tool()
 
         # Create dashboard
-        create_params = create_tool.schema(data={
-            "name": generate_unique_key("Get Test Dashboard"),
-            "description": "Test dashboard for get operation"
-        })
+        create_params = create_tool.schema(
+            data={
+                "name": generate_unique_key("Get Test Dashboard"),
+                "description": "Test dashboard for get operation",
+            }
+        )
 
         create_result = await create_tool.execute(context, create_params)
         created_dashboard = parse_tool_response(create_result.__dict__)
@@ -162,10 +177,12 @@ class TestDashboards:
         delete_tool = delete_dashboard_tool()
 
         # Create dashboard
-        create_params = create_tool.schema(data={
-            "name": generate_unique_key("Delete Test Dashboard"),
-            "description": "Test dashboard for deletion"
-        })
+        create_params = create_tool.schema(
+            data={
+                "name": generate_unique_key("Delete Test Dashboard"),
+                "description": "Test dashboard for deletion",
+            }
+        )
 
         create_result = await create_tool.execute(context, create_params)
         created_dashboard = parse_tool_response(create_result.__dict__)
@@ -187,10 +204,12 @@ class TestDashboards:
         delete_tool = delete_dashboard_tool()
 
         # Create
-        create_params = create_tool.schema(data={
-            "name": generate_unique_key("Workflow Test Dashboard"),
-            "description": "Testing full workflow"
-        })
+        create_params = create_tool.schema(
+            data={
+                "name": generate_unique_key("Workflow Test Dashboard"),
+                "description": "Testing full workflow",
+            }
+        )
 
         create_result = await create_tool.execute(context, create_params)
         created_dashboard = parse_tool_response(create_result.__dict__)
@@ -206,8 +225,8 @@ class TestDashboards:
             dashboardId=created_dashboard["id"],
             data={
                 "name": "Updated Workflow Dashboard",
-                "description": "Updated workflow description"
-            }
+                "description": "Updated workflow description",
+            },
         )
 
         update_result = await update_tool.execute(context, update_params)

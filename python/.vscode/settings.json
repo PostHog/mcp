@@ -1,12 +1,12 @@
 {
-  "python.linting.enabled": true,
-  "python.linting.ruffEnabled": true,
-  "python.linting.flake8Enabled": false,
-  "python.formatting.provider": "none",
-  "[python]": {
-    "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
-    }
-  }
+	"python.linting.enabled": true,
+	"python.linting.ruffEnabled": true,
+	"python.linting.flake8Enabled": false,
+	"python.formatting.provider": "none",
+	"[python]": {
+		"editor.defaultFormatter": "charliermarsh.ruff",
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": "explicit"
+		}
+	}
 }

@@ -70,7 +70,7 @@ class PersonPropertyFilter(BaseModel):
 
         valid = (
             (isinstance(value, str) and operator in string_ops)
-            or (isinstance(value, (int, float)) and operator in number_ops)
+            or (isinstance(value, int | float) and operator in number_ops)
             or (isinstance(value, bool) and operator in boolean_ops)
             or (is_array and operator in array_ops)
         )

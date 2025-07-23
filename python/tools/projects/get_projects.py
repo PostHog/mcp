@@ -22,7 +22,7 @@ def get_projects_tool() -> Tool[ProjectGetAllSchema]:
     return Tool(
         name="projects-get",
         description="""
-        - Fetches projects that the user has access to - the orgId is optional. 
+        - Fetches projects that the user has access to - the orgId is optional.
         - Use this tool before you use any other tools (besides organization-* and docs-search) to allow user to select the project they want to use for subsequent requests.
         """,
         schema=ProjectGetAllSchema,

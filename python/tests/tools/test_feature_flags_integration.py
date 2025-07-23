@@ -132,7 +132,7 @@ class TestFeatureFlags:
         updated_flag = parse_tool_response(update_result.__dict__)
 
         assert updated_flag["name"] == "Updated Name"
-        assert updated_flag["active"] == False
+        assert not updated_flag["active"]
         assert updated_flag["key"] == create_params.key
 
     @pytest.mark.asyncio
@@ -305,7 +305,7 @@ class TestFeatureFlags:
             # JSON response case - successful delete
             delete_response = json.loads(response_text)
             assert "success" in delete_response
-            assert delete_response["success"] == True
+            assert delete_response["success"]
             assert "deleted successfully" in delete_response["message"]
 
         # Verify it's deleted by trying to get it
@@ -362,12 +362,12 @@ class TestFeatureFlags:
 
         update_result = await update_tool.execute(context, update_params)
         updated_flag = parse_tool_response(update_result.__dict__)
-        assert updated_flag["active"] == True
+        assert updated_flag["active"]
         assert updated_flag["name"] == "Updated Workflow Flag"
 
         # Delete
         delete_params = delete_tool.schema(flagKey=created_flag["key"])
         delete_result = await delete_tool.execute(context, delete_params)
         delete_response = parse_tool_response(delete_result.__dict__)
-        assert delete_response["success"] == True
+        assert delete_response["success"]
         assert "deleted successfully" in delete_response["message"]

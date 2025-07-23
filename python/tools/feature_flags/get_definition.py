@@ -41,8 +41,8 @@ def get_feature_flag_definition_tool() -> Tool[FeatureFlagGetDefinitionSchema]:
     return Tool(
         name="feature-flag-get-definition",
         description="""
-        - Use this tool to get the definition of a feature flag. 
-        - You can provide either the flagId or the flagKey. 
+        - Use this tool to get the definition of a feature flag.
+        - You can provide either the flagId or the flagKey.
         - If you provide both, the flagId will be used.
         """,
         schema=FeatureFlagGetDefinitionSchema,

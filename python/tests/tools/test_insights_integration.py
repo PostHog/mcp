@@ -260,7 +260,7 @@ class TestInsights:
         delete_result = await delete_tool.execute(context, delete_params)
         delete_response = parse_tool_response(delete_result.__dict__)
 
-        assert delete_response["success"] == True
+        assert delete_response["success"]
         assert "deleted successfully" in delete_response["message"]
 
     @pytest.mark.asyncio
@@ -306,4 +306,4 @@ class TestInsights:
         delete_params = delete_tool.schema(insightId=created_insight["id"])
         delete_result = await delete_tool.execute(context, delete_params)
         delete_response = parse_tool_response(delete_result.__dict__)
-        assert delete_response["success"] == True
+        assert delete_response["success"]

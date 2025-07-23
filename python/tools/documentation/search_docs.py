@@ -19,7 +19,7 @@ def search_docs_tool() -> Tool[DocumentationSearchSchema]:
     return Tool(
         name="docs-search",
         description="""
-        - Use this tool to search the PostHog documentation for information that can help the user with their request. 
+        - Use this tool to search the PostHog documentation for information that can help the user with their request.
         - Use it as a fallback when you cannot answer the user's request using other tools in this MCP.
         """,
         schema=DocumentationSearchSchema,

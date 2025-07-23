@@ -1,10 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
+import { FeatureFlagGetDefinitionSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({
-	flagId: z.number().int().positive().optional(),
-	flagKey: z.string().optional(),
-});
+const schema = FeatureFlagGetDefinitionSchema;
 
 type Params = z.infer<typeof schema>;
 

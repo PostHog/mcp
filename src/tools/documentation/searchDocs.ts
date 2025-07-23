@@ -1,10 +1,9 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
 import { docsSearch } from "../../inkeepApi";
+import { DocumentationSearchSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({
-	query: z.string(),
-});
+const schema = DocumentationSearchSchema;
 
 type Params = z.infer<typeof schema>;
 

@@ -1,9 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
+import { FeatureFlagDeleteSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({
-	flagKey: z.string(),
-});
+const schema = FeatureFlagDeleteSchema;
 
 type Params = z.infer<typeof schema>;
 

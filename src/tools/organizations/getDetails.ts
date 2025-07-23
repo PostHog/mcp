@@ -1,7 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
+import { OrganizationGetDetailsSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({});
+const schema = OrganizationGetDetailsSchema;
 
 type Params = z.infer<typeof schema>;
 

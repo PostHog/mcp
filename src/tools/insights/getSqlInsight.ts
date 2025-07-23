@@ -1,12 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
+import { InsightGetSqlSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({
-	query: z
-		.string()
-		.max(1000)
-		.describe("Your natural language query describing the SQL insight (max 1000 characters)."),
-});
+const schema = InsightGetSqlSchema;
 
 type Params = z.infer<typeof schema>;
 

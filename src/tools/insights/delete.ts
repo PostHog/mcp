@@ -1,9 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
+import { InsightDeleteSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({
-	insightId: z.number(),
-});
+const schema = InsightDeleteSchema;
 
 type Params = z.infer<typeof schema>;
 

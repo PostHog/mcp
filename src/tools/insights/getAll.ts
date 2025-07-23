@@ -1,11 +1,9 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
-import { ListInsightsSchema } from "../../schema/insights";
 import { getProjectBaseUrl } from "../../lib/utils/api";
+import { InsightGetAllSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({
-	data: ListInsightsSchema.optional(),
-});
+const schema = InsightGetAllSchema;
 
 type Params = z.infer<typeof schema>;
 

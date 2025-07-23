@@ -1,9 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
+import { DashboardGetSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({
-	dashboardId: z.number(),
-});
+const schema = DashboardGetSchema;
 
 type Params = z.infer<typeof schema>;
 

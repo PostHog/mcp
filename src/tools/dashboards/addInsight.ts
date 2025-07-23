@@ -1,11 +1,9 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
-import { AddInsightToDashboardSchema } from "../../schema/dashboards";
 import { getProjectBaseUrl } from "../../lib/utils/api";
+import { DashboardAddInsightSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({
-	data: AddInsightToDashboardSchema,
-});
+const schema = DashboardAddInsightSchema;
 
 type Params = z.infer<typeof schema>;
 

@@ -1,12 +1,9 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
-import { UpdateFeatureFlagInputSchema } from "../../schema/flags";
 import { getProjectBaseUrl } from "../../lib/utils/api";
+import { FeatureFlagUpdateSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({
-	flagKey: z.string(),
-	data: UpdateFeatureFlagInputSchema,
-});
+const schema = FeatureFlagUpdateSchema;
 
 type Params = z.infer<typeof schema>;
 

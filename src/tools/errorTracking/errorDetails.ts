@@ -1,8 +1,8 @@
 import type { z } from "zod";
 import type { Context, Tool } from "../types";
-import { ErrorDetailsSchema } from "../../schema/errors";
+import { ErrorTrackingDetailsSchema } from "../../schema/tool-inputs";
 
-const schema = ErrorDetailsSchema;
+const schema = ErrorTrackingDetailsSchema;
 
 type Params = z.infer<typeof schema>;
 

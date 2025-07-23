@@ -1,10 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
+import { LLMObservabilityGetCostsSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({
-	projectId: z.number().int().positive(),
-	days: z.number().optional(),
-});
+const schema = LLMObservabilityGetCostsSchema;
 
 type Params = z.infer<typeof schema>;
 

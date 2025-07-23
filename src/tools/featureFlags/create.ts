@@ -1,16 +1,9 @@
-import { z } from "zod";
+import type { z } from "zod";
 import type { Context, Tool } from "../types";
-import { FilterGroupsSchema } from "../../schema/flags";
 import { getProjectBaseUrl } from "../../lib/utils/api";
+import { FeatureFlagCreateSchema } from "../../schema/tool-inputs";
 
-const schema = z.object({
-	name: z.string(),
-	key: z.string(),
-	description: z.string(),
-	filters: FilterGroupsSchema,
-	active: z.boolean(),
-	tags: z.array(z.string()).optional(),
-});
+const schema = FeatureFlagCreateSchema;
 
 type Params = z.infer<typeof schema>;
 

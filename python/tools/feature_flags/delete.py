@@ -7,7 +7,17 @@ from tools.types import Context, TextContent, Tool, ToolResult
 async def delete_feature_flag_handler(context: Context, params: FeatureFlagDeleteSchema) -> ToolResult:
     project_id = await context.get_project_id()
 
-    delete_result = await context.api.feature_flags(project_id).delete(params.flagKey)
+    # First find the flag by key to get its ID
+    flag_result = await context.api.feature_flags(project_id).find_by_key(params.flagKey)
+
+    if not flag_result.success:
+        raise Exception(f"Failed to find feature flag: {flag_result.error}")
+
+    if flag_result.data is None:
+        return ToolResult(content=[TextContent(text="Feature flag is already deleted.")])
+
+    # Delete the flag using its ID
+    delete_result = await context.api.feature_flags(project_id).delete(flag_result.data.id)
 
     if not delete_result.success:
         # Check if it's a "not found" error

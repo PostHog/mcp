@@ -13,7 +13,7 @@ async def with_pagination(
     api_token: str,
     data_class: type[T]
 ) -> list[T]:
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.get(
             url,
             headers={"Authorization": f"Bearer {api_token}"}

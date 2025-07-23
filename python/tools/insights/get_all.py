@@ -1,5 +1,6 @@
 import json
 
+from lib.utils.api import get_project_base_url
 from schema.insights import ListInsights
 from schema.tool_inputs import InsightGetAllSchema
 from tools.types import Context, TextContent, Tool, ToolResult
@@ -27,7 +28,14 @@ async def get_all_insights_handler(context: Context, params: InsightGetAllSchema
     if not insights_result.success:
         raise Exception(f"Failed to get insights: {insights_result.error}")
 
-    return ToolResult(content=[TextContent(text=json.dumps([insight.model_dump() for insight in insights_result.data]))])
+    # Add URLs to insights like the TypeScript version
+    insights_with_urls = []
+    for insight in insights_result.data:
+        insight_dict = insight.model_dump()
+        insight_dict["url"] = f"{get_project_base_url(project_id)}/insights/{insight.short_id}"
+        insights_with_urls.append(insight_dict)
+    
+    return ToolResult(content=[TextContent(text=json.dumps(insights_with_urls))])
 
 
 def get_all_insights_tool() -> Tool[InsightGetAllSchema]:

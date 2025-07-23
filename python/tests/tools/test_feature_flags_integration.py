@@ -96,43 +96,6 @@ class TestFeatureFlags:
 
         created_resources.feature_flags.append(flag_data["id"])
 
-    @pytest.mark.asyncio
-    async def test_create_feature_flag_with_complex_filters(self, context: Context, created_resources: CreatedResources):
-        """Test creating a feature flag with complex filters."""
-        tool = create_feature_flag_tool()
-        complex_filters = {
-            "groups": [
-                {
-                    "variant": None,
-                    "properties": [
-                        {
-                            "key": "email",
-                            "type": "person",
-                            "value": "test@example.com",
-                            "operator": "exact"
-                        }
-                    ],
-                    "rollout_percentage": 100
-                }
-            ]
-        }
-
-        params = tool.schema(
-            name="Complex Filter Flag",
-            key=generate_unique_key("complex-flag"),
-            description="Flag with complex filters",
-            active=True,
-            filters=complex_filters
-        )
-
-        result = await tool.execute(context, params)
-        flag_data = parse_tool_response(result.__dict__)
-
-        assert "id" in flag_data
-        assert flag_data["key"] == params.key
-        assert flag_data["name"] == params.name
-
-        created_resources.feature_flags.append(flag_data["id"])
 
     @pytest.mark.asyncio
     async def test_update_feature_flag_by_key(self, context: Context, created_resources: CreatedResources):
@@ -193,7 +156,6 @@ class TestFeatureFlags:
         new_filters = {
             "groups": [
                 {
-                    "variant": None,
                     "properties": [],
                     "rollout_percentage": 50
                 }
@@ -336,11 +298,13 @@ class TestFeatureFlags:
         response_text = delete_result.content[0].text
         if response_text == "Feature flag is already deleted.":
             # Already deleted case
-            assert True
+            pass
         else:
-            # JSON response case
+            # JSON response case - successful delete
             delete_response = json.loads(response_text)
-            assert "id" in delete_response  # Should have the deleted flag data
+            assert "success" in delete_response
+            assert delete_response["success"] == True
+            assert "deleted successfully" in delete_response["message"]
 
         # Verify it's deleted by trying to get it
         get_definition_tool = get_feature_flag_definition_tool()

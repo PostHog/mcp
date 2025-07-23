@@ -1,6 +1,7 @@
 import pytest
 import pytest_asyncio
 
+from schema.tool_inputs import Data5
 from tests.shared.test_utils import (
     SAMPLE_HOGQL_QUERIES,
     TEST_ORG_ID,
@@ -204,11 +205,11 @@ class TestInsights:
 
         # Create insight
         create_params = create_tool.schema(
-            data={
+            data=Data5(**{
                 "name": generate_unique_key("Get Test Insight"),
                 "description": "Test insight for get operation",
                 "query": SAMPLE_HOGQL_QUERIES["pageviews"].model_dump()
-            }
+            })
         )
 
         create_result = await create_tool.execute(context, create_params)

@@ -13,7 +13,7 @@
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types",
 		"prepare": "husky",
-		"schema:build:json": "tsx scripts/generate-tool-schema.ts"
+		"schema:build:json": "tsx typescript/scripts/generate-tool-schema.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",

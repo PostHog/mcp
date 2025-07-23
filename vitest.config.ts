@@ -5,13 +5,13 @@ export default defineConfig({
 		globals: true,
 		environment: "node",
 		testTimeout: 30000,
-		setupFiles: ["tests/setup.ts"],
-		include: ["tests/**/*.test.ts"],
-		exclude: ["node_modules/**", "dist/**", "tests/**/*.integration.test.ts"],
+		setupFiles: ["typescript/tests/setup.ts"],
+		include: ["typescript/tests/**/*.test.ts"],
+		exclude: ["node_modules/**", "dist/**", "typescript/tests/**/*.integration.test.ts"],
 	},
 	resolve: {
 		alias: {
-			"@": "/src",
+			"@": "/typescript/src",
 		},
 	},
 });

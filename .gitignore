@@ -8,3 +8,7 @@ node_modules
 
 # Editor-specific files
 .cursor/
+
+# Python
+python/venv/
+__pycache__/

@@ -52,6 +52,20 @@ pnpm run dev
 
 And replace `https://mcp.posthog.com/sse` with `http://localhost:8787/sse` in the MCP configuration.
 
+## Project Structure
+
+This repository is organized to support multiple language implementations:
+
+- `typescript/` - TypeScript implementation (current)
+- `python/` - Python implementation (planned)
+- `schema/` - Shared schema files generated from TypeScript for cross-language compatibility
+
+### Development Commands
+
+- `pnpm run dev` - Start development server
+- `pnpm run schema:build:json` - Generate JSON schema for other language implementations
+- `pnpm run lint:fix` - Format and lint code
+
 ### Environment variables
 
 - Create `.dev.vars` in the root

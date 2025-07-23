@@ -8,21 +8,25 @@
 		"format": "biome format --write",
 		"lint:fix": "biome lint --fix",
 		"test": "vitest",
-		"test:integration": "vitest run --config vitest.integration.config.ts",
+		"test:integration": "vitest run --config vitest.integration.config.mts",
 		"test:watch": "vitest watch",
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types",
-		"prepare": "husky"
+		"prepare": "husky",
+		"schema:build:json": "tsx typescript/scripts/generate-tool-schema.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
 		"@types/node": "^22.15.34",
 		"dotenv": "^16.4.7",
 		"husky": "^9.1.7",
+		"tsx": "^4.20.3",
 		"typescript": "^5.8.3",
 		"vite": "^5.0.0",
+		"vite-tsconfig-paths": "^5.1.4",
 		"vitest": "^3.2.4",
-		"wrangler": "^4.14.4"
+		"wrangler": "^4.14.4",
+		"zod-to-json-schema": "^3.24.6"
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.11.1",

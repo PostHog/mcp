@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import type { ApiClient } from "../api/client";
-import type { DurableObjectCache } from "../lib/utils/cache/DurableObjectCache";
+import type { ScopedCache } from "../lib/utils/cache/ScopedCache";
 
 export type State = {
 	projectId: string | undefined;
@@ -10,7 +10,7 @@ export type State = {
 
 export type Context = {
 	api: ApiClient;
-	cache: DurableObjectCache<State>;
+	cache: ScopedCache<State>;
 	env: Env;
 	getProjectId: () => Promise<string>;
 	getOrgID: () => Promise<string>;

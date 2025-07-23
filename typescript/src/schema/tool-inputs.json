@@ -1,909 +1,819 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "definitions": {
-    "DashboardAddInsightSchema": {
-      "$ref": "#/definitions/DashboardAddInsightSchema",
-      "definitions": {
-        "DashboardAddInsightSchema": {
-          "type": "object",
-          "properties": {
-            "data": {
-              "type": "object",
-              "properties": {
-                "insight_id": {
-                  "type": "integer",
-                  "exclusiveMinimum": 0
-                },
-                "dashboard_id": {
-                  "type": "integer",
-                  "exclusiveMinimum": 0
-                }
-              },
-              "required": [
-                "insight_id",
-                "dashboard_id"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "data"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "DashboardCreateSchema": {
-      "$ref": "#/definitions/DashboardCreateSchema",
-      "definitions": {
-        "DashboardCreateSchema": {
-          "type": "object",
-          "properties": {
-            "data": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "minLength": 1
-                },
-                "description": {
-                  "type": "string"
-                },
-                "pinned": {
-                  "type": "boolean",
-                  "default": false
-                },
-                "tags": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              },
-              "required": [
-                "name"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "data"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "DashboardDeleteSchema": {
-      "$ref": "#/definitions/DashboardDeleteSchema",
-      "definitions": {
-        "DashboardDeleteSchema": {
-          "type": "object",
-          "properties": {
-            "dashboardId": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "dashboardId"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "DashboardGetAllSchema": {
-      "$ref": "#/definitions/DashboardGetAllSchema",
-      "definitions": {
-        "DashboardGetAllSchema": {
-          "type": "object",
-          "properties": {
-            "data": {
-              "type": "object",
-              "properties": {
-                "limit": {
-                  "type": "integer",
-                  "exclusiveMinimum": 0
-                },
-                "offset": {
-                  "type": "integer",
-                  "minimum": 0
-                },
-                "search": {
-                  "type": "string"
-                },
-                "pinned": {
-                  "type": "boolean"
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "additionalProperties": false
-        }
-      }
-    },
-    "DashboardGetSchema": {
-      "$ref": "#/definitions/DashboardGetSchema",
-      "definitions": {
-        "DashboardGetSchema": {
-          "type": "object",
-          "properties": {
-            "dashboardId": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "dashboardId"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "DashboardUpdateSchema": {
-      "$ref": "#/definitions/DashboardUpdateSchema",
-      "definitions": {
-        "DashboardUpdateSchema": {
-          "type": "object",
-          "properties": {
-            "dashboardId": {
-              "type": "number"
-            },
-            "data": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "pinned": {
-                  "type": "boolean"
-                },
-                "tags": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "dashboardId",
-            "data"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "DocumentationSearchSchema": {
-      "$ref": "#/definitions/DocumentationSearchSchema",
-      "definitions": {
-        "DocumentationSearchSchema": {
-          "type": "object",
-          "properties": {
-            "query": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "query"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "ErrorTrackingDetailsSchema": {
-      "$ref": "#/definitions/ErrorTrackingDetailsSchema",
-      "definitions": {
-        "ErrorTrackingDetailsSchema": {
-          "type": "object",
-          "properties": {
-            "issueId": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "dateFrom": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "dateTo": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          "required": [
-            "issueId"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "ErrorTrackingListSchema": {
-      "$ref": "#/definitions/ErrorTrackingListSchema",
-      "definitions": {
-        "ErrorTrackingListSchema": {
-          "type": "object",
-          "properties": {
-            "orderBy": {
-              "type": "string",
-              "enum": [
-                "occurrences",
-                "first_seen",
-                "last_seen",
-                "users",
-                "sessions"
-              ]
-            },
-            "dateFrom": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "dateTo": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "orderDirection": {
-              "type": "string",
-              "enum": [
-                "ASC",
-                "DESC"
-              ]
-            },
-            "filterTestAccounts": {
-              "type": "boolean"
-            },
-            "status": {
-              "type": "string",
-              "enum": [
-                "active",
-                "resolved",
-                "all",
-                "suppressed"
-              ]
-            }
-          },
-          "additionalProperties": false
-        }
-      }
-    },
-    "FeatureFlagCreateSchema": {
-      "$ref": "#/definitions/FeatureFlagCreateSchema",
-      "definitions": {
-        "FeatureFlagCreateSchema": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "key": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "filters": {
-              "type": "object",
-              "properties": {
-                "groups": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "properties": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "key": {
-                              "type": "string"
-                            },
-                            "value": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "number"
-                                },
-                                {
-                                  "type": "boolean"
-                                },
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "string"
-                                  }
-                                },
-                                {
-                                  "type": "array",
-                                  "items": {
-                                    "type": "number"
-                                  }
-                                }
-                              ]
-                            },
-                            "operator": {
-                              "type": "string",
-                              "enum": [
-                                "exact",
-                                "is_not",
-                                "icontains",
-                                "not_icontains",
-                                "regex",
-                                "not_regex",
-                                "is_cleaned_path_exact",
-                                "exact",
-                                "is_not",
-                                "gt",
-                                "gte",
-                                "lt",
-                                "lte",
-                                "min",
-                                "max",
-                                "exact",
-                                "is_not",
-                                "in",
-                                "not_in"
-                              ]
-                            }
-                          },
-                          "required": [
-                            "key",
-                            "value"
-                          ],
-                          "additionalProperties": false
-                        }
-                      },
-                      "rollout_percentage": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "properties",
-                      "rollout_percentage"
-                    ],
-                    "additionalProperties": false
-                  }
-                }
-              },
-              "required": [
-                "groups"
-              ],
-              "additionalProperties": false
-            },
-            "active": {
-              "type": "boolean"
-            },
-            "tags": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          "required": [
-            "name",
-            "key",
-            "description",
-            "filters",
-            "active"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "FeatureFlagDeleteSchema": {
-      "$ref": "#/definitions/FeatureFlagDeleteSchema",
-      "definitions": {
-        "FeatureFlagDeleteSchema": {
-          "type": "object",
-          "properties": {
-            "flagKey": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "flagKey"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "FeatureFlagGetAllSchema": {
-      "$ref": "#/definitions/FeatureFlagGetAllSchema",
-      "definitions": {
-        "FeatureFlagGetAllSchema": {
-          "type": "object",
-          "properties": {},
-          "additionalProperties": false
-        }
-      }
-    },
-    "FeatureFlagGetDefinitionSchema": {
-      "$ref": "#/definitions/FeatureFlagGetDefinitionSchema",
-      "definitions": {
-        "FeatureFlagGetDefinitionSchema": {
-          "type": "object",
-          "properties": {
-            "flagId": {
-              "type": "integer",
-              "exclusiveMinimum": 0
-            },
-            "flagKey": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
-        }
-      }
-    },
-    "FeatureFlagUpdateSchema": {
-      "$ref": "#/definitions/FeatureFlagUpdateSchema",
-      "definitions": {
-        "FeatureFlagUpdateSchema": {
-          "type": "object",
-          "properties": {
-            "flagKey": {
-              "type": "string"
-            },
-            "data": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "filters": {
-                  "type": "object",
-                  "properties": {
-                    "groups": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "properties": {
-                            "type": "array",
-                            "items": {
-                              "type": "object",
-                              "properties": {
-                                "key": {
-                                  "type": "string"
-                                },
-                                "value": {
-                                  "anyOf": [
-                                    {
-                                      "type": "string"
-                                    },
-                                    {
-                                      "type": "number"
-                                    },
-                                    {
-                                      "type": "boolean"
-                                    },
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "string"
-                                      }
-                                    },
-                                    {
-                                      "type": "array",
-                                      "items": {
-                                        "type": "number"
-                                      }
-                                    }
-                                  ]
-                                },
-                                "operator": {
-                                  "type": "string",
-                                  "enum": [
-                                    "exact",
-                                    "is_not",
-                                    "icontains",
-                                    "not_icontains",
-                                    "regex",
-                                    "not_regex",
-                                    "is_cleaned_path_exact",
-                                    "exact",
-                                    "is_not",
-                                    "gt",
-                                    "gte",
-                                    "lt",
-                                    "lte",
-                                    "min",
-                                    "max",
-                                    "exact",
-                                    "is_not",
-                                    "in",
-                                    "not_in"
-                                  ]
-                                }
-                              },
-                              "required": [
-                                "key",
-                                "value"
-                              ],
-                              "additionalProperties": false
-                            }
-                          },
-                          "rollout_percentage": {
-                            "type": "number"
-                          }
-                        },
-                        "required": [
-                          "properties",
-                          "rollout_percentage"
-                        ],
-                        "additionalProperties": false
-                      }
-                    }
-                  },
-                  "required": [
-                    "groups"
-                  ],
-                  "additionalProperties": false
-                },
-                "active": {
-                  "type": "boolean"
-                },
-                "tags": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "flagKey",
-            "data"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "InsightCreateSchema": {
-      "$ref": "#/definitions/InsightCreateSchema",
-      "definitions": {
-        "InsightCreateSchema": {
-          "type": "object",
-          "properties": {
-            "data": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "query": {
-                  "type": "object",
-                  "properties": {
-                    "kind": {
-                      "type": "string",
-                      "const": "DataVisualizationNode"
-                    },
-                    "source": {
-                      "type": "object",
-                      "properties": {
-                        "kind": {
-                          "type": "string",
-                          "const": "HogQLQuery"
-                        },
-                        "query": {
-                          "type": "string"
-                        },
-                        "explain": {
-                          "type": "boolean"
-                        },
-                        "filters": {
-                          "type": "object",
-                          "properties": {
-                            "dateRange": {
-                              "type": "object",
-                              "properties": {
-                                "date_from": {
-                                  "type": "string",
-                                  "description": "The start date of the date range. Could be a date string or a relative date string like '-7d'"
-                                },
-                                "date_to": {
-                                  "type": "string",
-                                  "description": "The end date of the date range. Could be a date string or a relative date string like '-1d'"
-                                }
-                              },
-                              "required": [
-                                "date_from",
-                                "date_to"
-                              ],
-                              "additionalProperties": false
-                            }
-                          },
-                          "additionalProperties": false
-                        }
-                      },
-                      "required": [
-                        "kind",
-                        "query"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "source"
-                  ],
-                  "additionalProperties": false
-                },
-                "description": {
-                  "type": "string"
-                },
-                "saved": {
-                  "type": "boolean",
-                  "default": true
-                },
-                "favorited": {
-                  "type": "boolean",
-                  "default": false
-                },
-                "tags": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              },
-              "required": [
-                "name",
-                "query"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "data"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "InsightDeleteSchema": {
-      "$ref": "#/definitions/InsightDeleteSchema",
-      "definitions": {
-        "InsightDeleteSchema": {
-          "type": "object",
-          "properties": {
-            "insightId": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "insightId"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "InsightGetAllSchema": {
-      "$ref": "#/definitions/InsightGetAllSchema",
-      "definitions": {
-        "InsightGetAllSchema": {
-          "type": "object",
-          "properties": {
-            "data": {
-              "type": "object",
-              "properties": {
-                "limit": {
-                  "type": "number"
-                },
-                "offset": {
-                  "type": "number"
-                },
-                "saved": {
-                  "type": "boolean"
-                },
-                "favorited": {
-                  "type": "boolean"
-                },
-                "search": {
-                  "type": "string"
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "additionalProperties": false
-        }
-      }
-    },
-    "InsightGetSchema": {
-      "$ref": "#/definitions/InsightGetSchema",
-      "definitions": {
-        "InsightGetSchema": {
-          "type": "object",
-          "properties": {
-            "insightId": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "insightId"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "InsightGetSqlSchema": {
-      "$ref": "#/definitions/InsightGetSqlSchema",
-      "definitions": {
-        "InsightGetSqlSchema": {
-          "type": "object",
-          "properties": {
-            "query": {
-              "type": "string",
-              "maxLength": 1000,
-              "description": "Your natural language query describing the SQL insight (max 1000 characters)."
-            }
-          },
-          "required": [
-            "query"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "InsightUpdateSchema": {
-      "$ref": "#/definitions/InsightUpdateSchema",
-      "definitions": {
-        "InsightUpdateSchema": {
-          "type": "object",
-          "properties": {
-            "insightId": {
-              "type": "number"
-            },
-            "data": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "filters": {
-                  "type": "object",
-                  "additionalProperties": {}
-                },
-                "query": {
-                  "type": "object",
-                  "additionalProperties": {}
-                },
-                "saved": {
-                  "type": "boolean"
-                },
-                "favorited": {
-                  "type": "boolean"
-                },
-                "dashboard": {
-                  "type": "number"
-                },
-                "tags": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "required": [
-            "insightId",
-            "data"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "LLMObservabilityGetCostsSchema": {
-      "$ref": "#/definitions/LLMObservabilityGetCostsSchema",
-      "definitions": {
-        "LLMObservabilityGetCostsSchema": {
-          "type": "object",
-          "properties": {
-            "projectId": {
-              "type": "integer",
-              "exclusiveMinimum": 0
-            },
-            "days": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "projectId"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "OrganizationGetAllSchema": {
-      "$ref": "#/definitions/OrganizationGetAllSchema",
-      "definitions": {
-        "OrganizationGetAllSchema": {
-          "type": "object",
-          "properties": {},
-          "additionalProperties": false
-        }
-      }
-    },
-    "OrganizationGetDetailsSchema": {
-      "$ref": "#/definitions/OrganizationGetDetailsSchema",
-      "definitions": {
-        "OrganizationGetDetailsSchema": {
-          "type": "object",
-          "properties": {},
-          "additionalProperties": false
-        }
-      }
-    },
-    "OrganizationSetActiveSchema": {
-      "$ref": "#/definitions/OrganizationSetActiveSchema",
-      "definitions": {
-        "OrganizationSetActiveSchema": {
-          "type": "object",
-          "properties": {
-            "orgId": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "required": [
-            "orgId"
-          ],
-          "additionalProperties": false
-        }
-      }
-    },
-    "ProjectGetAllSchema": {
-      "$ref": "#/definitions/ProjectGetAllSchema",
-      "definitions": {
-        "ProjectGetAllSchema": {
-          "type": "object",
-          "properties": {},
-          "additionalProperties": false
-        }
-      }
-    },
-    "ProjectPropertyDefinitionsSchema": {
-      "$ref": "#/definitions/ProjectPropertyDefinitionsSchema",
-      "definitions": {
-        "ProjectPropertyDefinitionsSchema": {
-          "type": "object",
-          "properties": {},
-          "additionalProperties": false
-        }
-      }
-    },
-    "ProjectSetActiveSchema": {
-      "$ref": "#/definitions/ProjectSetActiveSchema",
-      "definitions": {
-        "ProjectSetActiveSchema": {
-          "type": "object",
-          "properties": {
-            "projectId": {
-              "type": "integer",
-              "exclusiveMinimum": 0
-            }
-          },
-          "required": [
-            "projectId"
-          ],
-          "additionalProperties": false
-        }
-      }
-    }
-  }
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"definitions": {
+		"DashboardAddInsightSchema": {
+			"$ref": "#/definitions/DashboardAddInsightSchema",
+			"definitions": {
+				"DashboardAddInsightSchema": {
+					"type": "object",
+					"properties": {
+						"data": {
+							"type": "object",
+							"properties": {
+								"insight_id": {
+									"type": "integer",
+									"exclusiveMinimum": 0
+								},
+								"dashboard_id": {
+									"type": "integer",
+									"exclusiveMinimum": 0
+								}
+							},
+							"required": ["insight_id", "dashboard_id"],
+							"additionalProperties": false
+						}
+					},
+					"required": ["data"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"DashboardCreateSchema": {
+			"$ref": "#/definitions/DashboardCreateSchema",
+			"definitions": {
+				"DashboardCreateSchema": {
+					"type": "object",
+					"properties": {
+						"data": {
+							"type": "object",
+							"properties": {
+								"name": {
+									"type": "string",
+									"minLength": 1
+								},
+								"description": {
+									"type": "string"
+								},
+								"pinned": {
+									"type": "boolean",
+									"default": false
+								},
+								"tags": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								}
+							},
+							"required": ["name"],
+							"additionalProperties": false
+						}
+					},
+					"required": ["data"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"DashboardDeleteSchema": {
+			"$ref": "#/definitions/DashboardDeleteSchema",
+			"definitions": {
+				"DashboardDeleteSchema": {
+					"type": "object",
+					"properties": {
+						"dashboardId": {
+							"type": "number"
+						}
+					},
+					"required": ["dashboardId"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"DashboardGetAllSchema": {
+			"$ref": "#/definitions/DashboardGetAllSchema",
+			"definitions": {
+				"DashboardGetAllSchema": {
+					"type": "object",
+					"properties": {
+						"data": {
+							"type": "object",
+							"properties": {
+								"limit": {
+									"type": "integer",
+									"exclusiveMinimum": 0
+								},
+								"offset": {
+									"type": "integer",
+									"minimum": 0
+								},
+								"search": {
+									"type": "string"
+								},
+								"pinned": {
+									"type": "boolean"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"additionalProperties": false
+				}
+			}
+		},
+		"DashboardGetSchema": {
+			"$ref": "#/definitions/DashboardGetSchema",
+			"definitions": {
+				"DashboardGetSchema": {
+					"type": "object",
+					"properties": {
+						"dashboardId": {
+							"type": "number"
+						}
+					},
+					"required": ["dashboardId"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"DashboardUpdateSchema": {
+			"$ref": "#/definitions/DashboardUpdateSchema",
+			"definitions": {
+				"DashboardUpdateSchema": {
+					"type": "object",
+					"properties": {
+						"dashboardId": {
+							"type": "number"
+						},
+						"data": {
+							"type": "object",
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"description": {
+									"type": "string"
+								},
+								"pinned": {
+									"type": "boolean"
+								},
+								"tags": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"required": ["dashboardId", "data"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"DocumentationSearchSchema": {
+			"$ref": "#/definitions/DocumentationSearchSchema",
+			"definitions": {
+				"DocumentationSearchSchema": {
+					"type": "object",
+					"properties": {
+						"query": {
+							"type": "string"
+						}
+					},
+					"required": ["query"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"ErrorTrackingDetailsSchema": {
+			"$ref": "#/definitions/ErrorTrackingDetailsSchema",
+			"definitions": {
+				"ErrorTrackingDetailsSchema": {
+					"type": "object",
+					"properties": {
+						"issueId": {
+							"type": "string",
+							"format": "uuid"
+						},
+						"dateFrom": {
+							"type": "string",
+							"format": "date-time"
+						},
+						"dateTo": {
+							"type": "string",
+							"format": "date-time"
+						}
+					},
+					"required": ["issueId"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"ErrorTrackingListSchema": {
+			"$ref": "#/definitions/ErrorTrackingListSchema",
+			"definitions": {
+				"ErrorTrackingListSchema": {
+					"type": "object",
+					"properties": {
+						"orderBy": {
+							"type": "string",
+							"enum": ["occurrences", "first_seen", "last_seen", "users", "sessions"]
+						},
+						"dateFrom": {
+							"type": "string",
+							"format": "date-time"
+						},
+						"dateTo": {
+							"type": "string",
+							"format": "date-time"
+						},
+						"orderDirection": {
+							"type": "string",
+							"enum": ["ASC", "DESC"]
+						},
+						"filterTestAccounts": {
+							"type": "boolean"
+						},
+						"status": {
+							"type": "string",
+							"enum": ["active", "resolved", "all", "suppressed"]
+						}
+					},
+					"additionalProperties": false
+				}
+			}
+		},
+		"FeatureFlagCreateSchema": {
+			"$ref": "#/definitions/FeatureFlagCreateSchema",
+			"definitions": {
+				"FeatureFlagCreateSchema": {
+					"type": "object",
+					"properties": {
+						"name": {
+							"type": "string"
+						},
+						"key": {
+							"type": "string"
+						},
+						"description": {
+							"type": "string"
+						},
+						"filters": {
+							"type": "object",
+							"properties": {
+								"groups": {
+									"type": "array",
+									"items": {
+										"type": "object",
+										"properties": {
+											"properties": {
+												"type": "array",
+												"items": {
+													"type": "object",
+													"properties": {
+														"key": {
+															"type": "string"
+														},
+														"value": {
+															"anyOf": [
+																{
+																	"type": "string"
+																},
+																{
+																	"type": "number"
+																},
+																{
+																	"type": "boolean"
+																},
+																{
+																	"type": "array",
+																	"items": {
+																		"type": "string"
+																	}
+																},
+																{
+																	"type": "array",
+																	"items": {
+																		"type": "number"
+																	}
+																}
+															]
+														},
+														"operator": {
+															"type": "string",
+															"enum": [
+																"exact",
+																"is_not",
+																"icontains",
+																"not_icontains",
+																"regex",
+																"not_regex",
+																"is_cleaned_path_exact",
+																"exact",
+																"is_not",
+																"gt",
+																"gte",
+																"lt",
+																"lte",
+																"min",
+																"max",
+																"exact",
+																"is_not",
+																"in",
+																"not_in"
+															]
+														}
+													},
+													"required": ["key", "value"],
+													"additionalProperties": false
+												}
+											},
+											"rollout_percentage": {
+												"type": "number"
+											}
+										},
+										"required": ["properties", "rollout_percentage"],
+										"additionalProperties": false
+									}
+								}
+							},
+							"required": ["groups"],
+							"additionalProperties": false
+						},
+						"active": {
+							"type": "boolean"
+						},
+						"tags": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					},
+					"required": ["name", "key", "description", "filters", "active"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"FeatureFlagDeleteSchema": {
+			"$ref": "#/definitions/FeatureFlagDeleteSchema",
+			"definitions": {
+				"FeatureFlagDeleteSchema": {
+					"type": "object",
+					"properties": {
+						"flagKey": {
+							"type": "string"
+						}
+					},
+					"required": ["flagKey"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"FeatureFlagGetAllSchema": {
+			"$ref": "#/definitions/FeatureFlagGetAllSchema",
+			"definitions": {
+				"FeatureFlagGetAllSchema": {
+					"type": "object",
+					"properties": {},
+					"additionalProperties": false
+				}
+			}
+		},
+		"FeatureFlagGetDefinitionSchema": {
+			"$ref": "#/definitions/FeatureFlagGetDefinitionSchema",
+			"definitions": {
+				"FeatureFlagGetDefinitionSchema": {
+					"type": "object",
+					"properties": {
+						"flagId": {
+							"type": "integer",
+							"exclusiveMinimum": 0
+						},
+						"flagKey": {
+							"type": "string"
+						}
+					},
+					"additionalProperties": false
+				}
+			}
+		},
+		"FeatureFlagUpdateSchema": {
+			"$ref": "#/definitions/FeatureFlagUpdateSchema",
+			"definitions": {
+				"FeatureFlagUpdateSchema": {
+					"type": "object",
+					"properties": {
+						"flagKey": {
+							"type": "string"
+						},
+						"data": {
+							"type": "object",
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"description": {
+									"type": "string"
+								},
+								"filters": {
+									"type": "object",
+									"properties": {
+										"groups": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"properties": {
+														"type": "array",
+														"items": {
+															"type": "object",
+															"properties": {
+																"key": {
+																	"type": "string"
+																},
+																"value": {
+																	"anyOf": [
+																		{
+																			"type": "string"
+																		},
+																		{
+																			"type": "number"
+																		},
+																		{
+																			"type": "boolean"
+																		},
+																		{
+																			"type": "array",
+																			"items": {
+																				"type": "string"
+																			}
+																		},
+																		{
+																			"type": "array",
+																			"items": {
+																				"type": "number"
+																			}
+																		}
+																	]
+																},
+																"operator": {
+																	"type": "string",
+																	"enum": [
+																		"exact",
+																		"is_not",
+																		"icontains",
+																		"not_icontains",
+																		"regex",
+																		"not_regex",
+																		"is_cleaned_path_exact",
+																		"exact",
+																		"is_not",
+																		"gt",
+																		"gte",
+																		"lt",
+																		"lte",
+																		"min",
+																		"max",
+																		"exact",
+																		"is_not",
+																		"in",
+																		"not_in"
+																	]
+																}
+															},
+															"required": ["key", "value"],
+															"additionalProperties": false
+														}
+													},
+													"rollout_percentage": {
+														"type": "number"
+													}
+												},
+												"required": ["properties", "rollout_percentage"],
+												"additionalProperties": false
+											}
+										}
+									},
+									"required": ["groups"],
+									"additionalProperties": false
+								},
+								"active": {
+									"type": "boolean"
+								},
+								"tags": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"required": ["flagKey", "data"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"InsightCreateSchema": {
+			"$ref": "#/definitions/InsightCreateSchema",
+			"definitions": {
+				"InsightCreateSchema": {
+					"type": "object",
+					"properties": {
+						"data": {
+							"type": "object",
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"query": {
+									"type": "object",
+									"properties": {
+										"kind": {
+											"type": "string",
+											"const": "DataVisualizationNode"
+										},
+										"source": {
+											"type": "object",
+											"properties": {
+												"kind": {
+													"type": "string",
+													"const": "HogQLQuery"
+												},
+												"query": {
+													"type": "string"
+												},
+												"explain": {
+													"type": "boolean"
+												},
+												"filters": {
+													"type": "object",
+													"properties": {
+														"dateRange": {
+															"type": "object",
+															"properties": {
+																"date_from": {
+																	"type": "string",
+																	"description": "The start date of the date range. Could be a date string or a relative date string like '-7d'"
+																},
+																"date_to": {
+																	"type": "string",
+																	"description": "The end date of the date range. Could be a date string or a relative date string like '-1d'"
+																}
+															},
+															"required": ["date_from", "date_to"],
+															"additionalProperties": false
+														}
+													},
+													"additionalProperties": false
+												}
+											},
+											"required": ["kind", "query"],
+											"additionalProperties": false
+										}
+									},
+									"required": ["kind", "source"],
+									"additionalProperties": false
+								},
+								"description": {
+									"type": "string"
+								},
+								"saved": {
+									"type": "boolean",
+									"default": true
+								},
+								"favorited": {
+									"type": "boolean",
+									"default": false
+								},
+								"tags": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								}
+							},
+							"required": ["name", "query"],
+							"additionalProperties": false
+						}
+					},
+					"required": ["data"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"InsightDeleteSchema": {
+			"$ref": "#/definitions/InsightDeleteSchema",
+			"definitions": {
+				"InsightDeleteSchema": {
+					"type": "object",
+					"properties": {
+						"insightId": {
+							"type": "number"
+						}
+					},
+					"required": ["insightId"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"InsightGetAllSchema": {
+			"$ref": "#/definitions/InsightGetAllSchema",
+			"definitions": {
+				"InsightGetAllSchema": {
+					"type": "object",
+					"properties": {
+						"data": {
+							"type": "object",
+							"properties": {
+								"limit": {
+									"type": "number"
+								},
+								"offset": {
+									"type": "number"
+								},
+								"saved": {
+									"type": "boolean"
+								},
+								"favorited": {
+									"type": "boolean"
+								},
+								"search": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"additionalProperties": false
+				}
+			}
+		},
+		"InsightGetSchema": {
+			"$ref": "#/definitions/InsightGetSchema",
+			"definitions": {
+				"InsightGetSchema": {
+					"type": "object",
+					"properties": {
+						"insightId": {
+							"type": "number"
+						}
+					},
+					"required": ["insightId"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"InsightGetSqlSchema": {
+			"$ref": "#/definitions/InsightGetSqlSchema",
+			"definitions": {
+				"InsightGetSqlSchema": {
+					"type": "object",
+					"properties": {
+						"query": {
+							"type": "string",
+							"maxLength": 1000,
+							"description": "Your natural language query describing the SQL insight (max 1000 characters)."
+						}
+					},
+					"required": ["query"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"InsightUpdateSchema": {
+			"$ref": "#/definitions/InsightUpdateSchema",
+			"definitions": {
+				"InsightUpdateSchema": {
+					"type": "object",
+					"properties": {
+						"insightId": {
+							"type": "number"
+						},
+						"data": {
+							"type": "object",
+							"properties": {
+								"name": {
+									"type": "string"
+								},
+								"description": {
+									"type": "string"
+								},
+								"filters": {
+									"type": "object",
+									"additionalProperties": {}
+								},
+								"query": {
+									"type": "object",
+									"additionalProperties": {}
+								},
+								"saved": {
+									"type": "boolean"
+								},
+								"favorited": {
+									"type": "boolean"
+								},
+								"dashboard": {
+									"type": "number"
+								},
+								"tags": {
+									"type": "array",
+									"items": {
+										"type": "string"
+									}
+								}
+							},
+							"additionalProperties": false
+						}
+					},
+					"required": ["insightId", "data"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"LLMObservabilityGetCostsSchema": {
+			"$ref": "#/definitions/LLMObservabilityGetCostsSchema",
+			"definitions": {
+				"LLMObservabilityGetCostsSchema": {
+					"type": "object",
+					"properties": {
+						"projectId": {
+							"type": "integer",
+							"exclusiveMinimum": 0
+						},
+						"days": {
+							"type": "number"
+						}
+					},
+					"required": ["projectId"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"OrganizationGetAllSchema": {
+			"$ref": "#/definitions/OrganizationGetAllSchema",
+			"definitions": {
+				"OrganizationGetAllSchema": {
+					"type": "object",
+					"properties": {},
+					"additionalProperties": false
+				}
+			}
+		},
+		"OrganizationGetDetailsSchema": {
+			"$ref": "#/definitions/OrganizationGetDetailsSchema",
+			"definitions": {
+				"OrganizationGetDetailsSchema": {
+					"type": "object",
+					"properties": {},
+					"additionalProperties": false
+				}
+			}
+		},
+		"OrganizationSetActiveSchema": {
+			"$ref": "#/definitions/OrganizationSetActiveSchema",
+			"definitions": {
+				"OrganizationSetActiveSchema": {
+					"type": "object",
+					"properties": {
+						"orgId": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					"required": ["orgId"],
+					"additionalProperties": false
+				}
+			}
+		},
+		"ProjectGetAllSchema": {
+			"$ref": "#/definitions/ProjectGetAllSchema",
+			"definitions": {
+				"ProjectGetAllSchema": {
+					"type": "object",
+					"properties": {},
+					"additionalProperties": false
+				}
+			}
+		},
+		"ProjectPropertyDefinitionsSchema": {
+			"$ref": "#/definitions/ProjectPropertyDefinitionsSchema",
+			"definitions": {
+				"ProjectPropertyDefinitionsSchema": {
+					"type": "object",
+					"properties": {},
+					"additionalProperties": false
+				}
+			}
+		},
+		"ProjectSetActiveSchema": {
+			"$ref": "#/definitions/ProjectSetActiveSchema",
+			"definitions": {
+				"ProjectSetActiveSchema": {
+					"type": "object",
+					"properties": {
+						"projectId": {
+							"type": "integer",
+							"exclusiveMinimum": 0
+						}
+					},
+					"required": ["projectId"],
+					"additionalProperties": false
+				}
+			}
+		}
+	}
 }

@@ -8,7 +8,7 @@
 		"format": "biome format --write",
 		"lint:fix": "biome lint --fix",
 		"test": "vitest",
-		"test:integration": "vitest run --config vitest.integration.config.ts",
+		"test:integration": "vitest run --config vitest.integration.config.mts",
 		"test:watch": "vitest watch",
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types",
@@ -23,6 +23,7 @@
 		"tsx": "^4.20.3",
 		"typescript": "^5.8.3",
 		"vite": "^5.0.0",
+		"vite-tsconfig-paths": "^5.1.4",
 		"vitest": "^3.2.4",
 		"wrangler": "^4.14.4",
 		"zod-to-json-schema": "^3.24.6"

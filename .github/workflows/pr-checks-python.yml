@@ -1,4 +1,6 @@
 name: PR Checks (Python)
+permissions:
+  contents: read
 
 on:
   push:
@@ -8,7 +10,7 @@ on:
 
 jobs:
   lint-and-format:
-    name: Python Lint and Format Check
+    name: Lint and Format
     runs-on: ubuntu-latest
     
     steps:
@@ -49,7 +51,7 @@ jobs:
           fi
 
   type-check:
-    name: Python Type Check
+    name: Type Checks
     runs-on: ubuntu-latest
     
     steps:

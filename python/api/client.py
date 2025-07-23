@@ -90,7 +90,7 @@ class ApiClient:
                     error_data = response.json()
                     if error_data.get("type") == "validation_error" and error_data.get("code"):
                         raise Exception(f"Validation error: {error_data['code']}")
-                except:
+                except Exception:
                     pass
 
                 raise Exception(f"Request failed: {response.text}")
@@ -101,7 +101,7 @@ class ApiClient:
                 validated_data = response_class.model_validate(raw_data)
                 return Result.ok(validated_data)
             except ValidationError as e:
-                raise Exception(f"Response validation failed: {e}")
+                raise Exception(f"Response validation failed: {e}") from e
 
         except Exception as error:
             return Result.err(error)

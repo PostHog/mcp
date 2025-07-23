@@ -34,8 +34,8 @@ async def with_pagination(url: str, api_token: str, data_class: type[T]) -> list
                     self.results = parsed_results
 
             parsed_response = SimpleResponse(data)
-        except ValidationError:
-            raise Exception(f"Failed to parse response for {url}")
+        except ValidationError as e:
+            raise Exception(f"Failed to parse response for {url}") from e
 
         results = parsed_response.results
 

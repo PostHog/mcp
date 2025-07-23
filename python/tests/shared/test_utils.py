@@ -9,6 +9,7 @@ from typing import Any
 
 from api.client import ApiClient, ApiConfig
 from lib.utils.cache.memory_cache import MemoryCache
+from schema.query import DateRange, HogQLFilters, HogQLQuery, InsightQuery
 from tools.types import Context
 
 
@@ -151,12 +152,7 @@ def generate_unique_key(prefix: str) -> str:
     return f"{prefix}-{timestamp}-{random_suffix}"
 
 
-# Import schema types for proper query construction
-from schema.query import DateRange, HogQLFilters, HogQLQuery, InsightQuery
-
-
-# Sample HogQL queries for testing
-def create_sample_queries():
+def create_sample_queries() -> dict[str, InsightQuery]:
     pageviews_query = InsightQuery(
         kind="DataVisualizationNode",
         source=HogQLQuery(

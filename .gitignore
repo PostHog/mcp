@@ -12,3 +12,5 @@ node_modules
 # Python
 __pycache__/
 .mypy_cache/
+.ruff_cache/
+.pytest_cache/

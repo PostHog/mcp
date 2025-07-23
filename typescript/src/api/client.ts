@@ -686,13 +686,13 @@ export class ApiClient {
 
 			addInsight: async ({
 				data,
-			}: { data: { insight_id: number; dashboard_id: number } }): Promise<Result<any>> => {
+			}: { data: { insightId: number; dashboardId: number } }): Promise<Result<any>> => {
 				return this.fetchWithSchema(
-					`${this.baseUrl}/api/projects/${projectId}/insights/${data.insight_id}/`,
+					`${this.baseUrl}/api/projects/${projectId}/insights/${data.insightId}/`,
 					z.any(),
 					{
 						method: "PATCH",
-						body: JSON.stringify({ dashboards: [data.dashboard_id] }),
+						body: JSON.stringify({ dashboards: [data.dashboardId] }),
 					},
 				);
 			},

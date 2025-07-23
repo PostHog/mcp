@@ -64,7 +64,7 @@ describe("Feature Flags", { concurrent: false }, () => {
 		it("should create a feature flag with tags", async () => {
 			const params = {
 				name: "Tagged Feature Flag",
-				key: `tagged-flag-${Date.now()}`,
+				key: generateUniqueKey("tagged-flag"),
 				description: "Flag with tags",
 				filters: { groups: [] },
 				active: true,
@@ -84,7 +84,7 @@ describe("Feature Flags", { concurrent: false }, () => {
 		it("should create a feature flag with complex filters", async () => {
 			const params = {
 				name: "Complex Filter Flag",
-				key: `complex-flag-${Date.now()}`,
+				key: generateUniqueKey("complex-flag"),
 				description: "Flag with complex filters",
 				active: true,
 				filters: {
@@ -124,7 +124,7 @@ describe("Feature Flags", { concurrent: false }, () => {
 			// First create a flag
 			const createParams = {
 				name: "Original Name",
-				key: `update-test-${Date.now()}`,
+				key: generateUniqueKey("update-test"),
 				description: "Original description",
 				filters: { groups: [] },
 				active: true,
@@ -156,7 +156,7 @@ describe("Feature Flags", { concurrent: false }, () => {
 			// Create a flag
 			const createParams = {
 				name: "Filter Update Test",
-				key: `filter-update-${Date.now()}`,
+				key: generateUniqueKey("filter-update"),
 				description: "Testing filter updates",
 				filters: { groups: [] },
 				active: true,
@@ -200,7 +200,7 @@ describe("Feature Flags", { concurrent: false }, () => {
 			for (let i = 0; i < 3; i++) {
 				const params = {
 					name: `List Test Flag ${i}`,
-					key: `list-test-${Date.now()}-${i}`,
+					key: generateUniqueKey(`list-test-${i}`),
 					description: `Test flag ${i}`,
 					filters: { groups: [] },
 					active: true,
@@ -249,7 +249,7 @@ describe("Feature Flags", { concurrent: false }, () => {
 			// Create a flag
 			const createParams = {
 				name: "Definition Test Flag",
-				key: `definition-test-${Date.now()}`,
+				key: generateUniqueKey("definition-test"),
 				description: "Test flag for definition",
 				filters: { groups: [] },
 				active: true,
@@ -271,7 +271,7 @@ describe("Feature Flags", { concurrent: false }, () => {
 		});
 
 		it("should return error message for non-existent flag key", async () => {
-			const nonExistentKey = `non-existent-${Date.now()}`;
+			const nonExistentKey = generateUniqueKey("non-existent");
 
 			const result = await getDefinitionTool.handler(context, { flagKey: nonExistentKey });
 
@@ -289,7 +289,7 @@ describe("Feature Flags", { concurrent: false }, () => {
 			// Create a flag
 			const createParams = {
 				name: "Delete Test Flag",
-				key: `delete-test-${Date.now()}`,
+				key: generateUniqueKey("delete-test"),
 				description: "Test flag for deletion",
 				filters: { groups: [] },
 				active: true,
@@ -317,7 +317,7 @@ describe("Feature Flags", { concurrent: false }, () => {
 		});
 
 		it("should handle deletion of non-existent flag", async () => {
-			const nonExistentKey = `non-existent-delete-${Date.now()}`;
+			const nonExistentKey = generateUniqueKey("non-existent-delete");
 
 			const result = await deleteTool.handler(context, { flagKey: nonExistentKey });
 			expect(result.content[0].text).toBe("Feature flag is already deleted.");
@@ -331,7 +331,7 @@ describe("Feature Flags", { concurrent: false }, () => {
 			const getDefinitionTool = getFeatureFlagDefinitionTool();
 			const deleteTool = deleteFeatureFlagTool();
 
-			const flagKey = `workflow-test-${Date.now()}`;
+			const flagKey = generateUniqueKey("workflow-test");
 
 			// Create
 			const createParams = {

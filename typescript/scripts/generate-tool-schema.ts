@@ -33,7 +33,7 @@ try {
 			// Extract the actual schema from nested definitions if present
 			let actualSchema = jsonSchema;
 			const schemaObj = jsonSchema as any;
-			
+
 			// If there's nested definitions with the schema name, use that
 			if (schemaObj.definitions?.[schemaName]) {
 				actualSchema = schemaObj.definitions[schemaName];

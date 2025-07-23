@@ -468,7 +468,7 @@ class DashboardResource:
             f"{self.client.base_url}/api/projects/{self.project_id}/dashboards/",
             DashboardCreateResponse,
             method="POST",
-            data=data.model_dump()
+            data=data.model_dump(exclude_unset=True)
         )
 
     async def update(self, dashboard_id: int, data: UpdateDashboardInput) -> Result:

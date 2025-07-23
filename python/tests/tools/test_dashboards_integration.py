@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 from tests.shared.test_utils import (
     validate_environment_variables,
     create_test_client,
@@ -27,7 +28,7 @@ class TestDashboards:
         """Validate environment variables before running tests."""
         validate_environment_variables()
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def context(self):
         """Create test context and set active project/org."""
         client = create_test_client()
@@ -41,7 +42,7 @@ class TestDashboards:
         """Track created resources for cleanup."""
         return CreatedResources()
     
-    @pytest.fixture(autouse=True)
+    @pytest_asyncio.fixture(autouse=True)
     async def cleanup(self, context, created_resources):
         """Clean up resources after each test."""
         yield
@@ -112,7 +113,7 @@ class TestDashboards:
         updated_dashboard = parse_tool_response(update_result.__dict__)
 
         assert updated_dashboard["id"] == created_dashboard["id"]
-        assert updated_dashboard["name"] == update_params.data["name"]
+        assert updated_dashboard["name"] == update_params.data.name
 
     @pytest.mark.asyncio
     async def test_get_all_dashboards_proper_structure(self, context: Context, created_resources: CreatedResources):
@@ -210,7 +211,7 @@ class TestDashboards:
 
         update_result = await update_tool.execute(context, update_params)
         updated_dashboard = parse_tool_response(update_result.__dict__)
-        assert updated_dashboard["name"] == update_params.data["name"]
+        assert updated_dashboard["name"] == update_params.data.name
 
         # Delete
         delete_params = delete_tool.schema(dashboardId=created_dashboard["id"])

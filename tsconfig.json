@@ -17,7 +17,5 @@
 		"types": ["node", "worker-configuration.d.ts"]
 	},
 	"include": ["worker-configuration.d.ts"],
-	"references": [
-		{ "path": "./typescript" }
-	]
+	"references": [{ "path": "./typescript" }]
 }

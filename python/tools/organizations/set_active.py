@@ -1,4 +1,3 @@
-
 from schema.tool_inputs import OrganizationSetActiveSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 

@@ -1,5 +1,5 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { getPostHogClient } from "../client";
+import { getPostHogClient } from "@/lib/client";
 
 export class MCPToolError extends Error {
 	public readonly tool: string;

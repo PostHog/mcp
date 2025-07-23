@@ -2,13 +2,13 @@ import { McpServer, type ToolCallback } from "@modelcontextprotocol/sdk/server/m
 import { McpAgent } from "agents/mcp";
 import type { z } from "zod";
 
-import { ApiClient } from "./api/client";
-import { getPostHogClient } from "./lib/client";
-import { DurableObjectCache } from "./lib/utils/cache/DurableObjectCache";
-import { handleToolError } from "./lib/utils/handleToolError";
-import { hash } from "./lib/utils/helper-functions";
-import tools from "./tools";
-import type { Context, State } from "./tools/types";
+import { ApiClient } from "@/api/client";
+import { getPostHogClient } from "@/lib/client";
+import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
+import { handleToolError } from "@/lib/utils/handleToolError";
+import { hash } from "@/lib/utils/helper-functions";
+import tools from "@/tools";
+import type { Context, State } from "@/tools/types";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.

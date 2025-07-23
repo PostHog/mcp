@@ -10,13 +10,13 @@ import {
 	type CreatedResources,
 	parseToolResponse,
 	generateUniqueKey,
-} from "../shared/test-utils";
-import createFeatureFlagTool from "../../src/tools/featureFlags/create";
-import updateFeatureFlagTool from "../../src/tools/featureFlags/update";
-import deleteFeatureFlagTool from "../../src/tools/featureFlags/delete";
-import getAllFeatureFlagsTool from "../../src/tools/featureFlags/getAll";
-import getFeatureFlagDefinitionTool from "../../src/tools/featureFlags/getDefinition";
-import type { Context } from "../../src/tools/types";
+} from "@/shared/test-utils";
+import createFeatureFlagTool from "@/tools/featureFlags/create";
+import updateFeatureFlagTool from "@/tools/featureFlags/update";
+import deleteFeatureFlagTool from "@/tools/featureFlags/delete";
+import getAllFeatureFlagsTool from "@/tools/featureFlags/getAll";
+import getFeatureFlagDefinitionTool from "@/tools/featureFlags/getDefinition";
+import type { Context } from "@/tools/types";
 
 describe("Feature Flags", { concurrent: false }, () => {
 	let context: Context;

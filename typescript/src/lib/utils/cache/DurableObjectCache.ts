@@ -1,4 +1,4 @@
-import { ScopedCache } from "./ScopedCache";
+import { ScopedCache } from "@/lib/utils/cache/ScopedCache";
 
 interface DurableObjectStorage {
 	get<T = unknown>(key: string): Promise<T | undefined>;

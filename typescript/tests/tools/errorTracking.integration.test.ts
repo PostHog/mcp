@@ -9,11 +9,11 @@ import {
 	TEST_ORG_ID,
 	type CreatedResources,
 	parseToolResponse,
-} from "../shared/test-utils";
-import listErrorsTool from "../../src/tools/errorTracking/listErrors";
-import errorDetailsTool from "../../src/tools/errorTracking/errorDetails";
-import type { Context } from "../../src/tools/types";
-import { OrderByErrors, OrderDirectionErrors, StatusErrors } from "../../src/schema/errors";
+} from "@/shared/test-utils";
+import listErrorsTool from "@/tools/errorTracking/listErrors";
+import errorDetailsTool from "@/tools/errorTracking/errorDetails";
+import type { Context } from "@/tools/types";
+import { OrderByErrors, OrderDirectionErrors, StatusErrors } from "@/schema/errors";
 
 describe("Error Tracking", { concurrent: false }, () => {
 	let context: Context;

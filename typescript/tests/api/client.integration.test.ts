@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterEach } from "vitest";
-import { ApiClient } from "../../src/api/client";
+import { ApiClient } from "@/api/client";
 
 const API_BASE_URL = process.env.TEST_API_BASE_URL || "http://localhost:8010";
 const API_TOKEN = process.env.TEST_API_TOKEN;

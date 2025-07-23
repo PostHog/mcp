@@ -11,13 +11,13 @@ import {
 	TEST_PROJECT_ID,
 	TEST_ORG_ID,
 	type CreatedResources,
-} from "../shared/test-utils";
-import createInsightTool from "../../src/tools/insights/create";
-import updateInsightTool from "../../src/tools/insights/update";
-import deleteInsightTool from "../../src/tools/insights/delete";
-import getAllInsightsTool from "../../src/tools/insights/getAll";
-import getInsightTool from "../../src/tools/insights/get";
-import type { Context } from "../../src/tools/types";
+} from "@/shared/test-utils";
+import createInsightTool from "@/tools/insights/create";
+import updateInsightTool from "@/tools/insights/update";
+import deleteInsightTool from "@/tools/insights/delete";
+import getAllInsightsTool from "@/tools/insights/getAll";
+import getInsightTool from "@/tools/insights/get";
+import type { Context } from "@/tools/types";
 
 describe("Insights", { concurrent: false }, () => {
 	// All tests run sequentially to avoid conflicts with shared PostHog project

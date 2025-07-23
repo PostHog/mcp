@@ -10,13 +10,13 @@ import {
 	TEST_PROJECT_ID,
 	TEST_ORG_ID,
 	type CreatedResources,
-} from "../shared/test-utils";
-import createDashboardTool from "../../src/tools/dashboards/create";
-import updateDashboardTool from "../../src/tools/dashboards/update";
-import deleteDashboardTool from "../../src/tools/dashboards/delete";
-import getAllDashboardsTool from "../../src/tools/dashboards/getAll";
-import getDashboardTool from "../../src/tools/dashboards/get";
-import type { Context } from "../../src/tools/types";
+} from "@/shared/test-utils";
+import createDashboardTool from "@/tools/dashboards/create";
+import updateDashboardTool from "@/tools/dashboards/update";
+import deleteDashboardTool from "@/tools/dashboards/delete";
+import getAllDashboardsTool from "@/tools/dashboards/getAll";
+import getDashboardTool from "@/tools/dashboards/get";
+import type { Context } from "@/tools/types";
 
 describe("Dashboards", { concurrent: false }, () => {
 	let context: Context;

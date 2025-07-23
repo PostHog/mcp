@@ -7,7 +7,7 @@
 		"ignore": [
 			"worker-configuration.d.ts",
 			".mypy_cache/**",
-			"typescript/src/schema/tool-inputs.json"
+			"schema/tool-inputs.json"
 		]
 	},
 	"vcs": {

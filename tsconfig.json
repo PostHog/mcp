@@ -17,7 +17,7 @@
 		"types": ["node", "worker-configuration.d.ts"],
 		"baseUrl": "./typescript",
 		"paths": {
-			"@/*": ["src/*"]
+			"@/*": ["src/*", "tests/*"]
 		}
 	},
 	"include": ["worker-configuration.d.ts", "typescript/src/**/*.ts", "typescript/scripts/**/*.ts"]

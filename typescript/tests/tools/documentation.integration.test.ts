@@ -8,9 +8,9 @@ import {
 	TEST_PROJECT_ID,
 	TEST_ORG_ID,
 	type CreatedResources,
-} from "../shared/test-utils";
-import searchDocsTool from "../../src/tools/documentation/searchDocs";
-import type { Context } from "../../src/tools/types";
+} from "@/shared/test-utils";
+import searchDocsTool from "@/tools/documentation/searchDocs";
+import type { Context } from "@/tools/types";
 
 describe("Documentation", { concurrent: false }, () => {
 	let context: Context;

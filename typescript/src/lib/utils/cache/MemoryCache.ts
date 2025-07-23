@@ -1,4 +1,4 @@
-import { ScopedCache } from "./ScopedCache";
+import { ScopedCache } from "@/lib/utils/cache/ScopedCache";
 
 const _cacheStore = new Map<string, any>();
 

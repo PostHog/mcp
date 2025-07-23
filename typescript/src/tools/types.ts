@@ -1,6 +1,6 @@
 import type { z } from "zod";
-import type { ApiClient } from "../api/client";
-import type { ScopedCache } from "../lib/utils/cache/ScopedCache";
+import type { ApiClient } from "@/api/client";
+import type { ScopedCache } from "@/lib/utils/cache/ScopedCache";
 
 export type State = {
 	projectId: string | undefined;

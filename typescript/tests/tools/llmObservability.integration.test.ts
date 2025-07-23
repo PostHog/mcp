@@ -9,9 +9,9 @@ import {
 	TEST_ORG_ID,
 	type CreatedResources,
 	parseToolResponse,
-} from "../shared/test-utils";
-import getLLMCostsTool from "../../src/tools/llmObservability/getLLMCosts";
-import type { Context } from "../../src/tools/types";
+} from "@/shared/test-utils";
+import getLLMCostsTool from "@/tools/llmObservability/getLLMCosts";
+import type { Context } from "@/tools/types";
 
 describe("LLM Observability", { concurrent: false }, () => {
 	let context: Context;

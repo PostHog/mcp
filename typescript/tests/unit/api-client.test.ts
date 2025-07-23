@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { ApiClient } from "../../src/api/client";
-import { BASE_URL } from "../../src/lib/constants";
+import { ApiClient } from "@/api/client";
+import { BASE_URL } from "@/lib/constants";
 
 describe("ApiClient", () => {
 	it("should create ApiClient with required config", () => {

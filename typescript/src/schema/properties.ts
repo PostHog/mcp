@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { ApiPropertyDefinitionSchema, type ApiResponseSchema } from "./api";
+import { ApiPropertyDefinitionSchema, type ApiResponseSchema } from "@/schema/api";
 
 export const PropertyDefinitionSchema = ApiPropertyDefinitionSchema.pick({
 	name: true,

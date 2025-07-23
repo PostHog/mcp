@@ -1,6 +1,6 @@
 import type { z } from "zod";
-import type { Context, Tool } from "../types";
-import { ErrorTrackingDetailsSchema } from "../../schema/tool-inputs";
+import type { Context, Tool } from "@/tools/types";
+import { ErrorTrackingDetailsSchema } from "@/schema/tool-inputs";
 
 const schema = ErrorTrackingDetailsSchema;
 

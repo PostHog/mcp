@@ -1,7 +1,7 @@
 import { expect } from "vitest";
-import { ApiClient } from "../../src/api/client";
-import type { Context } from "../../src/tools/types";
-import { MemoryCache } from "../../src/lib/utils/cache/MemoryCache";
+import { ApiClient } from "@/api/client";
+import type { Context } from "@/tools/types";
+import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
 
 export const API_BASE_URL = process.env.TEST_API_BASE_URL || "http://localhost:8010";
 export const API_TOKEN = process.env.TEST_API_TOKEN;

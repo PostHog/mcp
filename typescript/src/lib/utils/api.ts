@@ -1,5 +1,5 @@
-import { ApiResponseSchema } from "../../schema/api";
-import { BASE_URL } from "../constants";
+import { ApiResponseSchema } from "@/schema/api";
+import { BASE_URL } from "@/lib/constants";
 import type { z } from "zod";
 
 export const withPagination = async <T>(

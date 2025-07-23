@@ -9,11 +9,11 @@ import {
 	TEST_ORG_ID,
 	type CreatedResources,
 	parseToolResponse,
-} from "../shared/test-utils";
-import getProjectsTool from "../../src/tools/projects/getProjects";
-import setActiveProjectTool from "../../src/tools/projects/setActive";
-import propertyDefinitionsTool from "../../src/tools/projects/propertyDefinitions";
-import type { Context } from "../../src/tools/types";
+} from "@/shared/test-utils";
+import getProjectsTool from "@/tools/projects/getProjects";
+import setActiveProjectTool from "@/tools/projects/setActive";
+import propertyDefinitionsTool from "@/tools/projects/propertyDefinitions";
+import type { Context } from "@/tools/types";
 
 describe("Projects", { concurrent: false }, () => {
 	let context: Context;

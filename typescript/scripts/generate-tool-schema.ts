@@ -3,10 +3,11 @@
 // Generates JSON schema from Zod tool-inputs schemas for Python Pydantic schema generation
 
 import * as fs from "node:fs";
+import * as path from "node:path";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import * as schemas from "@/schema/tool-inputs";
 
-const output_path = "typescript/src/schema/tool-inputs.json";
+const output_path = path.join(__dirname, "../../schema/tool-inputs.json");
 
 console.log("Generating JSON schema from Zod tool-inputs schemas...");
 

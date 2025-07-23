@@ -1,29 +1,29 @@
-import { BASE_URL } from "../lib/constants";
-import { ErrorCode } from "../lib/errors";
-import { withPagination } from "../lib/utils/api";
-import { OrganizationSchema, type Organization } from "../schema/orgs";
-import { ProjectSchema, type Project } from "../schema/projects";
+import { BASE_URL } from "@/lib/constants";
+import { ErrorCode } from "@/lib/errors";
+import { withPagination } from "@/lib/utils/api";
+import { OrganizationSchema, type Organization } from "@/schema/orgs";
+import { ProjectSchema, type Project } from "@/schema/projects";
 import {
 	type CreateFeatureFlagInput,
 	CreateFeatureFlagInputSchema,
 	type UpdateFeatureFlagInput,
 	UpdateFeatureFlagInputSchema,
 	FeatureFlagSchema,
-} from "../schema/flags";
-import { ApiPropertyDefinitionSchema } from "../schema/api";
-import { PropertyDefinitionSchema } from "../schema/properties";
+} from "@/schema/flags";
+import { ApiPropertyDefinitionSchema } from "@/schema/api";
+import { PropertyDefinitionSchema } from "@/schema/properties";
 import {
 	type CreateInsightInput,
 	CreateInsightInputSchema,
 	type ListInsightsData,
 	ListInsightsSchema,
-} from "../schema/insights";
+} from "@/schema/insights";
 import {
 	type CreateDashboardInput,
 	CreateDashboardInputSchema,
 	type ListDashboardsData,
 	ListDashboardsSchema,
-} from "../schema/dashboards";
+} from "@/schema/dashboards";
 import { z } from "zod";
 
 export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };

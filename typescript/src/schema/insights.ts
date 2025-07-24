@@ -3,7 +3,7 @@ import { InsightQuerySchema } from "./query";
 
 export const InsightSchema = z.object({
 	id: z.number(),
-	name: z.string(),
+	name: z.string().optional().nullable(),
 	description: z.string().optional().nullable(),
 	filters: z.record(z.any()),
 	query: z.record(z.any()).optional().nullable(),

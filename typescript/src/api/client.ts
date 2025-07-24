@@ -501,11 +501,7 @@ export class ApiClient {
 				if (result.success) {
 					// Ack messages don't add anything useful so let's just keep them out
 					const filteredData = result.data.filter(
-						(item: any) =>
-							!(
-								item?.type === "message" &&
-								item?.data?.type === "ack"
-							),
+						(item: any) => !(item?.type === "message" && item?.data?.type === "ack"),
 					);
 
 					return {

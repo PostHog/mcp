@@ -15,7 +15,7 @@ export const getSqlInsightHandler = async (context: Context, params: Params) => 
 		throw new Error(`Failed to execute SQL insight: ${result.error.message}`);
 	}
 
-	if (result.data.results.length === 0) {
+	if (result.data.length === 0) {
 		return {
 			content: [
 				{

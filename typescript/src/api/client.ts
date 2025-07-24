@@ -1,29 +1,29 @@
 import { BASE_URL } from "@/lib/constants";
 import { ErrorCode } from "@/lib/errors";
 import { withPagination } from "@/lib/utils/api";
-import { OrganizationSchema, type Organization } from "@/schema/orgs";
-import { ProjectSchema, type Project } from "@/schema/projects";
-import {
-	type CreateFeatureFlagInput,
-	CreateFeatureFlagInputSchema,
-	type UpdateFeatureFlagInput,
-	UpdateFeatureFlagInputSchema,
-	FeatureFlagSchema,
-} from "@/schema/flags";
 import { ApiPropertyDefinitionSchema } from "@/schema/api";
-import { PropertyDefinitionSchema } from "@/schema/properties";
-import {
-	type CreateInsightInput,
-	CreateInsightInputSchema,
-	type ListInsightsData,
-	ListInsightsSchema,
-} from "@/schema/insights";
 import {
 	type CreateDashboardInput,
 	CreateDashboardInputSchema,
 	type ListDashboardsData,
 	ListDashboardsSchema,
 } from "@/schema/dashboards";
+import {
+	type CreateFeatureFlagInput,
+	CreateFeatureFlagInputSchema,
+	FeatureFlagSchema,
+	type UpdateFeatureFlagInput,
+	UpdateFeatureFlagInputSchema,
+} from "@/schema/flags";
+import {
+	type CreateInsightInput,
+	CreateInsightInputSchema,
+	type ListInsightsData,
+	ListInsightsSchema,
+} from "@/schema/insights";
+import { type Organization, OrganizationSchema } from "@/schema/orgs";
+import { type Project, ProjectSchema } from "@/schema/projects";
+import { PropertyDefinitionSchema } from "@/schema/properties";
 import { z } from "zod";
 
 export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
@@ -352,7 +352,7 @@ export class ApiClient {
 				Result<
 					Array<{
 						id: number;
-						name: string;
+						name?: string | null;
 						short_id: string;
 						description?: string | null;
 					}>
@@ -373,7 +373,7 @@ export class ApiClient {
 
 				const simpleInsightSchema = z.object({
 					id: z.number(),
-					name: z.string(),
+					name: z.string().nullable().optional(),
 					short_id: z.string(),
 					description: z.string().optional().nullable(),
 				});
@@ -415,11 +415,16 @@ export class ApiClient {
 			get: async ({
 				insightId,
 			}: { insightId: number }): Promise<
-				Result<{ id: number; name: string; short_id: string; description?: string | null }>
+				Result<{
+					id: number;
+					name?: string | null;
+					short_id: string;
+					description?: string | null;
+				}>
 			> => {
 				const simpleInsightSchema = z.object({
 					id: z.number(),
-					name: z.string(),
+					name: z.string().nullable().optional(),
 					short_id: z.string(),
 					description: z.string().nullable().optional(),
 				});

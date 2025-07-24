@@ -36,6 +36,33 @@ npx @posthog/wizard@latest mcp add
 }
 ```
 
+### Using EU cloud or self-hosted instances
+
+If you're using PostHog EU cloud or a self-hosted instance, you can specify a custom base URL by adding the `POSTHOG_BASE_URL` environment variable:
+
+```json
+{
+  "mcpServers": {
+    "posthog": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote@latest",
+        "https://mcp.posthog.com/sse",
+        "--header",
+        "Authorization:${POSTHOG_AUTH_HEADER}"
+      ],
+      "env": {
+        "POSTHOG_AUTH_HEADER": "Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}",
+        "POSTHOG_BASE_URL": "https://eu.posthog.com"
+      }
+    }
+  }
+}
+```
+
+> **⚠️ Important:** The MCP server is currently hosted on Cloudflare Workers. While you can specify EU or other regional PostHog instances, there is no guarantee that your data will remain within or be processed exclusively in that region due to the nature of Cloudflare's global infrastructure. We are working on a hosted version for EU cloud to ensure proper data residency, in the meantime you are welcome to deploy this server on your own infrastructure.
+
 **Here are some examples of prompts you can use:**
 - What feature flags do I have active?
 - Add a new feature flag for our homepage redesign

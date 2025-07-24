@@ -483,7 +483,7 @@ export class ApiClient {
 
 			sqlInsight: async ({
 				query,
-			}: { query: string }): Promise<Result<{ columns: string[]; results: any[] }>> => {
+			}: { query: string }): Promise<Result<any[]>> => {
 				const requestBody = {
 					query: query,
 					insight_type: "sql",
@@ -501,52 +501,19 @@ export class ApiClient {
 				);
 
 				if (result.success) {
-					const dataObject = result.data.find(
+					// Ack messages don't add anything useful so let's just keep them out
+					const filteredData = result.data.filter(
 						(item: any) =>
-							item &&
-							typeof item === "object" &&
-							"columns" in item &&
-							"results" in item,
+							!(
+								item?.type === "message" &&
+								item?.data?.type === "ack"
+							),
 					);
 
-					if (dataObject) {
-						return {
-							success: true,
-							data: {
-								columns: dataObject.columns || [],
-								results: dataObject.results || [],
-							},
-						};
-					}
-
-					const anyDataObject = result.data.find(
-						(item: any) =>
-							item &&
-							typeof item === "object" &&
-							(Array.isArray(item) || Object.keys(item).length > 0),
-					);
-
-					if (anyDataObject) {
-						if (Array.isArray(anyDataObject)) {
-							return {
-								success: true,
-								data: {
-									columns: ["result"],
-									results: anyDataObject,
-								},
-							};
-						}
-
-						return {
-							success: true,
-							data: {
-								columns: Object.keys(anyDataObject),
-								results: [anyDataObject],
-							},
-						};
-					}
-
-					return { success: false, error: new Error("No SQL data found in response") };
+					return {
+						success: true,
+						data: filteredData,
+					};
 				}
 
 				return result;

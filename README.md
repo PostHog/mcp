@@ -38,7 +38,7 @@ npx @posthog/wizard@latest mcp add
 
 ### Using EU cloud or self-hosted instances
 
-If you're using PostHog EU cloud or a self-hosted instance, you can specify a custom base URL by adding the `POSTHOG_BASE_URL` environment variable in `.dev.vars` when running the MCP server locally or on your own infrastructure, e.g. `POSTHOG_BASE_URL=https://eu.posthog.com`
+If you're using PostHog EU cloud or a self-hosted instance, you can specify a custom base URL by adding the `POSTHOG_BASE_URL` [environment variable](https://developers.cloudflare.com/workers/configuration/environment-variables) when running the MCP server locally or on your own infrastructure, e.g. `POSTHOG_BASE_URL=https://eu.posthog.com`
 
 **Here are some examples of prompts you can use:**
 - What feature flags do I have active?

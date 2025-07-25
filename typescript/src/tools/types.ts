@@ -10,6 +10,7 @@ export type State = {
 
 export type Context = {
 	api: ApiClient;
+
 	cache: ScopedCache<State>;
 	env: Env;
 	getProjectId: () => Promise<string>;

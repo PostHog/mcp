@@ -13,7 +13,7 @@ export const ApiPropertyDefinitionSchema = z.object({
 	verified_at: z.string().nullable().optional(),
 	verified_by: z.string().nullable().optional(),
 	hidden: z.boolean().nullable().optional(),
-	tags: z.array(z.string()).optional(),
+	tags: z.array(z.string()).default([]),
 });
 
 export const ApiResponseSchema = <T extends z.ZodType>(dataSchema: T) =>

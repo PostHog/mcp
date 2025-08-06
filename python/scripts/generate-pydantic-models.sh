@@ -49,6 +49,7 @@ uv run datamodel-codegen \
     --use-field-description \
     --use-schema-description \
     --field-constraints \
+    --strip-default-none \
     --use-annotated
 
 echo "✅ Generated Pydantic models at $OUTPUT_PATH"

@@ -59,3 +59,21 @@ line-ending = "auto"
 
 [tool.uv]
 dev-dependencies = []
+
+[project]
+name = "posthog-mcp-python"
+version = "0.1.0"
+description = "Python implementation of the PostHog Model Context Protocol (MCP) server"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "PostHog", email = "hey@posthog.com" },
+]
+dependencies = [
+    "pydantic>=2.0.0",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+indent-width = 4

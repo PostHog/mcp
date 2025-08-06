@@ -127,8 +127,8 @@ export class MyMCP extends McpAgent<Env> {
 
 			// If there is only one org, set it as the active org
 			if (orgsResult.data.length === 1) {
-				await this.cache.set("orgId", orgsResult.data[0].id);
-				return orgsResult.data[0].id;
+				await this.cache.set("orgId", orgsResult.data[0]!.id);
+				return orgsResult.data[0]!.id;
 			}
 
 			return "@current";
@@ -149,8 +149,8 @@ export class MyMCP extends McpAgent<Env> {
 
 			// If there is only one project, set it as the active project
 			if (projectsResult.data.length === 1) {
-				await this.cache.set("projectId", projectsResult.data[0].id.toString());
-				return projectsResult.data[0].id.toString();
+				await this.cache.set("projectId", projectsResult.data[0]!.id.toString());
+				return projectsResult.data[0]!.id.toString();
 			}
 
 			return "@current";

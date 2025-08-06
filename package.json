@@ -19,7 +19,8 @@
 		"test:python": "cd python && uv run pytest tests/ -v",
 		"test:python:integration": "cd python && uv run pytest tests/tools/ -v",
 		"lint:python": "cd python && uv run ruff check --fix .",
-		"format:python": "cd python && uv run ruff format ."
+		"format:python": "cd python && uv run ruff format .",
+		"typecheck": "tsc --project typescript/tsconfig.json --noEmit"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",

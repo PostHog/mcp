@@ -34,9 +34,9 @@ class Data1(BaseModel):
         extra="forbid",
     )
     name: Annotated[str, Field(min_length=1)]
-    description: str | None = None
+    description: str | None
     pinned: bool | None = False
-    tags: list[str] | None = None
+    tags: list[str] | None
 
 
 class DashboardCreateSchema(BaseModel):
@@ -57,17 +57,17 @@ class Data2(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    limit: Annotated[int | None, Field(gt=0)] = None
-    offset: Annotated[int | None, Field(ge=0)] = None
-    search: str | None = None
-    pinned: bool | None = None
+    limit: Annotated[int | None, Field(gt=0)]
+    offset: Annotated[int | None, Field(ge=0)]
+    search: str | None
+    pinned: bool | None
 
 
 class DashboardGetAllSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    data: Data2 | None = None
+    data: Data2 | None
 
 
 class DashboardGetSchema(BaseModel):
@@ -81,10 +81,10 @@ class Data3(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    name: str | None = None
-    description: str | None = None
-    pinned: bool | None = None
-    tags: list[str] | None = None
+    name: str | None
+    description: str | None
+    pinned: bool | None
+    tags: list[str] | None
 
 
 class DashboardUpdateSchema(BaseModel):
@@ -107,8 +107,8 @@ class ErrorTrackingDetailsSchema(BaseModel):
         extra="forbid",
     )
     issueId: UUID
-    dateFrom: datetime | None = None
-    dateTo: datetime | None = None
+    dateFrom: datetime | None
+    dateTo: datetime | None
 
 
 class OrderBy(StrEnum):
@@ -135,12 +135,12 @@ class ErrorTrackingListSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    orderBy: OrderBy | None = None
-    dateFrom: datetime | None = None
-    dateTo: datetime | None = None
-    orderDirection: OrderDirection | None = None
-    filterTestAccounts: bool | None = None
-    status: Status | None = None
+    orderBy: OrderBy | None
+    dateFrom: datetime | None
+    dateTo: datetime | None
+    orderDirection: OrderDirection | None
+    filterTestAccounts: bool | None
+    status: Status | None
 
 
 class Operator(StrEnum):
@@ -171,7 +171,7 @@ class Property(BaseModel):
     )
     key: str
     value: str | float | bool | list[str] | list[float]
-    operator: Operator | None = None
+    operator: Operator | None
 
 
 class Group(BaseModel):
@@ -198,7 +198,7 @@ class FeatureFlagCreateSchema(BaseModel):
     description: str
     filters: Filters
     active: bool
-    tags: list[str] | None = None
+    tags: list[str] | None
 
 
 class FeatureFlagDeleteSchema(BaseModel):
@@ -219,8 +219,8 @@ class FeatureFlagGetDefinitionSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    flagId: Annotated[int | None, Field(gt=0)] = None
-    flagKey: str | None = None
+    flagId: Annotated[int | None, Field(gt=0)]
+    flagKey: str | None
 
 
 class Property1(BaseModel):
@@ -229,7 +229,7 @@ class Property1(BaseModel):
     )
     key: str
     value: str | float | bool | list[str] | list[float]
-    operator: Operator | None = None
+    operator: Operator | None
 
 
 class Group1(BaseModel):
@@ -251,11 +251,11 @@ class Data4(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    name: str | None = None
-    description: str | None = None
-    filters: Filters1 | None = None
-    active: bool | None = None
-    tags: list[str] | None = None
+    name: str | None
+    description: str | None
+    filters: Filters1 | None
+    active: bool | None
+    tags: list[str] | None
 
 
 class FeatureFlagUpdateSchema(BaseModel):
@@ -284,7 +284,7 @@ class Filters2(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    dateRange: DateRange | None = None
+    dateRange: DateRange | None
 
 
 class Source(BaseModel):
@@ -293,8 +293,8 @@ class Source(BaseModel):
     )
     kind: Literal["HogQLQuery"] = "HogQLQuery"
     query: str
-    explain: bool | None = None
-    filters: Filters2 | None = None
+    explain: bool | None
+    filters: Filters2 | None
 
 
 class Query(BaseModel):
@@ -311,10 +311,10 @@ class Data5(BaseModel):
     )
     name: str
     query: Query
-    description: str | None = None
+    description: str | None
     saved: bool | None = True
     favorited: bool | None = False
-    tags: list[str] | None = None
+    tags: list[str] | None
 
 
 class InsightCreateSchema(BaseModel):
@@ -335,18 +335,18 @@ class Data6(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    limit: float | None = None
-    offset: float | None = None
-    saved: bool | None = None
-    favorited: bool | None = None
-    search: str | None = None
+    limit: float | None
+    offset: float | None
+    saved: bool | None
+    favorited: bool | None
+    search: str | None
 
 
 class InsightGetAllSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    data: Data6 | None = None
+    data: Data6 | None
 
 
 class InsightGetSchema(BaseModel):
@@ -370,14 +370,14 @@ class Data7(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    name: str | None = None
-    description: str | None = None
-    filters: dict[str, Any] | None = None
-    query: dict[str, Any] | None = None
-    saved: bool | None = None
-    favorited: bool | None = None
-    dashboard: float | None = None
-    tags: list[str] | None = None
+    name: str | None
+    description: str | None
+    filters: dict[str, Any] | None
+    query: dict[str, Any] | None
+    saved: bool | None
+    favorited: bool | None
+    dashboard: float | None
+    tags: list[str] | None
 
 
 class InsightUpdateSchema(BaseModel):
@@ -393,7 +393,7 @@ class LLMObservabilityGetCostsSchema(BaseModel):
         extra="forbid",
     )
     projectId: Annotated[int, Field(gt=0)]
-    days: float | None = None
+    days: float | None
 
 
 class OrganizationGetAllSchema(BaseModel):

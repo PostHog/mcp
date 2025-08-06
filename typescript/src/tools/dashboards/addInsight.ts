@@ -27,7 +27,7 @@ export const addInsightHandler = async (context: Context, params: Params) => {
 
 	const resultWithUrls = {
 		...result.data,
-		dashboard_url: `${getProjectBaseUrl(projectId)}/dashboard/${data.dashboard_id}`,
+		dashboard_url: `${getProjectBaseUrl(projectId)}/dashboard/${data.dashboardId}`,
 		insight_url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
 	};
 

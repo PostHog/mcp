@@ -10,7 +10,7 @@ type Params = z.infer<typeof schema>;
 export const getAllHandler = async (context: Context, params: Params) => {
 	const { data } = params;
 	const projectId = await context.getProjectId();
-	const insightsResult = await context.api.insights({ projectId }).list({ params: data });
+	const insightsResult = await context.api.insights({ projectId }).list({ params: { ...data } });
 
 	if (!insightsResult.success) {
 		throw new Error(`Failed to get insights: ${insightsResult.error.message}`);

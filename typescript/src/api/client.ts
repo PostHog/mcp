@@ -1,29 +1,29 @@
 import { BASE_URL } from "@/lib/constants";
 import { ErrorCode } from "@/lib/errors";
 import { withPagination } from "@/lib/utils/api";
-import { OrganizationSchema, type Organization } from "@/schema/orgs";
-import { ProjectSchema, type Project } from "@/schema/projects";
-import {
-	type CreateFeatureFlagInput,
-	CreateFeatureFlagInputSchema,
-	type UpdateFeatureFlagInput,
-	UpdateFeatureFlagInputSchema,
-	FeatureFlagSchema,
-} from "@/schema/flags";
 import { ApiPropertyDefinitionSchema } from "@/schema/api";
-import { PropertyDefinitionSchema } from "@/schema/properties";
-import {
-	type CreateInsightInput,
-	CreateInsightInputSchema,
-	type ListInsightsData,
-	ListInsightsSchema,
-} from "@/schema/insights";
 import {
 	type CreateDashboardInput,
 	CreateDashboardInputSchema,
 	type ListDashboardsData,
 	ListDashboardsSchema,
 } from "@/schema/dashboards";
+import {
+	type CreateFeatureFlagInput,
+	CreateFeatureFlagInputSchema,
+	FeatureFlagSchema,
+	type UpdateFeatureFlagInput,
+	UpdateFeatureFlagInputSchema,
+} from "@/schema/flags";
+import {
+	type CreateInsightInput,
+	CreateInsightInputSchema,
+	type ListInsightsData,
+	ListInsightsSchema,
+} from "@/schema/insights";
+import { type Organization, OrganizationSchema } from "@/schema/orgs";
+import { type Project, ProjectSchema } from "@/schema/projects";
+import { PropertyDefinitionSchema } from "@/schema/properties";
 import { z } from "zod";
 
 export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
@@ -210,7 +210,7 @@ export class ApiClient {
 					key: string;
 					name: string;
 					active: boolean;
-					description?: string;
+					description?: string | null | undefined;
 				}>
 			> => {
 				return this.fetchWithSchema(
@@ -352,9 +352,9 @@ export class ApiClient {
 				Result<
 					Array<{
 						id: number;
-						name: string;
+						name?: string | null | undefined;
 						short_id: string;
-						description?: string | null;
+						description?: string | null | undefined;
 					}>
 				>
 			> => {
@@ -373,7 +373,7 @@ export class ApiClient {
 
 				const simpleInsightSchema = z.object({
 					id: z.number(),
-					name: z.string(),
+					name: z.string().nullable().optional(),
 					short_id: z.string(),
 					description: z.string().optional().nullable(),
 				});
@@ -415,11 +415,16 @@ export class ApiClient {
 			get: async ({
 				insightId,
 			}: { insightId: number }): Promise<
-				Result<{ id: number; name: string; short_id: string; description?: string | null }>
+				Result<{
+					id: number;
+					name?: string | null | undefined;
+					short_id: string;
+					description?: string | null | undefined;
+				}>
 			> => {
 				const simpleInsightSchema = z.object({
 					id: z.number(),
-					name: z.string(),
+					name: z.string().nullable().optional(),
 					short_id: z.string(),
 					description: z.string().nullable().optional(),
 				});
@@ -481,9 +486,7 @@ export class ApiClient {
 				}
 			},
 
-			sqlInsight: async ({
-				query,
-			}: { query: string }): Promise<Result<{ columns: string[]; results: any[] }>> => {
+			sqlInsight: async ({ query }: { query: string }): Promise<Result<any[]>> => {
 				const requestBody = {
 					query: query,
 					insight_type: "sql",
@@ -501,52 +504,15 @@ export class ApiClient {
 				);
 
 				if (result.success) {
-					const dataObject = result.data.find(
-						(item: any) =>
-							item &&
-							typeof item === "object" &&
-							"columns" in item &&
-							"results" in item,
+					// Ack messages don't add anything useful so let's just keep them out
+					const filteredData = result.data.filter(
+						(item: any) => !(item?.type === "message" && item?.data?.type === "ack"),
 					);
 
-					if (dataObject) {
-						return {
-							success: true,
-							data: {
-								columns: dataObject.columns || [],
-								results: dataObject.results || [],
-							},
-						};
-					}
-
-					const anyDataObject = result.data.find(
-						(item: any) =>
-							item &&
-							typeof item === "object" &&
-							(Array.isArray(item) || Object.keys(item).length > 0),
-					);
-
-					if (anyDataObject) {
-						if (Array.isArray(anyDataObject)) {
-							return {
-								success: true,
-								data: {
-									columns: ["result"],
-									results: anyDataObject,
-								},
-							};
-						}
-
-						return {
-							success: true,
-							data: {
-								columns: Object.keys(anyDataObject),
-								results: [anyDataObject],
-							},
-						};
-					}
-
-					return { success: false, error: new Error("No SQL data found in response") };
+					return {
+						success: true,
+						data: filteredData,
+					};
 				}
 
 				return result;
@@ -563,7 +529,7 @@ export class ApiClient {
 					Array<{
 						id: number;
 						name: string;
-						description?: string | null;
+						description?: string | null | undefined;
 					}>
 				>
 			> => {
@@ -600,7 +566,7 @@ export class ApiClient {
 			get: async ({
 				dashboardId,
 			}: { dashboardId: number }): Promise<
-				Result<{ id: number; name: string; description?: string | null }>
+				Result<{ id: number; name: string; description?: string | null | undefined }>
 			> => {
 				const simpleDashboardSchema = z.object({
 					id: z.number(),

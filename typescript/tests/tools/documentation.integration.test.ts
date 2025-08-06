@@ -37,10 +37,10 @@ describe("Documentation", { concurrent: false }, () => {
 		it("should handle missing INKEEP_API_KEY", async () => {
 			const contextWithoutKey = {
 				...context,
-				env: { ...context.env, INKEEP_API_KEY: undefined },
+				env: { ...context.env, INKEEP_API_KEY: undefined as any },
 			};
 
-			const result = await searchTool.handler(contextWithoutKey, {
+			const result = await searchTool.handler(contextWithoutKey as Context, {
 				query: "feature flags",
 			});
 

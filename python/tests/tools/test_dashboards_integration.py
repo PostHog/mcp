@@ -50,9 +50,7 @@ class TestDashboards:
         await cleanup_resources(context.api, TEST_PROJECT_ID, created_resources)
 
     @pytest.mark.asyncio
-    async def test_create_dashboard_with_minimal_fields(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_create_dashboard_with_minimal_fields(self, context: Context, created_resources: CreatedResources):
         """Test creating a dashboard with minimal fields."""
         tool = create_dashboard_tool()
         params = tool.schema(
@@ -72,9 +70,7 @@ class TestDashboards:
         created_resources.dashboards.append(dashboard_data["id"])
 
     @pytest.mark.asyncio
-    async def test_create_dashboard_with_tags(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_create_dashboard_with_tags(self, context: Context, created_resources: CreatedResources):
         """Test creating a dashboard with tags."""
         tool = create_dashboard_tool()
         params = tool.schema(
@@ -94,9 +90,7 @@ class TestDashboards:
         created_resources.dashboards.append(dashboard_data["id"])
 
     @pytest.mark.asyncio
-    async def test_update_dashboard_name_and_description(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_update_dashboard_name_and_description(self, context: Context, created_resources: CreatedResources):
         """Test updating dashboard name and description."""
         create_tool = create_dashboard_tool()
         update_tool = update_dashboard_tool()
@@ -126,9 +120,7 @@ class TestDashboards:
         assert updated_dashboard["name"] == update_params.data.name
 
     @pytest.mark.asyncio
-    async def test_get_all_dashboards_proper_structure(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_all_dashboards_proper_structure(self, context: Context, created_resources: CreatedResources):
         """Test that get-all-dashboards returns proper structure."""
         tool = get_all_dashboards_tool()
         params = tool.schema()
@@ -143,9 +135,7 @@ class TestDashboards:
             assert "name" in dashboard
 
     @pytest.mark.asyncio
-    async def test_get_specific_dashboard_by_id(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_specific_dashboard_by_id(self, context: Context, created_resources: CreatedResources):
         """Test getting a specific dashboard by ID."""
         create_tool = create_dashboard_tool()
         get_tool = get_dashboard_tool()

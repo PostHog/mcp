@@ -73,15 +73,10 @@ jobs:
           cd python
           uv sync --dev
           
-      - name: Install mypy
-        run: |
-          cd python
-          uv add --dev mypy
-          
       - name: Run type checking
         run: |
           cd python
-          uv run mypy . --ignore-missing-imports --check-untyped-defs
+          uvx ty check
 
   schema-sync:
     name: Schema Synchronization Check

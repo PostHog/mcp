@@ -50,5 +50,3 @@ def get_project_base_url(project_id: str) -> str:
     if project_id == "@current":
         return BASE_URL
     return f"{BASE_URL}/project/{project_id}"
-
-

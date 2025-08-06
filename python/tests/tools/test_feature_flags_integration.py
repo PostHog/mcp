@@ -53,9 +53,7 @@ class TestFeatureFlags:
         await cleanup_resources(context.api, TEST_PROJECT_ID, created_resources)
 
     @pytest.mark.asyncio
-    async def test_create_feature_flag_with_minimal_fields(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_create_feature_flag_with_minimal_fields(self, context: Context, created_resources: CreatedResources):
         """Test creating a feature flag with minimal required fields."""
         tool = create_feature_flag_tool()
         params = tool.schema(
@@ -78,9 +76,7 @@ class TestFeatureFlags:
         created_resources.feature_flags.append(flag_data["id"])
 
     @pytest.mark.asyncio
-    async def test_create_feature_flag_with_complex_filters(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_create_feature_flag_with_complex_filters(self, context: Context, created_resources: CreatedResources):
         """Test creating a feature flag with complex filters."""
         tool = create_feature_flag_tool()
         complex_filters = {
@@ -92,7 +88,7 @@ class TestFeatureFlags:
                 {
                     "properties": [],
                     "rollout_percentage": 100.0,
-                }
+                },
             ]
         }
 
@@ -116,9 +112,7 @@ class TestFeatureFlags:
         created_resources.feature_flags.append(flag_data["id"])
 
     @pytest.mark.asyncio
-    async def test_create_feature_flag_with_tags(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_create_feature_flag_with_tags(self, context: Context, created_resources: CreatedResources):
         """Test creating a feature flag with tags."""
         tool = create_feature_flag_tool()
         params = tool.schema(
@@ -140,9 +134,7 @@ class TestFeatureFlags:
         created_resources.feature_flags.append(flag_data["id"])
 
     @pytest.mark.asyncio
-    async def test_update_feature_flag_by_key(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_update_feature_flag_by_key(self, context: Context, created_resources: CreatedResources):
         """Test updating a feature flag by key."""
         create_tool = create_feature_flag_tool()
         update_tool = update_feature_flag_tool()
@@ -174,9 +166,7 @@ class TestFeatureFlags:
         assert updated_flag["key"] == create_params.key
 
     @pytest.mark.asyncio
-    async def test_update_feature_flag_filters(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_update_feature_flag_filters(self, context: Context, created_resources: CreatedResources):
         """Test updating feature flag filters."""
         create_tool = create_feature_flag_tool()
         update_tool = update_feature_flag_tool()
@@ -206,9 +196,7 @@ class TestFeatureFlags:
         assert updated_flag["key"] == create_params.key
 
     @pytest.mark.asyncio
-    async def test_get_all_feature_flags(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_all_feature_flags(self, context: Context, created_resources: CreatedResources):
         """Test listing all feature flags."""
         create_tool = create_feature_flag_tool()
         get_all_tool = get_all_feature_flags_tool()
@@ -244,9 +232,7 @@ class TestFeatureFlags:
             assert found["key"] == test_flag["key"]
 
     @pytest.mark.asyncio
-    async def test_get_all_feature_flags_proper_structure(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_all_feature_flags_proper_structure(self, context: Context, created_resources: CreatedResources):
         """Test that get-all-feature-flags returns proper structure."""
         tool = get_all_feature_flags_tool()
         params = tool.schema()
@@ -262,9 +248,7 @@ class TestFeatureFlags:
             assert "active" in flag
 
     @pytest.mark.asyncio
-    async def test_get_feature_flag_definition_by_key(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_feature_flag_definition_by_key(self, context: Context, created_resources: CreatedResources):
         """Test getting feature flag definition by key."""
         create_tool = create_feature_flag_tool()
         get_definition_tool = get_feature_flag_definition_tool()
@@ -294,9 +278,7 @@ class TestFeatureFlags:
         assert definition["active"] == create_params.active
 
     @pytest.mark.asyncio
-    async def test_get_feature_flag_definition_non_existent(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_feature_flag_definition_non_existent(self, context: Context, created_resources: CreatedResources):
         """Test getting definition for non-existent flag key."""
         tool = get_feature_flag_definition_tool()
         non_existent_key = generate_unique_key("non-existent")
@@ -308,9 +290,7 @@ class TestFeatureFlags:
         assert result.content[0].text == f'Error: Flag with key "{non_existent_key}" not found.'
 
     @pytest.mark.asyncio
-    async def test_delete_feature_flag_by_key(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_delete_feature_flag_by_key(self, context: Context, created_resources: CreatedResources):
         """Test deleting a feature flag by key."""
         create_tool = create_feature_flag_tool()
         delete_tool = delete_feature_flag_tool()
@@ -350,14 +330,10 @@ class TestFeatureFlags:
         get_definition_tool = get_feature_flag_definition_tool()
         get_params = get_definition_tool.schema(flagKey=create_params.key)
         get_result = await get_definition_tool.execute(context, get_params)
-        assert (
-            get_result.content[0].text == f'Error: Flag with key "{create_params.key}" not found.'
-        )
+        assert get_result.content[0].text == f'Error: Flag with key "{create_params.key}" not found.'
 
     @pytest.mark.asyncio
-    async def test_delete_non_existent_feature_flag(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_delete_non_existent_feature_flag(self, context: Context, created_resources: CreatedResources):
         """Test deleting a non-existent feature flag."""
         tool = delete_feature_flag_tool()
 
@@ -394,9 +370,7 @@ class TestFeatureFlags:
         assert retrieved_flag["id"] == created_flag["id"]
 
         # Update
-        update_params = update_tool.schema(
-            flagKey=flag_key, data={"active": True, "name": "Updated Workflow Flag"}
-        )
+        update_params = update_tool.schema(flagKey=flag_key, data={"active": True, "name": "Updated Workflow Flag"})
 
         update_result = await update_tool.execute(context, update_params)
         updated_flag = parse_tool_response(update_result.__dict__)

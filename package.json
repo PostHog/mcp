@@ -19,6 +19,7 @@
 		"test:python": "cd python && uv run pytest tests/ -v",
 		"lint:python": "cd python && uv run ruff check --fix .",
 		"format:python": "cd python && uv run ruff format .",
+		"typecheck:python": "cd python && uvx ty check",
 		"typecheck": "tsc --project typescript/tsconfig.json --noEmit"
 	},
 	"devDependencies": {

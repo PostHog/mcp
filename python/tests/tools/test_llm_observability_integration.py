@@ -45,9 +45,7 @@ class TestLLMObservability:
         await cleanup_resources(context.api, TEST_PROJECT_ID, created_resources)
 
     @pytest.mark.asyncio
-    async def test_get_llm_costs_default_days(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_llm_costs_default_days(self, context: Context, created_resources: CreatedResources):
         """Test getting LLM costs with default days (6 days)."""
         tool = get_llm_costs_tool()
         params = tool.schema(projectId=int(TEST_PROJECT_ID))
@@ -58,9 +56,7 @@ class TestLLMObservability:
         assert isinstance(costs_data, list)
 
     @pytest.mark.asyncio
-    async def test_get_llm_costs_custom_time_period(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_llm_costs_custom_time_period(self, context: Context, created_resources: CreatedResources):
         """Test getting LLM costs for custom time period."""
         tool = get_llm_costs_tool()
         params = tool.schema(projectId=int(TEST_PROJECT_ID), days=30)
@@ -71,9 +67,7 @@ class TestLLMObservability:
         assert isinstance(costs_data, list)
 
     @pytest.mark.asyncio
-    async def test_get_llm_costs_single_day(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_llm_costs_single_day(self, context: Context, created_resources: CreatedResources):
         """Test getting LLM costs for single day."""
         tool = get_llm_costs_tool()
         params = tool.schema(projectId=int(TEST_PROJECT_ID), days=1)
@@ -84,9 +78,7 @@ class TestLLMObservability:
         assert isinstance(costs_data, list)
 
     @pytest.mark.asyncio
-    async def test_llm_observability_workflow_different_time_periods(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_llm_observability_workflow_different_time_periods(self, context: Context, created_resources: CreatedResources):
         """Test getting costs for different time periods."""
         tool = get_llm_costs_tool()
 

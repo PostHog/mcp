@@ -2,12 +2,8 @@ from pydantic import BaseModel, Field
 
 
 class DateRange(BaseModel):
-    date_from: str = Field(
-        description="The start date of the date range. Could be a date string or a relative date string like '-7d'"
-    )
-    date_to: str = Field(
-        description="The end date of the date range. Could be a date string or a relative date string like '-1d'"
-    )
+    date_from: str = Field(description="The start date of the date range. Could be a date string or a relative date string like '-7d'")
+    date_to: str = Field(description="The end date of the date range. Could be a date string or a relative date string like '-1d'")
 
 
 class HogQLFilters(BaseModel):

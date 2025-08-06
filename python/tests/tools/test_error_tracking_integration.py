@@ -49,9 +49,7 @@ class TestErrorTracking:
         await cleanup_resources(context.api, TEST_PROJECT_ID, created_resources)
 
     @pytest.mark.asyncio
-    async def test_list_errors_with_default_parameters(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_list_errors_with_default_parameters(self, context: Context, created_resources: CreatedResources):
         """Test listing errors with default parameters."""
         tool = list_errors_tool()
         params = tool.schema()
@@ -62,9 +60,7 @@ class TestErrorTracking:
         assert isinstance(error_data, list)
 
     @pytest.mark.asyncio
-    async def test_list_errors_with_custom_date_range(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_list_errors_with_custom_date_range(self, context: Context, created_resources: CreatedResources):
         """Test listing errors with custom date range."""
         tool = list_errors_tool()
 
@@ -95,9 +91,7 @@ class TestErrorTracking:
         assert isinstance(error_data, list)
 
     @pytest.mark.asyncio
-    async def test_handle_empty_results(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_handle_empty_results(self, context: Context, created_resources: CreatedResources):
         """Test handling empty results with narrow date range."""
         tool = list_errors_tool()
 
@@ -113,9 +107,7 @@ class TestErrorTracking:
         assert isinstance(error_data, list)
 
     @pytest.mark.asyncio
-    async def test_get_error_details_by_issue_id(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_error_details_by_issue_id(self, context: Context, created_resources: CreatedResources):
         """Test getting error details by issue ID."""
         tool = error_details_tool()
         test_issue_id = "00000000-0000-0000-0000-000000000000"
@@ -128,9 +120,7 @@ class TestErrorTracking:
         assert isinstance(error_details, list)
 
     @pytest.mark.asyncio
-    async def test_get_error_details_with_custom_date_range(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_error_details_with_custom_date_range(self, context: Context, created_resources: CreatedResources):
         """Test getting error details with custom date range."""
         tool = error_details_tool()
         test_issue_id = "00000000-0000-0000-0000-000000000000"
@@ -146,9 +136,7 @@ class TestErrorTracking:
         assert isinstance(error_details, list)
 
     @pytest.mark.asyncio
-    async def test_error_tracking_workflow(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_error_tracking_workflow(self, context: Context, created_resources: CreatedResources):
         """Test error tracking workflow: list errors and get details."""
         list_tool = list_errors_tool()
         details_tool = error_details_tool()

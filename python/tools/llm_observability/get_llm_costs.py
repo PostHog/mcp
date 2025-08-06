@@ -4,9 +4,7 @@ from schema.tool_inputs import LLMObservabilityGetCostsSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
 
-async def get_llm_costs_handler(
-    context: Context, params: LLMObservabilityGetCostsSchema
-) -> ToolResult:
+async def get_llm_costs_handler(context: Context, params: LLMObservabilityGetCostsSchema) -> ToolResult:
     days = int(params.days) if params.days else 6
 
     trends_query = {

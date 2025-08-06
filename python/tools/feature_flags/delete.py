@@ -5,9 +5,7 @@ from schema.tool_inputs import FeatureFlagDeleteSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
 
-async def delete_feature_flag_handler(
-    context: Context, params: FeatureFlagDeleteSchema
-) -> ToolResult:
+async def delete_feature_flag_handler(context: Context, params: FeatureFlagDeleteSchema) -> ToolResult:
     project_id = await context.get_project_id()
 
     # First find the flag by key to get its ID

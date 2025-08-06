@@ -108,8 +108,8 @@ export const FeatureFlagSchema = z.object({
 	id: z.number(),
 	key: z.string(),
 	name: z.string(),
-	description: z.string().optional(),
-	filters: FiltersSchema.optional(),
+	description: z.string().optional().nullable(),
+	filters: FiltersSchema.optional().nullable(),
 	active: z.boolean(),
 	tags: z.array(z.string()).optional(),
 });

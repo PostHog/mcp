@@ -34,7 +34,7 @@ export async function docsSearch(apiKey: string, userQuery: string): Promise<str
 	if (
 		data.choices &&
 		data.choices.length > 0 &&
-		data.choices[0].message &&
+		data.choices[0]?.message &&
 		data.choices[0].message.content
 	) {
 		return data.choices[0].message.content;

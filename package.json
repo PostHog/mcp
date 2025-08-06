@@ -15,7 +15,8 @@
 		"prepare": "husky",
 		"schema:build:json": "tsx typescript/scripts/generate-tool-schema.ts",
 		"schema:build:python": "bash python/scripts/generate-pydantic-models.sh",
-		"schema:build": "pnpm run schema:build:json && pnpm run schema:build:python"
+		"schema:build": "pnpm run schema:build:json && pnpm run schema:build:python",
+		"typecheck": "tsc --project typescript/tsconfig.json --noEmit"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",

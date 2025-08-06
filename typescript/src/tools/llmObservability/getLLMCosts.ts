@@ -31,7 +31,7 @@ export const getLLMCostsHandler = async (context: Context, params: Params) => {
 		},
 	};
 
-	const costsResult = await context.api.query({ projectId }).execute({ queryBody: trendsQuery });
+	const costsResult = await context.api.query({ projectId: String(projectId) }).execute({ queryBody: trendsQuery });
 	if (!costsResult.success) {
 		throw new Error(`Failed to get LLM costs: ${costsResult.error.message}`);
 	}

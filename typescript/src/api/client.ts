@@ -210,7 +210,7 @@ export class ApiClient {
 					key: string;
 					name: string;
 					active: boolean;
-					description?: string;
+					description?: string | null | undefined;
 				}>
 			> => {
 				return this.fetchWithSchema(
@@ -352,9 +352,9 @@ export class ApiClient {
 				Result<
 					Array<{
 						id: number;
-						name?: string | null;
+						name?: string | null | undefined;
 						short_id: string;
-						description?: string | null;
+						description?: string | null | undefined;
 					}>
 				>
 			> => {
@@ -417,9 +417,9 @@ export class ApiClient {
 			}: { insightId: number }): Promise<
 				Result<{
 					id: number;
-					name?: string | null;
+					name?: string | null | undefined;
 					short_id: string;
-					description?: string | null;
+					description?: string | null | undefined;
 				}>
 			> => {
 				const simpleInsightSchema = z.object({
@@ -529,7 +529,7 @@ export class ApiClient {
 					Array<{
 						id: number;
 						name: string;
-						description?: string | null;
+						description?: string | null | undefined;
 					}>
 				>
 			> => {
@@ -566,7 +566,7 @@ export class ApiClient {
 			get: async ({
 				dashboardId,
 			}: { dashboardId: number }): Promise<
-				Result<{ id: number; name: string; description?: string | null }>
+				Result<{ id: number; name: string; description?: string | null | undefined }>
 			> => {
 				const simpleDashboardSchema = z.object({
 					id: z.number(),

@@ -30,6 +30,9 @@ jobs:
       - name: Run formatter
         run: pnpm run format
         
+      - name: Run type check
+        run: pnpm run typecheck
+        
       - name: Check for changes
         run: |
           if [ -n "$(git status --porcelain)" ]; then

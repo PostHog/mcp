@@ -287,7 +287,7 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 			if (result.success) {
 				expect(result.data).toHaveProperty("columns");
 				expect(result.data).toHaveProperty("results");
-				if ('columns' in result.data && 'results' in result.data) {
+				if ("columns" in result.data && "results" in result.data) {
 					expect(Array.isArray(result.data.columns)).toBe(true);
 					expect(Array.isArray(result.data.results)).toBe(true);
 				}

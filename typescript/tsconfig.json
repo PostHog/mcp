@@ -25,5 +25,5 @@
 		}
 	},
 	"include": ["src/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts", "../worker-configuration.d.ts"],
-	"exclude": ["node_modules", "dist", "**/*.test.ts"]
+	"exclude": ["node_modules", "dist"]
 }

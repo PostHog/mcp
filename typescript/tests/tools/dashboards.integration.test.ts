@@ -45,6 +45,7 @@ describe("Dashboards", { concurrent: false }, () => {
 				data: {
 					name: generateUniqueKey("Test Dashboard"),
 					description: "Integration test dashboard",
+					pinned: false,
 				},
 			};
 
@@ -64,6 +65,7 @@ describe("Dashboards", { concurrent: false }, () => {
 					name: generateUniqueKey("Tagged Dashboard"),
 					description: "Dashboard with tags",
 					tags: ["test", "integration"],
+					pinned: false,
 				},
 			};
 
@@ -86,6 +88,7 @@ describe("Dashboards", { concurrent: false }, () => {
 				data: {
 					name: generateUniqueKey("Original Dashboard"),
 					description: "Original description",
+					pinned: false,
 				},
 			};
 
@@ -134,6 +137,7 @@ describe("Dashboards", { concurrent: false }, () => {
 				data: {
 					name: generateUniqueKey("Get Test Dashboard"),
 					description: "Test dashboard for get operation",
+					pinned: false,
 				},
 			};
 
@@ -158,6 +162,7 @@ describe("Dashboards", { concurrent: false }, () => {
 				data: {
 					name: generateUniqueKey("Delete Test Dashboard"),
 					description: "Test dashboard for deletion",
+					pinned: false,
 				},
 			};
 
@@ -185,6 +190,7 @@ describe("Dashboards", { concurrent: false }, () => {
 				data: {
 					name: generateUniqueKey("Workflow Test Dashboard"),
 					description: "Testing full workflow",
+					pinned: false,
 				},
 			};
 

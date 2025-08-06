@@ -88,8 +88,10 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 					const org = result.data[0];
 					expect(org).toHaveProperty("id");
 					expect(org).toHaveProperty("name");
-					expect(typeof org.id).toBe("string");
-					expect(typeof org.name).toBe("string");
+					if (org) {
+						expect(typeof org.id).toBe("string");
+						expect(typeof org.name).toBe("string");
+					}
 				}
 			}
 		});
@@ -121,8 +123,10 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 					const project = result.data[0];
 					expect(project).toHaveProperty("id");
 					expect(project).toHaveProperty("name");
-					expect(typeof project.id).toBe("number");
-					expect(typeof project.name).toBe("string");
+					if (project) {
+						expect(typeof project.id).toBe("number");
+						expect(typeof project.name).toBe("string");
+					}
 				}
 			}
 		});
@@ -283,8 +287,10 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 			if (result.success) {
 				expect(result.data).toHaveProperty("columns");
 				expect(result.data).toHaveProperty("results");
-				expect(Array.isArray(result.data.columns)).toBe(true);
-				expect(Array.isArray(result.data.results)).toBe(true);
+				if ('columns' in result.data && 'results' in result.data) {
+					expect(Array.isArray(result.data.columns)).toBe(true);
+					expect(Array.isArray(result.data.results)).toBe(true);
+				}
 			}
 		});
 
@@ -305,6 +311,8 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 					},
+					saved: true,
+					favorited: false,
 				},
 			});
 
@@ -369,6 +377,7 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 				data: {
 					name: "Test Dashboard",
 					description: "Test dashboard for API tests",
+					pinned: false,
 				},
 			});
 

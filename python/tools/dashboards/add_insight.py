@@ -1,31 +1,31 @@
 import json
 
+from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
+from schema.dashboards import AddInsightToDashboard
 from schema.tool_inputs import DashboardAddInsightSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
 
-async def add_insight_to_dashboard_handler(
-    context: Context, params: DashboardAddInsightSchema
-) -> ToolResult:
+async def add_insight_to_dashboard_handler(context: Context, params: DashboardAddInsightSchema) -> ToolResult:
     project_id = await context.get_project_id()
 
     # First get the insight to get its short_id for URL generation
     insight_result = await context.api.insights(project_id).get(params.data.insightId)
 
-    if not insight_result.success:
+    if is_error(insight_result):
         raise Exception(f"Failed to get insight: {insight_result.error}")
 
-    # Then add the insight to the dashboard
-    from schema.dashboards import AddInsightToDashboard
+    assert is_success(insight_result)
 
-    add_insight_data = AddInsightToDashboard(
-        insight_id=params.data.insightId, dashboard_id=params.data.dashboardId
-    )
+    # Then add the insight to the dashboard
+    add_insight_data = AddInsightToDashboard(insight_id=params.data.insightId, dashboard_id=params.data.dashboardId)
     result = await context.api.dashboards(project_id).add_insight(add_insight_data)
 
-    if not result.success:
+    if is_error(result):
         raise Exception(f"Failed to add insight to dashboard: {result.error}")
+
+    assert is_success(result)
 
     result_with_urls = {
         **result.data,

@@ -2,13 +2,9 @@ from schema.tool_inputs import ProjectSetActiveSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
 
-async def set_active_project_handler(
-    context: Context, params: ProjectSetActiveSchema
-) -> ToolResult:
+async def set_active_project_handler(context: Context, params: ProjectSetActiveSchema) -> ToolResult:
     project_id = str(params.projectId)
-    state = await context.cache.get("state") or {}
-    state["project_id"] = project_id
-    await context.cache.set("state", state)
+    await context.cache.set("project_id", project_id)
 
     return ToolResult(content=[TextContent(text=f"Switched to project {project_id}")])
 

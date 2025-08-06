@@ -35,7 +35,7 @@ from tools.types import Context
 
 
 class ToolRegistry:
-    def __init__(self, api_token: str, base_url: str = None):
+    def __init__(self, api_token: str, base_url: str):
         self.api = ApiClient(ApiConfig(api_token=api_token, base_url=base_url))
         self.cache = MemoryCache()
         self.env: dict[str, Any] = {}
@@ -124,9 +124,7 @@ class ToolRegistry:
         validated_params = tool.schema.model_validate(params)
         result = await tool.execute(context, validated_params)
 
-        return {
-            "content": [{"type": content.type, "text": content.text} for content in result.content]
-        }
+        return {"content": [{"type": content.type, "text": content.text} for content in result.content]}
 
     async def close(self):
         await self.api.close()

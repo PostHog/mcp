@@ -1,5 +1,6 @@
 import json
 
+from api.client import is_error, is_success
 from schema.tool_inputs import ProjectGetAllSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
@@ -8,14 +9,14 @@ async def get_projects_handler(context: Context, _params: ProjectGetAllSchema) -
     org_id = await context.get_org_id()
     projects_result = await context.api.organizations().projects(org_id).list()
 
-    if not projects_result.success:
+    if is_error(projects_result):
         raise Exception(f"Failed to get projects: {projects_result.error}")
 
-    return ToolResult(
-        content=[
-            TextContent(text=json.dumps([project.model_dump() for project in projects_result.data]))
-        ]
-    )
+    assert is_success(projects_result)
+
+    projects_data = [project.model_dump() for project in projects_result.data]
+
+    return ToolResult(content=[TextContent(text=json.dumps(projects_data))])
 
 
 def get_projects_tool() -> Tool[ProjectGetAllSchema]:

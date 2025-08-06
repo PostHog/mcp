@@ -47,9 +47,7 @@ class TestOrganizations:
         await cleanup_resources(context.api, TEST_PROJECT_ID, created_resources)
 
     @pytest.mark.asyncio
-    async def test_list_all_organizations(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_list_all_organizations(self, context: Context, created_resources: CreatedResources):
         """Test listing all organizations."""
         tool = get_organizations_tool()
         params = tool.schema()
@@ -65,9 +63,7 @@ class TestOrganizations:
         assert "name" in org
 
     @pytest.mark.asyncio
-    async def test_organizations_proper_structure(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_organizations_proper_structure(self, context: Context, created_resources: CreatedResources):
         """Test that organizations have proper structure."""
         tool = get_organizations_tool()
         params = tool.schema()
@@ -80,9 +76,7 @@ class TestOrganizations:
         assert test_org["id"] == TEST_ORG_ID
 
     @pytest.mark.asyncio
-    async def test_set_active_organization(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_set_active_organization(self, context: Context, created_resources: CreatedResources):
         """Test setting active organization."""
         get_tool = get_organizations_tool()
         set_tool = set_active_org_tool()
@@ -101,14 +95,10 @@ class TestOrganizations:
         assert set_result.content[0].text == f"Switched to organization {target_org['id']}"
 
     @pytest.mark.asyncio
-    async def test_set_invalid_organization_id(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_set_invalid_organization_id(self, context: Context, created_resources: CreatedResources):
         """Test handling invalid organization ID."""
         tool = set_active_org_tool()
-        invalid_org_id = (
-            "00000000-0000-0000-0000-000000000000"  # Valid UUID format but non-existent
-        )
+        invalid_org_id = "00000000-0000-0000-0000-000000000000"  # Valid UUID format but non-existent
         params = tool.schema(orgId=invalid_org_id)
 
         # The Python implementation doesn't validate org existence, it just sets the ID
@@ -117,9 +107,7 @@ class TestOrganizations:
 
     @pytest.mark.asyncio
     @pytest.mark.skip(reason="Organization details test skipped - matching TypeScript")
-    async def test_get_organization_details_for_active_org(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_organization_details_for_active_org(self, context: Context, created_resources: CreatedResources):
         """Test getting organization details for active org."""
         tool = get_organization_details_tool()
         params = tool.schema()
@@ -134,9 +122,7 @@ class TestOrganizations:
 
     @pytest.mark.asyncio
     @pytest.mark.skip(reason="Organization details test skipped - matching TypeScript")
-    async def test_include_projects_in_organization_details(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_include_projects_in_organization_details(self, context: Context, created_resources: CreatedResources):
         """Test that organization details include projects."""
         tool = get_organization_details_tool()
         params = tool.schema()
@@ -152,15 +138,11 @@ class TestOrganizations:
             assert "id" in project
             assert "name" in project
 
-        test_project = next(
-            (p for p in org_details["projects"] if p["id"] == int(TEST_PROJECT_ID)), None
-        )
+        test_project = next((p for p in org_details["projects"] if p["id"] == int(TEST_PROJECT_ID)), None)
         assert test_project is not None
 
     @pytest.mark.asyncio
-    async def test_organization_workflow(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_organization_workflow(self, context: Context, created_resources: CreatedResources):
         """Test organization workflow: list and set active org."""
         get_tool = get_organizations_tool()
         set_tool = set_active_org_tool()
@@ -180,4 +162,4 @@ class TestOrganizations:
         assert set_result.content[0].text == f"Switched to organization {target_org['id']}"
 
         # Set in cache for future tests
-        await context.cache.set("state", {"org_id": target_org["id"]})
+        await context.cache.set("org_id", target_org["id"])

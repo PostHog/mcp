@@ -1,42 +1,82 @@
 import json
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import Any, Generic, Literal, TypeGuard, TypeVar
 
 import httpx
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 
 from lib.constants import BASE_URL
 from lib.errors import ErrorCode
 from lib.utils.api import with_pagination
-from schema.api import ApiPropertyDefinition
-from schema.dashboards import (
-    AddInsightToDashboard,
-    CreateDashboardInput,
-    ListDashboards,
-    UpdateDashboardInput,
+from schema.api import (
+    ApiPropertyDefinition,
+    DashboardCreateResponse,
+    DashboardGetResponse,
+    DashboardListItem,
+    DashboardUpdateResponse,
+    DeleteResponse,
+    FeatureFlagCreateResponse,
+    FeatureFlagGetResponse,
+    FeatureFlagListItem,
+    FeatureFlagUpdateResponse,
+    InsightCreateResponse,
+    InsightGetResponse,
+    InsightListItem,
+    InsightUpdateResponse,
+    OrgListResponse,
+    ProjectListResponse,
+    QueryResponse,
+    UserResponse,
 )
+from schema.dashboards import AddInsightToDashboard, CreateDashboardInput, ListDashboards, UpdateDashboardInput
 from schema.flags import CreateFeatureFlagInput, UpdateFeatureFlagInput
 from schema.insights import CreateInsightInput, ListInsights, UpdateInsightInput
 from schema.orgs import Organization
 from schema.projects import Project
 from schema.properties import PropertyDefinition
 
-T = TypeVar("T", bound=BaseModel)
+T = TypeVar("T")
 
 
 @dataclass
-class Result:
-    success: bool
-    data: Any | None = None
-    error: Exception | None = None
+class SuccessResult(Generic[T]):
+    success: Literal[True]
+    data: T
 
-    @classmethod
-    def ok(cls, data: Any) -> "Result":
-        return cls(success=True, data=data)
+    def __init__(self, data: T):
+        self.success = True
+        self.data = data
 
-    @classmethod
-    def err(cls, error: Exception) -> "Result":
-        return cls(success=False, error=error)
+
+@dataclass
+class ErrorResult:
+    success: Literal[False]
+    error: Exception
+
+    def __init__(self, error: Exception):
+        self.success = False
+        self.error = error
+
+
+# Generic Result type with proper narrowing
+Result = SuccessResult[T] | ErrorResult
+
+
+# Type narrowing functions - these work with Python's type system
+def is_success(result: Result[T]) -> TypeGuard[SuccessResult[T]]:
+    """Type guard that narrows Result[T] to SuccessResult[T]"""
+    return result.success
+
+
+def is_error(result: Result[T]) -> TypeGuard[ErrorResult]:
+    """Type guard that narrows Result[T] to ErrorResult"""
+    return not result.success
+
+
+# Helper function to propagate errors between different Result types
+def propagate_error(error_result: ErrorResult) -> ErrorResult:
+    """Propagate an error from one Result type to another"""
+    return error_result  # ErrorResult is not generic, so we can return it directly
 
 
 @dataclass
@@ -63,20 +103,16 @@ class ApiClient:
         response_class: type[T],
         method: str = "GET",
         data: dict[str, Any] | None = None,
-    ) -> Result:
+    ) -> Result[T]:
         try:
             headers = self._build_headers()
 
             if method == "GET":
                 response = await self.client.get(url, headers=headers)
             elif method == "POST":
-                response = await self.client.post(
-                    url, headers=headers, content=json.dumps(data) if data else None
-                )
+                response = await self.client.post(url, headers=headers, content=json.dumps(data) if data else None)
             elif method == "PATCH":
-                response = await self.client.patch(
-                    url, headers=headers, content=json.dumps(data) if data else None
-                )
+                response = await self.client.patch(url, headers=headers, content=json.dumps(data) if data else None)
             elif method == "DELETE":
                 response = await self.client.delete(url, headers=headers)
             else:
@@ -99,12 +135,12 @@ class ApiClient:
 
             try:
                 validated_data = response_class.model_validate(raw_data)
-                return Result.ok(validated_data)
+                return SuccessResult(validated_data)
             except ValidationError as e:
                 raise Exception(f"Response validation failed: {e}") from e
 
         except Exception as error:
-            return Result.err(error)
+            return ErrorResult(error)
 
     def organizations(self):
         return OrganizationResource(self)
@@ -135,22 +171,18 @@ class OrganizationResource:
     def __init__(self, client: ApiClient):
         self.client = client
 
-    async def list(self) -> Result:
-        class OrgListResponse(BaseModel):
-            results: list[Organization]
+    async def list(self) -> Result[list[Organization]]:
+        result = await self.client._fetch_with_schema(f"{self.client.base_url}/api/organizations/", OrgListResponse)
 
-        result = await self.client._fetch_with_schema(
-            f"{self.client.base_url}/api/organizations/", OrgListResponse
-        )
+        if is_success(result):
+            return SuccessResult(result.data.results)
 
-        if result.success:
-            return Result.ok(result.data.results)
+        assert is_error(result)
+
         return result
 
-    async def get(self, org_id: str) -> Result:
-        return await self.client._fetch_with_schema(
-            f"{self.client.base_url}/api/organizations/{org_id}/", Organization
-        )
+    async def get(self, org_id: str) -> Result[Organization]:
+        return await self.client._fetch_with_schema(f"{self.client.base_url}/api/organizations/{org_id}/", Organization)
 
     def projects(self, org_id: str):
         return OrganizationProjectResource(self.client, org_id)
@@ -161,16 +193,14 @@ class OrganizationProjectResource:
         self.client = client
         self.org_id = org_id
 
-    async def list(self) -> Result:
-        class ProjectListResponse(BaseModel):
-            results: list[Project]
+    async def list(self) -> Result[list[Project]]:
+        result = await self.client._fetch_with_schema(f"{self.client.base_url}/api/organizations/{self.org_id}/projects/", ProjectListResponse)
 
-        result = await self.client._fetch_with_schema(
-            f"{self.client.base_url}/api/organizations/{self.org_id}/projects/", ProjectListResponse
-        )
+        if is_success(result):
+            return SuccessResult(result.data.results)
 
-        if result.success:
-            return Result.ok(result.data.results)
+        assert is_error(result)
+        # Result is Union[SuccessResult, ErrorResult], so if not success, must be error
         return result
 
 
@@ -178,12 +208,10 @@ class ProjectResource:
     def __init__(self, client: ApiClient):
         self.client = client
 
-    async def get(self, project_id: str) -> Result:
-        return await self.client._fetch_with_schema(
-            f"{self.client.base_url}/api/projects/{project_id}/", Project
-        )
+    async def get(self, project_id: str) -> Result[Project]:
+        return await self.client._fetch_with_schema(f"{self.client.base_url}/api/projects/{project_id}/", Project)
 
-    async def property_definitions(self, project_id: str) -> Result:
+    async def property_definitions(self, project_id: str) -> Result[list[PropertyDefinition]]:
         try:
             property_definitions = await with_pagination(
                 f"{self.client.base_url}/api/projects/{project_id}/property_definitions/",
@@ -193,14 +221,11 @@ class ProjectResource:
 
             filtered_definitions = [def_ for def_ in property_definitions if not def_.hidden]
 
-            validated = [
-                PropertyDefinition(name=def_.name, property_type=def_.property_type)
-                for def_ in filtered_definitions
-            ]
+            validated = [PropertyDefinition(name=def_.name, property_type=def_.property_type) for def_ in filtered_definitions]
 
-            return Result.ok(validated)
+            return SuccessResult(validated)
         except Exception as error:
-            return Result.err(error)
+            return ErrorResult(error)
 
 
 class FeatureFlagResource:
@@ -208,56 +233,38 @@ class FeatureFlagResource:
         self.client = client
         self.project_id = project_id
 
-    async def list(self) -> Result:
+    async def list(self) -> Result[list[FeatureFlagListItem]]:
         try:
-
-            class FeatureFlagListItem(BaseModel):
-                id: int
-                key: str
-                name: str
-                active: bool
-
             flags = await with_pagination(
                 f"{self.client.base_url}/api/projects/{self.project_id}/feature_flags/",
                 self.client.config.api_token,
                 FeatureFlagListItem,
             )
 
-            return Result.ok(flags)
+            return SuccessResult(flags)
         except Exception as error:
-            return Result.err(error)
+            return ErrorResult(error)
 
-    async def get(self, flag_id: int) -> Result:
-        class FeatureFlagGetResponse(BaseModel):
-            id: int
-            key: str
-            name: str
-            active: bool
-            description: str | None = None
-
+    async def get(self, flag_id: int) -> Result[FeatureFlagGetResponse]:
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/feature_flags/{flag_id}/",
             FeatureFlagGetResponse,
         )
 
-    async def find_by_key(self, key: str) -> Result:
+    async def find_by_key(self, key: str) -> Result[FeatureFlagListItem | None]:
         list_result = await self.list()
-        if not list_result.success:
+        if is_error(list_result):
             return list_result
+
+        assert is_success(list_result)
 
         for flag in list_result.data:
             if flag.key == key:
-                return Result.ok(flag)
+                return SuccessResult(flag)
 
-        return Result.ok(None)
+        return SuccessResult(None)
 
-    async def create(self, data: CreateFeatureFlagInput) -> Result:
-        class FeatureFlagCreateResponse(BaseModel):
-            id: int
-            key: str
-            name: str
-            active: bool
-
+    async def create(self, data: CreateFeatureFlagInput) -> Result[FeatureFlagCreateResponse]:
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/feature_flags/",
             FeatureFlagCreateResponse,
@@ -265,21 +272,17 @@ class FeatureFlagResource:
             data=data.model_dump(exclude_unset=True),
         )
 
-    async def update(self, key: str, data: UpdateFeatureFlagInput) -> Result:
+    async def update(self, key: str, data: UpdateFeatureFlagInput) -> Result[FeatureFlagUpdateResponse]:
         find_result = await self.find_by_key(key)
-        if not find_result.success:
+        if is_error(find_result):
             return find_result
 
-        if not find_result.data:
-            return Result.err(Exception(f"Feature flag with key '{key}' not found"))
+        assert is_success(find_result)
+
+        if find_result.data is None:
+            return ErrorResult(Exception(f"Feature flag with key '{key}' not found"))
 
         flag_id = find_result.data.id
-
-        class FeatureFlagUpdateResponse(BaseModel):
-            id: int
-            key: str
-            name: str
-            active: bool
 
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/feature_flags/{flag_id}/",
@@ -288,11 +291,7 @@ class FeatureFlagResource:
             data=data.model_dump(exclude_unset=True),
         )
 
-    async def delete(self, flag_id: int) -> Result:
-        class DeleteResponse(BaseModel):
-            success: bool = True
-            message: str = "Feature flag deleted successfully"
-
+    async def delete(self, flag_id: int) -> Result[dict]:
         result = await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/feature_flags/{flag_id}/",
             DeleteResponse,
@@ -300,8 +299,11 @@ class FeatureFlagResource:
             data={"deleted": True},
         )
 
-        if result.success:
-            return Result.ok({"success": True, "message": "Feature flag deleted successfully"})
+        if is_success(result):
+            return SuccessResult({"success": True, "message": "Feature flag deleted successfully"})
+
+        assert is_error(result)
+
         return result
 
 
@@ -310,13 +312,7 @@ class InsightResource:
         self.client = client
         self.project_id = project_id
 
-    async def list(self, params: ListInsights | None = None) -> Result:
-        class InsightListItem(BaseModel):
-            id: int
-            name: str
-            short_id: str
-            description: str | None = None
-
+    async def list(self, params: ListInsights | None = None) -> Result[list[InsightListItem]]:
         url = f"{self.client.base_url}/api/projects/{self.project_id}/insights/"
         if params:
             query_params = params.model_dump(exclude_unset=True)
@@ -325,16 +321,11 @@ class InsightResource:
 
         try:
             insights = await with_pagination(url, self.client.config.api_token, InsightListItem)
-            return Result.ok(insights)
+            return SuccessResult(insights)
         except Exception as error:
-            return Result.err(error)
+            return ErrorResult(error)
 
-    async def create(self, data: CreateInsightInput) -> Result:
-        class InsightCreateResponse(BaseModel):
-            id: int
-            name: str
-            short_id: str
-
+    async def create(self, data: CreateInsightInput) -> Result[InsightCreateResponse]:
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/insights/",
             InsightCreateResponse,
@@ -342,24 +333,13 @@ class InsightResource:
             data=data.model_dump(exclude_unset=True),
         )
 
-    async def get(self, insight_id: int) -> Result:
-        class InsightGetResponse(BaseModel):
-            id: int
-            name: str
-            short_id: str
-            description: str | None = None
-
+    async def get(self, insight_id: int) -> Result[InsightGetResponse]:
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/insights/{insight_id}/",
             InsightGetResponse,
         )
 
-    async def update(self, insight_id: int, data: UpdateInsightInput) -> Result:
-        class InsightUpdateResponse(BaseModel):
-            id: int
-            name: str
-            short_id: str
-
+    async def update(self, insight_id: int, data: UpdateInsightInput) -> Result[InsightUpdateResponse]:
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/insights/{insight_id}/",
             InsightUpdateResponse,
@@ -367,11 +347,7 @@ class InsightResource:
             data=data.model_dump(exclude_unset=True),
         )
 
-    async def delete(self, insight_id: int) -> Result:
-        class DeleteResponse(BaseModel):
-            success: bool = True
-            message: str = "Insight deleted successfully"
-
+    async def delete(self, insight_id: int) -> Result[dict]:
         result = await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/insights/{insight_id}/",
             DeleteResponse,
@@ -379,15 +355,15 @@ class InsightResource:
             data={"deleted": True},
         )
 
-        if result.success:
-            return Result.ok({"success": True, "message": "Insight deleted successfully"})
+        if is_success(result):
+            return SuccessResult({"success": True, "message": "Insight deleted successfully"})
+        # Result is Union[SuccessResult, ErrorResult], so if not success, must be
+
+        assert is_error(result)
+
         return result
 
-    async def sql_insight(self, query: str) -> Result:
-        class SQLInsightResponse(BaseModel):
-            columns: list[str]
-            results: list[list[Any]]
-
+    async def sql_insight(self, query: str) -> Result[dict]:
         result = await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/environments/{self.project_id}/max_tools/create_and_query_insight/",
             dict,  # Raw response handling
@@ -395,7 +371,7 @@ class InsightResource:
             data={"query": query},
         )
 
-        if result.success:
+        if is_success(result):
             # Parse the complex response structure
             try:
                 response_data = result.data
@@ -405,12 +381,12 @@ class InsightResource:
                         data = first_item["data"]
                         columns = data.get("columns", [])
                         results = data.get("results", [])
-                        return Result.ok({"columns": columns, "results": results})
+                        return SuccessResult({"columns": columns, "results": results})
 
-                return Result.err(Exception("Unexpected response format from SQL insight"))
+                return ErrorResult(Exception("Unexpected response format from SQL insight"))
             except Exception as e:
-                return Result.err(e)
-
+                return ErrorResult(e)
+        # Result is Union[SuccessResult, ErrorResult], so if not success, must be error
         return result
 
 
@@ -419,12 +395,7 @@ class DashboardResource:
         self.client = client
         self.project_id = project_id
 
-    async def list(self, params: ListDashboards | None = None) -> Result:
-        class DashboardListItem(BaseModel):
-            id: int
-            name: str
-            description: str | None = None
-
+    async def list(self, params: ListDashboards | None = None) -> Result[list[DashboardListItem]]:
         url = f"{self.client.base_url}/api/projects/{self.project_id}/dashboards/"
         if params:
             query_params = params.model_dump(exclude_unset=True)
@@ -433,26 +404,17 @@ class DashboardResource:
 
         try:
             dashboards = await with_pagination(url, self.client.config.api_token, DashboardListItem)
-            return Result.ok(dashboards)
+            return SuccessResult(dashboards)
         except Exception as error:
-            return Result.err(error)
+            return ErrorResult(error)
 
-    async def get(self, dashboard_id: int) -> Result:
-        class DashboardGetResponse(BaseModel):
-            id: int
-            name: str
-            description: str | None = None
-
+    async def get(self, dashboard_id: int) -> Result[DashboardGetResponse]:
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/dashboards/{dashboard_id}/",
             DashboardGetResponse,
         )
 
-    async def create(self, data: CreateDashboardInput) -> Result:
-        class DashboardCreateResponse(BaseModel):
-            id: int
-            name: str
-
+    async def create(self, data: CreateDashboardInput) -> Result[DashboardCreateResponse]:
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/dashboards/",
             DashboardCreateResponse,
@@ -460,11 +422,7 @@ class DashboardResource:
             data=data.model_dump(exclude_unset=True),
         )
 
-    async def update(self, dashboard_id: int, data: UpdateDashboardInput) -> Result:
-        class DashboardUpdateResponse(BaseModel):
-            id: int
-            name: str
-
+    async def update(self, dashboard_id: int, data: UpdateDashboardInput) -> Result[DashboardUpdateResponse]:
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/dashboards/{dashboard_id}/",
             DashboardUpdateResponse,
@@ -472,11 +430,7 @@ class DashboardResource:
             data=data.model_dump(exclude_unset=True),
         )
 
-    async def delete(self, dashboard_id: int) -> Result:
-        class DeleteResponse(BaseModel):
-            success: bool = True
-            message: str = "Dashboard deleted successfully"
-
+    async def delete(self, dashboard_id: int) -> Result[dict]:
         result = await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/dashboards/{dashboard_id}/",
             DeleteResponse,
@@ -484,11 +438,14 @@ class DashboardResource:
             data={"deleted": True},
         )
 
-        if result.success:
-            return Result.ok({"success": True, "message": "Dashboard deleted successfully"})
+        if is_success(result):
+            return SuccessResult({"success": True, "message": "Dashboard deleted successfully"})
+
+        assert is_error(result)
+
         return result
 
-    async def add_insight(self, data: AddInsightToDashboard) -> Result:
+    async def add_insight(self, data: AddInsightToDashboard) -> Result[dict]:
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/projects/{self.project_id}/insights/{data.insight_id}/",
             dict,
@@ -502,10 +459,7 @@ class QueryResource:
         self.client = client
         self.project_id = project_id
 
-    async def execute(self, query_body: dict[str, Any]) -> Result:
-        class QueryResponse(BaseModel):
-            results: list[Any]
-
+    async def execute(self, query_body: dict[str, Any]) -> Result[QueryResponse]:
         return await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/environments/{self.project_id}/query/",
             QueryResponse,
@@ -518,14 +472,12 @@ class UserResource:
     def __init__(self, client: ApiClient):
         self.client = client
 
-    async def me(self) -> Result:
-        class UserResponse(BaseModel):
-            distinct_id: str
+    async def me(self) -> Result[dict]:
+        result = await self.client._fetch_with_schema(f"{self.client.base_url}/api/users/@me/", UserResponse)
 
-        result = await self.client._fetch_with_schema(
-            f"{self.client.base_url}/api/users/@me/", UserResponse
-        )
+        if is_success(result):
+            return SuccessResult({"distinctId": result.data.distinct_id})
 
-        if result.success:
-            return Result.ok({"distinctId": result.data.distinct_id})
+        assert is_error(result)
+
         return result

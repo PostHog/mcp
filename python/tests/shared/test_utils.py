@@ -3,6 +3,7 @@ import os
 import random
 import string
 import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -32,9 +33,9 @@ def load_env_test_file():
 load_env_test_file()
 
 API_BASE_URL = os.getenv("TEST_API_BASE_URL", "http://localhost:8010")
-API_TOKEN = os.getenv("TEST_API_TOKEN")
-TEST_ORG_ID = os.getenv("TEST_ORG_ID")
-TEST_PROJECT_ID = os.getenv("TEST_PROJECT_ID")
+API_TOKEN = os.getenv("TEST_API_TOKEN", "")
+TEST_ORG_ID = os.getenv("TEST_ORG_ID", "")
+TEST_PROJECT_ID = os.getenv("TEST_PROJECT_ID", "")
 
 
 @dataclass
@@ -72,20 +73,20 @@ def create_test_context(client: ApiClient) -> Context:
     env: dict[str, Any] = {}
 
     async def get_project_id() -> str:
-        state = await cache.get("state") or {}
-        if "project_id" not in state:
+        project_id = await cache.get("project_id")
+        if project_id is None:
             raise Exception("No active project set")
-        return state["project_id"]
+        return project_id
 
     async def get_org_id() -> str:
-        state = await cache.get("state") or {}
-        if "org_id" not in state:
+        org_id = await cache.get("org_id")
+        if org_id is None:
             raise Exception("No active organization set")
-        return state["org_id"]
+        return org_id
 
     async def get_distinct_id() -> str:
-        state = await cache.get("state") or {}
-        return state.get("distinct_id", "")
+        distinct_id = await cache.get("distinct_id")
+        return distinct_id or uuid.uuid4().hex
 
     return Context(
         api=client,
@@ -99,8 +100,8 @@ def create_test_context(client: ApiClient) -> Context:
 
 async def set_active_project_and_org(context: Context, project_id: str, org_id: str):
     """Set active project and organization in the cache."""
-    state = {"project_id": project_id, "org_id": org_id}
-    await context.cache.set("state", state)
+    await context.cache.set("project_id", project_id)
+    await context.cache.set("org_id", org_id)
 
 
 async def cleanup_resources(client: ApiClient, project_id: str, resources: CreatedResources):
@@ -184,9 +185,7 @@ SAMPLE_FEATURE_FLAG_FILTERS = {"groups": [{"properties": [], "rollout_percentage
 SAMPLE_FEATURE_FLAG_FILTERS_WITH_PROPERTIES = {
     "groups": [
         {
-            "properties": [
-                {"key": "email", "value": "test@posthog.com", "operator": "exact", "type": "person"}
-            ],
+            "properties": [{"key": "email", "value": "test@posthog.com", "operator": "exact", "type": "person"}],
             "rollout_percentage": 50,
         }
     ]

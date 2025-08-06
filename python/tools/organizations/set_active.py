@@ -4,9 +4,7 @@ from tools.types import Context, TextContent, Tool, ToolResult
 
 async def set_active_handler(context: Context, params: OrganizationSetActiveSchema) -> ToolResult:
     org_id = str(params.orgId)
-    state = await context.cache.get("state") or {}
-    state["org_id"] = org_id
-    await context.cache.set("state", state)
+    await context.cache.set("org_id", org_id)
 
     return ToolResult(content=[TextContent(text=f"Switched to organization {org_id}")])
 

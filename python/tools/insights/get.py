@@ -1,5 +1,6 @@
 import json
 
+from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.tool_inputs import InsightGetSchema
 from tools.types import Context, TextContent, Tool, ToolResult
@@ -9,12 +10,16 @@ async def get_insight_handler(context: Context, params: InsightGetSchema) -> Too
     project_id = await context.get_project_id()
     insight_result = await context.api.insights(project_id).get(int(params.insightId))
 
-    if not insight_result.success:
+    if is_error(insight_result):
         raise Exception(f"Failed to get insight: {insight_result.error}")
 
+    assert is_success(insight_result)
+
+    insight_data = insight_result.data
+
     insight_with_url = {
-        **insight_result.data.model_dump(),
-        "url": f"{get_project_base_url(project_id)}/insights/{insight_result.data.short_id}",
+        **insight_data.model_dump(),
+        "url": f"{get_project_base_url(project_id)}/insights/{insight_data.short_id}",
     }
 
     return ToolResult(content=[TextContent(text=json.dumps(insight_with_url))])

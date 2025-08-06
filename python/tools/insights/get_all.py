@@ -1,5 +1,6 @@
 import json
 
+from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.insights import ListInsights
 from schema.tool_inputs import InsightGetAllSchema
@@ -25,10 +26,11 @@ async def get_all_insights_handler(context: Context, params: InsightGetAllSchema
 
     insights_result = await context.api.insights(project_id).list(list_params)
 
-    if not insights_result.success:
+    if is_error(insights_result):
         raise Exception(f"Failed to get insights: {insights_result.error}")
 
-    # Add URLs to insights like the TypeScript version
+    assert is_success(insights_result)
+
     insights_with_urls = []
     for insight in insights_result.data:
         insight_dict = insight.model_dump()

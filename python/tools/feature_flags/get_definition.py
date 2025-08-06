@@ -1,5 +1,6 @@
 import json
 
+from api.client import is_error, is_success
 from schema.tool_inputs import FeatureFlagGetDefinitionSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
@@ -15,16 +16,18 @@ async def get_feature_flag_definition_handler(
     # Use flagId if provided (takes precedence)
     if params.flagId:
         flag_result = await context.api.feature_flags(project_id).get(params.flagId)
-        if not flag_result.success:
+        if is_error(flag_result):
             raise Exception(f"Failed to get feature flag: {flag_result.error}")
+        assert is_success(flag_result)
         return ToolResult(content=[TextContent(text=json.dumps(flag_result.data.model_dump()))])
 
     # Use flagKey if provided
     if params.flagKey:
         flag_result = await context.api.feature_flags(project_id).find_by_key(params.flagKey)
-        if not flag_result.success:
+        if is_error(flag_result):
             raise Exception(f"Failed to find feature flag: {flag_result.error}")
 
+        assert is_success(flag_result)
         if flag_result.data:
             return ToolResult(content=[TextContent(text=json.dumps(flag_result.data.model_dump()))])
         else:

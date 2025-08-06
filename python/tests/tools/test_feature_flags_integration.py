@@ -78,6 +78,44 @@ class TestFeatureFlags:
         created_resources.feature_flags.append(flag_data["id"])
 
     @pytest.mark.asyncio
+    async def test_create_feature_flag_with_complex_filters(
+        self, context: Context, created_resources: CreatedResources
+    ):
+        """Test creating a feature flag with complex filters."""
+        tool = create_feature_flag_tool()
+        complex_filters = {
+            "groups": [
+                {
+                    "properties": [],
+                    "rollout_percentage": 50.0,
+                },
+                {
+                    "properties": [],
+                    "rollout_percentage": 100.0,
+                }
+            ]
+        }
+
+        params = tool.schema(
+            name="Complex Filter Flag",
+            key=generate_unique_key("complex-flag"),
+            description="Flag with complex filters",
+            filters=complex_filters,
+            active=True,
+        )
+
+        result = await tool.execute(context, params)
+        flag_data = parse_tool_response(result.__dict__)
+
+        assert flag_data["id"] is not None
+        assert flag_data["key"] == params.key
+        assert flag_data["name"] == params.name
+        assert flag_data["active"] == params.active
+        assert "/feature_flags/" in flag_data["url"]
+
+        created_resources.feature_flags.append(flag_data["id"])
+
+    @pytest.mark.asyncio
     async def test_create_feature_flag_with_tags(
         self, context: Context, created_resources: CreatedResources
     ):

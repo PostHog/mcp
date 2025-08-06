@@ -1,12 +1,19 @@
 {
+	"python.defaultInterpreterPath": "./.venv/bin/python",
 	"python.linting.enabled": true,
 	"python.linting.ruffEnabled": true,
 	"python.linting.flake8Enabled": false,
 	"python.formatting.provider": "none",
+	"editor.formatOnType": false,
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "never"
+	},
 	"[python]": {
 		"editor.defaultFormatter": "charliermarsh.ruff",
+		"editor.formatOnSave": true,
 		"editor.codeActionsOnSave": {
-			"source.organizeImports": "explicit"
+			"source.organizeImports": "explicit",
+			"source.fixAll.ruff": "explicit"
 		}
 	}
 }

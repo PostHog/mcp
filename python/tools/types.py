@@ -3,11 +3,7 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel
-
 from api.client import ApiClient
-
-T = TypeVar("T", bound=BaseModel)
 
 
 @dataclass
@@ -17,20 +13,20 @@ class State:
     distinct_id: str | None = None
 
 
-class ScopedCache(ABC, Generic[T]):
+class ScopedCache(ABC):
     @abstractmethod
-    async def get(self, key: str) -> T | None:
+    async def get(self, key: str) -> str | None:
         pass
 
     @abstractmethod
-    async def set(self, key: str, value: T) -> None:
+    async def set(self, key: str, value: str) -> None:
         pass
 
 
 @dataclass
 class Context:
     api: ApiClient
-    cache: ScopedCache[State]
+    cache: ScopedCache
     env: dict[str, Any]
     get_project_id: Callable[[], Awaitable[str]]
     get_org_id: Callable[[], Awaitable[str]]
@@ -46,6 +42,9 @@ class ToolResult:
 class TextContent:
     type: str = "text"
     text: str = ""
+
+
+T = TypeVar("T")
 
 
 class Tool(Generic[T]):

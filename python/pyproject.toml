@@ -31,7 +31,7 @@ packages = ["."]
 
 [tool.ruff]
 target-version = "py311"
-line-length = 100
+line-length = 160
 indent-width = 4
 exclude = [
     "schema/tool_inputs.py",  # Auto-generated file

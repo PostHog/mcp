@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
 
@@ -35,3 +35,118 @@ class ApiResponse(BaseModel, Generic[T]):
     next: str | None = None
     previous: str | None = None
     results: list[T]
+
+
+# Organization API Schemas
+class OrgListResponse(BaseModel):
+    results: list["Organization"]
+
+
+class ProjectListResponse(BaseModel):
+    results: list["Project"]
+
+
+# Feature Flag API Schemas
+class FeatureFlagListItem(BaseModel):
+    id: int
+    key: str
+    name: str
+    active: bool
+
+
+class FeatureFlagGetResponse(BaseModel):
+    id: int
+    key: str
+    name: str
+    active: bool
+    description: str | None = None
+
+
+class FeatureFlagCreateResponse(BaseModel):
+    id: int
+    key: str
+    name: str
+    active: bool
+
+
+class FeatureFlagUpdateResponse(BaseModel):
+    id: int
+    key: str
+    name: str
+    active: bool
+
+
+# Insight API Schemas
+class InsightListItem(BaseModel):
+    id: int
+    name: str
+    short_id: str
+    description: str | None = None
+
+
+class InsightCreateResponse(BaseModel):
+    id: int
+    name: str
+    short_id: str
+
+
+class InsightGetResponse(BaseModel):
+    id: int
+    name: str
+    short_id: str
+    description: str | None = None
+
+
+class InsightUpdateResponse(BaseModel):
+    id: int
+    name: str
+    short_id: str
+
+
+class SQLInsightResponse(BaseModel):
+    columns: list[str]
+    results: list[list[Any]]
+
+
+# Dashboard API Schemas
+class DashboardListItem(BaseModel):
+    id: int
+    name: str
+    description: str | None = None
+
+
+class DashboardGetResponse(BaseModel):
+    id: int
+    name: str
+    description: str | None = None
+
+
+class DashboardCreateResponse(BaseModel):
+    id: int
+    name: str
+
+
+class DashboardUpdateResponse(BaseModel):
+    id: int
+    name: str
+
+
+# Query API Schemas
+class QueryResponse(BaseModel):
+    results: list[Any]
+
+
+# User API Schemas
+class UserResponse(BaseModel):
+    distinct_id: str
+
+
+# Generic API Schemas
+class DeleteResponse(BaseModel):
+    success: bool = True
+    message: str = "Successfully deleted"
+
+
+# Forward references for imported types
+from schema.orgs import Organization  # noqa: E402
+from schema.projects import Project  # noqa: E402

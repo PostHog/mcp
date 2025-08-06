@@ -52,9 +52,7 @@ class TestInsights:
         await cleanup_resources(context.api, TEST_PROJECT_ID, created_resources)
 
     @pytest.mark.asyncio
-    async def test_create_insight_with_pageview_query(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_create_insight_with_pageview_query(self, context: Context, created_resources: CreatedResources):
         """Test creating an insight with pageview query."""
         tool = create_insight_tool()
         params = tool.schema(
@@ -75,9 +73,7 @@ class TestInsights:
         created_resources.insights.append(insight_data["id"])
 
     @pytest.mark.asyncio
-    async def test_create_insight_with_top_events_query(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_create_insight_with_top_events_query(self, context: Context, created_resources: CreatedResources):
         """Test creating an insight with top events query."""
         tool = create_insight_tool()
         params = tool.schema(
@@ -97,9 +93,7 @@ class TestInsights:
         created_resources.insights.append(insight_data["id"])
 
     @pytest.mark.asyncio
-    async def test_create_insight_with_tags(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_create_insight_with_tags(self, context: Context, created_resources: CreatedResources):
         """Test creating an insight with tags."""
         tool = create_insight_tool()
         params = tool.schema(
@@ -120,9 +114,7 @@ class TestInsights:
         created_resources.insights.append(insight_data["id"])
 
     @pytest.mark.asyncio
-    async def test_update_insight_name_and_description(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_update_insight_name_and_description(self, context: Context, created_resources: CreatedResources):
         """Test updating an insight's name and description."""
         create_tool = create_insight_tool()
         update_tool = update_insight_tool()
@@ -153,9 +145,7 @@ class TestInsights:
         assert updated_insight["name"] == update_params.data.name
 
     @pytest.mark.asyncio
-    async def test_update_insight_query(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_update_insight_query(self, context: Context, created_resources: CreatedResources):
         """Test updating an insight's query."""
         create_tool = create_insight_tool()
         update_tool = update_insight_tool()
@@ -186,9 +176,7 @@ class TestInsights:
         assert updated_insight["name"] == create_params.data.name
 
     @pytest.mark.asyncio
-    async def test_get_all_insights_proper_structure(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_all_insights_proper_structure(self, context: Context, created_resources: CreatedResources):
         """Test that get-all-insights returns proper structure."""
         tool = get_all_insights_tool()
         params = tool.schema()
@@ -205,9 +193,7 @@ class TestInsights:
             assert "url" in insight
 
     @pytest.mark.asyncio
-    async def test_get_specific_insight_by_id(
-        self, context: Context, created_resources: CreatedResources
-    ):
+    async def test_get_specific_insight_by_id(self, context: Context, created_resources: CreatedResources):
         """Test getting a specific insight by ID."""
         create_tool = create_insight_tool()
         get_tool = get_insight_tool()
@@ -215,11 +201,9 @@ class TestInsights:
         # Create insight
         create_params = create_tool.schema(
             data=Data5(
-                **{
-                    "name": generate_unique_key("Get Test Insight"),
-                    "description": "Test insight for get operation",
-                    "query": SAMPLE_HOGQL_QUERIES["pageviews"].model_dump(),
-                }
+                name=generate_unique_key("Get Test Insight"),
+                description="Test insight for get operation",
+                query=SAMPLE_HOGQL_QUERIES["pageviews"].model_dump(),
             )
         )
 

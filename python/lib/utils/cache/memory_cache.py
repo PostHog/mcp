@@ -1,16 +1,12 @@
-from typing import Any, TypeVar
-
 from tools.types import ScopedCache
 
-T = TypeVar("T")
 
-
-class MemoryCache(ScopedCache[T]):
+class MemoryCache(ScopedCache):
     def __init__(self):
-        self._cache: dict[str, Any] = {}
+        self._cache: dict[str, str] = {}
 
-    async def get(self, key: str) -> T | None:
+    async def get(self, key: str) -> str | None:
         return self._cache.get(key)
 
-    async def set(self, key: str, value: T) -> None:
+    async def set(self, key: str, value: str) -> None:
         self._cache[key] = value

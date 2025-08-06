@@ -1,4 +1,4 @@
-name: Tests (TypeScript)
+name: TypeScript CI
 
 on:
   push:
@@ -7,13 +7,50 @@ on:
     branches: [ main ]
 
 jobs:
+  lint-and-format:
+    name: Lint, Format, and Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          
+      - name: Install dependencies
+        run: pnpm i
+        
+      - name: Run linter
+        run: pnpm run lint:fix
+        
+      - name: Run formatter
+        run: pnpm run format
+        
+      - name: Run type check
+        run: pnpm run typecheck
+        
+      - name: Check for changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Code formatting or linting changes detected!"
+            git diff
+            exit 1
+          fi
+
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
     concurrency:
-      group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+      group: ${{ github.workflow }}-unit-${{ github.head_ref || github.ref }}
       cancel-in-progress: true
     
     steps:
@@ -32,12 +69,6 @@ jobs:
     - name: Install dependencies
       run: pnpm install
       
-    - name: Run linting
-      run: pnpm run lint:fix
-      
-    - name: Run formatting check
-      run: pnpm run format
-      
     - name: Run unit tests
       run: pnpm run test
 
@@ -48,7 +79,7 @@ jobs:
     permissions:
       contents: read
     concurrency:
-      group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+      group: ${{ github.workflow }}-integration-${{ github.head_ref || github.ref }}
       cancel-in-progress: true
     
     steps:

@@ -9,7 +9,6 @@ from tools.types import Context, TextContent, Tool, ToolResult
 async def list_errors_handler(context: Context, params: ErrorTrackingListSchema) -> ToolResult:
     project_id = await context.get_project_id()
 
-    # Set defaults
     order_by = params.orderBy or "occurrences"
     date_from = params.dateFrom or datetime.now() - timedelta(days=7)
     date_to = params.dateTo or datetime.now()

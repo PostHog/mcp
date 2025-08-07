@@ -9,7 +9,6 @@ from tools.types import Context, TextContent, Tool, ToolResult
 async def update_feature_flag_handler(context: Context, params: FeatureFlagUpdateSchema) -> ToolResult:
     project_id = await context.get_project_id()
 
-    # Extract key and update data from the new schema structure
     key = params.flagKey
     update_data = params.data
 

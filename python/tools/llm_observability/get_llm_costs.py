@@ -1,5 +1,6 @@
 import json
 
+from api.client import is_error, is_success
 from schema.tool_inputs import LLMObservabilityGetCostsSchema
 from tools.types import Context, TextContent, Tool, ToolResult
 
@@ -23,9 +24,11 @@ async def get_llm_costs_handler(context: Context, params: LLMObservabilityGetCos
         "breakdownFilter": {"breakdown_type": "event", "breakdown": "$ai_model"},
     }
 
-    costs_result = await context.api.query(str(params.projectId)).execute(trends_query)
-    if not costs_result.success:
+    costs_result = await context.api.query(str(params.projectId)).execute({"query": trends_query})
+    if is_error(costs_result):
         raise Exception(f"Failed to get LLM costs: {costs_result.error}")
+
+    assert is_success(costs_result)
 
     return ToolResult(content=[TextContent(text=json.dumps(costs_result.data.results))])
 

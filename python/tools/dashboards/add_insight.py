@@ -10,7 +10,6 @@ from tools.types import Context, TextContent, Tool, ToolResult
 async def add_insight_to_dashboard_handler(context: Context, params: DashboardAddInsightSchema) -> ToolResult:
     project_id = await context.get_project_id()
 
-    # First get the insight to get its short_id for URL generation
     insight_result = await context.api.insights(project_id).get(params.data.insightId)
 
     if is_error(insight_result):
@@ -18,8 +17,8 @@ async def add_insight_to_dashboard_handler(context: Context, params: DashboardAd
 
     assert is_success(insight_result)
 
-    # Then add the insight to the dashboard
     add_insight_data = AddInsightToDashboard(insight_id=params.data.insightId, dashboard_id=params.data.dashboardId)
+
     result = await context.api.dashboards(project_id).add_insight(add_insight_data)
 
     if is_error(result):

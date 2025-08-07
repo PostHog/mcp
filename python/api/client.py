@@ -58,11 +58,9 @@ class ErrorResult:
         self.error = error
 
 
-# Generic Result type with proper narrowing
 Result = SuccessResult[T] | ErrorResult
 
 
-# Type narrowing functions - these work with Python's type system
 def is_success(result: Result[T]) -> TypeGuard[SuccessResult[T]]:
     """Type guard that narrows Result[T] to SuccessResult[T]"""
     return result.success
@@ -73,7 +71,6 @@ def is_error(result: Result[T]) -> TypeGuard[ErrorResult]:
     return not result.success
 
 
-# Helper function to propagate errors between different Result types
 def propagate_error(error_result: ErrorResult) -> ErrorResult:
     """Propagate an error from one Result type to another"""
     return error_result  # ErrorResult is not generic, so we can return it directly
@@ -200,7 +197,7 @@ class OrganizationProjectResource:
             return SuccessResult(result.data.results)
 
         assert is_error(result)
-        # Result is Union[SuccessResult, ErrorResult], so if not success, must be error
+
         return result
 
 
@@ -253,6 +250,7 @@ class FeatureFlagResource:
 
     async def find_by_key(self, key: str) -> Result[FeatureFlagListItem | None]:
         list_result = await self.list()
+
         if is_error(list_result):
             return list_result
 
@@ -314,6 +312,7 @@ class InsightResource:
 
     async def list(self, params: ListInsights | None = None) -> Result[list[InsightListItem]]:
         url = f"{self.client.base_url}/api/projects/{self.project_id}/insights/"
+
         if params:
             query_params = params.model_dump(exclude_unset=True)
             if query_params:
@@ -357,7 +356,6 @@ class InsightResource:
 
         if is_success(result):
             return SuccessResult({"success": True, "message": "Insight deleted successfully"})
-        # Result is Union[SuccessResult, ErrorResult], so if not success, must be
 
         assert is_error(result)
 
@@ -386,7 +384,6 @@ class InsightResource:
                 return ErrorResult(Exception("Unexpected response format from SQL insight"))
             except Exception as e:
                 return ErrorResult(e)
-        # Result is Union[SuccessResult, ErrorResult], so if not success, must be error
         return result
 
 
@@ -472,12 +469,5 @@ class UserResource:
     def __init__(self, client: ApiClient):
         self.client = client
 
-    async def me(self) -> Result[dict]:
-        result = await self.client._fetch_with_schema(f"{self.client.base_url}/api/users/@me/", UserResponse)
-
-        if is_success(result):
-            return SuccessResult({"distinctId": result.data.distinct_id})
-
-        assert is_error(result)
-
-        return result
+    async def me(self) -> Result[UserResponse]:
+        return await self.client._fetch_with_schema(f"{self.client.base_url}/api/users/@me/", UserResponse)

@@ -10,7 +10,6 @@ from tools.types import Context, TextContent, Tool, ToolResult
 async def get_all_insights_handler(context: Context, params: InsightGetAllSchema) -> ToolResult:
     project_id = await context.get_project_id()
 
-    # Extract parameters from the nested data structure
     data = params.data
 
     if data:

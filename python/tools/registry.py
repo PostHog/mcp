@@ -1,6 +1,6 @@
 from typing import Any
 
-from api.client import ApiClient, ApiConfig
+from api.client import ApiClient, ApiConfig, is_error, is_success
 from lib.utils.cache.memory_cache import MemoryCache
 from tools.dashboards.add_insight import add_insight_to_dashboard_tool
 from tools.dashboards.create import create_dashboard_tool
@@ -24,8 +24,6 @@ from tools.insights.get_sql_insight import get_sql_insight_tool
 from tools.insights.update import update_insight_tool
 from tools.llm_observability.get_llm_costs import get_llm_costs_tool
 from tools.organizations.get_details import get_organization_details_tool
-
-# Import all tools
 from tools.organizations.get_organizations import get_organizations_tool
 from tools.organizations.set_active import set_active_org_tool
 from tools.projects.get_projects import get_projects_tool
@@ -40,7 +38,6 @@ class ToolRegistry:
         self.cache = MemoryCache()
         self.env: dict[str, Any] = {}
 
-        # Initialize tools
         self.tools = [
             # Organization tools
             get_organizations_tool(),
@@ -80,30 +77,34 @@ class ToolRegistry:
         ]
 
     async def get_project_id(self) -> str:
-        state = await self.cache.get("state") or {}
-        if "project_id" not in state:
+        project_id = await self.cache.get("project_id")
+        if not project_id:
             raise Exception("No active project set. Please use project-set-active first.")
-        return state["project_id"]
+        return project_id
 
     async def get_org_id(self) -> str:
-        state = await self.cache.get("state") or {}
-        if "org_id" not in state:
+        org_id = await self.cache.get("org_id")
+        if not org_id:
             raise Exception("No active organization set. Please use organization-set-active first.")
-        return state["org_id"]
+        return org_id
 
     async def get_distinct_id(self) -> str:
-        state = await self.cache.get("state") or {}
-        if "distinct_id" not in state:
+        distinct_id = await self.cache.get("distinct_id")
+
+        if not distinct_id:
             # Fetch from API if not cached
             user_result = await self.api.users().me()
-            if not user_result.success:
+
+            if is_error(user_result):
                 raise Exception(f"Failed to get user info: {user_result.error}")
 
-            distinct_id = user_result.data["distinctId"]
-            state["distinct_id"] = distinct_id
-            await self.cache.set("state", state)
-            return distinct_id
-        return state["distinct_id"]
+            assert is_success(user_result)
+
+            distinct_id = user_result.data.distinct_id
+
+            await self.cache.set("distinct_id", distinct_id)
+
+        return distinct_id
 
     def get_context(self) -> Context:
         return Context(

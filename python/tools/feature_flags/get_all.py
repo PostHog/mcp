@@ -7,6 +7,7 @@ from tools.types import Context, TextContent, Tool, ToolResult
 
 async def get_all_feature_flags_handler(context: Context, _params: FeatureFlagGetAllSchema) -> ToolResult:
     project_id = await context.get_project_id()
+
     flags_result = await context.api.feature_flags(project_id).list()
 
     if is_error(flags_result):

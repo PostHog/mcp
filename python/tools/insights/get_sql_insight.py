@@ -14,6 +14,7 @@ async def get_sql_insight_handler(context: Context, params: InsightGetSqlSchema)
         raise Exception(f"Failed to execute SQL insight: {insight_result.error}")
 
     assert is_success(insight_result)
+
     return ToolResult(content=[TextContent(text=json.dumps(insight_result.data))])
 
 

@@ -9,23 +9,29 @@ async def get_feature_flag_definition_handler(context: Context, params: FeatureF
     # Validate that either flagId or flagKey is provided
     if not params.flagId and not params.flagKey:
         raise ValueError("Either flagId or flagKey must be provided")
+
     project_id = await context.get_project_id()
 
     # Use flagId if provided (takes precedence)
     if params.flagId:
         flag_result = await context.api.feature_flags(project_id).get(params.flagId)
+
         if is_error(flag_result):
             raise Exception(f"Failed to get feature flag: {flag_result.error}")
+
         assert is_success(flag_result)
+
         return ToolResult(content=[TextContent(text=json.dumps(flag_result.data.model_dump()))])
 
     # Use flagKey if provided
     if params.flagKey:
         flag_result = await context.api.feature_flags(project_id).find_by_key(params.flagKey)
+
         if is_error(flag_result):
             raise Exception(f"Failed to find feature flag: {flag_result.error}")
 
         assert is_success(flag_result)
+
         if flag_result.data:
             return ToolResult(content=[TextContent(text=json.dumps(flag_result.data.model_dump()))])
         else:

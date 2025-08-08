@@ -7,11 +7,13 @@ Python implementation of the PostHog Model Context Protocol (MCP) server.
 ### 1. Install Dependencies with uv
 
 For production:
+
 ```bash
 uv sync
 ```
 
 For development (includes schema generation tools):
+
 ```bash
 uv sync --dev
 ```
@@ -19,6 +21,7 @@ uv sync --dev
 ### 2. Alternative: Create Virtual Environment Manually
 
 If you prefer to use pip:
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate

@@ -14,7 +14,7 @@ async def get_organization_details_handler(context: Context, _params: Organizati
 
     assert is_success(org_result)
 
-    return ToolResult(content=[TextContent(text=json.dumps(org_result.data.model_dump()))])
+    return ToolResult(content=[TextContent(text=json.dumps(org_result.data.model_dump(mode="json")))])
 
 
 def get_organization_details_tool() -> Tool[OrganizationGetDetailsSchema]:

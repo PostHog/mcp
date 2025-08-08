@@ -1,5 +1,3 @@
-import json
-
 from api.client import is_error, is_success
 from schema.tool_inputs import InsightGetSqlSchema
 from tools.types import Context, TextContent, Tool, ToolResult
@@ -11,11 +9,16 @@ async def get_sql_insight_handler(context: Context, params: InsightGetSqlSchema)
     insight_result = await context.api.insights(project_id).sql_insight(params.query)
 
     if is_error(insight_result):
-        raise Exception(f"Failed to execute SQL insight: {insight_result.error}")
+        error_msg = str(insight_result.error)
+        error_type = type(insight_result.error).__name__
+        if not error_msg or error_msg == "None":
+            error_msg = f"Unknown error occurred (type: {error_type})"
+
+        raise Exception(f"Failed to execute SQL insight: {error_msg}")
 
     assert is_success(insight_result)
 
-    return ToolResult(content=[TextContent(text=json.dumps(insight_result.data))])
+    return ToolResult(content=[TextContent(text=insight_result.data["response"])])
 
 
 def get_sql_insight_tool() -> Tool[InsightGetSqlSchema]:

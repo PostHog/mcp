@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 
 
 class PropertyType(str, Enum):
@@ -145,6 +145,22 @@ class UserResponse(BaseModel):
 class DeleteResponse(BaseModel):
     success: bool = True
     message: str = "Successfully deleted"
+
+
+# SQL Insight API Schemas
+class SqlInsightItem(BaseModel):
+    data: dict[str, Any] | None = None
+    type: str | None = None
+
+
+class SqlInsightResponse(RootModel[list[SqlInsightItem]]):
+    root: list[SqlInsightItem]
+
+    @classmethod
+    def model_validate(cls, value):
+        if isinstance(value, list):
+            return cls(root=[SqlInsightItem.model_validate(item) if isinstance(item, dict) else SqlInsightItem(data=item) for item in value])
+        return super().model_validate(value)
 
 
 # Forward references for imported types

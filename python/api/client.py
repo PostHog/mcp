@@ -26,6 +26,7 @@ from schema.api import (
     OrgListResponse,
     ProjectListResponse,
     QueryResponse,
+    SqlInsightResponse,
     UserResponse,
 )
 from schema.dashboards import AddInsightToDashboard, CreateDashboardInput, ListDashboards, UpdateDashboardInput
@@ -100,18 +101,19 @@ class ApiClient:
         response_class: type[T],
         method: str = "GET",
         data: dict[str, Any] | None = None,
+        timeout: float = 15.0,
     ) -> Result[T]:
         try:
             headers = self._build_headers()
 
             if method == "GET":
-                response = await self.client.get(url, headers=headers)
+                response = await self.client.get(url, headers=headers, timeout=timeout)
             elif method == "POST":
-                response = await self.client.post(url, headers=headers, content=json.dumps(data) if data else None)
+                response = await self.client.post(url, headers=headers, content=json.dumps(data) if data else None, timeout=timeout)
             elif method == "PATCH":
-                response = await self.client.patch(url, headers=headers, content=json.dumps(data) if data else None)
+                response = await self.client.patch(url, headers=headers, content=json.dumps(data) if data else None, timeout=timeout)
             elif method == "DELETE":
-                response = await self.client.delete(url, headers=headers)
+                response = await self.client.delete(url, headers=headers, timeout=timeout)
             else:
                 raise ValueError(f"Unsupported HTTP method: {method}")
 
@@ -364,26 +366,65 @@ class InsightResource:
     async def sql_insight(self, query: str) -> Result[dict]:
         result = await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/environments/{self.project_id}/max_tools/create_and_query_insight/",
-            dict,  # Raw response handling
+            SqlInsightResponse,
             method="POST",
-            data={"query": query},
+            data={"query": query, "insight_type": "sql"},
+            timeout=120.0,  # This can take a long time
         )
 
         if is_success(result):
-            # Parse the complex response structure
             try:
-                response_data = result.data
-                if isinstance(response_data, list) and len(response_data) > 0:
-                    first_item = response_data[0]
-                    if "data" in first_item:
-                        data = first_item["data"]
-                        columns = data.get("columns", [])
-                        results = data.get("results", [])
-                        return SuccessResult({"columns": columns, "results": results})
+                response_data = result.data.root
+                if response_data and len(response_data) > 0:
+                    generated_query = None
+                    execution_plan = None
+                    query_results = None
 
-                return ErrorResult(Exception("Unexpected response format from SQL insight"))
+                    for item in response_data:
+                        if item.data:
+                            data = item.data
+                            item_type = data.get("type", "")
+
+                            if item_type == "ai/viz":
+                                if "answer" in data:
+                                    answer = data["answer"]
+                                    generated_query = str(answer) if answer else None
+
+                                if "plan" in data:
+                                    execution_plan = data["plan"]
+
+                            elif item_type == "tool":
+                                if "content" in data:
+                                    query_results = data["content"]
+
+                            elif "columns" in data and "results" in data:
+                                columns = data.get("columns", [])
+                                results = data.get("results", [])
+                                if columns or results:
+                                    query_results = f"Columns: {columns}\nResults: {results}"
+
+                    response_text = []
+
+                    if generated_query:
+                        response_text.append(f"Generated Query:\n{generated_query}")
+
+                    if execution_plan:
+                        response_text.append(f"Execution Plan:\n{execution_plan}")
+
+                    if query_results:
+                        response_text.append(f"Query Results:\n{query_results}")
+
+                    if not response_text:
+                        response_text.append("Query executed but no detailed results were returned.")
+
+                    return SuccessResult({"response": "\n\n".join(response_text)})
+
+                return SuccessResult({"response": "No data returned from SQL insight API."})
             except Exception as e:
-                return ErrorResult(e)
+                return ErrorResult(Exception(f"Error parsing SQL insight response: {str(e)}"))
+
+        assert is_error(result)
+
         return result
 
 

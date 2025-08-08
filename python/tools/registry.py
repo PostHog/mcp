@@ -33,10 +33,10 @@ from tools.types import Context
 
 
 class ToolRegistry:
-    def __init__(self, api_token: str, base_url: str):
+    def __init__(self, api_token: str, base_url: str, env: dict[str, Any] | None = None):
         self.api = ApiClient(ApiConfig(api_token=api_token, base_url=base_url))
         self.cache = MemoryCache()
-        self.env: dict[str, Any] = {}
+        self.env: dict[str, Any] = env or {}
 
         self.tools = [
             # Organization tools

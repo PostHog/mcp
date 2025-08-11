@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll, afterEach } from "vitest";
 import { ApiClient } from "@/api/client";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
-const API_BASE_URL = process.env.TEST_API_BASE_URL || "http://localhost:8010";
-const API_TOKEN = process.env.TEST_API_TOKEN;
+const API_BASE_URL = process.env.TEST_POSTHOG_API_BASE_URL || "http://localhost:8010";
+const API_TOKEN = process.env.TEST_POSTHOG_PERSONAL_API_KEY;
 const TEST_ORG_ID = process.env.TEST_ORG_ID;
 const TEST_PROJECT_ID = process.env.TEST_PROJECT_ID;
 
@@ -20,7 +20,7 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 
 	beforeAll(async () => {
 		if (!API_TOKEN) {
-			throw new Error("TEST_API_TOKEN environment variable is required");
+			throw new Error("TEST_POSTHOG_PERSONAL_API_KEY environment variable is required");
 		}
 
 		if (!TEST_ORG_ID) {

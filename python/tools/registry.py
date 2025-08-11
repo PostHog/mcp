@@ -130,3 +130,10 @@ class ToolRegistry:
 
     async def close(self):
         await self.api.close()
+
+    # Support context management
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()

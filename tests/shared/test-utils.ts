@@ -1,10 +1,10 @@
 import { expect } from "vitest";
 import { ApiClient } from "../../src/api/client";
-import type { Context } from "../../src/tools/types";
 import { MemoryCache } from "../../src/lib/utils/cache/MemoryCache";
+import type { Context } from "../../src/tools/types";
 
-export const API_BASE_URL = process.env.TEST_API_BASE_URL || "http://localhost:8010";
-export const API_TOKEN = process.env.TEST_API_TOKEN;
+export const API_BASE_URL = process.env.TEST_POSTHOG_API_BASE_URL || "http://localhost:8010";
+export const PERSONAL_API_KEY = process.env.TEST_POSTHOG_PERSONAL_API_KEY;
 export const TEST_ORG_ID = process.env.TEST_ORG_ID;
 export const TEST_PROJECT_ID = process.env.TEST_PROJECT_ID;
 
@@ -15,8 +15,8 @@ export interface CreatedResources {
 }
 
 export function validateEnvironmentVariables() {
-	if (!API_TOKEN) {
-		throw new Error("TEST_API_TOKEN environment variable is required");
+	if (!PERSONAL_API_KEY) {
+		throw new Error("TEST_POSTHOG_PERSONAL_API_KEY environment variable is required");
 	}
 
 	if (!TEST_ORG_ID) {
@@ -30,7 +30,7 @@ export function validateEnvironmentVariables() {
 
 export function createTestClient(): ApiClient {
 	return new ApiClient({
-		apiToken: API_TOKEN!,
+		apiToken: PERSONAL_API_KEY!,
 		baseUrl: API_BASE_URL,
 	});
 }

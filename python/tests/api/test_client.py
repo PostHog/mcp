@@ -1,5 +1,6 @@
 from api.client import ApiClient, ApiConfig
-from lib.constants import BASE_URL
+
+BASE_URL = "https://example.com"
 
 
 class TestApiClientUnit:
@@ -7,15 +8,9 @@ class TestApiClientUnit:
 
     def test_create_api_client_with_required_config(self):
         """Test creating ApiClient with required config."""
-        config = ApiConfig(api_token="test-token")
+        config = ApiConfig(api_token="test-token", base_url=BASE_URL)
         client = ApiClient(config)
         assert isinstance(client, ApiClient)
-
-    def test_use_default_base_url_when_not_provided(self):
-        """Test that default BASE_URL is used when not provided."""
-        config = ApiConfig(api_token="test-token")
-        client = ApiClient(config)
-        assert client.base_url == BASE_URL
 
     def test_use_custom_base_url_when_provided(self):
         """Test that custom baseUrl is used when provided."""
@@ -26,7 +21,7 @@ class TestApiClientUnit:
 
     def test_build_correct_headers(self):
         """Test that correct headers are built."""
-        config = ApiConfig(api_token="test-token-123")
+        config = ApiConfig(api_token="test-token-123", base_url=BASE_URL)
         client = ApiClient(config)
         headers = client._build_headers()
 

@@ -287,7 +287,7 @@ class TestFeatureFlags:
         result = await tool.execute(context, params)
 
         # The result should contain an error message
-        assert result.content[0].text == f'Error: Flag with key "{non_existent_key}" not found.'
+        assert result.content == f'Error: Flag with key "{non_existent_key}" not found.'
 
     @pytest.mark.asyncio
     async def test_delete_feature_flag_by_key(self, context: Context, created_resources: CreatedResources):
@@ -312,10 +312,9 @@ class TestFeatureFlags:
         delete_result = await delete_tool.execute(context, delete_params)
 
         assert delete_result.content is not None
-        assert delete_result.content[0].type == "text"
 
         # Handle both JSON response and plain text response
-        response_text = delete_result.content[0].text
+        response_text = delete_result.content
         if response_text == "Feature flag is already deleted.":
             # Already deleted case
             pass
@@ -330,7 +329,7 @@ class TestFeatureFlags:
         get_definition_tool = get_feature_flag_definition_tool()
         get_params = get_definition_tool.schema(flagKey=create_params.key)
         get_result = await get_definition_tool.execute(context, get_params)
-        assert get_result.content[0].text == f'Error: Flag with key "{create_params.key}" not found.'
+        assert get_result.content == f'Error: Flag with key "{create_params.key}" not found.'
 
     @pytest.mark.asyncio
     async def test_delete_non_existent_feature_flag(self, context: Context, created_resources: CreatedResources):
@@ -339,7 +338,7 @@ class TestFeatureFlags:
 
         params = tool.schema(flagKey="non-existent-key")  # Use a non-existent key
         result = await tool.execute(context, params)
-        assert result.content[0].text == "Feature flag is already deleted."
+        assert result.content == "Feature flag is already deleted."
 
     @pytest.mark.asyncio
     async def test_full_crud_workflow(self, context: Context, created_resources: CreatedResources):

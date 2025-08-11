@@ -92,7 +92,7 @@ class TestOrganizations:
         set_params = set_tool.schema(orgId=target_org["id"])
         set_result = await set_tool.execute(context, set_params)
 
-        assert set_result.content[0].text == f"Switched to organization {target_org['id']}"
+        assert set_result.content == f"Switched to organization {target_org['id']}"
 
     @pytest.mark.asyncio
     async def test_set_invalid_organization_id(self, context: Context, created_resources: CreatedResources):
@@ -103,7 +103,7 @@ class TestOrganizations:
 
         # The Python implementation doesn't validate org existence, it just sets the ID
         result = await tool.execute(context, params)
-        assert result.content[0].text == f"Switched to organization {invalid_org_id}"
+        assert result.content == f"Switched to organization {invalid_org_id}"
 
     @pytest.mark.asyncio
     @pytest.mark.skip(reason="Organization details test skipped - matching TypeScript")
@@ -159,7 +159,7 @@ class TestOrganizations:
         # Set active organization
         set_params = set_tool.schema(orgId=target_org["id"])
         set_result = await set_tool.execute(context, set_params)
-        assert set_result.content[0].text == f"Switched to organization {target_org['id']}"
+        assert set_result.content == f"Switched to organization {target_org['id']}"
 
         # Set in cache for future tests
         await context.cache.set("org_id", target_org["id"])

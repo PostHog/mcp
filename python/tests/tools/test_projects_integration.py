@@ -92,7 +92,7 @@ class TestProjects:
         set_params = set_tool.schema(projectId=str(target_project["id"]))
         set_result = await set_tool.execute(context, set_params)
 
-        assert set_result.content[0].text == f"Switched to project {target_project['id']}"
+        assert set_result.content == f"Switched to project {target_project['id']}"
 
     @pytest.mark.asyncio
     async def test_set_project_id_as_expected(self, context: Context, created_resources: CreatedResources):
@@ -102,7 +102,7 @@ class TestProjects:
         params = tool.schema(projectId=str(project_id))
 
         result = await tool.execute(context, params)
-        assert result.content[0].text == f"Switched to project {project_id}"
+        assert result.content == f"Switched to project {project_id}"
 
     @pytest.mark.asyncio
     @pytest.mark.skip(reason="Property definitions test skipped - matching TypeScript")
@@ -160,7 +160,7 @@ class TestProjects:
         # Set active project
         set_params = set_tool.schema(projectId=str(target_project["id"]))
         set_result = await set_tool.execute(context, set_params)
-        assert set_result.content[0].text == f"Switched to project {target_project['id']}"
+        assert set_result.content == f"Switched to project {target_project['id']}"
 
         # Set in cache for future tests
         await context.cache.set("project_id", str(target_project["id"]))

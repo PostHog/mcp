@@ -67,7 +67,7 @@ class TestDocumentation:
 
         result = await tool.execute(context_without_key, params)
 
-        assert result.content[0].text == "Error: INKEEP_API_KEY is not configured."
+        assert result.content == "Error: INKEEP_API_KEY is not configured."
 
     @pytest.mark.asyncio
     @pytest.mark.skip(reason="Documentation search test skipped - matching TypeScript")
@@ -78,9 +78,8 @@ class TestDocumentation:
 
         result = await tool.execute(context, params)
 
-        assert result.content[0].type == "text"
-        assert result.content[0].text is not None
-        assert len(result.content[0].text) > 0
+        assert result.content is not None
+        assert len(result.content) > 0
 
     @pytest.mark.asyncio
     @pytest.mark.skip(reason="Analytics documentation search test skipped - matching TypeScript")
@@ -91,9 +90,8 @@ class TestDocumentation:
 
         result = await tool.execute(context, params)
 
-        assert result.content[0].type == "text"
-        assert result.content[0].text is not None
-        assert len(result.content[0].text) > 0
+        assert result.content is not None
+        assert len(result.content) > 0
 
     @pytest.mark.asyncio
     @pytest.mark.skip(reason="Empty query results test skipped - matching TypeScript")
@@ -104,8 +102,7 @@ class TestDocumentation:
 
         result = await tool.execute(context, params)
 
-        assert result.content[0].type == "text"
-        assert result.content[0].text is not None
+        assert result.content is not None
 
     @pytest.mark.asyncio
     async def test_validate_query_parameter_required(self, context: Context, created_resources: CreatedResources):
@@ -117,4 +114,4 @@ class TestDocumentation:
         params = tool.schema(query="")
         result = await tool.execute(context, params)
         # The result should either work or return an error message, both are valid
-        assert result.content[0].text is not None
+        assert result.content is not None

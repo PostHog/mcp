@@ -12,7 +12,7 @@ from tests.shared.test_utils import (
     create_test_client,
     create_test_context,
     generate_unique_key,
-    parse_tool_response,
+    parse_tool_result,
     set_active_project_and_org,
     validate_environment_variables,
 )
@@ -65,7 +65,7 @@ class TestFeatureFlags:
         )
 
         result = await tool.execute(context, params)
-        flag_data = parse_tool_response(result.__dict__)
+        flag_data = parse_tool_result(result)
 
         assert "id" in flag_data
         assert flag_data["key"] == params.key
@@ -101,7 +101,7 @@ class TestFeatureFlags:
         )
 
         result = await tool.execute(context, params)
-        flag_data = parse_tool_response(result.__dict__)
+        flag_data = parse_tool_result(result)
 
         assert flag_data["id"] is not None
         assert flag_data["key"] == params.key
@@ -125,7 +125,7 @@ class TestFeatureFlags:
         )
 
         result = await tool.execute(context, params)
-        flag_data = parse_tool_response(result.__dict__)
+        flag_data = parse_tool_result(result)
 
         assert "id" in flag_data
         assert flag_data["key"] == params.key
@@ -149,7 +149,7 @@ class TestFeatureFlags:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_flag = parse_tool_response(create_result.__dict__)
+        created_flag = parse_tool_result(create_result)
         created_resources.feature_flags.append(created_flag["id"])
 
         # Update the flag
@@ -159,7 +159,7 @@ class TestFeatureFlags:
         )
 
         update_result = await update_tool.execute(context, update_params)
-        updated_flag = parse_tool_response(update_result.__dict__)
+        updated_flag = parse_tool_result(update_result)
 
         assert updated_flag["name"] == "Updated Name"
         assert not updated_flag["active"]
@@ -181,7 +181,7 @@ class TestFeatureFlags:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_flag = parse_tool_response(create_result.__dict__)
+        created_flag = parse_tool_result(create_result)
         created_resources.feature_flags.append(created_flag["id"])
 
         # Update with new filters
@@ -190,7 +190,7 @@ class TestFeatureFlags:
         update_params = update_tool.schema(flagKey=create_params.key, data={"filters": new_filters})
 
         update_result = await update_tool.execute(context, update_params)
-        updated_flag = parse_tool_response(update_result.__dict__)
+        updated_flag = parse_tool_result(update_result)
 
         assert "id" in updated_flag
         assert updated_flag["key"] == create_params.key
@@ -213,14 +213,14 @@ class TestFeatureFlags:
             )
 
             result = await create_tool.execute(context, params)
-            flag = parse_tool_response(result.__dict__)
+            flag = parse_tool_result(result)
             test_flags.append(flag)
             created_resources.feature_flags.append(flag["id"])
 
         # Get all flags
         all_params = get_all_tool.schema()
         result = await get_all_tool.execute(context, all_params)
-        all_flags = parse_tool_response(result.__dict__)
+        all_flags = parse_tool_result(result)
 
         assert isinstance(all_flags, list)
         assert len(all_flags) >= 3
@@ -238,7 +238,7 @@ class TestFeatureFlags:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        flags = parse_tool_response(result.__dict__)
+        flags = parse_tool_result(result)
 
         if len(flags) > 0:
             flag = flags[0]
@@ -264,13 +264,13 @@ class TestFeatureFlags:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_flag = parse_tool_response(create_result.__dict__)
+        created_flag = parse_tool_result(create_result)
         created_resources.feature_flags.append(created_flag["id"])
 
         # Get definition
         def_params = get_definition_tool.schema(flagKey=create_params.key)
         result = await get_definition_tool.execute(context, def_params)
-        definition = parse_tool_response(result.__dict__)
+        definition = parse_tool_result(result)
 
         assert definition["id"] == created_flag["id"]
         assert definition["key"] == create_params.key
@@ -305,7 +305,7 @@ class TestFeatureFlags:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_flag = parse_tool_response(create_result.__dict__)
+        created_flag = parse_tool_result(create_result)
 
         # Delete the flag
         delete_params = delete_tool.schema(flagKey=created_flag["key"])
@@ -360,25 +360,25 @@ class TestFeatureFlags:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_flag = parse_tool_response(create_result.__dict__)
+        created_flag = parse_tool_result(create_result)
 
         # Read
         get_params = get_definition_tool.schema(flagKey=flag_key)
         get_result = await get_definition_tool.execute(context, get_params)
-        retrieved_flag = parse_tool_response(get_result.__dict__)
+        retrieved_flag = parse_tool_result(get_result)
         assert retrieved_flag["id"] == created_flag["id"]
 
         # Update
         update_params = update_tool.schema(flagKey=flag_key, data={"active": True, "name": "Updated Workflow Flag"})
 
         update_result = await update_tool.execute(context, update_params)
-        updated_flag = parse_tool_response(update_result.__dict__)
+        updated_flag = parse_tool_result(update_result)
         assert updated_flag["active"]
         assert updated_flag["name"] == "Updated Workflow Flag"
 
         # Delete
         delete_params = delete_tool.schema(flagKey=created_flag["key"])
         delete_result = await delete_tool.execute(context, delete_params)
-        delete_response = parse_tool_response(delete_result.__dict__)
+        delete_response = parse_tool_result(delete_result)
         assert delete_response["success"]
         assert "deleted successfully" in delete_response["message"]

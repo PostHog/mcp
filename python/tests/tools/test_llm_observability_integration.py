@@ -8,7 +8,7 @@ from tests.shared.test_utils import (
     cleanup_resources,
     create_test_client,
     create_test_context,
-    parse_tool_response,
+    parse_tool_result,
     set_active_project_and_org,
     validate_environment_variables,
 )
@@ -51,7 +51,7 @@ class TestLLMObservability:
         params = tool.schema(projectId=int(TEST_PROJECT_ID))
 
         result = await tool.execute(context, params)
-        costs_data = parse_tool_response(result.__dict__)
+        costs_data = parse_tool_result(result)
 
         assert isinstance(costs_data, list)
 
@@ -62,7 +62,7 @@ class TestLLMObservability:
         params = tool.schema(projectId=int(TEST_PROJECT_ID), days=30)
 
         result = await tool.execute(context, params)
-        costs_data = parse_tool_response(result.__dict__)
+        costs_data = parse_tool_result(result)
 
         assert isinstance(costs_data, list)
 
@@ -73,7 +73,7 @@ class TestLLMObservability:
         params = tool.schema(projectId=int(TEST_PROJECT_ID), days=1)
 
         result = await tool.execute(context, params)
-        costs_data = parse_tool_response(result.__dict__)
+        costs_data = parse_tool_result(result)
 
         assert isinstance(costs_data, list)
 
@@ -85,11 +85,11 @@ class TestLLMObservability:
         # Test week data
         week_params = tool.schema(projectId=int(TEST_PROJECT_ID), days=7)
         week_result = await tool.execute(context, week_params)
-        week_data = parse_tool_response(week_result.__dict__)
+        week_data = parse_tool_result(week_result)
         assert isinstance(week_data, list)
 
         # Test month data
         month_params = tool.schema(projectId=int(TEST_PROJECT_ID), days=30)
         month_result = await tool.execute(context, month_params)
-        month_data = parse_tool_response(month_result.__dict__)
+        month_data = parse_tool_result(month_result)
         assert isinstance(month_data, list)

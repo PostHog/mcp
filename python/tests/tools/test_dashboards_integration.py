@@ -9,7 +9,7 @@ from tests.shared.test_utils import (
     create_test_client,
     create_test_context,
     generate_unique_key,
-    parse_tool_response,
+    parse_tool_result,
     set_active_project_and_org,
     validate_environment_variables,
 )
@@ -61,7 +61,7 @@ class TestDashboards:
         )
 
         result = await tool.execute(context, params)
-        dashboard_data = parse_tool_response(result.__dict__)
+        dashboard_data = parse_tool_result(result)
 
         assert "id" in dashboard_data
         assert dashboard_data["name"] == params.data.name
@@ -82,7 +82,7 @@ class TestDashboards:
         )
 
         result = await tool.execute(context, params)
-        dashboard_data = parse_tool_response(result.__dict__)
+        dashboard_data = parse_tool_result(result)
 
         assert "id" in dashboard_data
         assert dashboard_data["name"] == params.data.name
@@ -104,7 +104,7 @@ class TestDashboards:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_dashboard = parse_tool_response(create_result.__dict__)
+        created_dashboard = parse_tool_result(create_result)
         created_resources.dashboards.append(created_dashboard["id"])
 
         # Update dashboard
@@ -114,7 +114,7 @@ class TestDashboards:
         )
 
         update_result = await update_tool.execute(context, update_params)
-        updated_dashboard = parse_tool_response(update_result.__dict__)
+        updated_dashboard = parse_tool_result(update_result)
 
         assert updated_dashboard["id"] == created_dashboard["id"]
         assert updated_dashboard["name"] == update_params.data.name
@@ -126,7 +126,7 @@ class TestDashboards:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        dashboards = parse_tool_response(result.__dict__)
+        dashboards = parse_tool_result(result)
 
         assert isinstance(dashboards, list)
         if len(dashboards) > 0:
@@ -149,13 +149,13 @@ class TestDashboards:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_dashboard = parse_tool_response(create_result.__dict__)
+        created_dashboard = parse_tool_result(create_result)
         created_resources.dashboards.append(created_dashboard["id"])
 
         # Get dashboard
         get_params = get_tool.schema(dashboardId=created_dashboard["id"])
         get_result = await get_tool.execute(context, get_params)
-        retrieved_dashboard = parse_tool_response(get_result.__dict__)
+        retrieved_dashboard = parse_tool_result(get_result)
 
         assert retrieved_dashboard["id"] == created_dashboard["id"]
         assert retrieved_dashboard["name"] == create_params.data.name
@@ -175,12 +175,12 @@ class TestDashboards:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_dashboard = parse_tool_response(create_result.__dict__)
+        created_dashboard = parse_tool_result(create_result)
 
         # Delete dashboard
         delete_params = delete_tool.schema(dashboardId=created_dashboard["id"])
         delete_result = await delete_tool.execute(context, delete_params)
-        delete_response = parse_tool_response(delete_result.__dict__)
+        delete_response = parse_tool_result(delete_result)
 
         assert delete_response["success"]
         assert "deleted successfully" in delete_response["message"]
@@ -202,12 +202,12 @@ class TestDashboards:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_dashboard = parse_tool_response(create_result.__dict__)
+        created_dashboard = parse_tool_result(create_result)
 
         # Read
         get_params = get_tool.schema(dashboardId=created_dashboard["id"])
         get_result = await get_tool.execute(context, get_params)
-        retrieved_dashboard = parse_tool_response(get_result.__dict__)
+        retrieved_dashboard = parse_tool_result(get_result)
         assert retrieved_dashboard["id"] == created_dashboard["id"]
 
         # Update
@@ -220,11 +220,11 @@ class TestDashboards:
         )
 
         update_result = await update_tool.execute(context, update_params)
-        updated_dashboard = parse_tool_response(update_result.__dict__)
+        updated_dashboard = parse_tool_result(update_result)
         assert updated_dashboard["name"] == update_params.data.name
 
         # Delete
         delete_params = delete_tool.schema(dashboardId=created_dashboard["id"])
         delete_result = await delete_tool.execute(context, delete_params)
-        delete_response = parse_tool_response(delete_result.__dict__)
+        delete_response = parse_tool_result(delete_result)
         assert delete_response["success"]

@@ -11,7 +11,7 @@ from tests.shared.test_utils import (
     cleanup_resources,
     create_test_client,
     create_test_context,
-    parse_tool_response,
+    parse_tool_result,
     set_active_project_and_org,
     validate_environment_variables,
 )
@@ -55,7 +55,7 @@ class TestErrorTracking:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        error_data = parse_tool_response(result.__dict__)
+        error_data = parse_tool_result(result)
 
         assert isinstance(error_data, list)
 
@@ -75,7 +75,7 @@ class TestErrorTracking:
         )
 
         result = await tool.execute(context, params)
-        error_data = parse_tool_response(result.__dict__)
+        error_data = parse_tool_result(result)
 
         assert isinstance(error_data, list)
 
@@ -86,7 +86,7 @@ class TestErrorTracking:
         params = tool.schema(status=StatusErrors.ACTIVE)
 
         result = await tool.execute(context, params)
-        error_data = parse_tool_response(result.__dict__)
+        error_data = parse_tool_result(result)
 
         assert isinstance(error_data, list)
 
@@ -102,7 +102,7 @@ class TestErrorTracking:
         params = tool.schema(dateFrom=date_from, dateTo=date_to)
 
         result = await tool.execute(context, params)
-        error_data = parse_tool_response(result.__dict__)
+        error_data = parse_tool_result(result)
 
         assert isinstance(error_data, list)
 
@@ -115,7 +115,7 @@ class TestErrorTracking:
         params = tool.schema(issueId=test_issue_id)
 
         result = await tool.execute(context, params)
-        error_details = parse_tool_response(result.__dict__)
+        error_details = parse_tool_result(result)
 
         assert isinstance(error_details, list)
 
@@ -131,7 +131,7 @@ class TestErrorTracking:
         params = tool.schema(issueId=test_issue_id, dateFrom=date_from, dateTo=date_to)
 
         result = await tool.execute(context, params)
-        error_details = parse_tool_response(result.__dict__)
+        error_details = parse_tool_result(result)
 
         assert isinstance(error_details, list)
 
@@ -144,7 +144,7 @@ class TestErrorTracking:
         # List errors
         list_params = list_tool.schema()
         list_result = await list_tool.execute(context, list_params)
-        error_list = parse_tool_response(list_result.__dict__)
+        error_list = parse_tool_result(list_result)
 
         assert isinstance(error_list, list)
 
@@ -158,6 +158,6 @@ class TestErrorTracking:
             details_params = details_tool.schema(issueId=test_issue_id)
 
         details_result = await details_tool.execute(context, details_params)
-        error_details = parse_tool_response(details_result.__dict__)
+        error_details = parse_tool_result(details_result)
 
         assert isinstance(error_details, list)

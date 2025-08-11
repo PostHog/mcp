@@ -30,7 +30,6 @@ async def main():
 
     config = load_config_from_env()
 
-    # Use context manager for automatic cleanup
     async with ToolRegistry(config) as registry:
         print(f"🔧 Loaded {len(registry.tools)} tools:")
 

@@ -8,7 +8,7 @@ from tests.shared.test_utils import (
     cleanup_resources,
     create_test_client,
     create_test_context,
-    parse_tool_response,
+    parse_tool_result,
     set_active_project_and_org,
     validate_environment_variables,
 )
@@ -53,7 +53,7 @@ class TestOrganizations:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        orgs = parse_tool_response(result.__dict__)
+        orgs = parse_tool_result(result)
 
         assert isinstance(orgs, list)
         assert len(orgs) > 0
@@ -69,7 +69,7 @@ class TestOrganizations:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        orgs = parse_tool_response(result.__dict__)
+        orgs = parse_tool_result(result)
 
         test_org = next((org for org in orgs if org["id"] == TEST_ORG_ID), None)
         assert test_org is not None
@@ -84,7 +84,7 @@ class TestOrganizations:
         # Get organizations
         orgs_params = get_tool.schema()
         orgs_result = await get_tool.execute(context, orgs_params)
-        orgs = parse_tool_response(orgs_result.__dict__)
+        orgs = parse_tool_result(orgs_result)
         assert len(orgs) > 0
 
         # Set active organization
@@ -113,7 +113,7 @@ class TestOrganizations:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        org_details = parse_tool_response(result.__dict__)
+        org_details = parse_tool_result(result)
 
         assert org_details["id"] == TEST_ORG_ID
         assert "name" in org_details
@@ -128,7 +128,7 @@ class TestOrganizations:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        org_details = parse_tool_response(result.__dict__)
+        org_details = parse_tool_result(result)
 
         assert "projects" in org_details
         assert isinstance(org_details["projects"], list)
@@ -150,7 +150,7 @@ class TestOrganizations:
         # List organizations
         orgs_params = get_tool.schema()
         orgs_result = await get_tool.execute(context, orgs_params)
-        orgs = parse_tool_response(orgs_result.__dict__)
+        orgs = parse_tool_result(orgs_result)
         assert len(orgs) > 0
 
         # Find target org (prefer test org, fallback to first)

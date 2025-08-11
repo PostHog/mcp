@@ -8,7 +8,7 @@ from tests.shared.test_utils import (
     cleanup_resources,
     create_test_client,
     create_test_context,
-    parse_tool_response,
+    parse_tool_result,
     set_active_project_and_org,
     validate_environment_variables,
 )
@@ -53,7 +53,7 @@ class TestProjects:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        projects = parse_tool_response(result.__dict__)
+        projects = parse_tool_result(result)
 
         assert isinstance(projects, list)
         assert len(projects) > 0
@@ -69,7 +69,7 @@ class TestProjects:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        projects = parse_tool_response(result.__dict__)
+        projects = parse_tool_result(result)
 
         test_project = next((proj for proj in projects if proj["id"] == int(TEST_PROJECT_ID)), None)
         assert test_project is not None
@@ -84,7 +84,7 @@ class TestProjects:
         # Get projects
         projects_params = get_tool.schema()
         projects_result = await get_tool.execute(context, projects_params)
-        projects = parse_tool_response(projects_result.__dict__)
+        projects = parse_tool_result(projects_result)
         assert len(projects) > 0
 
         # Set active project
@@ -112,7 +112,7 @@ class TestProjects:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        property_defs = parse_tool_response(result.__dict__)
+        property_defs = parse_tool_result(result)
 
         assert "event_properties" in property_defs
         assert "person_properties" in property_defs
@@ -130,7 +130,7 @@ class TestProjects:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        property_defs = parse_tool_response(result.__dict__)
+        property_defs = parse_tool_result(result)
 
         if len(property_defs["event_properties"]) > 0:
             event_prop = property_defs["event_properties"][0]
@@ -151,7 +151,7 @@ class TestProjects:
         # List projects
         projects_params = get_tool.schema()
         projects_result = await get_tool.execute(context, projects_params)
-        projects = parse_tool_response(projects_result.__dict__)
+        projects = parse_tool_result(projects_result)
         assert len(projects) > 0
 
         # Find target project (prefer test project, fallback to first)

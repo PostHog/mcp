@@ -11,7 +11,7 @@ from tests.shared.test_utils import (
     create_test_client,
     create_test_context,
     generate_unique_key,
-    parse_tool_response,
+    parse_tool_result,
     set_active_project_and_org,
     validate_environment_variables,
 )
@@ -64,7 +64,7 @@ class TestInsights:
         )
 
         result = await tool.execute(context, params)
-        insight_data = parse_tool_response(result.__dict__)
+        insight_data = parse_tool_result(result)
 
         assert "id" in insight_data
         assert insight_data["name"] == params.data.name
@@ -85,7 +85,7 @@ class TestInsights:
         )
 
         result = await tool.execute(context, params)
-        insight_data = parse_tool_response(result.__dict__)
+        insight_data = parse_tool_result(result)
 
         assert "id" in insight_data
         assert insight_data["name"] == params.data.name
@@ -106,7 +106,7 @@ class TestInsights:
         )
 
         result = await tool.execute(context, params)
-        insight_data = parse_tool_response(result.__dict__)
+        insight_data = parse_tool_result(result)
 
         assert "id" in insight_data
         assert insight_data["name"] == params.data.name
@@ -129,7 +129,7 @@ class TestInsights:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_insight = parse_tool_response(create_result.__dict__)
+        created_insight = parse_tool_result(create_result)
         created_resources.insights.append(created_insight["id"])
 
         # Update insight
@@ -139,7 +139,7 @@ class TestInsights:
         )
 
         update_result = await update_tool.execute(context, update_params)
-        updated_insight = parse_tool_response(update_result.__dict__)
+        updated_insight = parse_tool_result(update_result)
 
         assert updated_insight["id"] == created_insight["id"]
         assert updated_insight["name"] == update_params.data.name
@@ -160,7 +160,7 @@ class TestInsights:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_insight = parse_tool_response(create_result.__dict__)
+        created_insight = parse_tool_result(create_result)
         created_resources.insights.append(created_insight["id"])
 
         # Update insight query
@@ -170,7 +170,7 @@ class TestInsights:
         )
 
         update_result = await update_tool.execute(context, update_params)
-        updated_insight = parse_tool_response(update_result.__dict__)
+        updated_insight = parse_tool_result(update_result)
 
         assert updated_insight["id"] == created_insight["id"]
         assert updated_insight["name"] == create_params.data.name
@@ -182,7 +182,7 @@ class TestInsights:
         params = tool.schema()
 
         result = await tool.execute(context, params)
-        insights = parse_tool_response(result.__dict__)
+        insights = parse_tool_result(result)
 
         assert isinstance(insights, list)
         if len(insights) > 0:
@@ -208,13 +208,13 @@ class TestInsights:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_insight = parse_tool_response(create_result.__dict__)
+        created_insight = parse_tool_result(create_result)
         created_resources.insights.append(created_insight["id"])
 
         # Get insight
         get_params = get_tool.schema(insightId=created_insight["id"])
         get_result = await get_tool.execute(context, get_params)
-        retrieved_insight = parse_tool_response(get_result.__dict__)
+        retrieved_insight = parse_tool_result(get_result)
 
         assert retrieved_insight["id"] == created_insight["id"]
         assert retrieved_insight["name"] == create_params.data.name
@@ -237,12 +237,12 @@ class TestInsights:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_insight = parse_tool_response(create_result.__dict__)
+        created_insight = parse_tool_result(create_result)
 
         # Delete insight
         delete_params = delete_tool.schema(insightId=created_insight["id"])
         delete_result = await delete_tool.execute(context, delete_params)
-        delete_response = parse_tool_response(delete_result.__dict__)
+        delete_response = parse_tool_result(delete_result)
 
         assert delete_response["success"]
         assert "deleted successfully" in delete_response["message"]
@@ -265,12 +265,12 @@ class TestInsights:
         )
 
         create_result = await create_tool.execute(context, create_params)
-        created_insight = parse_tool_response(create_result.__dict__)
+        created_insight = parse_tool_result(create_result)
 
         # Read
         get_params = get_tool.schema(insightId=created_insight["id"])
         get_result = await get_tool.execute(context, get_params)
-        retrieved_insight = parse_tool_response(get_result.__dict__)
+        retrieved_insight = parse_tool_result(get_result)
         assert retrieved_insight["id"] == created_insight["id"]
 
         # Update
@@ -283,11 +283,11 @@ class TestInsights:
         )
 
         update_result = await update_tool.execute(context, update_params)
-        updated_insight = parse_tool_response(update_result.__dict__)
+        updated_insight = parse_tool_result(update_result)
         assert updated_insight["name"] == update_params.data.name
 
         # Delete
         delete_params = delete_tool.schema(insightId=created_insight["id"])
         delete_result = await delete_tool.execute(context, delete_params)
-        delete_response = parse_tool_response(delete_result.__dict__)
+        delete_response = parse_tool_result(delete_result)
         assert delete_response["success"]

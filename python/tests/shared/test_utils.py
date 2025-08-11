@@ -12,7 +12,7 @@ from api.client import ApiClient, ApiConfig
 from lib.config import PostHogToolConfig
 from lib.utils.cache.memory_cache import MemoryCache
 from schema.query import DateRange, HogQLFilters, HogQLQuery, InsightQuery
-from tools.types import Context
+from tools.types import Context, ToolResult
 
 
 def load_env_test_file():
@@ -138,18 +138,9 @@ async def cleanup_resources(client: ApiClient, project_id: str, resources: Creat
     resources.dashboards.clear()
 
 
-def parse_tool_response(result: dict[str, Any]) -> Any:
+def parse_tool_result(result: ToolResult) -> Any:
     """Parse the JSON response from a tool execution."""
-    assert "content" in result
-    assert len(result["content"]) > 0
-    content_item = result["content"][0]
-    # Handle both dict and object formats
-    if hasattr(content_item, "type") and hasattr(content_item, "text"):
-        assert content_item.type == "text"
-        return json.loads(content_item.text)
-    else:
-        assert content_item["type"] == "text"
-        return json.loads(content_item["text"])
+    return json.loads(result.content)
 
 
 def generate_unique_key(prefix: str) -> str:

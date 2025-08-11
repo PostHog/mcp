@@ -19,7 +19,7 @@ async def get_insight_handler(context: Context, params: InsightGetSchema) -> Too
 
     insight_with_url = {
         **insight_data.model_dump(),
-        "url": f"{get_project_base_url(project_id)}/insights/{insight_data.short_id}",
+        "url": f"{get_project_base_url(project_id, context.api.base_url)}/insights/{insight_data.short_id}",
     }
 
     return ToolResult(content=[TextContent(text=json.dumps(insight_with_url))])

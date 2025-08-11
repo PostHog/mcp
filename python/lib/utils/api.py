@@ -3,8 +3,6 @@ from typing import TypeVar
 import httpx
 from pydantic import BaseModel, ValidationError
 
-from lib.constants import BASE_URL
-
 T = TypeVar("T", bound=BaseModel)
 
 
@@ -46,7 +44,7 @@ async def with_pagination(url: str, api_token: str, data_class: type[T]) -> list
         return results
 
 
-def get_project_base_url(project_id: str) -> str:
+def get_project_base_url(project_id: str, base_url: str) -> str:
     if project_id == "@current":
-        return BASE_URL
-    return f"{BASE_URL}/project/{project_id}"
+        return base_url
+    return f"{base_url}/project/{project_id}"

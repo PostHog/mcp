@@ -1,6 +1,7 @@
 from typing import Any
 
 from api.client import ApiClient, ApiConfig, is_error, is_success
+from lib.config import PostHogToolConfig
 from lib.utils.cache.memory_cache import MemoryCache
 from tools.dashboards.add_insight import add_insight_to_dashboard_tool
 from tools.dashboards.create import create_dashboard_tool
@@ -33,10 +34,10 @@ from tools.types import Context
 
 
 class ToolRegistry:
-    def __init__(self, api_token: str, base_url: str, env: dict[str, Any] | None = None):
-        self.api = ApiClient(ApiConfig(api_token=api_token, base_url=base_url))
+    def __init__(self, config: PostHogToolConfig):
+        self.config = config
+        self.api = ApiClient(ApiConfig(api_token=config.api_token, base_url=config.api_base_url))
         self.cache = MemoryCache()
-        self.env: dict[str, Any] = env or {}
 
         self.tools = [
             # Organization tools
@@ -110,7 +111,7 @@ class ToolRegistry:
         return Context(
             api=self.api,
             cache=self.cache,
-            env=self.env,
+            config=self.config,
             get_project_id=self.get_project_id,
             get_org_id=self.get_org_id,
             get_distinct_id=self.get_distinct_id,

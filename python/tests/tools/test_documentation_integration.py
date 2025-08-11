@@ -1,6 +1,7 @@
 import pytest
 import pytest_asyncio
 
+from lib.config import PostHogToolConfig
 from tests.shared.test_utils import (
     TEST_ORG_ID,
     TEST_PROJECT_ID,
@@ -46,11 +47,16 @@ class TestDocumentation:
     @pytest.mark.asyncio
     async def test_handle_missing_inkeep_api_key(self, context: Context, created_resources: CreatedResources):
         """Test handling missing INKEEP_API_KEY."""
-        # Create context without INKEEP_API_KEY
+
+        # Create config without INKEEP_API_KEY
+        config_without_key = PostHogToolConfig(
+            api_token=context.config.api_token, api_base_url=context.config.api_base_url, inkeep_api_key=None, dev=context.config.dev
+        )
+
         context_without_key = Context(
             api=context.api,
             cache=context.cache,
-            env={**context.env, "INKEEP_API_KEY": None},
+            config=config_without_key,
             get_project_id=context.get_project_id,
             get_org_id=context.get_org_id,
             get_distinct_id=context.get_distinct_id,

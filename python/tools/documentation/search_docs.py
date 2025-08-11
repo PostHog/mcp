@@ -7,7 +7,7 @@ from tools.types import Context, TextContent, Tool, ToolResult
 
 
 async def search_docs_handler(context: Context, params: DocumentationSearchSchema) -> ToolResult:
-    inkeep_api_key = context.env.get("INKEEP_API_KEY")
+    inkeep_api_key = context.config.inkeep_api_key
 
     if not inkeep_api_key:
         return ToolResult(content=[TextContent(text="Error: INKEEP_API_KEY is not configured.")])

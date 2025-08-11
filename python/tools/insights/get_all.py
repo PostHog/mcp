@@ -33,7 +33,7 @@ async def get_all_insights_handler(context: Context, params: InsightGetAllSchema
     insights_with_urls = []
     for insight in insights_result.data:
         insight_dict = insight.model_dump()
-        insight_dict["url"] = f"{get_project_base_url(project_id)}/insights/{insight.short_id}"
+        insight_dict["url"] = f"{get_project_base_url(project_id, context.api.base_url)}/insights/{insight.short_id}"
         insights_with_urls.append(insight_dict)
 
     return ToolResult(content=[TextContent(text=json.dumps(insights_with_urls))])

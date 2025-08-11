@@ -19,7 +19,7 @@ async def update_dashboard_handler(context: Context, params: DashboardUpdateSche
 
     dashboard_with_url = {
         **dashboard_data.model_dump(),
-        "url": f"{get_project_base_url(project_id)}/dashboard/{dashboard_data.id}",
+        "url": f"{get_project_base_url(project_id, context.api.base_url)}/dashboard/{dashboard_data.id}",
     }
 
     return ToolResult(content=[TextContent(text=json.dumps(dashboard_with_url))])

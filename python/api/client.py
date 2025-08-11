@@ -5,7 +5,6 @@ from typing import Any, Generic, Literal, TypeGuard, TypeVar
 import httpx
 from pydantic import ValidationError
 
-from lib.constants import BASE_URL
 from lib.errors import ErrorCode
 from lib.utils.api import with_pagination
 from schema.api import (
@@ -80,13 +79,13 @@ def propagate_error(error_result: ErrorResult) -> ErrorResult:
 @dataclass
 class ApiConfig:
     api_token: str
-    base_url: str | None = None
+    base_url: str
 
 
 class ApiClient:
     def __init__(self, config: ApiConfig):
         self.config = config
-        self.base_url = config.base_url or BASE_URL
+        self.base_url = config.base_url
         self.client = httpx.AsyncClient()
 
     def _build_headers(self) -> dict[str, str]:

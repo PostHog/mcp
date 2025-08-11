@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Any, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from api.client import ApiClient
+from lib.config import PostHogToolConfig
 
 
 @dataclass
@@ -27,7 +28,7 @@ class ScopedCache(ABC):
 class Context:
     api: ApiClient
     cache: ScopedCache
-    env: dict[str, Any]
+    config: PostHogToolConfig
     get_project_id: Callable[[], Awaitable[str]]
     get_org_id: Callable[[], Awaitable[str]]
     get_distinct_id: Callable[[], Awaitable[str]]

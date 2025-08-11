@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from api.client import ApiClient, ApiConfig
+from lib.config import PostHogToolConfig
 from lib.utils.cache.memory_cache import MemoryCache
 from schema.query import DateRange, HogQLFilters, HogQLQuery, InsightQuery
 from tools.types import Context
@@ -70,7 +71,12 @@ def create_test_client() -> ApiClient:
 def create_test_context(client: ApiClient) -> Context:
     """Create a test context with mocked cache and helper functions."""
     cache = MemoryCache()
-    env: dict[str, Any] = {}
+    config = PostHogToolConfig(
+        api_token=API_TOKEN,
+        api_base_url=API_BASE_URL,
+        inkeep_api_key=os.getenv("INKEEP_API_KEY"),
+        dev=os.getenv("DEV", "false").lower() in ("true", "1", "yes"),
+    )
 
     async def get_project_id() -> str:
         project_id = await cache.get("project_id")
@@ -91,7 +97,7 @@ def create_test_context(client: ApiClient) -> Context:
     return Context(
         api=client,
         cache=cache,
-        env=env,
+        config=config,
         get_project_id=get_project_id,
         get_org_id=get_org_id,
         get_distinct_id=get_distinct_id,

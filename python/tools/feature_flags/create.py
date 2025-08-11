@@ -20,7 +20,7 @@ async def create_feature_flag_handler(context: Context, params: FeatureFlagCreat
 
     feature_flag_with_url = {
         **flag_data.model_dump(),
-        "url": f"{get_project_base_url(project_id)}/feature_flags/{flag_data.id}",
+        "url": f"{get_project_base_url(project_id, context.api.base_url)}/feature_flags/{flag_data.id}",
     }
 
     return ToolResult(content=[TextContent(text=json.dumps(feature_flag_with_url))])

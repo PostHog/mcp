@@ -2,7 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import DashboardGetAllSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def get_all_dashboards_handler(context: Context, params: DashboardGetAllSchema) -> ToolResult:
@@ -16,7 +16,7 @@ async def get_all_dashboards_handler(context: Context, params: DashboardGetAllSc
 
     dashboards_data = [dashboard.model_dump() for dashboard in dashboards_result.data]
 
-    return ToolResult(content=[TextContent(text=json.dumps(dashboards_data))])
+    return ToolResult(content=json.dumps(dashboards_data))
 
 
 def get_all_dashboards_tool() -> Tool[DashboardGetAllSchema]:

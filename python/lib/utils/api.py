@@ -6,9 +6,9 @@ from pydantic import BaseModel, ValidationError
 T = TypeVar("T", bound=BaseModel)
 
 
-async def with_pagination(url: str, api_token: str, data_class: type[T]) -> list[T]:
+async def with_pagination(url: str, personal_api_key: str, data_class: type[T]) -> list[T]:
     async with httpx.AsyncClient(timeout=30.0) as client:
-        response = await client.get(url, headers={"Authorization": f"Bearer {api_token}"})
+        response = await client.get(url, headers={"Authorization": f"Bearer {personal_api_key}"})
 
         if not response.is_success:
             raise Exception(f"Failed to fetch {url}: {response.text}")
@@ -38,7 +38,7 @@ async def with_pagination(url: str, api_token: str, data_class: type[T]) -> list
         results = parsed_response.results
 
         if parsed_response.next:
-            next_results = await with_pagination(parsed_response.next, api_token, data_class)
+            next_results = await with_pagination(parsed_response.next, personal_api_key, data_class)
             return results + next_results
 
         return results

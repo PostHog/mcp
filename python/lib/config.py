@@ -2,16 +2,16 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class PostHogToolConfig(BaseModel):
-    api_token: str = Field(..., description="PostHog API token")
+    personal_api_key: str = Field(..., description="PostHog personal API key - you can create one at https://app.posthog.com/settings/user-api-keys")
     api_base_url: str = Field(..., description="PostHog API base URL")
     inkeep_api_key: str | None = Field(None, description="Inkeep API key for documentation search")
     dev: bool = Field(False, description="Development mode flag")
 
-    @field_validator("api_token")
+    @field_validator("personal_api_key")
     @classmethod
-    def validate_api_token(cls, v: str) -> str:
+    def validate_personal_api_key(cls, v: str) -> str:
         if not v or not v.strip():
-            raise ValueError("API_TOKEN cannot be empty")
+            raise ValueError("PERSONAL_API_KEY cannot be empty")
         return v.strip()
 
     @field_validator("api_base_url")
@@ -27,12 +27,12 @@ class PostHogToolConfig(BaseModel):
         return v.rstrip("/")
 
 
-def load_environment_from_env() -> PostHogToolConfig:
+def load_config_from_env() -> PostHogToolConfig:
     import os
 
     return PostHogToolConfig(
-        api_token=os.getenv("API_TOKEN", ""),
-        api_base_url=os.getenv("API_BASE_URL", ""),
+        personal_api_key=os.getenv("POSTHOG_PERSONAL_API_KEY", ""),
+        api_base_url=os.getenv("POSTHOG_API_BASE_URL", ""),
         inkeep_api_key=os.getenv("INKEEP_API_KEY"),
         dev=os.getenv("DEV", "false").lower() in ("true", "1", "yes"),
     )

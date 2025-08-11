@@ -4,7 +4,7 @@ from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.dashboards import AddInsightToDashboard
 from schema.tool_inputs import DashboardAddInsightSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def add_insight_to_dashboard_handler(context: Context, params: DashboardAddInsightSchema) -> ToolResult:
@@ -32,7 +32,7 @@ async def add_insight_to_dashboard_handler(context: Context, params: DashboardAd
         "insight_url": f"{get_project_base_url(project_id, context.api.base_url)}/insights/{insight_result.data.short_id}",
     }
 
-    return ToolResult(content=[TextContent(text=json.dumps(result_with_urls))])
+    return ToolResult(content=json.dumps(result_with_urls))
 
 
 def add_insight_to_dashboard_tool() -> Tool[DashboardAddInsightSchema]:

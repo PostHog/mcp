@@ -2,7 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import OrganizationGetDetailsSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def get_organization_details_handler(context: Context, _params: OrganizationGetDetailsSchema) -> ToolResult:
@@ -14,7 +14,7 @@ async def get_organization_details_handler(context: Context, _params: Organizati
 
     assert is_success(org_result)
 
-    return ToolResult(content=[TextContent(text=json.dumps(org_result.data.model_dump(mode="json")))])
+    return ToolResult(content=json.dumps(org_result.data.model_dump(mode="json")))
 
 
 def get_organization_details_tool() -> Tool[OrganizationGetDetailsSchema]:

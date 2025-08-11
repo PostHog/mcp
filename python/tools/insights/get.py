@@ -3,7 +3,7 @@ import json
 from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.tool_inputs import InsightGetSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def get_insight_handler(context: Context, params: InsightGetSchema) -> ToolResult:
@@ -22,7 +22,7 @@ async def get_insight_handler(context: Context, params: InsightGetSchema) -> Too
         "url": f"{get_project_base_url(project_id, context.api.base_url)}/insights/{insight_data.short_id}",
     }
 
-    return ToolResult(content=[TextContent(text=json.dumps(insight_with_url))])
+    return ToolResult(content=json.dumps(insight_with_url))
 
 
 def get_insight_tool() -> Tool[InsightGetSchema]:

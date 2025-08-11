@@ -4,7 +4,7 @@ from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.insights import ListInsights
 from schema.tool_inputs import InsightGetAllSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def get_all_insights_handler(context: Context, params: InsightGetAllSchema) -> ToolResult:
@@ -36,7 +36,7 @@ async def get_all_insights_handler(context: Context, params: InsightGetAllSchema
         insight_dict["url"] = f"{get_project_base_url(project_id, context.api.base_url)}/insights/{insight.short_id}"
         insights_with_urls.append(insight_dict)
 
-    return ToolResult(content=[TextContent(text=json.dumps(insights_with_urls))])
+    return ToolResult(content=json.dumps(insights_with_urls))
 
 
 def get_all_insights_tool() -> Tool[InsightGetAllSchema]:

@@ -6,7 +6,7 @@ from tools.registry import ToolRegistry
 
 class TestToolRegistry:
     def test_context_manager_support(self):
-        config = PostHogToolConfig(api_token="test_token", api_base_url="https://us.posthog.com")
+        config = PostHogToolConfig(personal_api_key="test_token", api_base_url="https://us.posthog.com")
 
         registry = ToolRegistry(config)
 
@@ -18,7 +18,7 @@ class TestToolRegistry:
 
     @pytest.mark.asyncio
     async def test_context_manager_usage(self):
-        config = PostHogToolConfig(api_token="test_token", api_base_url="https://us.posthog.com")
+        config = PostHogToolConfig(personal_api_key="test_token", api_base_url="https://us.posthog.com")
 
         async with ToolRegistry(config) as registry:
             assert registry is not None

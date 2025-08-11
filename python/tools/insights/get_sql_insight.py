@@ -1,6 +1,6 @@
 from api.client import is_error, is_success
 from schema.tool_inputs import InsightGetSqlSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def get_sql_insight_handler(context: Context, params: InsightGetSqlSchema) -> ToolResult:
@@ -18,7 +18,7 @@ async def get_sql_insight_handler(context: Context, params: InsightGetSqlSchema)
 
     assert is_success(insight_result)
 
-    return ToolResult(content=[TextContent(text=insight_result.data["response"])])
+    return ToolResult(content=insight_result.data["response"])
 
 
 def get_sql_insight_tool() -> Tool[InsightGetSqlSchema]:

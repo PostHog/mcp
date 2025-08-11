@@ -36,13 +36,7 @@ class Context:
 
 @dataclass
 class ToolResult:
-    content: list
-
-
-@dataclass
-class TextContent:
-    type: str = "text"
-    text: str = ""
+    content: str
 
 
 T = TypeVar("T")

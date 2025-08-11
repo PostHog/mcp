@@ -30,13 +30,13 @@ from tools.organizations.set_active import set_active_org_tool
 from tools.projects.get_projects import get_projects_tool
 from tools.projects.property_definitions import property_definitions_tool
 from tools.projects.set_active import set_active_project_tool
-from tools.types import Context
+from tools.types import Context, ToolResult
 
 
 class ToolRegistry:
     def __init__(self, config: PostHogToolConfig):
         self.config = config
-        self.api = ApiClient(ApiConfig(api_token=config.api_token, base_url=config.api_base_url))
+        self.api = ApiClient(ApiConfig(personal_api_key=config.personal_api_key, base_url=config.api_base_url))
         self.cache = MemoryCache()
 
         self.tools = [
@@ -117,16 +117,16 @@ class ToolRegistry:
             get_distinct_id=self.get_distinct_id,
         )
 
-    async def execute_tool(self, tool_name: str, params: dict[str, Any]) -> dict[str, Any]:
+    async def execute_tool(self, tool_name: str, params: dict[str, Any]) -> ToolResult:
         tool = next((t for t in self.tools if t.name == tool_name), None)
         if not tool:
             raise Exception(f"Tool '{tool_name}' not found")
 
         context = self.get_context()
         validated_params = tool.schema.model_validate(params)
-        result = await tool.execute(context, validated_params)
+        result: ToolResult = await tool.execute(context, validated_params)
 
-        return {"content": [{"type": content.type, "text": content.text} for content in result.content]}
+        return result
 
     async def close(self):
         await self.api.close()

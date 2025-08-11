@@ -2,7 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import FeatureFlagDeleteSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def delete_feature_flag_handler(context: Context, params: FeatureFlagDeleteSchema) -> ToolResult:
@@ -16,7 +16,7 @@ async def delete_feature_flag_handler(context: Context, params: FeatureFlagDelet
     assert is_success(flag_result)
 
     if flag_result.data is None:
-        return ToolResult(content=[TextContent(text="Feature flag is already deleted.")])
+        return ToolResult(content="Feature flag is already deleted.")
 
     delete_result = await context.api.feature_flags(project_id).delete(flag_result.data.id)
 
@@ -24,13 +24,13 @@ async def delete_feature_flag_handler(context: Context, params: FeatureFlagDelet
         error_str = str(delete_result.error)
 
         if "not_found" in error_str or "Not found" in error_str:
-            return ToolResult(content=[TextContent(text="Feature flag is already deleted.")])
+            return ToolResult(content="Feature flag is already deleted.")
 
         raise Exception(f"Failed to delete feature flag: {delete_result.error}")
 
     assert is_success(delete_result)
 
-    return ToolResult(content=[TextContent(text=json.dumps(delete_result.data))])
+    return ToolResult(content=json.dumps(delete_result.data))
 
 
 def delete_feature_flag_tool() -> Tool[FeatureFlagDeleteSchema]:

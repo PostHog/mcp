@@ -50,7 +50,7 @@ class TestDocumentation:
 
         # Create config without INKEEP_API_KEY
         config_without_key = PostHogToolConfig(
-            api_token=context.config.api_token, api_base_url=context.config.api_base_url, inkeep_api_key=None, dev=context.config.dev
+            personal_api_key=context.config.personal_api_key, api_base_url=context.config.api_base_url, inkeep_api_key=None, dev=context.config.dev
         )
 
         context_without_key = Context(

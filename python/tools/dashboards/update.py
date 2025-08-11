@@ -3,7 +3,7 @@ import json
 from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.tool_inputs import DashboardUpdateSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def update_dashboard_handler(context: Context, params: DashboardUpdateSchema) -> ToolResult:
@@ -22,7 +22,7 @@ async def update_dashboard_handler(context: Context, params: DashboardUpdateSche
         "url": f"{get_project_base_url(project_id, context.api.base_url)}/dashboard/{dashboard_data.id}",
     }
 
-    return ToolResult(content=[TextContent(text=json.dumps(dashboard_with_url))])
+    return ToolResult(json.dumps(dashboard_with_url))
 
 
 def update_dashboard_tool() -> Tool[DashboardUpdateSchema]:

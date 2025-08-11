@@ -3,7 +3,7 @@ import json
 from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.tool_inputs import FeatureFlagCreateSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def create_feature_flag_handler(context: Context, params: FeatureFlagCreateSchema) -> ToolResult:
@@ -23,7 +23,7 @@ async def create_feature_flag_handler(context: Context, params: FeatureFlagCreat
         "url": f"{get_project_base_url(project_id, context.api.base_url)}/feature_flags/{flag_data.id}",
     }
 
-    return ToolResult(content=[TextContent(text=json.dumps(feature_flag_with_url))])
+    return ToolResult(content=json.dumps(feature_flag_with_url))
 
 
 def create_feature_flag_tool() -> Tool[FeatureFlagCreateSchema]:

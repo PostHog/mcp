@@ -1,5 +1,5 @@
 from schema.tool_inputs import OrganizationSetActiveSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def set_active_handler(context: Context, params: OrganizationSetActiveSchema) -> ToolResult:
@@ -7,7 +7,7 @@ async def set_active_handler(context: Context, params: OrganizationSetActiveSche
 
     await context.cache.set("org_id", org_id)
 
-    return ToolResult(content=[TextContent(text=f"Switched to organization {org_id}")])
+    return ToolResult(content=f"Switched to organization {org_id}")
 
 
 def set_active_org_tool() -> Tool[OrganizationSetActiveSchema]:

@@ -2,7 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import DashboardDeleteSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def delete_dashboard_handler(context: Context, params: DashboardDeleteSchema) -> ToolResult:
@@ -13,7 +13,7 @@ async def delete_dashboard_handler(context: Context, params: DashboardDeleteSche
         raise Exception(f"Failed to delete dashboard: {result.error}")
 
     assert is_success(result)
-    return ToolResult(content=[TextContent(text=json.dumps(result.data))])
+    return ToolResult(content=json.dumps(result.data))
 
 
 def delete_dashboard_tool() -> Tool[DashboardDeleteSchema]:

@@ -2,7 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import LLMObservabilityGetCostsSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def get_llm_costs_handler(context: Context, params: LLMObservabilityGetCostsSchema) -> ToolResult:
@@ -30,7 +30,7 @@ async def get_llm_costs_handler(context: Context, params: LLMObservabilityGetCos
 
     assert is_success(costs_result)
 
-    return ToolResult(content=[TextContent(text=json.dumps(costs_result.data.results))])
+    return ToolResult(content=json.dumps(costs_result.data.results))
 
 
 def get_llm_costs_tool() -> Tool[LLMObservabilityGetCostsSchema]:

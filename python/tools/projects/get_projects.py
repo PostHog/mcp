@@ -2,7 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import ProjectGetAllSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def get_projects_handler(context: Context, _params: ProjectGetAllSchema) -> ToolResult:
@@ -16,7 +16,7 @@ async def get_projects_handler(context: Context, _params: ProjectGetAllSchema) -
 
     projects_data = [project.model_dump() for project in projects_result.data]
 
-    return ToolResult(content=[TextContent(text=json.dumps(projects_data))])
+    return ToolResult(content=json.dumps(projects_data))
 
 
 def get_projects_tool() -> Tool[ProjectGetAllSchema]:

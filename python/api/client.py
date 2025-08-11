@@ -78,7 +78,7 @@ def propagate_error(error_result: ErrorResult) -> ErrorResult:
 
 @dataclass
 class ApiConfig:
-    api_token: str
+    personal_api_key: str
     base_url: str
 
 
@@ -90,7 +90,7 @@ class ApiClient:
 
     def _build_headers(self) -> dict[str, str]:
         return {
-            "Authorization": f"Bearer {self.config.api_token}",
+            "Authorization": f"Bearer {self.config.personal_api_key}",
             "Content-Type": "application/json",
         }
 
@@ -213,7 +213,7 @@ class ProjectResource:
         try:
             property_definitions = await with_pagination(
                 f"{self.client.base_url}/api/projects/{project_id}/property_definitions/",
-                self.client.config.api_token,
+                self.client.config.personal_api_key,
                 ApiPropertyDefinition,
             )
 
@@ -235,7 +235,7 @@ class FeatureFlagResource:
         try:
             flags = await with_pagination(
                 f"{self.client.base_url}/api/projects/{self.project_id}/feature_flags/",
-                self.client.config.api_token,
+                self.client.config.personal_api_key,
                 FeatureFlagListItem,
             )
 
@@ -320,7 +320,7 @@ class InsightResource:
                 url += "?" + "&".join([f"{k}={v}" for k, v in query_params.items()])
 
         try:
-            insights = await with_pagination(url, self.client.config.api_token, InsightListItem)
+            insights = await with_pagination(url, self.client.config.personal_api_key, InsightListItem)
             return SuccessResult(insights)
         except Exception as error:
             return ErrorResult(error)
@@ -440,7 +440,7 @@ class DashboardResource:
                 url += "?" + "&".join([f"{k}={v}" for k, v in query_params.items()])
 
         try:
-            dashboards = await with_pagination(url, self.client.config.api_token, DashboardListItem)
+            dashboards = await with_pagination(url, self.client.config.personal_api_key, DashboardListItem)
             return SuccessResult(dashboards)
         except Exception as error:
             return ErrorResult(error)

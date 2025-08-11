@@ -2,7 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import InsightDeleteSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def delete_insight_handler(context: Context, params: InsightDeleteSchema) -> ToolResult:
@@ -13,7 +13,7 @@ async def delete_insight_handler(context: Context, params: InsightDeleteSchema) 
         raise Exception(f"Failed to delete insight: {result.error}")
 
     assert is_success(result)
-    return ToolResult(content=[TextContent(text=json.dumps(result.data))])
+    return ToolResult(content=json.dumps(result.data))
 
 
 def delete_insight_tool() -> Tool[InsightDeleteSchema]:

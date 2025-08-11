@@ -2,7 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import DashboardGetSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def get_dashboard_handler(context: Context, params: DashboardGetSchema) -> ToolResult:
@@ -13,7 +13,7 @@ async def get_dashboard_handler(context: Context, params: DashboardGetSchema) ->
         raise Exception(f"Failed to get dashboard: {dashboard_result.error}")
 
     assert is_success(dashboard_result)
-    return ToolResult(content=[TextContent(text=json.dumps(dashboard_result.data.model_dump()))])
+    return ToolResult(json.dumps(dashboard_result.data.model_dump()))
 
 
 def get_dashboard_tool() -> Tool[DashboardGetSchema]:

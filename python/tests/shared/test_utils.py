@@ -34,7 +34,7 @@ def load_env_test_file():
 load_env_test_file()
 
 API_BASE_URL = os.getenv("TEST_API_BASE_URL", "http://localhost:8010")
-API_TOKEN = os.getenv("TEST_API_TOKEN", "")
+PERSONAL_API_KEY = os.getenv("TEST_PERSONAL_API_KEY", "")
 TEST_ORG_ID = os.getenv("TEST_ORG_ID", "")
 TEST_PROJECT_ID = os.getenv("TEST_PROJECT_ID", "")
 
@@ -53,8 +53,8 @@ class CreatedResources:
 
 def validate_environment_variables():
     """Validate that required environment variables are set."""
-    if not API_TOKEN:
-        raise ValueError("TEST_API_TOKEN environment variable is required")
+    if not PERSONAL_API_KEY:
+        raise ValueError("TEST_PERSONAL_API_KEY environment variable is required")
 
     if not TEST_ORG_ID:
         raise ValueError("TEST_ORG_ID environment variable is required")
@@ -65,14 +65,14 @@ def validate_environment_variables():
 
 def create_test_client() -> ApiClient:
     """Create a test API client."""
-    return ApiClient(ApiConfig(api_token=API_TOKEN, base_url=API_BASE_URL))
+    return ApiClient(ApiConfig(personal_api_key=PERSONAL_API_KEY, base_url=API_BASE_URL))
 
 
 def create_test_context(client: ApiClient) -> Context:
     """Create a test context with mocked cache and helper functions."""
     cache = MemoryCache()
     config = PostHogToolConfig(
-        api_token=API_TOKEN,
+        personal_api_key=PERSONAL_API_KEY,
         api_base_url=API_BASE_URL,
         inkeep_api_key=os.getenv("INKEEP_API_KEY"),
         dev=os.getenv("DEV", "false").lower() in ("true", "1", "yes"),

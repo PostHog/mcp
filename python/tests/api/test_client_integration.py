@@ -18,12 +18,12 @@ class TestApiClientIntegration:
     @pytest.fixture(scope="class", autouse=True)
     def setup_class(self):
         """Validate environment variables before running tests."""
-        api_token = os.getenv("TEST_API_TOKEN")
+        personal_api_key = os.getenv("TEST_PERSONAL_API_KEY")
         test_org_id = os.getenv("TEST_ORG_ID")
         test_project_id = os.getenv("TEST_PROJECT_ID")
 
-        if not api_token:
-            pytest.skip("TEST_API_TOKEN environment variable is required")
+        if not personal_api_key:
+            pytest.skip("TEST_PERSONAL_API_KEY environment variable is required")
         if not test_org_id:
             pytest.skip("TEST_ORG_ID environment variable is required")
         if not test_project_id:
@@ -32,13 +32,13 @@ class TestApiClientIntegration:
     @pytest_asyncio.fixture
     async def client(self):
         """Create API client for tests."""
-        api_token = os.getenv("TEST_API_TOKEN")
+        personal_api_key = os.getenv("TEST_PERSONAL_API_KEY")
         api_base_url = os.getenv("TEST_API_BASE_URL", "http://localhost:8010")
 
-        assert api_token, "TEST_API_TOKEN environment variable is required"
+        assert personal_api_key, "TEST_PERSONAL_API_KEY environment variable is required"
         assert api_base_url, "TEST_API_BASE_URL environment variable is required"
 
-        config = ApiConfig(api_token=api_token, base_url=api_base_url)
+        config = ApiConfig(personal_api_key=personal_api_key, base_url=api_base_url)
         client = ApiClient(config)
         yield client
         await client.close()

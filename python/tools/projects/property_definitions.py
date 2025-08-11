@@ -2,7 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import ProjectPropertyDefinitionsSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def property_definitions_handler(context: Context, _params: ProjectPropertyDefinitionsSchema) -> ToolResult:
@@ -16,7 +16,7 @@ async def property_definitions_handler(context: Context, _params: ProjectPropert
 
     prop_defs_data = [prop_def.model_dump() for prop_def in prop_defs_result.data]
 
-    return ToolResult(content=[TextContent(text=json.dumps(prop_defs_data))])
+    return ToolResult(content=json.dumps(prop_defs_data))
 
 
 def property_definitions_tool() -> Tool[ProjectPropertyDefinitionsSchema]:

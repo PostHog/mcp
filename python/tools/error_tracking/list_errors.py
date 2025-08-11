@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from api.client import is_error, is_success
 from schema.tool_inputs import ErrorTrackingListSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def list_errors_handler(context: Context, params: ErrorTrackingListSchema) -> ToolResult:
@@ -33,7 +33,7 @@ async def list_errors_handler(context: Context, params: ErrorTrackingListSchema)
 
     assert is_success(errors_result)
 
-    return ToolResult(content=[TextContent(text=json.dumps(errors_result.data.results))])
+    return ToolResult(content=json.dumps(errors_result.data.results))
 
 
 def list_errors_tool() -> Tool[ErrorTrackingListSchema]:

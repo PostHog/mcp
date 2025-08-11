@@ -2,7 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import FeatureFlagGetAllSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def get_all_feature_flags_handler(context: Context, _params: FeatureFlagGetAllSchema) -> ToolResult:
@@ -17,7 +17,7 @@ async def get_all_feature_flags_handler(context: Context, _params: FeatureFlagGe
 
     flags_data = [flag.model_dump() for flag in flags_result.data]
 
-    return ToolResult(content=[TextContent(text=json.dumps(flags_data))])
+    return ToolResult(content=json.dumps(flags_data))
 
 
 def get_all_feature_flags_tool() -> Tool[FeatureFlagGetAllSchema]:

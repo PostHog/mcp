@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from api.client import is_error, is_success
 from schema.tool_inputs import ErrorTrackingDetailsSchema
-from tools.types import Context, TextContent, Tool, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 async def error_details_handler(context: Context, params: ErrorTrackingDetailsSchema) -> ToolResult:
@@ -24,7 +24,7 @@ async def error_details_handler(context: Context, params: ErrorTrackingDetailsSc
         raise Exception(f"Failed to get error details: {errors_result.error}")
 
     assert is_success(errors_result)
-    return ToolResult(content=[TextContent(text=json.dumps(errors_result.data.results))])
+    return ToolResult(content=json.dumps(errors_result.data.results))
 
 
 def error_details_tool() -> Tool[ErrorTrackingDetailsSchema]:

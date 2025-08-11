@@ -18,7 +18,7 @@ class TestPostHogToolConfig:
         assert config.api_base_url == "https://example.com"
 
     def test_empty_personal_api_key_fails(self):
-        with pytest.raises(ValidationError, match="PERSONAL_API_KEY cannot be empty"):
+        with pytest.raises(ValidationError, match="personal_api_key cannot be empty"):
             PostHogToolConfig(personal_api_key="", api_base_url="https://example.com")
 
     def test_invalid_url_scheme_fails(self):
@@ -31,7 +31,7 @@ class TestPostHogToolConfig:
 
 
 class TestLoadEnvironmentFromEnv:
-    @patch.dict(os.environ, {"PERSONAL_API_KEY": "env_token", "API_BASE_URL": "https://example.com", "DEV": "true"})
+    @patch.dict(os.environ, {"POSTHOG_PERSONAL_API_KEY": "env_token", "POSTHOG_API_BASE_URL": "https://example.com", "DEV": "true"})
     def test_load_from_env(self):
         config = load_config_from_env()
 

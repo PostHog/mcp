@@ -11,18 +11,18 @@ class PostHogToolConfig(BaseModel):
     @classmethod
     def validate_personal_api_key(cls, v: str) -> str:
         if not v or not v.strip():
-            raise ValueError("PERSONAL_API_KEY cannot be empty")
+            raise ValueError("personal_api_key cannot be empty")
         return v.strip()
 
     @field_validator("api_base_url")
     @classmethod
     def validate_api_base_url(cls, v: str) -> str:
         if not v or not v.strip():
-            raise ValueError("API_BASE_URL cannot be empty")
+            raise ValueError("api_base_url cannot be empty")
 
         v = v.strip()
         if not (v.startswith("http://") or v.startswith("https://")):
-            raise ValueError("API_BASE_URL must start with http:// or https://")
+            raise ValueError("api_base_url must start with http:// or https://")
 
         return v.rstrip("/")
 

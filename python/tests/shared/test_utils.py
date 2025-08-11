@@ -33,8 +33,8 @@ def load_env_test_file():
 # Load environment variables from .env.test
 load_env_test_file()
 
-API_BASE_URL = os.getenv("TEST_API_BASE_URL", "http://localhost:8010")
-PERSONAL_API_KEY = os.getenv("TEST_PERSONAL_API_KEY", "")
+API_BASE_URL = os.getenv("TEST_POSTHOG_API_BASE_URL", "http://localhost:8010")
+PERSONAL_API_KEY = os.getenv("TEST_POSTHOG_PERSONAL_API_KEY", "")
 TEST_ORG_ID = os.getenv("TEST_ORG_ID", "")
 TEST_PROJECT_ID = os.getenv("TEST_PROJECT_ID", "")
 
@@ -54,7 +54,7 @@ class CreatedResources:
 def validate_environment_variables():
     """Validate that required environment variables are set."""
     if not PERSONAL_API_KEY:
-        raise ValueError("TEST_PERSONAL_API_KEY environment variable is required")
+        raise ValueError("TEST_POSTHOG_PERSONAL_API_KEY environment variable is required")
 
     if not TEST_ORG_ID:
         raise ValueError("TEST_ORG_ID environment variable is required")

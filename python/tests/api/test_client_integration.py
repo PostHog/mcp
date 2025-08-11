@@ -32,11 +32,11 @@ class TestApiClientIntegration:
     @pytest_asyncio.fixture
     async def client(self):
         """Create API client for tests."""
-        personal_api_key = os.getenv("TEST_PERSONAL_API_KEY")
-        api_base_url = os.getenv("TEST_API_BASE_URL", "http://localhost:8010")
+        personal_api_key = os.getenv("TEST_POSTHOG_PERSONAL_API_KEY")
+        api_base_url = os.getenv("TEST_POSTHOG_API_BASE_URL", "http://localhost:8010")
 
-        assert personal_api_key, "TEST_PERSONAL_API_KEY environment variable is required"
-        assert api_base_url, "TEST_API_BASE_URL environment variable is required"
+        assert personal_api_key, "TEST_POSTHOG_PERSONAL_API_KEY environment variable is required"
+        assert api_base_url, "TEST_POSTHOG_API_BASE_URL environment variable is required"
 
         config = ApiConfig(personal_api_key=personal_api_key, base_url=api_base_url)
         client = ApiClient(config)

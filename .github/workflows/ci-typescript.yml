@@ -101,7 +101,7 @@ jobs:
     - name: Run integration tests
       run: pnpm run test:integration
       env:
-        TEST_API_BASE_URL: ${{ secrets.TEST_API_BASE_URL }}
-        TEST_API_TOKEN: ${{ secrets.TEST_API_TOKEN }}
+        TEST_POSTHOG_API_BASE_URL: ${{ secrets.TEST_API_BASE_URL }}
+        TEST_POSTHOG_PERSONAL_API_KEY: ${{ secrets.TEST_API_TOKEN }}
         TEST_ORG_ID: ${{ secrets.TEST_ORG_ID }}
         TEST_PROJECT_ID: ${{ secrets.TEST_PROJECT_ID }}

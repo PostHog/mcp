@@ -13,6 +13,7 @@ dependencies = [
     "typing-extensions>=4.8.0",
     "python-dateutil>=2.8.2",
     "python-dotenv>=1.0.0",
+    "langchain>=0.3.27",
 ]
 
 [dependency-groups]

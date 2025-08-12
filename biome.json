@@ -4,7 +4,13 @@
 		"enabled": true
 	},
 	"files": {
-		"ignore": ["worker-configuration.d.ts", ".mypy_cache/**", "schema/tool-inputs.json"]
+		"ignore": [
+			"worker-configuration.d.ts",
+			".mypy_cache/**",
+			"schema/tool-inputs.json",
+			"node_modules/**",
+			"python/**"
+		]
 	},
 	"vcs": {
 		"enabled": true,

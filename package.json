@@ -6,7 +6,7 @@
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"format": "biome format --write",
-		"lint:fix": "biome lint --fix",
+		"lint:fix": "biome lint --write",
 		"test": "vitest",
 		"test:integration": "vitest run --config vitest.integration.config.mts",
 		"test:watch": "vitest watch",

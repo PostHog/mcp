@@ -30,7 +30,7 @@ from tools.organizations.set_active import set_active_org_tool
 from tools.projects.get_projects import get_projects_tool
 from tools.projects.property_definitions import property_definitions_tool
 from tools.projects.set_active import set_active_project_tool
-from tools.types import Context, ToolResult
+from tools.types import Context, Tool, ToolResult
 
 
 class ToolRegistry:
@@ -39,7 +39,7 @@ class ToolRegistry:
         self.api = ApiClient(ApiConfig(personal_api_key=config.personal_api_key, base_url=config.api_base_url))
         self.cache = MemoryCache()
 
-        self.tools = [
+        self.tools: list[Tool] = [
             # Organization tools
             get_organizations_tool(),
             set_active_org_tool(),
@@ -127,6 +127,9 @@ class ToolRegistry:
         result: ToolResult = await tool.execute(context, validated_params)
 
         return result
+
+    def get_tools(self) -> list[Tool]:
+        return self.tools
 
     async def close(self):
         await self.api.close()

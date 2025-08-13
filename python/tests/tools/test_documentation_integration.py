@@ -57,9 +57,6 @@ class TestDocumentation:
             api=context.api,
             cache=context.cache,
             config=config_without_key,
-            get_project_id=context.get_project_id,
-            get_org_id=context.get_org_id,
-            get_distinct_id=context.get_distinct_id,
         )
 
         tool = search_docs_tool()

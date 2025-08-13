@@ -1,7 +1,7 @@
 [project]
-name = "posthog-mcp-python"
+name = "posthog-agents"
 version = "0.1.0"
-description = "Python implementation of the PostHog Model Context Protocol (MCP) server"
+description = "PostHog agents and integrations for LLM frameworks"
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [

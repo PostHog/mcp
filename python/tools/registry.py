@@ -1,6 +1,6 @@
 from typing import Any
 
-from api.client import ApiClient, ApiConfig, is_error, is_success
+from api.client import ApiClient, ApiConfig
 from lib.config import PostHogToolConfig
 from lib.utils.cache.memory_cache import MemoryCache
 from tools.dashboards.add_insight import add_insight_to_dashboard_tool
@@ -77,44 +77,11 @@ class ToolRegistry:
             get_llm_costs_tool(),
         ]
 
-    async def get_project_id(self) -> str:
-        project_id = await self.cache.get("project_id")
-        if not project_id:
-            raise Exception("No active project set. Please use project-set-active first.")
-        return project_id
-
-    async def get_org_id(self) -> str:
-        org_id = await self.cache.get("org_id")
-        if not org_id:
-            raise Exception("No active organization set. Please use organization-set-active first.")
-        return org_id
-
-    async def get_distinct_id(self) -> str:
-        distinct_id = await self.cache.get("distinct_id")
-
-        if not distinct_id:
-            # Fetch from API if not cached
-            user_result = await self.api.users().me()
-
-            if is_error(user_result):
-                raise Exception(f"Failed to get user info: {user_result.error}")
-
-            assert is_success(user_result)
-
-            distinct_id = user_result.data.distinct_id
-
-            await self.cache.set("distinct_id", distinct_id)
-
-        return distinct_id
-
     def get_context(self) -> Context:
         return Context(
             api=self.api,
             cache=self.cache,
             config=self.config,
-            get_project_id=self.get_project_id,
-            get_org_id=self.get_org_id,
-            get_distinct_id=self.get_distinct_id,
         )
 
     async def execute_tool(self, tool_name: str, params: dict[str, Any]) -> ToolResult:

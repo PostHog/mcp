@@ -1,9 +1,10 @@
+import uuid
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
-from api.client import ApiClient
+from api.client import ApiClient, is_error, is_success
 from lib.config import PostHogToolConfig
 
 
@@ -29,9 +30,37 @@ class Context:
     api: ApiClient
     cache: ScopedCache
     config: PostHogToolConfig
-    get_project_id: Callable[[], Awaitable[str]]
-    get_org_id: Callable[[], Awaitable[str]]
-    get_distinct_id: Callable[[], Awaitable[str]]
+
+    async def get_project_id(self) -> str:
+        project_id = await self.cache.get("project_id")
+        if not project_id:
+            raise Exception("No active project set. Please use project-set-active first.")
+        return project_id
+
+    async def get_org_id(self) -> str:
+        org_id = await self.cache.get("org_id")
+        if not org_id:
+            raise Exception("No active organization set. Please use organization-set-active first.")
+        return org_id
+
+    async def get_distinct_id(self) -> str:
+        distinct_id = await self.cache.get("distinct_id")
+
+        if not distinct_id:
+            # Fetch from API if not cached
+            user_result = await self.api.users().me()
+
+            if is_error(user_result):
+                raise Exception(f"Failed to get user info: {user_result.error}")
+
+            assert is_success(user_result)
+
+            distinct_id = user_result.data.distinct_id
+
+            if distinct_id:
+                await self.cache.set("distinct_id", distinct_id)
+
+        return distinct_id or uuid.uuid4().hex
 
 
 @dataclass

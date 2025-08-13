@@ -3,7 +3,6 @@ import os
 import random
 import string
 import time
-import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -78,29 +77,10 @@ def create_test_context(client: ApiClient) -> Context:
         dev=os.getenv("DEV", "false").lower() in ("true", "1", "yes"),
     )
 
-    async def get_project_id() -> str:
-        project_id = await cache.get("project_id")
-        if project_id is None:
-            raise Exception("No active project set")
-        return project_id
-
-    async def get_org_id() -> str:
-        org_id = await cache.get("org_id")
-        if org_id is None:
-            raise Exception("No active organization set")
-        return org_id
-
-    async def get_distinct_id() -> str:
-        distinct_id = await cache.get("distinct_id")
-        return distinct_id or uuid.uuid4().hex
-
     return Context(
         api=client,
         cache=cache,
         config=config,
-        get_project_id=get_project_id,
-        get_org_id=get_org_id,
-        get_distinct_id=get_distinct_id,
     )
 
 

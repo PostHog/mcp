@@ -4,8 +4,8 @@ import { z } from "zod";
 export const DashboardSchema = z.object({
 	id: z.number().int().positive(),
 	name: z.string(),
-	description: z.string().optional().nullable(),
-	pinned: z.boolean().optional().nullable(),
+	description: z.string().nullish(),
+	pinned: z.boolean().nullish(),
 	created_at: z.string(),
 	created_by: z
 		.object({
@@ -13,12 +13,12 @@ export const DashboardSchema = z.object({
 		})
 		.optional()
 		.nullable(),
-	is_shared: z.boolean().optional().nullable(),
-	deleted: z.boolean().optional().nullable(),
-	filters: z.record(z.any()).optional().nullable(),
-	variables: z.record(z.any()).optional().nullable(),
-	tags: z.array(z.string()).optional().nullable(),
-	tiles: z.array(z.record(z.any())).optional().nullable(),
+	is_shared: z.boolean().nullish(),
+	deleted: z.boolean().nullish(),
+	filters: z.record(z.any()).nullish(),
+	variables: z.record(z.any()).nullish(),
+	tags: z.array(z.string()).nullish(),
+	tiles: z.array(z.record(z.any())).nullish(),
 });
 
 // Input schema for creating dashboards

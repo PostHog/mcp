@@ -3,10 +3,10 @@ import { InsightQuerySchema } from "./query";
 
 export const InsightSchema = z.object({
 	id: z.number(),
-	name: z.string().optional().nullable(),
-	description: z.string().optional().nullable(),
+	name: z.string().nullish(),
+	description: z.string().nullish(),
 	filters: z.record(z.any()),
-	query: z.record(z.any()).optional().nullable(),
+	query: z.record(z.any()).nullish(),
 	result: z.any().optional(),
 	created_at: z.string(),
 	updated_at: z.string(),
@@ -21,14 +21,14 @@ export const InsightSchema = z.object({
 		.optional()
 		.nullable(),
 	saved: z.boolean(),
-	favorited: z.boolean().optional().nullable(),
+	favorited: z.boolean().nullish(),
 	deleted: z.boolean(),
-	dashboard: z.number().optional().nullable(),
-	layouts: z.record(z.any()).optional().nullable(),
-	color: z.string().optional().nullable(),
-	last_refresh: z.string().optional().nullable(),
-	refreshing: z.boolean().optional().nullable(),
-	tags: z.array(z.string()).optional().nullable(),
+	dashboard: z.number().nullish(),
+	layouts: z.record(z.any()).nullish(),
+	color: z.string().nullish(),
+	last_refresh: z.string().nullish(),
+	refreshing: z.boolean().nullish(),
+	tags: z.array(z.string()).nullish(),
 });
 
 export const CreateInsightInputSchema = z.object({

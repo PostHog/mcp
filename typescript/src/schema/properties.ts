@@ -1,5 +1,5 @@
+import { type ApiListResponseSchema, ApiPropertyDefinitionSchema } from "@/schema/api";
 import type { z } from "zod";
-import { ApiPropertyDefinitionSchema, type ApiResponseSchema } from "@/schema/api";
 
 export const PropertyDefinitionSchema = ApiPropertyDefinitionSchema.pick({
 	name: true,
@@ -8,5 +8,5 @@ export const PropertyDefinitionSchema = ApiPropertyDefinitionSchema.pick({
 
 export type PropertyDefinition = z.infer<typeof ApiPropertyDefinitionSchema>;
 export type PropertyDefinitionsResponse = z.infer<
-	ReturnType<typeof ApiResponseSchema<typeof ApiPropertyDefinitionSchema>>
+	ReturnType<typeof ApiListResponseSchema<typeof ApiPropertyDefinitionSchema>>
 >;

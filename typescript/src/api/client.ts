@@ -373,9 +373,9 @@ export class ApiClient {
 
 				const simpleInsightSchema = z.object({
 					id: z.number(),
-					name: z.string().nullable().optional(),
+					name: z.string().nullish(),
 					short_id: z.string(),
-					description: z.string().optional().nullable(),
+					description: z.string().nullish(),
 				});
 
 				const responseSchema = z.object({
@@ -424,9 +424,9 @@ export class ApiClient {
 			> => {
 				const simpleInsightSchema = z.object({
 					id: z.number(),
-					name: z.string().nullable().optional(),
+					name: z.string().nullish(),
 					short_id: z.string(),
-					description: z.string().nullable().optional(),
+					description: z.string().nullish(),
 				});
 
 				return this.fetchWithSchema(
@@ -547,7 +547,7 @@ export class ApiClient {
 				const simpleDashboardSchema = z.object({
 					id: z.number(),
 					name: z.string(),
-					description: z.string().optional().nullable(),
+					description: z.string().nullish(),
 				});
 
 				const responseSchema = z.object({
@@ -571,7 +571,7 @@ export class ApiClient {
 				const simpleDashboardSchema = z.object({
 					id: z.number(),
 					name: z.string(),
-					description: z.string().optional().nullable(),
+					description: z.string().nullish(),
 				});
 
 				return this.fetchWithSchema(

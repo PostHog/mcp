@@ -23,12 +23,11 @@ async def with_pagination(url: str, personal_api_key: str, data_class: type[T]) 
             results_data = data["results"]
             parsed_results = [data_class.model_validate(item) for item in results_data]
 
-            # Create a simple response object
             class SimpleResponse:
                 def __init__(self, data):
                     self.count = data.get("count", 0)
-                    self.next = data.get("next")
-                    self.previous = data.get("previous")
+                    self.next = data.get("next", None)
+                    self.previous = data.get("previous", None)
                     self.results = parsed_results
 
             parsed_response = SimpleResponse(data)

@@ -1,4 +1,4 @@
-import { ApiResponseSchema } from "@/schema/api";
+import { ApiListResponseSchema } from "@/schema/api";
 import { BASE_URL } from "@/lib/constants";
 import type { z } from "zod";
 
@@ -19,7 +19,7 @@ export const withPagination = async <T>(
 
 	const data = await response.json();
 
-	const responseSchema = ApiResponseSchema<z.ZodType<T>>(dataSchema);
+	const responseSchema = ApiListResponseSchema<z.ZodType<T>>(dataSchema);
 
 	const parsedData = responseSchema.parse(data);
 

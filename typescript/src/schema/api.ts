@@ -3,23 +3,23 @@ import { z } from "zod";
 export const ApiPropertyDefinitionSchema = z.object({
 	id: z.string(),
 	name: z.string(),
-	description: z.string().nullable().optional(),
-	is_numerical: z.boolean().nullable().optional(),
-	updated_at: z.string().nullable().optional(),
-	updated_by: z.string().nullable().optional(),
-	is_seen_on_filtered_events: z.boolean().nullable().optional(),
-	property_type: z.enum(["String", "Numeric", "Boolean", "DateTime"]).nullable().optional(),
-	verified: z.boolean().nullable().optional(),
-	verified_at: z.string().nullable().optional(),
-	verified_by: z.string().nullable().optional(),
-	hidden: z.boolean().nullable().optional(),
+	description: z.string().nullish(),
+	is_numerical: z.boolean().nullish(),
+	updated_at: z.string().nullish(),
+	updated_by: z.string().nullish(),
+	is_seen_on_filtered_events: z.boolean().nullish(),
+	property_type: z.enum(["String", "Numeric", "Boolean", "DateTime"]).nullish(),
+	verified: z.boolean().nullish(),
+	verified_at: z.string().nullish(),
+	verified_by: z.string().nullish(),
+	hidden: z.boolean().nullish(),
 	tags: z.array(z.string()).default([]),
 });
 
-export const ApiResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
+export const ApiListResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
 	z.object({
-		count: z.number(),
-		next: z.string().nullable(),
-		previous: z.string().nullable(),
+		count: z.number().nullish(),
+		next: z.string().nullish(),
+		previous: z.string().nullish(),
 		results: z.array(dataSchema),
 	});

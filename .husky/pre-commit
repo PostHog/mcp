@@ -1,2 +1,2 @@
-pnpm run lint:fix
+pnpm run lint:typescript
 pnpm run format

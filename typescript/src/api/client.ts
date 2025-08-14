@@ -233,7 +233,7 @@ export class ApiClient {
 				const found = listResult.data.find((f) => f.key === key);
 
 				if (!found) {
-					return { success: false, error: new Error(`Feature flag not found: ${key}`) };
+					return { success: true, data: undefined };
 				}
 
 				const flagResult = await this.featureFlags({ projectId }).get({ flagId: found.id });
@@ -241,8 +241,6 @@ export class ApiClient {
 				if (!flagResult.success) {
 					return { success: false, error: flagResult.error };
 				}
-
-				console.log("flagResult", flagResult.data);
 
 				return { success: true, data: flagResult.data };
 			},

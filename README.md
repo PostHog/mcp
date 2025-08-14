@@ -24,7 +24,7 @@ npx @posthog/wizard@latest mcp add
       "args": [
         "-y",
         "mcp-remote@latest",
-        "https://mcp.posthog.com/sse",
+        "https://mcp.posthog.com/mcp",
         "--header",
         "Authorization:${POSTHOG_AUTH_HEADER}"
       ],
@@ -54,7 +54,7 @@ To run the MCP server locally, run the following command:
 pnpm run dev
 ```
 
-And replace `https://mcp.posthog.com/sse` with `http://localhost:8787/sse` in the MCP configuration.
+And replace `https://mcp.posthog.com/mcp` with `http://localhost:8787/mcp` in the MCP configuration.
 
 ## Project Structure
 
@@ -87,7 +87,7 @@ During development you can directly inspect the MCP tool call results using the 
 You can run it using the following command:
 
 ```bash
-npx @modelcontextprotocol/inspector npx -y mcp-remote@latest http://localhost:8787/sse --header "\"Authorization: Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}\""
+npx @modelcontextprotocol/inspector npx -y mcp-remote@latest http://localhost:8787/mcp --header "\"Authorization: Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}\""
 ```
 
 Alternatively, you can use the following configuration in the MCP Inspector:
@@ -103,6 +103,6 @@ npx
 **Arguments:**
 
 ```
--y mcp-remote@latest http://localhost:8787/sse --header "Authorization: Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}"
+-y mcp-remote@latest http://localhost:8787/mcp --header "Authorization: Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}"
 ```
 

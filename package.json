@@ -8,6 +8,7 @@
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types",
 		"prepare": "husky",
+		"inspector": "npx @modelcontextprotocol/inspector npx -y mcp-remote@latest http://localhost:8787/mcp",
 		"schema:build:json": "tsx typescript/scripts/generate-tool-schema.ts",
 		"schema:build:python": "bash python/scripts/generate-pydantic-models.sh",
 		"schema:build": "pnpm run schema:build:json && pnpm run schema:build:python",

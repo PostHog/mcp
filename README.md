@@ -24,7 +24,7 @@ npx @posthog/wizard@latest mcp add
       "args": [
         "-y",
         "mcp-remote@latest",
-        "https://mcp.posthog.com/mcp",
+        "https://mcp.posthog.com/mcp", // You can replace this with https://mcp.posthog.com/sse if your client does not support Streamable HTTP
         "--header",
         "Authorization:${POSTHOG_AUTH_HEADER}"
       ],

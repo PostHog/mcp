@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { ProjectSetActiveSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = ProjectSetActiveSchema;
 
@@ -16,11 +17,11 @@ export const setActiveHandler = async (context: Context, params: Params) => {
 	};
 };
 
+const definition = getToolDefinition("project-set-active");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "project-set-active",
-	description: `
-        - Use this tool to set the active project.
-    `,
+	description: definition.description,
 	schema,
 	handler: setActiveHandler,
 });

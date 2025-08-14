@@ -3,6 +3,7 @@ import json
 from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.tool_inputs import DashboardUpdateSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -26,12 +27,11 @@ async def update_dashboard_handler(context: Context, params: DashboardUpdateSche
 
 
 def update_dashboard_tool() -> Tool[DashboardUpdateSchema]:
+    definition = get_tool_definition("dashboard-update")
+
     return Tool(
         name="dashboard-update",
-        description="""
-        - Update an existing dashboard by ID.
-        - Can update name, description, pinned status or tags.
-        """,
+        description=definition["description"],
         schema=DashboardUpdateSchema,
         handler=update_dashboard_handler,
     )

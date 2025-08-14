@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { FeatureFlagDeleteSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = FeatureFlagDeleteSchema;
 
@@ -33,11 +34,11 @@ export const deleteHandler = async (context: Context, params: Params) => {
 	};
 };
 
+const definition = getToolDefinition("delete-feature-flag");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "delete-feature-flag",
-	description: `
-        - Use this tool to delete a feature flag in the project.
-    `,
+	description: definition.description,
 	schema,
 	handler: deleteHandler,
 });

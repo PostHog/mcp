@@ -3,6 +3,7 @@ import json
 from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.tool_inputs import FeatureFlagUpdateSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -30,9 +31,11 @@ async def update_feature_flag_handler(context: Context, params: FeatureFlagUpdat
 
 
 def update_feature_flag_tool() -> Tool[FeatureFlagUpdateSchema]:
+    definition = get_tool_definition("update-feature-flag")
+
     return Tool(
         name="update-feature-flag",
-        description="Updates an existing feature flag in the project.",
+        description=definition["description"],
         schema=FeatureFlagUpdateSchema,
         handler=update_feature_flag_handler,
     )

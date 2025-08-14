@@ -2,6 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import OrganizationGetDetailsSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -18,9 +19,11 @@ async def get_organization_details_handler(context: Context, _params: Organizati
 
 
 def get_organization_details_tool() -> Tool[OrganizationGetDetailsSchema]:
+    definition = get_tool_definition("organization-details-get")
+
     return Tool(
         name="organization-details-get",
-        description="Use this tool to get the details of the active organization.",
+        description=definition["description"],
         schema=OrganizationGetDetailsSchema,
         handler=get_organization_details_handler,
     )

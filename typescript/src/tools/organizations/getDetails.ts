@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { OrganizationGetDetailsSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = OrganizationGetDetailsSchema;
 
@@ -20,11 +21,11 @@ export const getDetailsHandler = async (context: Context, _params: Params) => {
 	};
 };
 
+const definition = getToolDefinition("organization-details-get");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "organization-details-get",
-	description: `
-        - Use this tool to get the details of the active organization.
-    `,
+	description: definition.description,
 	schema,
 	handler: getDetailsHandler,
 });

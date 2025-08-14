@@ -2,6 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import DashboardGetAllSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -20,12 +21,11 @@ async def get_all_dashboards_handler(context: Context, params: DashboardGetAllSc
 
 
 def get_all_dashboards_tool() -> Tool[DashboardGetAllSchema]:
+    definition = get_tool_definition("dashboards-get-all")
+
     return Tool(
         name="dashboards-get-all",
-        description="""
-        - Get all dashboards in the project with optional filtering.
-        - Can filter by pinned status, search term, or pagination.
-        """,
+        description=definition["description"],
         schema=DashboardGetAllSchema,
         handler=get_all_dashboards_handler,
     )

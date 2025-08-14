@@ -1,7 +1,8 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { getProjectBaseUrl } from "@/lib/utils/api";
 import { InsightGetAllSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = InsightGetAllSchema;
 
@@ -24,12 +25,11 @@ export const getAllHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(insightsWithUrls) }] };
 };
 
+const definition = getToolDefinition("insights-get-all");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "insights-get-all",
-	description: `
-        - Get all insights in the project with optional filtering.
-        - Can filter by saved status, favorited status, or search term.
-    `,
+	description: definition.description,
 	schema,
 	handler: getAllHandler,
 });

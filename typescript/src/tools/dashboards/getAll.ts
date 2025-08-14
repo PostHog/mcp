@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { DashboardGetAllSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = DashboardGetAllSchema;
 
@@ -22,10 +23,7 @@ export const getAllHandler = async (context: Context, params: Params) => {
 
 const tool = (): Tool<typeof schema> => ({
 	name: "dashboards-get-all",
-	description: `
-        - Get all dashboards in the project with optional filtering.
-        - Can filter by pinned status, search term, or pagination.
-    `,
+	description: getToolDefinition("dashboards-get-all").description,
 	schema,
 	handler: getAllHandler,
 });

@@ -4,6 +4,7 @@ from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.insights import ListInsights
 from schema.tool_inputs import InsightGetAllSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -40,9 +41,11 @@ async def get_all_insights_handler(context: Context, params: InsightGetAllSchema
 
 
 def get_all_insights_tool() -> Tool[InsightGetAllSchema]:
+    definition = get_tool_definition("insights-get-all")
+
     return Tool(
         name="insights-get-all",
-        description="Use this tool to get all insights for the project. Supports filtering by saved, favorited, and search query.",
+        description=definition["description"],
         schema=InsightGetAllSchema,
         handler=get_all_insights_handler,
     )

@@ -2,6 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import ProjectPropertyDefinitionsSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -20,9 +21,11 @@ async def property_definitions_handler(context: Context, _params: ProjectPropert
 
 
 def property_definitions_tool() -> Tool[ProjectPropertyDefinitionsSchema]:
+    definition = get_tool_definition("property-definitions")
+
     return Tool(
         name="property-definitions",
-        description="Use this tool to get the property definitions of the active project.",
+        description=definition["description"],
         schema=ProjectPropertyDefinitionsSchema,
         handler=property_definitions_handler,
     )

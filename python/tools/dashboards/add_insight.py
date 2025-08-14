@@ -4,6 +4,7 @@ from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.dashboards import AddInsightToDashboard
 from schema.tool_inputs import DashboardAddInsightSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -36,13 +37,11 @@ async def add_insight_to_dashboard_handler(context: Context, params: DashboardAd
 
 
 def add_insight_to_dashboard_tool() -> Tool[DashboardAddInsightSchema]:
+    definition = get_tool_definition("add-insight-to-dashboard")
+
     return Tool(
         name="add-insight-to-dashboard",
-        description="""
-        - Add an existing insight to a dashboard.
-        - Requires insight ID and dashboard ID.
-        - Optionally supports layout and color customization.
-        """,
+        description=definition["description"],
         schema=DashboardAddInsightSchema,
         handler=add_insight_to_dashboard_handler,
     )

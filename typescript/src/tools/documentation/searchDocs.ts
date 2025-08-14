@@ -1,7 +1,8 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { docsSearch } from "@/inkeepApi";
 import { DocumentationSearchSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = DocumentationSearchSchema;
 
@@ -25,12 +26,11 @@ export const searchDocsHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: resultText }] };
 };
 
+const definition = getToolDefinition("docs-search");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "docs-search",
-	description: `
-        - Use this tool to search the PostHog documentation for information that can help the user with their request. 
-        - Use it as a fallback when you cannot answer the user's request using other tools in this MCP.
-    `,
+	description: definition.description,
 	schema,
 	handler: searchDocsHandler,
 });

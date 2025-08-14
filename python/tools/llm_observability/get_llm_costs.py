@@ -2,6 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import LLMObservabilityGetCostsSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -34,22 +35,11 @@ async def get_llm_costs_handler(context: Context, params: LLMObservabilityGetCos
 
 
 def get_llm_costs_tool() -> Tool[LLMObservabilityGetCostsSchema]:
+    definition = get_tool_definition("get-llm-total-costs-for-project")
+
     return Tool(
         name="get-llm-total-costs-for-project",
-        description="""
-        - Fetches the total LLM daily costs for each model for a project over a given number of days.
-        - If no number of days is provided, it defaults to 7.
-        - The results are sorted by model name.
-        - The total cost is rounded to 4 decimal places.
-        - The query is executed against the project's data warehouse.
-        - Show the results as a Markdown formatted table with the following information for each model:
-            - Model name
-            - Total cost in USD
-            - Each day's date
-            - Each day's cost in USD
-        - Write in bold the model name with the highest total cost.
-        - Properly render the markdown table in the response.
-        """,
+        description=definition["description"],
         schema=LLMObservabilityGetCostsSchema,
         handler=get_llm_costs_handler,
     )

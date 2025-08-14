@@ -3,6 +3,7 @@ import json
 from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.tool_inputs import InsightUpdateSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -26,12 +27,11 @@ async def update_insight_handler(context: Context, params: InsightUpdateSchema) 
 
 
 def update_insight_tool() -> Tool[InsightUpdateSchema]:
+    definition = get_tool_definition("insight-update")
+
     return Tool(
         name="insight-update",
-        description="""
-        - Update an existing insight by ID.
-        - Can update name, description, filters, and other properties.
-        """,
+        description=definition["description"],
         schema=InsightUpdateSchema,
         handler=update_insight_handler,
     )

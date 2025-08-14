@@ -1,7 +1,8 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { getProjectBaseUrl } from "@/lib/utils/api";
 import { DashboardAddInsightSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = DashboardAddInsightSchema;
 
@@ -34,13 +35,11 @@ export const addInsightHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(resultWithUrls) }] };
 };
 
+const definition = getToolDefinition("add-insight-to-dashboard");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "add-insight-to-dashboard",
-	description: `
-        - Add an existing insight to a dashboard.
-        - Requires insight ID and dashboard ID.
-        - Optionally supports layout and color customization.
-    `,
+	description: definition.description,
 	schema,
 	handler: addInsightHandler,
 });

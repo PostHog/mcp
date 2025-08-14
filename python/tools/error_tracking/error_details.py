@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from api.client import is_error, is_success
 from schema.tool_inputs import ErrorTrackingDetailsSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -28,9 +29,11 @@ async def error_details_handler(context: Context, params: ErrorTrackingDetailsSc
 
 
 def error_details_tool() -> Tool[ErrorTrackingDetailsSchema]:
+    definition = get_tool_definition("error-details")
+
     return Tool(
         name="error-details",
-        description="Use this tool to get the details of an error in the project.",
+        description=definition["description"],
         schema=ErrorTrackingDetailsSchema,
         handler=error_details_handler,
     )

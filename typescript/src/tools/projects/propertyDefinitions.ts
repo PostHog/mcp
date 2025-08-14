@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { ProjectPropertyDefinitionsSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = ProjectPropertyDefinitionsSchema;
 
@@ -19,11 +20,11 @@ export const propertyDefinitionsHandler = async (context: Context, _params: Para
 	};
 };
 
+const definition = getToolDefinition("property-definitions");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "property-definitions",
-	description: `
-        - Use this tool to get the property definitions of the active project.
-    `,
+	description: definition.description,
 	schema,
 	handler: propertyDefinitionsHandler,
 });

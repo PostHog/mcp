@@ -2,6 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import ProjectGetAllSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -20,12 +21,11 @@ async def get_projects_handler(context: Context, _params: ProjectGetAllSchema) -
 
 
 def get_projects_tool() -> Tool[ProjectGetAllSchema]:
+    definition = get_tool_definition("projects-get")
+
     return Tool(
         name="projects-get",
-        description="""
-        - Fetches projects that the user has access to - the orgId is optional.
-        - Use this tool before you use any other tools (besides organization-* and docs-search) to allow user to select the project they want to use for subsequent requests.
-        """,
+        description=definition["description"],
         schema=ProjectGetAllSchema,
         handler=get_projects_handler,
     )

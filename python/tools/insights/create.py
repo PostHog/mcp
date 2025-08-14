@@ -3,6 +3,7 @@ import json
 from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.tool_inputs import InsightCreateSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -27,9 +28,11 @@ async def create_insight_handler(context: Context, params: InsightCreateSchema) 
 
 
 def create_insight_tool() -> Tool[InsightCreateSchema]:
+    definition = get_tool_definition("insight-create-from-query")
+
     return Tool(
-        name="create-insight",
-        description="Creates a new insight in the project.",
+        name="insight-create-from-query",
+        description=definition["description"],
         schema=InsightCreateSchema,
         handler=create_insight_handler,
     )

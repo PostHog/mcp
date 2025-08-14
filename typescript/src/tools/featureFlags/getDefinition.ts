@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { FeatureFlagGetDefinitionSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = FeatureFlagGetDefinitionSchema;
 
@@ -64,13 +65,11 @@ export const getDefinitionHandler = async (context: Context, { flagId, flagKey }
 	};
 };
 
+const definition = getToolDefinition("feature-flag-get-definition");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "feature-flag-get-definition",
-	description: `
-        - Use this tool to get the definition of a feature flag. 
-        - You can provide either the flagId or the flagKey. 
-        - If you provide both, the flagId will be used.
-    `,
+	description: definition.description,
 	schema,
 	handler: getDefinitionHandler,
 });

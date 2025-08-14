@@ -3,6 +3,7 @@ import json
 from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.tool_inputs import InsightGetSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -26,9 +27,11 @@ async def get_insight_handler(context: Context, params: InsightGetSchema) -> Too
 
 
 def get_insight_tool() -> Tool[InsightGetSchema]:
+    definition = get_tool_definition("insight-get")
+
     return Tool(
         name="insight-get",
-        description="Get a specific insight by ID.",
+        description=definition["description"],
         schema=InsightGetSchema,
         handler=get_insight_handler,
     )

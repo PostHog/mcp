@@ -1,5 +1,6 @@
 from api.client import is_error, is_success
 from schema.tool_inputs import InsightGetSqlSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -18,13 +19,15 @@ async def get_sql_insight_handler(context: Context, params: InsightGetSqlSchema)
 
     assert is_success(insight_result)
 
-    return ToolResult(content=insight_result.data["response"])
+    return ToolResult(content=insight_result.data)
 
 
 def get_sql_insight_tool() -> Tool[InsightGetSqlSchema]:
+    definition = get_tool_definition("get-sql-insight")
+
     return Tool(
         name="get-sql-insight",
-        description="Executes a SQL query and returns the results as an insight.",
+        description=definition["description"],
         schema=InsightGetSqlSchema,
         handler=get_sql_insight_handler,
     )

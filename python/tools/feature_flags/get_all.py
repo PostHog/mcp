@@ -2,6 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import FeatureFlagGetAllSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -21,9 +22,11 @@ async def get_all_feature_flags_handler(context: Context, _params: FeatureFlagGe
 
 
 def get_all_feature_flags_tool() -> Tool[FeatureFlagGetAllSchema]:
+    definition = get_tool_definition("feature-flag-get-all")
+
     return Tool(
-        name="feature-flags-get-all",
-        description="Use this tool to get all feature flags for the project.",
+        name="feature-flag-get-all",
+        description=definition["description"],
         schema=FeatureFlagGetAllSchema,
         handler=get_all_feature_flags_handler,
     )

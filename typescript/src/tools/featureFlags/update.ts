@@ -1,7 +1,8 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { getProjectBaseUrl } from "@/lib/utils/api";
 import { FeatureFlagUpdateSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = FeatureFlagUpdateSchema;
 
@@ -30,12 +31,11 @@ export const updateHandler = async (context: Context, params: Params) => {
 	};
 };
 
+const definition = getToolDefinition("update-feature-flag");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "update-feature-flag",
-	description: `Update a new feature flag in the project.
-    - To enable a feature flag, you should make sure it is active and the rollout percentage is set to 100 for the group you want to target.
-    - To disable a feature flag, you should make sure it is inactive, you can keep the rollout percentage as it is.
-    `,
+	description: definition.description,
 	schema,
 	handler: updateHandler,
 });

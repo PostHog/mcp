@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { ErrorTrackingDetailsSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = ErrorTrackingDetailsSchema;
 
@@ -30,11 +31,11 @@ export const errorDetailsHandler = async (context: Context, params: Params) => {
 	};
 };
 
+const definition = getToolDefinition("error-details");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "error-details",
-	description: `
-        - Use this tool to get the details of an error in the project.
-    `,
+	description: definition.description,
 	schema,
 	handler: errorDetailsHandler,
 });

@@ -2,6 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import FeatureFlagGetDefinitionSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -41,13 +42,11 @@ async def get_feature_flag_definition_handler(context: Context, params: FeatureF
 
 
 def get_feature_flag_definition_tool() -> Tool[FeatureFlagGetDefinitionSchema]:
+    definition = get_tool_definition("feature-flag-get-definition")
+
     return Tool(
         name="feature-flag-get-definition",
-        description="""
-        - Use this tool to get the definition of a feature flag.
-        - You can provide either the flagId or the flagKey.
-        - If you provide both, the flagId will be used.
-        """,
+        description=definition["description"],
         schema=FeatureFlagGetDefinitionSchema,
         handler=get_feature_flag_definition_handler,
     )

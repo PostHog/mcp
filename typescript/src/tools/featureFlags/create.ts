@@ -1,7 +1,8 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { getProjectBaseUrl } from "@/lib/utils/api";
 import { FeatureFlagCreateSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = FeatureFlagCreateSchema;
 
@@ -29,13 +30,11 @@ export const createHandler = async (context: Context, params: Params) => {
 	};
 };
 
+const definition = getToolDefinition("create-feature-flag");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "create-feature-flag",
-	description: `Creates a new feature flag in the project. Once you have created a feature flag, you should:
-     - Ask the user if they want to add it to their codebase
-     - Use the "search-docs" tool to find documentation on how to add feature flags to the codebase (search for the right language / framework)
-     - Clarify where it should be added and then add it.
-    `,
+	description: definition.description,
 	schema,
 	handler: createHandler,
 });

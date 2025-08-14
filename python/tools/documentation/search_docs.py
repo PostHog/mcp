@@ -3,6 +3,7 @@ import json
 import httpx
 
 from schema.tool_inputs import DocumentationSearchSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -45,12 +46,11 @@ async def search_docs_handler(context: Context, params: DocumentationSearchSchem
 
 
 def search_docs_tool() -> Tool[DocumentationSearchSchema]:
+    definition = get_tool_definition("docs-search")
+
     return Tool(
         name="docs-search",
-        description="""
-        - Use this tool to search the PostHog documentation for information that can help the user with their request.
-        - Use it as a fallback when you cannot answer the user's request using other tools in this MCP.
-        """,
+        description=definition["description"],
         schema=DocumentationSearchSchema,
         handler=search_docs_handler,
     )

@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { ProjectGetAllSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = ProjectGetAllSchema;
 
@@ -19,12 +20,11 @@ export const getProjectsHandler = async (context: Context, _params: Params) => {
 	};
 };
 
+const definition = getToolDefinition("projects-get");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "projects-get",
-	description: `
-        - Fetches projects that the user has access to - the orgId is optional. 
-        - Use this tool before you use any other tools (besides organization-* and docs-search) to allow user to select the project they want to use for subsequent requests.
-    `,
+	description: definition.description,
 	schema,
 	handler: getProjectsHandler,
 });

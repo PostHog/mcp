@@ -3,6 +3,7 @@ import json
 from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.tool_inputs import DashboardCreateSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -26,12 +27,11 @@ async def create_dashboard_handler(context: Context, params: DashboardCreateSche
 
 
 def create_dashboard_tool() -> Tool[DashboardCreateSchema]:
+    definition = get_tool_definition("dashboard-create")
+
     return Tool(
         name="dashboard-create",
-        description="""
-        - Create a new dashboard in the project.
-        - Requires name and optional description, tags, and other properties.
-        """,
+        description=definition["description"],
         schema=DashboardCreateSchema,
         handler=create_dashboard_handler,
     )

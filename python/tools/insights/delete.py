@@ -2,6 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import InsightDeleteSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -17,9 +18,11 @@ async def delete_insight_handler(context: Context, params: InsightDeleteSchema) 
 
 
 def delete_insight_tool() -> Tool[InsightDeleteSchema]:
+    definition = get_tool_definition("insight-delete")
+
     return Tool(
         name="insight-delete",
-        description="Delete an insight by ID (soft delete - marks as deleted).",
+        description=definition["description"],
         schema=InsightDeleteSchema,
         handler=delete_insight_handler,
     )

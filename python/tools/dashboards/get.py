@@ -2,6 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import DashboardGetSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -17,9 +18,11 @@ async def get_dashboard_handler(context: Context, params: DashboardGetSchema) ->
 
 
 def get_dashboard_tool() -> Tool[DashboardGetSchema]:
+    definition = get_tool_definition("dashboard-get")
+
     return Tool(
         name="dashboard-get",
-        description="Get a specific dashboard by ID.",
+        description=definition["description"],
         schema=DashboardGetSchema,
         handler=get_dashboard_handler,
     )

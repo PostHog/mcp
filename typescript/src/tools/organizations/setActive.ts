@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { OrganizationSetActiveSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = OrganizationSetActiveSchema;
 
@@ -15,11 +16,11 @@ export const setActiveHandler = async (context: Context, params: Params) => {
 	};
 };
 
+const definition = getToolDefinition("organization-set-active");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "organization-set-active",
-	description: `
-        - Use this tool to set the active organization.
-    `,
+	description: definition.description,
 	schema,
 	handler: setActiveHandler,
 });

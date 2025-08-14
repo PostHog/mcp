@@ -1,7 +1,8 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { getProjectBaseUrl } from "@/lib/utils/api";
 import { DashboardCreateSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = DashboardCreateSchema;
 
@@ -24,12 +25,11 @@ export const createHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
 };
 
+const definition = getToolDefinition("dashboard-create");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "dashboard-create",
-	description: `
-        - Create a new dashboard in the project.
-        - Requires name and optional description, tags, and other properties.
-    `,
+	description: definition.description,
 	schema,
 	handler: createHandler,
 });

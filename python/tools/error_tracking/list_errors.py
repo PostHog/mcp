@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 from api.client import is_error, is_success
 from schema.tool_inputs import ErrorTrackingListSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -37,9 +38,11 @@ async def list_errors_handler(context: Context, params: ErrorTrackingListSchema)
 
 
 def list_errors_tool() -> Tool[ErrorTrackingListSchema]:
+    definition = get_tool_definition("list-errors")
+
     return Tool(
         name="list-errors",
-        description="Use this tool to list errors in the project.",
+        description=definition["description"],
         schema=ErrorTrackingListSchema,
         handler=list_errors_handler,
     )

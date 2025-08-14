@@ -1,0 +1,83 @@
+{
+	"add-insight-to-dashboard": {
+		"description": "Add an existing insight to a dashboard. Requires insight ID and dashboard ID. Optionally supports layout and color customization."
+	},
+	"dashboard-create": {
+		"description": "Create a new dashboard in the project. Requires name and optional description, tags, and other properties."
+	},
+	"dashboard-delete": {
+		"description": "Delete a dashboard by ID (soft delete - marks as deleted)."
+	},
+	"dashboard-get": {
+		"description": "Get a specific dashboard by ID."
+	},
+	"dashboards-get-all": {
+		"description": "Get all dashboards in the project with optional filtering. Can filter by pinned status, search term, or pagination."
+	},
+	"dashboard-update": {
+		"description": "Update an existing dashboard by ID. Can update name, description, pinned status or tags."
+	},
+	"docs-search": {
+		"description": "Use this tool to search the PostHog documentation for information that can help the user with their request. Use it as a fallback when you cannot answer the user's request using other tools in this MCP."
+	},
+	"error-details": {
+		"description": "Use this tool to get the details of an error in the project."
+	},
+	"list-errors": {
+		"description": "Use this tool to list errors in the project."
+	},
+	"create-feature-flag": {
+		"description": "Creates a new feature flag in the project. Once you have created a feature flag, you should: Ask the user if they want to add it to their codebase, Use the \"search-docs\" tool to find documentation on how to add feature flags to the codebase (search for the right language / framework), Clarify where it should be added and then add it."
+	},
+	"delete-feature-flag": {
+		"description": "Use this tool to delete a feature flag in the project."
+	},
+	"feature-flag-get-all": {
+		"description": "Use this tool to get all feature flags in the project."
+	},
+	"feature-flag-get-definition": {
+		"description": "Use this tool to get the definition of a feature flag. You can provide either the flagId or the flagKey. If you provide both, the flagId will be used."
+	},
+	"update-feature-flag": {
+		"description": "Update a new feature flag in the project. To enable a feature flag, you should make sure it is active and the rollout percentage is set to 100 for the group you want to target. To disable a feature flag, you should make sure it is inactive, you can keep the rollout percentage as it is."
+	},
+	"insight-create-from-query": {
+		"description": "You can use this to save a query as an insight. You should only do this with a valid query that you have seen, or one you have modified slightly. If the user wants to see data, you should use the \"get-sql-insight\" tool to get that data instead. An insight requires a name, query, and other optional properties. The query should use HogQL, which is a variant of Clickhouse SQL."
+	},
+	"insight-delete": {
+		"description": "Delete an insight by ID (soft delete - marks as deleted)."
+	},
+	"insight-get": {
+		"description": "Get a specific insight by ID."
+	},
+	"insights-get-all": {
+		"description": "Get all insights in the project with optional filtering. Can filter by saved status, favorited status, or search term."
+	},
+	"get-sql-insight": {
+		"description": "Queries project's PostHog data warehouse based on a provided natural language question - don't provide SQL query as input but describe the output you want. Data warehouse schema includes data like events and persons. Use this tool to get a quick answer to a question about the data in the project, which can't be answered using other, more dedicated tools.Fetches the result as a Server-Sent Events (SSE) stream and provides the concatenated data content. When giving the results back to the user, first show the SQL query that was used, then briefly explain the query, then provide results in reasily readable format. You should also offer to save the query as an insight if the user wants to."
+	},
+	"insight-update": {
+		"description": "Update an existing insight by ID. Can update name, description, filters, and other properties."
+	},
+	"get-llm-total-costs-for-project": {
+		"description": "Fetches the total LLM daily costs for each model for a project over a given number of days. If no number of days is provided, it defaults to 7. The results are sorted by model name. The total cost is rounded to 4 decimal places. The query is executed against the project's data warehouse. Show the results as a Markdown formatted table with the following information for each model: Model name, Total cost in USD, Each day's date, Each day's cost in USD. Write in bold the model name with the highest total cost. Properly render the markdown table in the response."
+	},
+	"organization-details-get": {
+		"description": "Use this tool to get the details of the active organization."
+	},
+	"organizations-get": {
+		"description": "Use this tool to get the organizations the user has access to."
+	},
+	"organization-set-active": {
+		"description": "Use this tool to set the active organization."
+	},
+	"projects-get": {
+		"description": "Fetches projects that the user has access to - the orgId is optional. Use this tool before you use any other tools (besides organization-* and docs-search) to allow user to select the project they want to use for subsequent requests."
+	},
+	"property-definitions": {
+		"description": "Use this tool to get the property definitions of the active project."
+	},
+	"project-set-active": {
+		"description": "Use this tool to set the active project."
+	}
+}

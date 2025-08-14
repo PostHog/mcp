@@ -362,7 +362,7 @@ class InsightResource:
 
         return result
 
-    async def sql_insight(self, query: str) -> Result[dict]:
+    async def sql_insight(self, query: str) -> Result[str]:
         result = await self.client._fetch_with_schema(
             f"{self.client.base_url}/api/environments/{self.project_id}/max_tools/create_and_query_insight/",
             SqlInsightResponse,
@@ -374,51 +374,7 @@ class InsightResource:
         if is_success(result):
             try:
                 response_data = result.data.root
-                if response_data and len(response_data) > 0:
-                    generated_query = None
-                    execution_plan = None
-                    query_results = None
-
-                    for item in response_data:
-                        if item.data:
-                            data = item.data
-                            item_type = data.get("type", "")
-
-                            if item_type == "ai/viz":
-                                if "answer" in data:
-                                    answer = data["answer"]
-                                    generated_query = str(answer) if answer else None
-
-                                if "plan" in data:
-                                    execution_plan = data["plan"]
-
-                            elif item_type == "tool":
-                                if "content" in data:
-                                    query_results = data["content"]
-
-                            elif "columns" in data and "results" in data:
-                                columns = data.get("columns", [])
-                                results = data.get("results", [])
-                                if columns or results:
-                                    query_results = f"Columns: {columns}\nResults: {results}"
-
-                    response_text = []
-
-                    if generated_query:
-                        response_text.append(f"Generated Query:\n{generated_query}")
-
-                    if execution_plan:
-                        response_text.append(f"Execution Plan:\n{execution_plan}")
-
-                    if query_results:
-                        response_text.append(f"Query Results:\n{query_results}")
-
-                    if not response_text:
-                        response_text.append("Query executed but no detailed results were returned.")
-
-                    return SuccessResult({"response": "\n\n".join(response_text)})
-
-                return SuccessResult({"response": "No data returned from SQL insight API."})
+                return SuccessResult(json.dumps(response_data))
             except Exception as e:
                 return ErrorResult(Exception(f"Error parsing SQL insight response: {str(e)}"))
 

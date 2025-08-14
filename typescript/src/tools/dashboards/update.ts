@@ -1,7 +1,8 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { getProjectBaseUrl } from "@/lib/utils/api";
 import { DashboardUpdateSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = DashboardUpdateSchema;
 
@@ -28,10 +29,7 @@ export const updateHandler = async (context: Context, params: Params) => {
 
 const tool = (): Tool<typeof schema> => ({
 	name: "dashboard-update",
-	description: `
-        - Update an existing dashboard by ID.
-        - Can update name, description, pinned status or tags.
-    `,
+	description: getToolDefinition("dashboard-update").description,
 	schema,
 	handler: updateHandler,
 });

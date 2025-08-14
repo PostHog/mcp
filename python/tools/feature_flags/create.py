@@ -3,6 +3,7 @@ import json
 from api.client import is_error, is_success
 from lib.utils.api import get_project_base_url
 from schema.tool_inputs import FeatureFlagCreateSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -27,13 +28,11 @@ async def create_feature_flag_handler(context: Context, params: FeatureFlagCreat
 
 
 def create_feature_flag_tool() -> Tool[FeatureFlagCreateSchema]:
+    definition = get_tool_definition("create-feature-flag")
+
     return Tool(
         name="create-feature-flag",
-        description="""Creates a new feature flag in the project. Once you have created a feature flag, you should:
-     - Ask the user if they want to add it to their codebase
-     - Use the "search-docs" tool to find documentation on how to add feature flags to the codebase (search for the right language / framework)
-     - Clarify where it should be added and then add it.
-        """,
+        description=definition["description"],
         schema=FeatureFlagCreateSchema,
         handler=create_feature_flag_handler,
     )

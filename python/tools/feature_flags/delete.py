@@ -2,6 +2,7 @@ import json
 
 from api.client import is_error, is_success
 from schema.tool_inputs import FeatureFlagDeleteSchema
+from tools.tool_definitions import get_tool_definition
 from tools.types import Context, Tool, ToolResult
 
 
@@ -34,9 +35,11 @@ async def delete_feature_flag_handler(context: Context, params: FeatureFlagDelet
 
 
 def delete_feature_flag_tool() -> Tool[FeatureFlagDeleteSchema]:
+    definition = get_tool_definition("delete-feature-flag")
+
     return Tool(
         name="delete-feature-flag",
-        description="Deletes a feature flag from the project.",
+        description=definition["description"],
         schema=FeatureFlagDeleteSchema,
         handler=delete_feature_flag_handler,
     )

@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { LLMObservabilityGetCostsSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = LLMObservabilityGetCostsSchema;
 
@@ -42,22 +43,11 @@ export const getLLMCostsHandler = async (context: Context, params: Params) => {
 	};
 };
 
+const definition = getToolDefinition("get-llm-total-costs-for-project");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "get-llm-total-costs-for-project",
-	description: `
-        - Fetches the total LLM daily costs for each model for a project over a given number of days.
-        - If no number of days is provided, it defaults to 7.
-        - The results are sorted by model name.
-        - The total cost is rounded to 4 decimal places.
-        - The query is executed against the project's data warehouse.
-        - Show the results as a Markdown formatted table with the following information for each model:
-            - Model name
-            - Total cost in USD
-            - Each day's date
-            - Each day's cost in USD
-        - Write in bold the model name with the highest total cost.
-        - Properly render the markdown table in the response.
-    `,
+	description: definition.description,
 	schema,
 	handler: getLLMCostsHandler,
 });

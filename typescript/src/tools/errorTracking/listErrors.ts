@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { ErrorTrackingListSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = ErrorTrackingListSchema;
 
@@ -33,11 +34,11 @@ export const listErrorsHandler = async (context: Context, params: Params) => {
 	};
 };
 
+const definition = getToolDefinition("list-errors");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "list-errors",
-	description: `
-        - Use this tool to list errors in the project.
-    `,
+	description: definition.description,
 	schema,
 	handler: listErrorsHandler,
 });

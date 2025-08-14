@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { InsightDeleteSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = InsightDeleteSchema;
 
@@ -18,11 +19,11 @@ export const deleteHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(result.data) }] };
 };
 
+const definition = getToolDefinition("insight-delete");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "insight-delete",
-	description: `
-        - Delete an insight by ID (soft delete - marks as deleted).
-    `,
+	description: definition.description,
 	schema,
 	handler: deleteHandler,
 });

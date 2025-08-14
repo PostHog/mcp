@@ -1,13 +1,13 @@
 import { z } from "zod";
-import { FilterGroupsSchema, UpdateFeatureFlagInputSchema } from "./flags";
-import { CreateInsightInputSchema, UpdateInsightInputSchema, ListInsightsSchema } from "./insights";
 import {
-	CreateDashboardInputSchema,
-	UpdateDashboardInputSchema,
-	ListDashboardsSchema,
 	AddInsightToDashboardSchema,
+	CreateDashboardInputSchema,
+	ListDashboardsSchema,
+	UpdateDashboardInputSchema,
 } from "./dashboards";
 import { ErrorDetailsSchema, ListErrorsSchema } from "./errors";
+import { FilterGroupsSchema, UpdateFeatureFlagInputSchema } from "./flags";
+import { CreateInsightInputSchema, ListInsightsSchema, UpdateInsightInputSchema } from "./insights";
 
 export const DashboardAddInsightSchema = z.object({
 	data: AddInsightToDashboardSchema,

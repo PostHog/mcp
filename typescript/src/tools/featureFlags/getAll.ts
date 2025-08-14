@@ -1,6 +1,7 @@
-import type { z } from "zod";
-import type { Context, Tool } from "@/tools/types";
 import { FeatureFlagGetAllSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
 
 const schema = FeatureFlagGetAllSchema;
 
@@ -17,11 +18,11 @@ export const getAllHandler = async (context: Context, _params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(flagsResult.data) }] };
 };
 
+const definition = getToolDefinition("feature-flag-get-all");
+
 const tool = (): Tool<typeof schema> => ({
 	name: "feature-flag-get-all",
-	description: `
-        - Use this tool to get all feature flags in the project.
-    `,
+	description: definition.description,
 	schema,
 	handler: getAllHandler,
 });

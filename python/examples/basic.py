@@ -56,7 +56,7 @@ async def main():
                 print(f"🎯 Setting active organization: {org_name} (ID: {org_id})")
 
                 # Set the active organization
-                await registry.execute_tool("organization-set-active", {"orgId": org_id})
+                await registry.execute_tool("switch-organization", {"orgId": org_id})
                 print("✅ Active organization set successfully!")
             else:
                 print("❌ No organizations found")
@@ -89,7 +89,7 @@ async def main():
                 print(f"🎯 Setting active project: {project_name} (ID: {project_id})")
 
                 # Set the active project
-                await registry.execute_tool("project-set-active", {"projectId": project_id})
+                await registry.execute_tool("switch-project", {"projectId": project_id})
                 print("✅ Active project set successfully!")
             else:
                 print("❌ No projects found")

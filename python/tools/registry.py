@@ -80,13 +80,56 @@ class ToolRegistry:
     async def get_project_id(self) -> str:
         project_id = await self.cache.get("project_id")
         if not project_id:
-            raise Exception("No active project set. Please use project-set-active first.")
+            org_id = await self.get_org_id()
+            projects_result = await self.api.organizations().projects(org_id=org_id).list()
+            if is_error(projects_result):
+                raise Exception(f"Failed to get projects: {projects_result.error}")
+
+            assert is_success(projects_result)
+
+            # If there is only one project, set it as the active project
+            if len(projects_result.data) == 1:
+                project_id = str(projects_result.data[0].id)
+                await self.cache.set("project_id", project_id)
+                return project_id
+
+            current_project = await self.api.projects().get(project_id="@current")
+            if is_error(current_project):
+                raise Exception(f"Failed to get current project: {current_project.error}")
+
+            assert is_success(current_project)
+
+            project_id = str(current_project.data.id)
+            await self.cache.set("project_id", project_id)
+            return project_id
+
         return project_id
 
     async def get_org_id(self) -> str:
         org_id = await self.cache.get("org_id")
         if not org_id:
-            raise Exception("No active organization set. Please use organization-set-active first.")
+            orgs_result = await self.api.organizations().list()
+            if is_error(orgs_result):
+                raise Exception(f"Failed to get organizations: {orgs_result.error}")
+
+            assert is_success(orgs_result)
+
+            # If there is only one org, set it as the active org
+            if len(orgs_result.data) == 1:
+                org_id = str(orgs_result.data[0].id)
+                await self.cache.set("org_id", org_id)
+                return org_id
+
+            current_org = await self.api.organizations().get(org_id="@current")
+            if is_error(current_org):
+                raise Exception(f"Failed to get current organization: {current_org.error}")
+
+            assert is_success(current_org)
+
+            org_id = str(current_org.data.id)
+            await self.cache.set("org_id", org_id)
+            return org_id
+
         return org_id
 
     async def get_distinct_id(self) -> str:

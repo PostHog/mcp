@@ -12,10 +12,10 @@ async def set_active_project_handler(context: Context, params: ProjectSetActiveS
 
 
 def set_active_project_tool() -> Tool[ProjectSetActiveSchema]:
-    definition = get_tool_definition("project-set-active")
+    definition = get_tool_definition("switch-project")
 
     return Tool(
-        name="project-set-active",
+        name="switch-project",
         description=definition["description"],
         schema=ProjectSetActiveSchema,
         handler=set_active_project_handler,

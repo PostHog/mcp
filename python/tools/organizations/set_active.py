@@ -12,10 +12,10 @@ async def set_active_handler(context: Context, params: OrganizationSetActiveSche
 
 
 def set_active_org_tool() -> Tool[OrganizationSetActiveSchema]:
-    definition = get_tool_definition("organization-set-active")
+    definition = get_tool_definition("switch-organization")
 
     return Tool(
-        name="organization-set-active",
+        name="switch-organization",
         description=definition["description"],
         schema=OrganizationSetActiveSchema,
         handler=set_active_handler,

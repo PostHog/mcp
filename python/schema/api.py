@@ -59,6 +59,7 @@ class FeatureFlagGetResponse(BaseModel):
     key: str
     name: str
     active: bool
+    filters: Any | None = None
     description: str | None = None
 
 

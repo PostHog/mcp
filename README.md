@@ -64,15 +64,14 @@ And replace `https://mcp.posthog.com/sse` with `http://localhost:8787/sse` in th
 
 This repository is organized to support multiple language implementations:
 
-- `typescript/` - TypeScript implementation (current)
-- `python/` - Python implementation (planned)
-- `schema/` - Shared schema files generated from TypeScript for cross-language compatibility
+- `typescript/` - TypeScript implementation of the MCP server & tools
+- `schema/` - Shared schema files generated from TypeScript
 
 ### Development Commands
 
 - `pnpm run dev` - Start development server
 - `pnpm run schema:build:json` - Generate JSON schema for other language implementations
-- `pnpm run lint:fix` - Format and lint code
+- `pnpm run lint:typescript` - Format and lint code
 
 ### Environment variables
 

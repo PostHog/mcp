@@ -16,14 +16,6 @@ export const getHandler = async (context: Context, params: Params) => {
 		throw new Error(`Failed to get dashboard: ${dashboardResult.error.message}`);
 	}
 
-	// get insights for dashboard
-	const insightsResult = await context.api.insights({ projectId }).list({
-		dashboardId,
-	});
-
-	if (!insightsResult.success) {
-		throw new Error(`Failed to get insights: ${insightsResult.error.message}`);
-	}
 	return { content: [{ type: "text", text: JSON.stringify(dashboardResult.data) }] };
 };
 

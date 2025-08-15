@@ -37,6 +37,7 @@ export const getDefinitionHandler = async (context: Context, { flagId, flagKey }
 		const flagResult = await context.api
 			.featureFlags({ projectId })
 			.findByKey({ key: flagKey });
+
 		if (!flagResult.success) {
 			throw new Error(`Failed to find feature flag: ${flagResult.error.message}`);
 		}

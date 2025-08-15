@@ -17,10 +17,10 @@ export const setActiveHandler = async (context: Context, params: Params) => {
 	};
 };
 
-const definition = getToolDefinition("project-set-active");
+const definition = getToolDefinition("switch-project");
 
 const tool = (): Tool<typeof schema> => ({
-	name: "project-set-active",
+	name: "switch-project",
 	description: definition.description,
 	schema,
 	handler: setActiveHandler,

@@ -1,45 +1,45 @@
 import type { Context, Tool, ZodObjectAny } from "./types";
 
+import createFeatureFlag from "./featureFlags/create";
+import deleteFeatureFlag from "./featureFlags/delete";
+import getAllFeatureFlags from "./featureFlags/getAll";
 // Feature Flags
 import getFeatureFlagDefinition from "./featureFlags/getDefinition";
-import getAllFeatureFlags from "./featureFlags/getAll";
-import createFeatureFlag from "./featureFlags/create";
 import updateFeatureFlag from "./featureFlags/update";
-import deleteFeatureFlag from "./featureFlags/delete";
 
+import getOrganizationDetails from "./organizations/getDetails";
 // Organizations
 import getOrganizations from "./organizations/getOrganizations";
 import setActiveOrganization from "./organizations/setActive";
-import getOrganizationDetails from "./organizations/getDetails";
 
 // Projects
 import getProjects from "./projects/getProjects";
-import setActiveProject from "./projects/setActive";
 import propertyDefinitions from "./projects/propertyDefinitions";
+import setActiveProject from "./projects/setActive";
 
 // Documentation
 import searchDocs from "./documentation/searchDocs";
 
+import errorDetails from "./errorTracking/errorDetails";
 // Error Tracking
 import listErrors from "./errorTracking/listErrors";
-import errorDetails from "./errorTracking/errorDetails";
 
+import createInsight from "./insights/create";
+import deleteInsight from "./insights/delete";
+import getInsight from "./insights/get";
 // Insights
 import getAllInsights from "./insights/getAll";
-import getInsight from "./insights/get";
-import createInsight from "./insights/create";
-import updateInsight from "./insights/update";
-import deleteInsight from "./insights/delete";
 import queryInsight from "./insights/query";
 import getSqlInsight from "./insights/getSqlInsight";
+import updateInsight from "./insights/update";
 
+import addInsightToDashboard from "./dashboards/addInsight";
+import createDashboard from "./dashboards/create";
+import deleteDashboard from "./dashboards/delete";
+import getDashboard from "./dashboards/get";
 // Dashboards
 import getAllDashboards from "./dashboards/getAll";
-import getDashboard from "./dashboards/get";
-import createDashboard from "./dashboards/create";
 import updateDashboard from "./dashboards/update";
-import deleteDashboard from "./dashboards/delete";
-import addInsightToDashboard from "./dashboards/addInsight";
 
 // LLM Observability
 import getLLMCosts from "./llmObservability/getLLMCosts";

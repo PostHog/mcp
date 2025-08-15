@@ -1,4 +1,3 @@
-import { BASE_URL } from "@/lib/constants";
 import { ErrorCode } from "@/lib/errors";
 import { withPagination } from "@/lib/utils/api";
 import { ApiPropertyDefinitionSchema } from "@/schema/api";
@@ -30,7 +29,7 @@ export type Result<T, E = Error> = { success: true; data: T } | { success: false
 
 export interface ApiConfig {
 	apiToken: string;
-	baseUrl?: string;
+	baseUrl: string;
 }
 export class ApiClient {
 	private config: ApiConfig;
@@ -38,13 +37,21 @@ export class ApiClient {
 
 	constructor(config: ApiConfig) {
 		this.config = config;
-		this.baseUrl = config.baseUrl || BASE_URL;
+		this.baseUrl = config.baseUrl;
 	}
 	private buildHeaders() {
 		return {
 			Authorization: `Bearer ${this.config.apiToken}`,
 			"Content-Type": "application/json",
 		};
+	}
+
+	getProjectBaseUrl(projectId: string) {
+		if (projectId === "@current") {
+			return this.baseUrl;
+		}
+
+		return `${this.baseUrl}/project/${projectId}`;
 	}
 
 	private async fetchWithSchema<T>(

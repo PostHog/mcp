@@ -36,9 +36,13 @@ npx @posthog/wizard@latest mcp add
 }
 ```
 
-### Using EU cloud or self-hosted instances
+### Data residency
 
-If you're using PostHog EU cloud or a self-hosted instance, you can specify a custom base URL by adding the `POSTHOG_BASE_URL` [environment variable](https://developers.cloudflare.com/workers/configuration/environment-variables) when running the MCP server locally or on your own infrastructure, e.g. `POSTHOG_BASE_URL=https://eu.posthog.com`
+The MCP server is hosted on a Cloudflare worker, this can be located outside of the EU / US, so there is no gaurantee that the data will be processed solely within a specific region.
+
+### Using self-hosted instances
+
+If you're using a self-hosted instance of PostHog, you can specify a custom base URL by adding the `POSTHOG_BASE_URL` [environment variable](https://developers.cloudflare.com/workers/configuration/environment-variables) when running the MCP server locally or on your own infrastructure, e.g. `POSTHOG_BASE_URL=https://posthog.example.com`
 
 **Here are some examples of prompts you can use:**
 - What feature flags do I have active?

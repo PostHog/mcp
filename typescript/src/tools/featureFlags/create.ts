@@ -1,4 +1,3 @@
-import { getProjectBaseUrl } from "@/lib/utils/api";
 import { FeatureFlagCreateSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
@@ -22,7 +21,7 @@ export const createHandler = async (context: Context, params: Params) => {
 
 	const featureFlagWithUrl = {
 		...flagResult.data,
-		url: `${getProjectBaseUrl(projectId)}/feature_flags/${flagResult.data.id}`,
+		url: `${context.api.getProjectBaseUrl(projectId)}/feature_flags/${flagResult.data.id}`,
 	};
 
 	return {

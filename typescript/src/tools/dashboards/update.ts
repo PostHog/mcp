@@ -1,4 +1,3 @@
-import { getProjectBaseUrl } from "@/lib/utils/api";
 import { DashboardUpdateSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
@@ -21,7 +20,7 @@ export const updateHandler = async (context: Context, params: Params) => {
 
 	const dashboardWithUrl = {
 		...dashboardResult.data,
-		url: `${getProjectBaseUrl(projectId)}/dashboard/${dashboardResult.data.id}`,
+		url: `${context.api.getProjectBaseUrl(projectId)}/dashboard/${dashboardResult.data.id}`,
 	};
 
 	return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };

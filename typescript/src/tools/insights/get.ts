@@ -1,4 +1,3 @@
-import { getProjectBaseUrl } from "@/lib/utils/api";
 import { InsightGetSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
@@ -18,7 +17,7 @@ export const getHandler = async (context: Context, params: Params) => {
 
 	const insightWithUrl = {
 		...insightResult.data,
-		url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
+		url: `${context.api.getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
 	};
 
 	return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };

@@ -1,11 +1,14 @@
-import type { z } from "zod";
 import type { ApiClient } from "@/api/client";
 import type { ScopedCache } from "@/lib/utils/cache/ScopedCache";
+import type { z } from "zod";
+
+export type CloudRegion = "us" | "eu";
 
 export type State = {
 	projectId: string | undefined;
 	orgId: string | undefined;
 	distinctId: string | undefined;
+	region: CloudRegion | undefined;
 };
 
 export type Context = {

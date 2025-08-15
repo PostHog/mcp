@@ -366,6 +366,13 @@ class InsightGetSqlSchema(BaseModel):
     """
 
 
+class InsightQuerySchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    insightId: float
+
+
 class Data7(BaseModel):
     model_config = ConfigDict(
         extra="forbid",

@@ -92,15 +92,6 @@ export const InsightGetSqlSchema = z.object({
 
 export const InsightQuerySchema = z.object({
 	insightId: z.number(),
-	dateFrom: z
-		.string()
-		.optional()
-		.describe("Start date for the query (e.g., '2024-01-01', '-7d', '-1dStart')"),
-	dateTo: z
-		.string()
-		.optional()
-		.describe("End date for the query (e.g., '2024-01-31', '-1d', '-0d')"),
-	refresh: z.boolean().optional().describe("Whether to refresh/recalculate the results"),
 });
 
 export const InsightUpdateSchema = z.object({

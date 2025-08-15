@@ -1,24 +1,24 @@
-import { describe, it, expect, beforeAll, afterEach } from "vitest";
 import {
-	validateEnvironmentVariables,
+	type CreatedResources,
+	SAMPLE_HOGQL_QUERIES,
+	TEST_ORG_ID,
+	TEST_PROJECT_ID,
+	cleanupResources,
 	createTestClient,
 	createTestContext,
-	setActiveProjectAndOrg,
-	cleanupResources,
-	parseToolResponse,
 	generateUniqueKey,
-	SAMPLE_HOGQL_QUERIES,
-	TEST_PROJECT_ID,
-	TEST_ORG_ID,
-	type CreatedResources,
+	parseToolResponse,
+	setActiveProjectAndOrg,
+	validateEnvironmentVariables,
 } from "@/shared/test-utils";
 import createInsightTool from "@/tools/insights/create";
-import updateInsightTool from "@/tools/insights/update";
 import deleteInsightTool from "@/tools/insights/delete";
-import getAllInsightsTool from "@/tools/insights/getAll";
 import getInsightTool from "@/tools/insights/get";
+import getAllInsightsTool from "@/tools/insights/getAll";
 import queryInsightTool from "@/tools/insights/query";
+import updateInsightTool from "@/tools/insights/update";
 import type { Context } from "@/tools/types";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 describe("Insights", { concurrent: false }, () => {
 	// All tests run sequentially to avoid conflicts with shared PostHog project
@@ -238,15 +238,8 @@ describe("Insights", { concurrent: false }, () => {
 
 			const result = await queryTool.handler(context, {
 				insightId: createdInsight.id,
-				dateFrom: "-7d",
-				dateTo: "-1d",
 			});
 			const queryResponse = parseToolResponse(result);
-
-			// Verify that we have query parameters in response
-			expect(queryResponse).toHaveProperty("query_params");
-			expect(queryResponse.query_params.dateFrom).toBe("-7d");
-			expect(queryResponse.query_params.dateTo).toBe("-1d");
 
 			expect(queryResponse).toHaveProperty("insight");
 			expect(queryResponse).toHaveProperty("results");

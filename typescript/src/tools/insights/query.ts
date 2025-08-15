@@ -1,4 +1,3 @@
-import { getProjectBaseUrl } from "@/lib/utils/api";
 import { InsightQuerySchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
@@ -9,43 +8,30 @@ const schema = InsightQuerySchema;
 type Params = z.infer<typeof schema>;
 
 export const queryHandler = async (context: Context, params: Params) => {
-	const { insightId, dateFrom, dateTo, refresh } = params;
+	const { insightId } = params;
 	const projectId = await context.getProjectId();
 
+	const insightResult = await context.api.insights({ projectId }).get({ insightId });
+
+	if (!insightResult.success) {
+		throw new Error(`Failed to get insight: ${insightResult.error.message}`);
+	}
+
 	// Query the insight with parameters to get actual results
-	const queryParams: {
-		insightId: number;
-		dateFrom?: string;
-		dateTo?: string;
-		refresh?: boolean;
-	} = { insightId };
+	const queryResult = await context.api.insights({ projectId }).query({
+		query: insightResult.data.query,
+	});
 
-	if (dateFrom) queryParams.dateFrom = dateFrom;
-	if (dateTo) queryParams.dateTo = dateTo;
-	if (refresh !== undefined) queryParams.refresh = refresh;
-
-	const queryResult = await context.api.insights({ projectId }).query(queryParams);
 	if (!queryResult.success) {
 		throw new Error(`Failed to query insight: ${queryResult.error.message}`);
 	}
 
-	// Get insight metadata for reference
-	const insightResult = await context.api.insights({ projectId }).get({ insightId });
-	if (!insightResult.success) {
-		throw new Error(`Failed to get insight metadata: ${insightResult.error.message}`);
-	}
-
 	const responseData = {
 		insight: {
+			url: `${context.api.getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
 			...insightResult.data,
-			url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
 		},
 		results: queryResult.data.results,
-		query_params: {
-			dateFrom,
-			dateTo,
-			refresh,
-		},
 	};
 
 	return { content: [{ type: "text", text: JSON.stringify(responseData) }] };

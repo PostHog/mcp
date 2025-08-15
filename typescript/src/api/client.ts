@@ -427,6 +427,8 @@ export class ApiClient {
 					name?: string | null | undefined;
 					short_id: string;
 					description?: string | null | undefined;
+					query?: any;
+					filters?: any;
 				}>
 			> => {
 				const simpleInsightSchema = z.object({
@@ -434,6 +436,8 @@ export class ApiClient {
 					name: z.string().nullish(),
 					short_id: z.string(),
 					description: z.string().nullish(),
+					query: z.any(),
+					filters: z.any(),
 				});
 
 				return this.fetchWithSchema(
@@ -494,46 +498,11 @@ export class ApiClient {
 			},
 
 			query: async ({
-				insightId,
-				dateFrom,
-				dateTo,
-				refresh,
+				query,
 			}: {
-				insightId: number;
-				dateFrom?: string;
-				dateTo?: string;
-				refresh?: boolean;
+				query: Record<string, any>;
 			}): Promise<Result<any>> => {
-				// First get the insight to retrieve its query definition
-				const insightResult = await this.fetchWithSchema(
-					`${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
-					z.object({
-						query: z.any(),
-						filters: z.any().optional(),
-					}),
-				);
-
-				if (!insightResult.success) {
-					return insightResult;
-				}
-
-				// Prepare the query body with the insight's query and any date overrides
-				const queryBody = { ...insightResult.data.query };
-
-				if (dateFrom || dateTo) {
-					if (!queryBody.dateRange) {
-						queryBody.dateRange = {};
-					}
-
-					if (dateFrom) queryBody.dateRange.date_from = dateFrom;
-					if (dateTo) queryBody.dateRange.date_to = dateTo;
-				}
-
-				// Execute the query
-				const queryParams = new URLSearchParams();
-				if (refresh) queryParams.append("refresh", "true");
-
-				const url = `${this.baseUrl}/api/environments/${projectId}/query/${queryParams.toString() ? `?${queryParams}` : ""}`;
+				const url = `${this.baseUrl}/api/environments/${projectId}/query/`;
 
 				const queryResponseSchema = z.object({
 					results: z.any(),
@@ -541,7 +510,7 @@ export class ApiClient {
 
 				return this.fetchWithSchema(url, queryResponseSchema, {
 					method: "POST",
-					body: JSON.stringify({ query: queryBody }),
+					body: JSON.stringify({ query }),
 				});
 			},
 

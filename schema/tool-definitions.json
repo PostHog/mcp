@@ -51,7 +51,7 @@
 		"description": "Get a specific insight by ID."
 	},
 	"insight-query": {
-		"description": "Execute a query on an existing insight to get its results/data. Provide the insight ID to retrieve the current query results. You can also provide a date range to query the insight for using the dateFrom and dateTo parameters (e.g. dateFrom: '-7d', dateTo: '-1d')."
+		"description": "Execute a query on an existing insight to get its results/data. Provide the insight ID to retrieve the current query results."
 	},
 	"insights-get-all": {
 		"description": "Get all insights in the project with optional filtering. Can filter by saved status, favorited status, or search term."

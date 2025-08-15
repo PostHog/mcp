@@ -1,4 +1,3 @@
-import { getProjectBaseUrl } from "@/lib/utils/api";
 import { DashboardAddInsightSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
@@ -28,8 +27,8 @@ export const addInsightHandler = async (context: Context, params: Params) => {
 
 	const resultWithUrls = {
 		...result.data,
-		dashboard_url: `${getProjectBaseUrl(projectId)}/dashboard/${data.dashboardId}`,
-		insight_url: `${getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
+		dashboard_url: `${context.api.getProjectBaseUrl(projectId)}/dashboard/${data.dashboardId}`,
+		insight_url: `${context.api.getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`,
 	};
 
 	return { content: [{ type: "text", text: JSON.stringify(resultWithUrls) }] };

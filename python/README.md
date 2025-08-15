@@ -1,6 +1,6 @@
 # PostHog MCP Server - Python Implementation
 
-Python implementation of the PostHog Model Context Protocol (MCP) server.
+Python wrapper of the MCP server tools.
 
 ## Setup
 
@@ -70,4 +70,4 @@ uv run ruff check --fix .
 
 ### Dependencies
 
-Dependencies are managed in `pyproject.toml`:
+Dependencies are managed in `pyproject.toml`.

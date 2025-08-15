@@ -8,7 +8,8 @@ import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
 import { handleToolError } from "@/lib/utils/handleToolError";
 import { hash } from "@/lib/utils/helper-functions";
 import tools from "@/tools";
-import type { Context, State } from "@/tools/types";
+import type { CloudRegion, Context, State } from "@/tools/types";
+import { CUSTOM_BASE_URL } from "./lib/constants";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
@@ -33,9 +34,12 @@ export class MyMCP extends McpAgent<Env> {
 		projectId: undefined,
 		orgId: undefined,
 		distinctId: undefined,
+		region: undefined,
 	};
 
 	_cache: DurableObjectCache<State> | undefined;
+
+	_api: ApiClient | undefined;
 
 	get requestProperties() {
 		return this.props as RequestProperties;
@@ -56,17 +60,66 @@ export class MyMCP extends McpAgent<Env> {
 		return this._cache;
 	}
 
-	get api() {
-		return new ApiClient({
+	async detectRegion(): Promise<CloudRegion | undefined> {
+		const usClient = new ApiClient({
 			apiToken: this.requestProperties.apiToken,
+			baseUrl: "https://us.posthog.com",
 		});
+
+		const euClient = new ApiClient({
+			apiToken: this.requestProperties.apiToken,
+			baseUrl: "https://eu.posthog.com",
+		});
+
+		const [usResult, euResult] = await Promise.all([
+			usClient.users().me(),
+			euClient.users().me(),
+		]);
+
+		if (usResult.success) {
+			await this.cache.set("region", "us");
+			return "us";
+		}
+
+		if (euResult.success) {
+			await this.cache.set("region", "eu");
+			return "eu";
+		}
+
+		return undefined;
+	}
+
+	async getBaseUrl() {
+		if (CUSTOM_BASE_URL) {
+			return CUSTOM_BASE_URL;
+		}
+
+		const region = (await this.cache.get("region")) || (await this.detectRegion());
+
+		if (region === "eu") {
+			return "https://eu.posthog.com";
+		}
+
+		return "https://us.posthog.com";
+	}
+
+	async api() {
+		if (!this._api) {
+			const baseUrl = await this.getBaseUrl();
+			this._api = new ApiClient({
+				apiToken: this.requestProperties.apiToken,
+				baseUrl,
+			});
+		}
+
+		return this._api;
 	}
 
 	async getDistinctId() {
 		let _distinctId = await this.cache.get("distinctId");
 
 		if (!_distinctId) {
-			const userResult = await this.api.users().me();
+			const userResult = await (await this.api()).users().me();
 			if (!userResult.success) {
 				throw new Error(`Failed to get user: ${userResult.error.message}`);
 			}
@@ -120,7 +173,7 @@ export class MyMCP extends McpAgent<Env> {
 		const orgId = await this.cache.get("orgId");
 
 		if (!orgId) {
-			const orgsResult = await this.api.organizations().list();
+			const orgsResult = await (await this.api()).organizations().list();
 			if (!orgsResult.success) {
 				throw new Error(`Failed to get organizations: ${orgsResult.error.message}`);
 			}
@@ -142,7 +195,10 @@ export class MyMCP extends McpAgent<Env> {
 
 		if (!projectId) {
 			const orgId = await this.getOrgID();
-			const projectsResult = await this.api.organizations().projects({ orgId }).list();
+			const projectsResult = await (await this.api())
+				.organizations()
+				.projects({ orgId })
+				.list();
 			if (!projectsResult.success) {
 				throw new Error(`Failed to get projects: ${projectsResult.error.message}`);
 			}
@@ -159,9 +215,9 @@ export class MyMCP extends McpAgent<Env> {
 		return projectId;
 	}
 
-	getContext(): Context {
+	async getContext(): Promise<Context> {
 		return {
-			api: this.api,
+			api: await this.api(),
 			cache: this.cache,
 			env: this.env,
 			getProjectId: this.getProjectId.bind(this),
@@ -171,7 +227,7 @@ export class MyMCP extends McpAgent<Env> {
 	}
 
 	async init() {
-		const context = this.getContext();
+		const context = await this.getContext();
 		const allTools = tools(context);
 
 		for (const tool of allTools) {

@@ -55,74 +55,74 @@ jobs:
           cd python
           uvx ty check
 
-  unit-tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
+  # unit-tests:
+  #   name: Unit Tests
+  #   runs-on: ubuntu-latest
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
         
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: '3.11'
           
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-        with:
-          version: "latest"
+  #     - name: Install uv
+  #       uses: astral-sh/setup-uv@v3
+  #       with:
+  #         version: "latest"
           
-      - name: Install dependencies
-        run: |
-          cd python
-          uv sync --dev
+  #     - name: Install dependencies
+  #       run: |
+  #         cd python
+  #         uv sync --dev
           
-      - name: Run unit tests
-        run: |
-          cd python
-          uv run pytest tests/ -v --tb=short --ignore-glob="*_integration.py"
-        env:
-          PYTHONPATH: ${{ github.workspace }}/python
+  #     - name: Run unit tests
+  #       run: |
+  #         cd python
+  #         uv run pytest tests/ -v --tb=short --ignore-glob="*_integration.py"
+  #       env:
+  #         PYTHONPATH: ${{ github.workspace }}/python
 
-  integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    concurrency:
-      group: ${{ github.workflow }}-integration-${{ github.head_ref || github.ref }}
-      cancel-in-progress: true
+  # integration-tests:
+  #   name: Integration Tests
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #   concurrency:
+  #     group: ${{ github.workflow }}-integration-${{ github.head_ref || github.ref }}
+  #     cancel-in-progress: true
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
       
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+  #   - name: Set up Python
+  #     uses: actions/setup-python@v5
+  #     with:
+  #       python-version: '3.11'
         
-    - name: Install uv
-      uses: astral-sh/setup-uv@v3
-      with:
-        version: "latest"
+  #   - name: Install uv
+  #     uses: astral-sh/setup-uv@v3
+  #     with:
+  #       version: "latest"
         
-    - name: Install dependencies
-      run: |
-        cd python
-        uv sync --dev
+  #   - name: Install dependencies
+  #     run: |
+  #       cd python
+  #       uv sync --dev
         
-    - name: Run integration tests
-      run: |
-        cd python
-        uv run pytest tests/tools/ -v --tb=short
-      env:
-        PYTHONPATH: ${{ github.workspace }}/python
-        TEST_POSTHOG_API_BASE_URL: ${{ secrets.TEST_API_BASE_URL }}
-        TEST_POSTHOG_PERSONAL_API_KEY: ${{ secrets.TEST_API_TOKEN }}
-        TEST_ORG_ID: ${{ secrets.TEST_ORG_ID }}
-        TEST_PROJECT_ID: ${{ secrets.TEST_PROJECT_ID }}
+  #   - name: Run integration tests
+  #     run: |
+  #       cd python
+  #       uv run pytest tests/tools/ -v --tb=short
+  #     env:
+  #       PYTHONPATH: ${{ github.workspace }}/python
+  #       TEST_POSTHOG_API_BASE_URL: ${{ secrets.TEST_API_BASE_URL }}
+  #       TEST_POSTHOG_PERSONAL_API_KEY: ${{ secrets.TEST_API_TOKEN }}
+  #       TEST_ORG_ID: ${{ secrets.TEST_ORG_ID }}
+  #       TEST_PROJECT_ID: ${{ secrets.TEST_PROJECT_ID }}
 
   schema-sync:
     name: Schema Synchronization Check

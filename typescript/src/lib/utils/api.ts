@@ -1,5 +1,5 @@
 import { ApiListResponseSchema } from "@/schema/api";
-import { BASE_URL } from "@/lib/constants";
+
 import type { z } from "zod";
 
 export const withPagination = async <T>(
@@ -31,12 +31,4 @@ export const withPagination = async <T>(
 	}
 
 	return results;
-};
-
-export const getProjectBaseUrl = (projectId: string) => {
-	if (projectId === "@current") {
-		return BASE_URL;
-	}
-
-	return `${BASE_URL}/project/${projectId}`;
 };

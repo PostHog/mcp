@@ -1,19 +1,19 @@
-import { describe, it, expect, beforeAll, afterEach } from "vitest";
 import {
-	validateEnvironmentVariables,
+	type CreatedResources,
+	TEST_ORG_ID,
+	TEST_PROJECT_ID,
+	cleanupResources,
 	createTestClient,
 	createTestContext,
-	setActiveProjectAndOrg,
-	cleanupResources,
-	TEST_PROJECT_ID,
-	TEST_ORG_ID,
-	type CreatedResources,
 	parseToolResponse,
+	setActiveProjectAndOrg,
+	validateEnvironmentVariables,
 } from "@/shared/test-utils";
 import getProjectsTool from "@/tools/projects/getProjects";
-import setActiveProjectTool from "@/tools/projects/setActive";
 import propertyDefinitionsTool from "@/tools/projects/propertyDefinitions";
+import setActiveProjectTool from "@/tools/projects/setActive";
 import type { Context } from "@/tools/types";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 describe("Projects", { concurrent: false }, () => {
 	let context: Context;

@@ -169,7 +169,7 @@ export class MyMCP extends McpAgent<Env> {
 		);
 	}
 
-	async getOrgID() {
+	async getOrgID(): Promise<string> {
 		const orgId = await this.cache.get("orgId");
 
 		if (!orgId) {
@@ -180,17 +180,24 @@ export class MyMCP extends McpAgent<Env> {
 
 			// If there is only one org, set it as the active org
 			if (orgsResult.data.length === 1) {
-				await this.cache.set("orgId", orgsResult.data[0]!.id);
-				return orgsResult.data[0]!.id;
+				await this.cache.set("orgId", orgsResult.data[0]!.id.toString());
+				return orgsResult.data[0]!.id.toString();
 			}
 
-			return "@current";
+			const currentOrg = await (await this.api()).organizations().get({ orgId: "@current" });
+
+			if (!currentOrg.success) {
+				throw new Error(`Failed to get current organization: ${currentOrg.error.message}`);
+			}
+
+			await this.cache.set("orgId", currentOrg.data.id.toString());
+			return currentOrg.data.id.toString();
 		}
 
 		return orgId;
 	}
 
-	async getProjectId() {
+	async getProjectId(): Promise<string> {
 		const projectId = await this.cache.get("projectId");
 
 		if (!projectId) {
@@ -209,7 +216,16 @@ export class MyMCP extends McpAgent<Env> {
 				return projectsResult.data[0]!.id.toString();
 			}
 
-			return "@current";
+			const currentProject = await (await this.api())
+				.projects()
+				.get({ projectId: "@current" });
+
+			if (!currentProject.success) {
+				throw new Error(`Failed to get current project: ${currentProject.error.message}`);
+			}
+
+			await this.cache.set("projectId", currentProject.data.id.toString());
+			return currentProject.data.id.toString();
 		}
 
 		return projectId;

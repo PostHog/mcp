@@ -222,13 +222,7 @@ export class ApiClient {
 			> => {
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/feature_flags/${flagId}/`,
-					FeatureFlagSchema.pick({
-						id: true,
-						key: true,
-						name: true,
-						active: true,
-						description: true,
-					}),
+					FeatureFlagSchema,
 				);
 			},
 
@@ -244,7 +238,18 @@ export class ApiClient {
 				}
 
 				const found = listResult.data.find((f) => f.key === key);
-				return { success: true, data: found };
+
+				if (!found) {
+					return { success: true, data: undefined };
+				}
+
+				const flagResult = await this.featureFlags({ projectId }).get({ flagId: found.id });
+
+				if (!flagResult.success) {
+					return { success: false, error: flagResult.error };
+				}
+
+				return { success: true, data: flagResult.data };
 			},
 
 			create: async ({
@@ -264,12 +269,7 @@ export class ApiClient {
 
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/feature_flags/`,
-					FeatureFlagSchema.pick({
-						id: true,
-						key: true,
-						name: true,
-						active: true,
-					}),
+					FeatureFlagSchema,
 					{
 						method: "POST",
 						body: JSON.stringify(body),
@@ -307,12 +307,7 @@ export class ApiClient {
 
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/feature_flags/${findResult.data.id}/`,
-					FeatureFlagSchema.pick({
-						id: true,
-						key: true,
-						name: true,
-						active: true,
-					}),
+					FeatureFlagSchema,
 					{
 						method: "PATCH",
 						body: JSON.stringify(body),

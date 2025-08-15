@@ -184,7 +184,7 @@ export class MyMCP extends McpAgent<Env> {
 				return orgsResult.data[0]!.id.toString();
 			}
 
-			const currentOrg = await this.api.organizations().get({ orgId: "@current" });
+			const currentOrg = await (await this.api()).organizations().get({ orgId: "@current" });
 
 			if (!currentOrg.success) {
 				throw new Error(`Failed to get current organization: ${currentOrg.error.message}`);
@@ -216,7 +216,9 @@ export class MyMCP extends McpAgent<Env> {
 				return projectsResult.data[0]!.id.toString();
 			}
 
-			const currentProject = await this.api.projects().get({ projectId: "@current" });
+			const currentProject = await (await this.api())
+				.projects()
+				.get({ projectId: "@current" });
 
 			if (!currentProject.success) {
 				throw new Error(`Failed to get current project: ${currentProject.error.message}`);

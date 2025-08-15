@@ -17,7 +17,6 @@ import asyncio
 import json
 
 from dotenv import load_dotenv
-
 from lib.config import load_config_from_env
 from tools.registry import ToolRegistry
 

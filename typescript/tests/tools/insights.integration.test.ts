@@ -17,6 +17,7 @@ import updateInsightTool from "@/tools/insights/update";
 import deleteInsightTool from "@/tools/insights/delete";
 import getAllInsightsTool from "@/tools/insights/getAll";
 import getInsightTool from "@/tools/insights/get";
+import queryInsightTool from "@/tools/insights/query";
 import type { Context } from "@/tools/types";
 
 describe("Insights", { concurrent: false }, () => {
@@ -213,6 +214,45 @@ describe("Insights", { concurrent: false }, () => {
 			expect(retrievedInsight.name).toBe(createParams.data.name);
 			expect(retrievedInsight.description).toBe(createParams.data.description);
 			expect(retrievedInsight.url).toContain("/insights/");
+		});
+	});
+
+	describe("query-insight tool", () => {
+		const createTool = createInsightTool();
+		const queryTool = queryInsightTool();
+
+		it("should query an insight and return results with metadata", async () => {
+			const createParams = {
+				data: {
+					name: generateUniqueKey("Query Test Insight"),
+					description: "Test insight for query operation",
+					query: SAMPLE_HOGQL_QUERIES.pageviews,
+					saved: true,
+					favorited: false,
+				},
+			};
+
+			const createResult = await createTool.handler(context, createParams);
+			const createdInsight = parseToolResponse(createResult);
+			createdResources.insights.push(createdInsight.id);
+
+			const result = await queryTool.handler(context, { 
+				insightId: createdInsight.id,
+				dateFrom: '-7d',
+				dateTo: '-1d'
+			});
+			const queryResponse = parseToolResponse(result);
+
+			// Verify that we have query parameters in response
+			expect(queryResponse).toHaveProperty("query_params");
+			expect(queryResponse.query_params.dateFrom).toBe('-7d');
+			expect(queryResponse.query_params.dateTo).toBe('-1d');
+
+			expect(queryResponse).toHaveProperty("insight");
+			expect(queryResponse).toHaveProperty("results");
+			expect(queryResponse.insight.id).toBe(createdInsight.id);
+			expect(queryResponse.insight.name).toBe(createParams.data.name);
+			expect(queryResponse.insight.url).toContain("/insights/");
 		});
 	});
 

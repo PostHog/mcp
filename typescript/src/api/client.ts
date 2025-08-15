@@ -486,6 +486,58 @@ export class ApiClient {
 				}
 			},
 
+			query: async ({
+				insightId,
+				dateFrom,
+				dateTo,
+				refresh,
+			}: {
+				insightId: number;
+				dateFrom?: string;
+				dateTo?: string;
+				refresh?: boolean;
+			}): Promise<Result<any>> => {
+				// First get the insight to retrieve its query definition
+				const insightResult = await this.fetchWithSchema(
+					`${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
+					z.object({
+						query: z.any(),
+						filters: z.any().optional(),
+					}),
+				);
+
+				if (!insightResult.success) {
+					return insightResult;
+				}
+
+				// Prepare the query body with the insight's query and any date overrides
+				const queryBody = { ...insightResult.data.query };
+
+				if (dateFrom || dateTo) {
+					if (!queryBody.dateRange) {
+						queryBody.dateRange = {};
+					}
+
+					if (dateFrom) queryBody.dateRange.date_from = dateFrom;
+					if (dateTo) queryBody.dateRange.date_to = dateTo;
+				}
+
+				// Execute the query
+				const queryParams = new URLSearchParams();
+				if (refresh) queryParams.append("refresh", "true");
+
+				const url = `${this.baseUrl}/api/environments/${projectId}/query/${queryParams.toString() ? `?${queryParams}` : ""}`;
+
+				const queryResponseSchema = z.object({
+					results: z.any(),
+				});
+
+				return this.fetchWithSchema(url, queryResponseSchema, {
+					method: "POST",
+					body: JSON.stringify({ query: queryBody }),
+				});
+			},
+
 			sqlInsight: async ({ query }: { query: string }): Promise<Result<any[]>> => {
 				const requestBody = {
 					query: query,

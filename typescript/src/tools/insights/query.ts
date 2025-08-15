@@ -11,7 +11,7 @@ type Params = z.infer<typeof schema>;
 export const queryHandler = async (context: Context, params: Params) => {
 	const { insightId, dateFrom, dateTo, refresh } = params;
 	const projectId = await context.getProjectId();
-	
+
 	// Query the insight with parameters to get actual results
 	const queryParams: {
 		insightId: number;
@@ -19,11 +19,11 @@ export const queryHandler = async (context: Context, params: Params) => {
 		dateTo?: string;
 		refresh?: boolean;
 	} = { insightId };
-	
+
 	if (dateFrom) queryParams.dateFrom = dateFrom;
 	if (dateTo) queryParams.dateTo = dateTo;
 	if (refresh !== undefined) queryParams.refresh = refresh;
-	
+
 	const queryResult = await context.api.insights({ projectId }).query(queryParams);
 	if (!queryResult.success) {
 		throw new Error(`Failed to query insight: ${queryResult.error.message}`);

@@ -236,17 +236,17 @@ describe("Insights", { concurrent: false }, () => {
 			const createdInsight = parseToolResponse(createResult);
 			createdResources.insights.push(createdInsight.id);
 
-			const result = await queryTool.handler(context, { 
+			const result = await queryTool.handler(context, {
 				insightId: createdInsight.id,
-				dateFrom: '-7d',
-				dateTo: '-1d'
+				dateFrom: "-7d",
+				dateTo: "-1d",
 			});
 			const queryResponse = parseToolResponse(result);
 
 			// Verify that we have query parameters in response
 			expect(queryResponse).toHaveProperty("query_params");
-			expect(queryResponse.query_params.dateFrom).toBe('-7d');
-			expect(queryResponse.query_params.dateTo).toBe('-1d');
+			expect(queryResponse.query_params.dateFrom).toBe("-7d");
+			expect(queryResponse.query_params.dateTo).toBe("-1d");
 
 			expect(queryResponse).toHaveProperty("insight");
 			expect(queryResponse).toHaveProperty("results");

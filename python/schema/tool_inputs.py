@@ -143,6 +143,13 @@ class ErrorTrackingListSchema(BaseModel):
     status: Status | None = None
 
 
+class ExperimentGetAllSchema(BaseModel):
+    pass
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+
 class Operator(StrEnum):
     EXACT = "exact"
     IS_NOT = "is_not"

@@ -24,13 +24,16 @@ import errorDetails from "./errorTracking/errorDetails";
 // Error Tracking
 import listErrors from "./errorTracking/listErrors";
 
+// Experiments
+import getAllExperiments from "./experiments/getAll";
+
 import createInsight from "./insights/create";
 import deleteInsight from "./insights/delete";
 import getInsight from "./insights/get";
 // Insights
 import getAllInsights from "./insights/getAll";
-import queryInsight from "./insights/query";
 import getSqlInsight from "./insights/getSqlInsight";
+import queryInsight from "./insights/query";
 import updateInsight from "./insights/update";
 
 import addInsightToDashboard from "./dashboards/addInsight";
@@ -69,6 +72,9 @@ const tools = (_context: Context): Tool<ZodObjectAny>[] => [
 	listErrors(),
 	errorDetails(),
 
+	// Experiments
+	getAllExperiments(),
+
 	// Insights
 	getAllInsights(),
 	getInsight(),
@@ -91,4 +97,5 @@ const tools = (_context: Context): Tool<ZodObjectAny>[] => [
 ];
 
 export default tools;
-export type { Tool, Context, State } from "./types";
+export type { Context, State, Tool } from "./types";
+

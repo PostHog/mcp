@@ -180,7 +180,7 @@ export class ApiClient {
 
 	experiments({ projectId }: { projectId: string }) {
 		return {
-			list: async(): Promise<Result<Experiment[]>> => {
+			list: async (): Promise<Result<Experiment[]>> => {
 				try {
 					const response = await withPagination(
 						`${this.baseUrl}/api/projects/${projectId}/experiments/`,

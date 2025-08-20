@@ -82,7 +82,7 @@ const tool = (): Tool<typeof schema> => ({
     annotations: {
         destructiveHint: false,  // Tool doesn't delete existing data
         idempotentHint: false,   // Creating flags isn't idempotent (creates new each time)
-        openWorldHint: true,     // Tool is not closed, it modifies a resource
+        openWorldHint: true,     // Tool creates new resources in the world
         readOnlyHint: false,     // Tool modifies state (creates new flags)
     },
 });
@@ -227,3 +227,16 @@ public featureFlags(params: { projectId: number }) {
 - **Be comprehensive**: Include useful information in responses, but don't stuff the context window with unnecessary information
 - **Add context**: Include helpful URLs, descriptions, or related data
 - **Be consistent**: Use similar patterns across tools
+
+## Tool Annotations
+
+Tools should include annotations that provide hints about their behavior to MCP clients. These help clients understand what a tool does and how it might affect the system:
+
+```typescript
+annotations: {
+    destructiveHint: boolean,  // Does the tool delete or destructively modify data?
+    idempotentHint: boolean,   // Can the tool be safely called multiple times with same result?
+    openWorldHint: boolean,    // Does the tool interact with external systems or create new resources?
+    readOnlyHint: boolean,     // Is the tool read-only (doesn't modify any state)?
+}
+```

@@ -79,6 +79,12 @@ const tool = (): Tool<typeof schema> => ({
     description: definition.description,
     schema,
     handler: createHandler,
+    annotations: {
+        destructiveHint: false,  // Tool doesn't delete existing data
+        idempotentHint: false,   // Creating flags isn't idempotent (creates new each time)
+        openWorldHint: true,     // Tool is not closed, it modifies a resource
+        readOnlyHint: false,     // Tool modifies state (creates new flags)
+    },
 });
 
 export default tool;
@@ -89,6 +95,7 @@ export default tool;
 - Use `context.api` to make API calls
 - Add helpful information like URLs to responses
 - Handle errors gracefully with descriptive messages
+- Include annotations to hint at tool behavior (see below)
 
 ### 3. Add Tool Definition (`schema/tool-definitions.json`)
 

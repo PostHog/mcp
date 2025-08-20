@@ -7,6 +7,8 @@ import {
 	type ListDashboardsData,
 	ListDashboardsSchema,
 } from "@/schema/dashboards";
+import type { Experiment } from "@/schema/experiments";
+import { ExperimentSchema } from "@/schema/experiments";
 import {
 	type CreateFeatureFlagInput,
 	CreateFeatureFlagInputSchema,
@@ -169,6 +171,24 @@ export class ApiClient {
 					);
 
 					return { success: true, data: validated };
+				} catch (error) {
+					return { success: false, error: error as Error };
+				}
+			},
+		};
+	}
+
+	experiments({ projectId }: { projectId: string }) {
+		return {
+			list: async (): Promise<Result<Experiment[]>> => {
+				try {
+					const response = await withPagination(
+						`${this.baseUrl}/api/projects/${projectId}/experiments/`,
+						this.config.apiToken,
+						ExperimentSchema,
+					);
+
+					return { success: true, data: response };
 				} catch (error) {
 					return { success: false, error: error as Error };
 				}

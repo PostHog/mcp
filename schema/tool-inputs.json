@@ -223,6 +223,11 @@
       },
       "additionalProperties": false
     },
+    "ExperimentGetAllSchema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
     "FeatureFlagCreateSchema": {
       "type": "object",
       "properties": {

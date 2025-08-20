@@ -42,6 +42,8 @@ export const ErrorTrackingDetailsSchema = ErrorDetailsSchema;
 
 export const ErrorTrackingListSchema = ListErrorsSchema;
 
+export const ExperimentGetAllSchema = z.object({});
+
 export const FeatureFlagCreateSchema = z.object({
 	name: z.string(),
 	key: z.string(),

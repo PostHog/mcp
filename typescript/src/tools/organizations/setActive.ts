@@ -23,6 +23,12 @@ const tool = (): Tool<typeof schema> => ({
 	description: definition.description,
 	schema,
 	handler: setActiveHandler,
+	annotations: {
+		destructiveHint: false,
+		idempotentHint: true,
+		openWorldHint: true,
+		readOnlyHint: true, // This sets the active organization, but does not change anything with the API.
+	},
 });
 
 export default tool;

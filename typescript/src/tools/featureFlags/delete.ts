@@ -41,6 +41,12 @@ const tool = (): Tool<typeof schema> => ({
 	description: definition.description,
 	schema,
 	handler: deleteHandler,
+	annotations: {
+		destructiveHint: true,
+		idempotentHint: true,
+		openWorldHint: true,
+		readOnlyHint: false,
+	},
 });
 
 export default tool;

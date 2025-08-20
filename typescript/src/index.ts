@@ -8,7 +8,7 @@ import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
 import { handleToolError } from "@/lib/utils/handleToolError";
 import { hash } from "@/lib/utils/helper-functions";
 import tools from "@/tools";
-import type { CloudRegion, Context, State } from "@/tools/types";
+import type { CloudRegion, Context, State, Tool } from "@/tools/types";
 import { CUSTOM_BASE_URL } from "./lib/constants";
 
 const INSTRUCTIONS = `
@@ -143,28 +143,31 @@ export class MyMCP extends McpAgent<Env> {
 	}
 
 	registerTool<TSchema extends z.ZodRawShape>(
-		name: string,
-		description: string,
-		schema: TSchema,
+		tool: Tool<z.ZodObject<TSchema>>,
 		handler: (params: z.infer<z.ZodObject<TSchema>>) => Promise<any>,
 	): void {
 		const wrappedHandler = async (params: z.infer<z.ZodObject<TSchema>>) => {
 			await this.trackEvent("mcp tool call", {
-				tool: name,
+				tool: tool.name,
 			});
 
 			try {
 				return await handler(params);
 			} catch (error: any) {
 				const distinctId = await this.getDistinctId();
-				return handleToolError(error, name, distinctId);
+				return handleToolError(error, tool.name, distinctId);
 			}
 		};
 
 		this.server.tool(
-			name,
-			description,
-			schema,
+			tool.name,
+			tool.description,
+			tool.schema,
+			{
+				...tool.annotations,
+				title: tool.name,
+			},
+
 			wrappedHandler as unknown as ToolCallback<TSchema>,
 		);
 	}
@@ -247,9 +250,7 @@ export class MyMCP extends McpAgent<Env> {
 		const allTools = tools(context);
 
 		for (const tool of allTools) {
-			this.registerTool(tool.name, tool.description, tool.schema.shape, async (params) =>
-				tool.handler(context, params),
-			);
+			this.registerTool(tool, async (params) => tool.handler(context, params));
 		}
 	}
 }

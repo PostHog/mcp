@@ -25,6 +25,12 @@ export type Tool<TSchema extends z.ZodTypeAny = z.ZodTypeAny> = {
 	description: string;
 	schema: TSchema;
 	handler: (context: Context, params: z.infer<TSchema>) => Promise<any>;
+	annotations: {
+		destructiveHint: boolean;
+		idempotentHint: boolean;
+		openWorldHint: boolean;
+		readOnlyHint: boolean;
+	};
 };
 
 export type ZodObjectAny = z.ZodObject<any, any, any, any, any>;

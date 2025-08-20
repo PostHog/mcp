@@ -28,7 +28,7 @@ const tool = (): Tool<typeof schema> => ({
 		destructiveHint: false,
 		idempotentHint: true,
 		openWorldHint: true,
-		readOnlyHint: true, // This sets the active project, but does not change anything with the API.
+		readOnlyHint: false,
 	},
 });
 

@@ -162,7 +162,7 @@ export class MyMCP extends McpAgent<Env> {
 		this.server.tool(
 			tool.name,
 			tool.description,
-			tool.schema,
+			tool.schema.shape,
 			{
 				...tool.annotations,
 				title: tool.name,

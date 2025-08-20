@@ -71,7 +71,7 @@
 	},
 	"experiment-get-all": {
 		"description": "Get all experiments in the project.",
-		"category": "Insights & analytics",
+		"category": "Experiments",
 		"summary": "Get all experiments in the project."
 	},
 	"insight-create-from-query": {

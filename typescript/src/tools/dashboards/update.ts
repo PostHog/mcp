@@ -31,6 +31,12 @@ const tool = (): Tool<typeof schema> => ({
 	description: getToolDefinition("dashboard-update").description,
 	schema,
 	handler: updateHandler,
+	annotations: {
+		destructiveHint: false,
+		idempotentHint: true,
+		openWorldHint: true,
+		readOnlyHint: false,
+	},
 });
 
 export default tool;

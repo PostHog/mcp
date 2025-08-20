@@ -41,9 +41,9 @@
 		"zod-to-json-schema": "^3.24.6"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "^1.11.1",
+		"@modelcontextprotocol/sdk": "^1.17.3",
 		"@types/dotenv": "^6.1.1",
-		"agents": "^0.0.80",
+		"agents": "^0.0.113",
 		"posthog-node": "^4.18.0",
 		"zod": "^3.24.4"
 	},

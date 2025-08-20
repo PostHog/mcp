@@ -50,6 +50,12 @@ const tool = (): Tool<typeof schema> => ({
 	description: definition.description,
 	schema,
 	handler: getLLMCostsHandler,
+	annotations: {
+		destructiveHint: false,
+		idempotentHint: true,
+		openWorldHint: true,
+		readOnlyHint: true,
+	},
 });
 
 export default tool;

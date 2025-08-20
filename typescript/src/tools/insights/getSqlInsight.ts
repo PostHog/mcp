@@ -37,6 +37,12 @@ const tool = (): Tool<typeof schema> => ({
 	description: definition.description,
 	schema,
 	handler: getSqlInsightHandler,
+	annotations: {
+		destructiveHint: false,
+		idempotentHint: false,
+		openWorldHint: true,
+		readOnlyHint: true,
+	},
 });
 
 export default tool;

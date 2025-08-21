@@ -8,7 +8,7 @@ const schema = ProjectGetAllSchema;
 type Params = z.infer<typeof schema>;
 
 export const getProjectsHandler = async (context: Context, _params: Params) => {
-	const orgId = await context.getOrgID();
+	const orgId = await context.stateManager.getOrgID();
 	const projectsResult = await context.api.organizations().projects({ orgId }).list();
 
 	if (!projectsResult.success) {

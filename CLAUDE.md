@@ -34,7 +34,7 @@ mcp/
 
 ### Key Components (TypeScript Implementation)
 
-- **Main MCP Class (`typescript/src/index.ts`)**: `MyMCP` extends `McpAgent` and defines all available tools for interacting with PostHog
+- **Main MCP Class (`typescript/src/integrations/mcp/index.ts`)**: `MyMCP` extends `McpAgent` and defines all available tools for interacting with PostHog
 - **Unified API Client (`typescript/src/api/client.ts`)**: `ApiClient` class provides type-safe methods for all PostHog API interactions with proper error handling and schema validation
 - **Schema Validation (`typescript/src/schema/`)**: Zod schemas for validating API requests and responses
 - **Tool Input Schemas (`typescript/src/schema/tool-inputs.ts`)**: Centralized Zod schemas for all MCP tool inputs, exported to `schema/tool-inputs.json` for other language implementations

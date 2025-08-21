@@ -8,7 +8,7 @@ const schema = OrganizationGetDetailsSchema;
 type Params = z.infer<typeof schema>;
 
 export const getDetailsHandler = async (context: Context, _params: Params) => {
-	const orgId = await context.getOrgID();
+	const orgId = await context.stateManager.getOrgID();
 
 	const orgResult = await context.api.organizations().get({ orgId });
 

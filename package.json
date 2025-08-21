@@ -8,6 +8,7 @@
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types",
 		"prepare": "husky",
+		"build": "cd typescript && pnpm run build",
 		"inspector": "npx @modelcontextprotocol/inspector npx -y mcp-remote@latest http://localhost:8787/mcp",
 		"schema:build:json": "tsx typescript/scripts/generate-tool-schema.ts",
 		"schema:build:python": "bash python/scripts/generate-pydantic-models.sh",
@@ -44,6 +45,7 @@
 		"@modelcontextprotocol/sdk": "^1.17.3",
 		"@types/dotenv": "^6.1.1",
 		"agents": "^0.0.113",
+		"ai": "^5.0.18",
 		"posthog-node": "^4.18.0",
 		"zod": "^3.24.4"
 	},

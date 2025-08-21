@@ -8,7 +8,7 @@ const schema = ProjectPropertyDefinitionsSchema;
 type Params = z.infer<typeof schema>;
 
 export const propertyDefinitionsHandler = async (context: Context, _params: Params) => {
-	const projectId = await context.getProjectId();
+	const projectId = await context.stateManager.getProjectId();
 
 	const propDefsResult = await context.api.projects().propertyDefinitions({ projectId });
 

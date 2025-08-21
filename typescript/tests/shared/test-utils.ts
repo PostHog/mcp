@@ -1,5 +1,6 @@
 import { ApiClient } from "@/api/client";
 import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
+import { StateManager } from "@/lib/utils/StateManager";
 import type { Context } from "@/tools/types";
 import { expect } from "vitest";
 
@@ -37,29 +38,13 @@ export function createTestClient(): ApiClient {
 
 export function createTestContext(client: ApiClient): Context {
 	const cache = new MemoryCache<any>("test-user");
+	const stateManager = new StateManager(cache, client);
 
 	const context: Context = {
 		api: client,
 		cache,
 		env: {} as any,
-		getProjectId: async () => {
-			const projectId = await cache.get("projectId");
-			if (!projectId) {
-				throw new Error("No active project set");
-			}
-			return projectId;
-		},
-		getOrgID: async () => {
-			const orgId = await cache.get("orgId");
-			if (!orgId) {
-				throw new Error("No active organization set");
-			}
-			return orgId;
-		},
-		getDistinctId: async () => {
-			const distinctId = await cache.get("distinctId");
-			return distinctId || "";
-		},
+		stateManager,
 	};
 
 	return context;

@@ -9,7 +9,7 @@ type Params = z.infer<typeof schema>;
 
 export const errorDetailsHandler = async (context: Context, params: Params) => {
 	const { issueId, dateFrom, dateTo } = params;
-	const projectId = await context.getProjectId();
+	const projectId = await context.stateManager.getProjectId();
 
 	const errorQuery = {
 		kind: "ErrorTrackingQuery",

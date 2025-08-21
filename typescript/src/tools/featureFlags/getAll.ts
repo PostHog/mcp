@@ -8,9 +8,10 @@ const schema = FeatureFlagGetAllSchema;
 type Params = z.infer<typeof schema>;
 
 export const getAllHandler = async (context: Context, _params: Params) => {
-	const projectId = await context.getProjectId();
+	const projectId = await context.stateManager.getProjectId();
 
 	const flagsResult = await context.api.featureFlags({ projectId }).list();
+
 	if (!flagsResult.success) {
 		throw new Error(`Failed to get feature flags: ${flagsResult.error.message}`);
 	}

@@ -1,4 +1,5 @@
 import type { ApiClient } from "@/api/client";
+import type { StateManager } from "@/lib/utils/StateManager";
 import type { ScopedCache } from "@/lib/utils/cache/ScopedCache";
 import type { z } from "zod";
 
@@ -11,13 +12,15 @@ export type State = {
 	region: CloudRegion | undefined;
 };
 
+export type Env = {
+	INKEEP_API_KEY: string | undefined;
+};
+
 export type Context = {
 	api: ApiClient;
 	cache: ScopedCache<State>;
 	env: Env;
-	getProjectId: () => Promise<string>;
-	getOrgID: () => Promise<string>;
-	getDistinctId: () => Promise<string>;
+	stateManager: StateManager;
 };
 
 export type Tool<TSchema extends z.ZodTypeAny = z.ZodTypeAny> = {

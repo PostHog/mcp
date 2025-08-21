@@ -9,7 +9,7 @@ type Params = z.infer<typeof schema>;
 
 export const createHandler = async (context: Context, params: Params) => {
 	const { data } = params;
-	const projectId = await context.getProjectId();
+	const projectId = await context.stateManager.getProjectId();
 	const dashboardResult = await context.api.dashboards({ projectId }).create({ data });
 
 	if (!dashboardResult.success) {

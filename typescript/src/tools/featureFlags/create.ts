@@ -9,7 +9,7 @@ type Params = z.infer<typeof schema>;
 
 export const createHandler = async (context: Context, params: Params) => {
 	const { name, key, description, filters, active, tags } = params;
-	const projectId = await context.getProjectId();
+	const projectId = await context.stateManager.getProjectId();
 
 	const flagResult = await context.api.featureFlags({ projectId }).create({
 		data: { name, key, description, filters, active, tags },

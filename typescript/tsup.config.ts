@@ -1,0 +1,14 @@
+import { defineConfig } from "tsup";
+
+export default defineConfig({
+	entry: {
+		index: "src/index.ts",
+		tools: "src/tools/index.ts",
+		"ai-sdk": "src/integrations/ai-sdk/index.ts",
+	},
+	format: ["cjs", "esm"],
+	dts: true,
+	clean: true,
+	splitting: false,
+	treeshake: true,
+});

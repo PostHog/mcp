@@ -9,7 +9,7 @@ type Params = z.infer<typeof schema>;
 
 export const deleteHandler = async (context: Context, params: Params) => {
 	const { insightId } = params;
-	const projectId = await context.getProjectId();
+	const projectId = await context.stateManager.getProjectId();
 	const result = await context.api.insights({ projectId }).delete({ insightId });
 
 	if (!result.success) {

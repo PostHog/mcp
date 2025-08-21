@@ -9,7 +9,7 @@ type Params = z.infer<typeof schema>;
 
 export const deleteHandler = async (context: Context, params: Params) => {
 	const { flagKey } = params;
-	const projectId = await context.getProjectId();
+	const projectId = await context.stateManager.getProjectId();
 
 	const flagResult = await context.api.featureFlags({ projectId }).findByKey({ key: flagKey });
 	if (!flagResult.success) {

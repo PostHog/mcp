@@ -47,7 +47,7 @@ import updateDashboard from "./dashboards/update";
 // LLM Observability
 import getLLMCosts from "./llmObservability/getLLMCosts";
 
-const tools = (_context: Context): Tool<ZodObjectAny>[] => [
+const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
 	// Feature Flags
 	getFeatureFlagDefinition(),
 	getAllFeatureFlags(),
@@ -66,7 +66,7 @@ const tools = (_context: Context): Tool<ZodObjectAny>[] => [
 	propertyDefinitions(),
 
 	// Documentation
-	searchDocs(),
+	...(context.env.INKEEP_API_KEY ? [searchDocs()] : []),
 
 	// Error Tracking
 	listErrors(),
@@ -96,5 +96,40 @@ const tools = (_context: Context): Tool<ZodObjectAny>[] => [
 	getLLMCosts(),
 ];
 
-export default tools;
+import { ApiClient } from "@/api/client";
+import { StateManager } from "@/lib/utils/StateManager";
+import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
+import { hash } from "@/lib/utils/helper-functions";
+
+export type PostHogToolsOptions = {
+	posthogApiToken: string;
+	posthogApiBaseUrl: string;
+	inkeepApiKey?: string;
+};
+
+export function getContext(options: PostHogToolsOptions): Context {
+	const api = new ApiClient({
+		apiToken: options.posthogApiToken,
+		baseUrl: options.posthogApiBaseUrl,
+	});
+
+	const scope = hash(options.posthogApiToken);
+	const cache = new MemoryCache(scope);
+
+	return {
+		api,
+		cache,
+		env: {
+			INKEEP_API_KEY: options.inkeepApiKey,
+		},
+		stateManager: new StateManager(cache, api),
+	};
+}
+
+export function getPostHogTools(options: PostHogToolsOptions): Tool<ZodObjectAny>[] {
+	const context = getContext(options);
+	return getToolsFromContext(context);
+}
+
+export { getToolsFromContext };
 export type { Context, State, Tool } from "./types";

@@ -19,7 +19,7 @@ export const getDefinitionHandler = async (context: Context, { flagId, flagKey }
 		};
 	}
 
-	const projectId = await context.getProjectId();
+	const projectId = await context.stateManager.getProjectId();
 
 	if (flagId) {
 		const flagResult = await context.api

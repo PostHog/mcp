@@ -9,7 +9,7 @@ type Params = z.infer<typeof schema>;
 
 export const getSqlInsightHandler = async (context: Context, params: Params) => {
 	const { query } = params;
-	const projectId = await context.getProjectId();
+	const projectId = await context.stateManager.getProjectId();
 
 	const result = await context.api.insights({ projectId }).sqlInsight({ query });
 

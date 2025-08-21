@@ -8,7 +8,7 @@ const schema = ExperimentGetAllSchema;
 type Params = z.infer<typeof schema>;
 
 export const getAllHandler = async (context: Context, _params: Params) => {
-	const projectId = await context.getProjectId();
+	const projectId = await context.stateManager.getProjectId();
 
 	const results = await context.api.experiments({ projectId }).list();
 	if (!results.success) {

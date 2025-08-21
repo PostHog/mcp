@@ -9,7 +9,7 @@ type Params = z.infer<typeof schema>;
 
 export const createHandler = async (context: Context, params: Params) => {
 	const { data } = params;
-	const projectId = await context.getProjectId();
+	const projectId = await context.stateManager.getProjectId();
 	const insightResult = await context.api.insights({ projectId }).create({ data });
 	if (!insightResult.success) {
 		throw new Error(`Failed to create insight: ${insightResult.error.message}`);

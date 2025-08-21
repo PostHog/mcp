@@ -1,0 +1,15 @@
+{
+	"$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+	"bootstrap-sha": "main",
+	"release-type": "node",
+	"bump-minor-pre-major": true,
+	"bump-patch-for-minor-pre-major": true,
+	"include-v-in-tag": true,
+	"separate-pull-requests": true,
+	"changelog-sections": [
+		{ "type": "feat", "section": "Features" },
+		{ "type": "fix", "section": "Bug Fixes" },
+		{ "type": "docs", "section": "Documentation" },
+		{ "type": "chore", "section": "Miscellaneous" }
+	]
+}

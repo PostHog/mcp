@@ -9,7 +9,6 @@ async function analyzeProductUsage() {
 	const agentToolkit = new PostHogAgentToolkit({
 		posthogApiToken: process.env.POSTHOG_API_TOKEN!,
 		posthogApiBaseUrl: process.env.POSTHOG_API_BASE_URL || "https://us.posthog.com",
-		inkeepApiKey: process.env.INKEEP_API_KEY,
 	});
 
 	const result = await generateText({

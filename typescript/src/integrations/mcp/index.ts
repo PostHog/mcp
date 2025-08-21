@@ -3,11 +3,11 @@ import { McpAgent } from "agents/mcp";
 import type { z } from "zod";
 
 import { ApiClient } from "@/api/client";
-import { getPostHogClient } from "@/lib/client";
+import { getPostHogClient } from "@/integrations/mcp/utils/client";
+import { handleToolError } from "@/integrations/mcp/utils/handleToolError";
 import { CUSTOM_BASE_URL } from "@/lib/constants";
 import { StateManager } from "@/lib/utils/StateManager";
 import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
-import { handleToolError } from "@/lib/utils/handleToolError";
 import { hash } from "@/lib/utils/helper-functions";
 import { getToolsFromContext } from "@/tools";
 import type { CloudRegion, Context, State, Tool } from "@/tools/types";

@@ -15,9 +15,9 @@
 		"summary": "Delete a dashboard by ID."
 	},
 	"dashboard-get": {
-		"description": "Get a specific dashboard by ID.",
+		"description": "Get a specific dashboard by ID. The response will include insights / tiles that are on the dashboard.",
 		"category": "Dashboards",
-		"summary": "Get a specific dashboard by ID."
+		"summary": "Get a specific dashboard by ID, including insights that are on the dashboard."
 	},
 	"dashboards-get-all": {
 		"description": "Get all dashboards in the project with optional filtering. Can filter by pinned status, search term, or pagination.",

@@ -615,6 +615,7 @@ export class ApiClient {
 					id: z.number(),
 					name: z.string(),
 					description: z.string().nullish(),
+					tiles: z.array(z.any()),
 				});
 
 				return this.fetchWithSchema(

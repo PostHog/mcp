@@ -195,6 +195,18 @@ export class MyMCP extends McpAgent<Env> {
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const url = new URL(request.url);
+
+		if (url.pathname === "/") {
+			return new Response(
+				`<p>Welcome to the PostHog MCP Server. For setup and usage instructions, see: <a href="https://posthog.com/docs/model-context-protocol">https://posthog.com/docs/model-context-protocol</a></p>`,
+				{
+					headers: {
+						"content-type": "text/html",
+					},
+				},
+			);
+		}
+
 		const token = request.headers.get("Authorization")?.split(" ")[1];
 
 		if (!token) {

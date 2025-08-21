@@ -5,7 +5,7 @@ import type { z } from "zod";
 import { ApiClient } from "@/api/client";
 import { getPostHogClient } from "@/integrations/mcp/utils/client";
 import { handleToolError } from "@/integrations/mcp/utils/handleToolError";
-import { CUSTOM_BASE_URL, MCP_DOCS_URL } from "@/lib/constants";
+import { CUSTOM_BASE_URL } from "@/lib/constants";
 import { StateManager } from "@/lib/utils/StateManager";
 import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
 import { hash } from "@/lib/utils/helper-functions";
@@ -211,7 +211,7 @@ export default {
 
 		if (!token) {
 			return new Response(
-				"No token provided, please provide a valid API token. View the documentation for more information: https://posthog.com/docs/model-context-protocol",
+				`No token provided, please provide a valid API token. View the documentation for more information: ${MCP_DOCS_URL}`,
 				{
 					status: 401,
 				},
@@ -220,7 +220,7 @@ export default {
 
 		if (!token.startsWith("phx_")) {
 			return new Response(
-				"Invalid token, please provide a valid API token. View the documentation for more information: https://posthog.com/docs/model-context-protocol",
+				`Invalid token, please provide a valid API token. View the documentation for more information: ${MCP_DOCS_URL}`,
 				{
 					status: 401,
 				},

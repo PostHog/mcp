@@ -2,7 +2,7 @@ import { ApiClient } from "@/api/client";
 import { StateManager } from "@/lib/utils/StateManager";
 import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
 import { hash } from "@/lib/utils/helper-functions";
-import { getContext, getToolsFromContext } from "@/tools";
+import { getToolsFromContext } from "@/tools";
 import type { Context } from "@/tools/types";
 import { type Tool as VercelTool, tool } from "ai";
 import type { z } from "zod";

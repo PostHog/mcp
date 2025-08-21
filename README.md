@@ -74,6 +74,10 @@ This repository is organized to support multiple language implementations:
 - `pnpm run schema:build:json` - Generate JSON schema for other language implementations
 - `pnpm run lint:typescript` - Format and lint code
 
+### Adding New Tools
+
+See the [tools documentation](typescript/src/tools/README.md) for a guide on adding new tools to the MCP server.
+
 ### Environment variables
 
 - Create `.dev.vars` in the root

@@ -152,7 +152,7 @@ jobs:
           version: "latest"
           
       - name: Install Node.js dependencies
-        run: pnpm install
+        run: pnpm install && cd typescript && pnpm install
         
       - name: Install Python dependencies
         run: |

@@ -25,7 +25,7 @@ jobs:
           cache: 'pnpm'
           
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install && cd typescript && pnpm install
         
       - name: Run linter
         run: pnpm run lint
@@ -67,7 +67,7 @@ jobs:
         cache: 'pnpm'
         
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install && cd typescript && pnpm install
       
     - name: Run unit tests
       run: cd typescript && pnpm run test
@@ -96,7 +96,7 @@ jobs:
         cache: 'pnpm'
         
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install && cd typescript && pnpm install
       
     - name: Run integration tests
       run: cd typescript && pnpm run test:integration

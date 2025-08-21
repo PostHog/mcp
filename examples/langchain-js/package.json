@@ -4,8 +4,7 @@
 	"description": "Example using PostHog tools with Langchain JS",
 	"type": "module",
 	"scripts": {
-		"dev": "tsx src/index.ts",
-		"start": "node dist/index.js"
+		"dev": "tsx src/index.ts"
 	},
 	"dependencies": {
 		"@posthog/agents": "file:../../typescript",

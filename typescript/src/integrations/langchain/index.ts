@@ -11,9 +11,8 @@ import type { z } from "zod";
  * Options for the PostHog Agent Toolkit
  */
 export type PostHogToolsOptions = {
-	posthogApiToken: string;
+	posthogPersonalApiKey: string;
 	posthogApiBaseUrl: string;
-	inkeepApiKey?: string;
 };
 
 export class PostHogAgentToolkit {
@@ -33,18 +32,18 @@ export class PostHogAgentToolkit {
 	 */
 	getContext(): Context {
 		const api = new ApiClient({
-			apiToken: this.options.posthogApiToken,
+			apiToken: this.options.posthogPersonalApiKey,
 			baseUrl: this.options.posthogApiBaseUrl,
 		});
 
-		const scope = hash(this.options.posthogApiToken);
+		const scope = hash(this.options.posthogPersonalApiKey);
 		const cache = new MemoryCache(scope);
 
 		return {
 			api,
 			cache,
 			env: {
-				INKEEP_API_KEY: this.options.inkeepApiKey,
+				INKEEP_API_KEY: undefined,
 			},
 			stateManager: new StateManager(cache, api),
 		};

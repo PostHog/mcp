@@ -7,9 +7,8 @@ async function analyzeProductUsage() {
 	console.log("🚀 PostHog AI Agent - Product Usage Analysis\n");
 
 	const agentToolkit = new PostHogAgentToolkit({
-		posthogApiToken: process.env.POSTHOG_API_TOKEN!,
+		posthogPersonalApiKey: process.env.POSTHOG_PERSONAL_API_KEY!,
 		posthogApiBaseUrl: process.env.POSTHOG_API_BASE_URL || "https://us.posthog.com",
-		inkeepApiKey: process.env.INKEEP_API_KEY,
 	});
 
 	const result = await generateText({

@@ -147,13 +147,13 @@ export class MyMCP extends McpAgent<Env> {
 		tool: Tool<z.ZodObject<TSchema>>,
 		handler: (params: z.infer<z.ZodObject<TSchema>>) => Promise<any>,
 	): void {
-		const wrappedHandler: ToolCallback<TSchema> = async (params) => {
+		const wrappedHandler = async (params: z.infer<z.ZodObject<TSchema>>) => {
 			await this.trackEvent("mcp tool call", {
 				tool: tool.name,
 			});
 
 			try {
-				return await handler(params as z.infer<z.ZodObject<TSchema>>);
+				return await handler(params);
 			} catch (error: any) {
 				const distinctId = await this.getDistinctId();
 				return handleToolError(error, tool.name, distinctId);

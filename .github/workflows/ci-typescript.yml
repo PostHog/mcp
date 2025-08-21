@@ -25,7 +25,7 @@ jobs:
           cache: 'pnpm'
           
       - name: Install dependencies
-        run: pnpm i
+        run: pnpm i && cd typescript && pnpm i
         
       - name: Run linter
         run: pnpm run lint:typescript

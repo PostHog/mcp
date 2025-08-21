@@ -18,12 +18,12 @@
 		"noUncheckedIndexedAccess": true,
 		"exactOptionalPropertyTypes": true,
 		"skipLibCheck": true,
-		"types": ["node", "../worker-configuration.d.ts"],
+		"types": ["node", "./worker-configuration.d.ts"],
 		"baseUrl": ".",
 		"paths": {
 			"@/*": ["src/*", "tests/*"]
 		}
 	},
-	"include": ["src/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts", "../worker-configuration.d.ts"],
+	"include": ["src/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts", "worker-configuration.d.ts"],
 	"exclude": ["node_modules", "dist"]
 }

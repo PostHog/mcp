@@ -8,6 +8,7 @@
 		"build": "cd typescript && pnpm build",
 		"inspector": "cd typescript && pnpm inspector",
 		"schema:build:json": "tsx typescript/scripts/generate-tool-schema.ts",
+		"test": "cd typescript && pnpm test",
 		"schema:build:python": "bash python/scripts/generate-pydantic-models.sh",
 		"schema:build": "pnpm run schema:build:json && pnpm run schema:build:python",
 		"format": "biome format --write",

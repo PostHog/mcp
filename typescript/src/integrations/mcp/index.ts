@@ -168,7 +168,7 @@ export class MyMCP extends McpAgent<Env> {
 				...tool.annotations,
 				title: tool.name,
 			},
-			wrappedHandler,
+			wrappedHandler as unknown as ToolCallback<TSchema>,
 		);
 	}
 

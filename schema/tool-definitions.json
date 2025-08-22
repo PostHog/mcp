@@ -30,7 +30,7 @@
 		"summary": "Update an existing dashboard by ID."
 	},
 	"docs-search": {
-		"description": "Use this tool to search the PostHog documentation for information that can help the user with their request. Use it as a fallback when you cannot answer the user's request using other tools in this MCP.",
+		"description": "Use this tool to search the PostHog documentation for information that can help the user with their request. Use it as a fallback when you cannot answer the user's request using other tools in this MCP. Only use this tool for PostHog related questions.",
 		"category": "Documentation",
 		"summary": "Search the PostHog documentation for information."
 	},

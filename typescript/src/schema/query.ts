@@ -29,6 +29,8 @@ export const InsightQuerySchema = z.object({
 	source: HogQLQuerySchema,
 });
 
+export const QuerySchema = z.any();
+
 export type InsightQuery = z.infer<typeof InsightQuerySchema>;
 export type HogQLQuery = z.infer<typeof HogQLQuerySchema>;
 export type HogQLFilters = z.infer<typeof HogQLFiltersSchema>;

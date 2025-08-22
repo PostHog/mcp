@@ -1,4 +1,25 @@
 import { z } from "zod";
+import { QuerySchema } from "./query";
+
+export const DashboardTileSchema = z.object({
+	insight: z.object({
+		short_id: z.string(),
+		name: z.string(),
+		derived_name: z.string().nullable(),
+		description: z.string().nullable(),
+		query: QuerySchema,
+		created_at: z.string().nullish(),
+		updated_at: z.string().nullish(),
+		favorited: z.boolean().nullish(),
+		saved: z.boolean().nullish(),
+		tags: z.array(z.string()).nullish(),
+	}),
+	order: z.number(),
+	color: z.string().nullish(),
+	layouts: z.record(z.any()).nullish(),
+	last_refresh: z.string().nullish(),
+	is_cached: z.boolean().nullish(),
+});
 
 // Base dashboard schema from PostHog API
 export const DashboardSchema = z.object({
@@ -18,7 +39,14 @@ export const DashboardSchema = z.object({
 	filters: z.record(z.any()).nullish(),
 	variables: z.record(z.any()).nullish(),
 	tags: z.array(z.string()).nullish(),
-	tiles: z.array(z.record(z.any())).nullish(),
+	tiles: z.array(DashboardTileSchema).nullish(),
+});
+
+export const SimpleDashboardSchema = DashboardSchema.pick({
+	id: true,
+	name: true,
+	description: true,
+	tiles: true,
 });
 
 // Input schema for creating dashboards
@@ -57,3 +85,4 @@ export type CreateDashboardInput = z.infer<typeof CreateDashboardInputSchema>;
 export type UpdateDashboardInput = z.infer<typeof UpdateDashboardInputSchema>;
 export type ListDashboardsData = z.infer<typeof ListDashboardsSchema>;
 export type AddInsightToDashboardInput = z.infer<typeof AddInsightToDashboardSchema>;
+export type SimpleDashboard = z.infer<typeof SimpleDashboardSchema>;

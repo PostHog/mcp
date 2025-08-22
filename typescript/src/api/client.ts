@@ -6,6 +6,8 @@ import {
 	CreateDashboardInputSchema,
 	type ListDashboardsData,
 	ListDashboardsSchema,
+	type SimpleDashboard,
+	SimpleDashboardSchema,
 } from "@/schema/dashboards";
 import type { Experiment } from "@/schema/experiments";
 import { ExperimentSchema } from "@/schema/experiments";
@@ -608,19 +610,10 @@ export class ApiClient {
 
 			get: async ({
 				dashboardId,
-			}: { dashboardId: number }): Promise<
-				Result<{ id: number; name: string; description?: string | null | undefined }>
-			> => {
-				const simpleDashboardSchema = z.object({
-					id: z.number(),
-					name: z.string(),
-					description: z.string().nullish(),
-					tiles: z.array(z.any()),
-				});
-
+			}: { dashboardId: number }): Promise<Result<SimpleDashboard>> => {
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/dashboards/${dashboardId}/`,
-					simpleDashboardSchema,
+					SimpleDashboardSchema,
 				);
 			},
 

@@ -8,8 +8,7 @@
           "type": "object",
           "properties": {
             "insightId": {
-              "type": "integer",
-              "exclusiveMinimum": 0
+              "type": "string"
             },
             "dashboardId": {
               "type": "integer",

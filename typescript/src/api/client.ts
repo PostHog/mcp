@@ -443,7 +443,7 @@ export class ApiClient {
 				insightId: string;
 			}): Promise<
 				Result<{
-					id: number;
+					id: string;
 					name?: string | null | undefined;
 					short_id: string;
 					description?: string | null | undefined;

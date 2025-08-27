@@ -27,6 +27,15 @@ import {
 import { type Organization, OrganizationSchema } from "@/schema/orgs";
 import { type Project, ProjectSchema } from "@/schema/projects";
 import { PropertyDefinitionSchema } from "@/schema/properties";
+import {
+	type CreateSurveyInput,
+	CreateSurveyInputSchema,
+	type ListSurveysData,
+	ListSurveysSchema,
+	SurveySchema,
+	type UpdateSurveyInput,
+	UpdateSurveyInputSchema,
+} from "@/schema/surveys";
 import { z } from "zod";
 
 export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
@@ -739,6 +748,191 @@ export class ApiClient {
 					success: true,
 					data: { distinctId: result.data.distinct_id },
 				};
+			},
+		};
+	}
+
+	surveys({ projectId }: { projectId: string }) {
+		return {
+			list: async ({
+				params,
+			}: { params?: ListSurveysData } = {}): Promise<
+				Result<
+					Array<{
+						id: string;
+						name: string;
+						description?: string | null | undefined;
+						type: "popover" | "api" | "widget" | "external_survey";
+						archived: boolean;
+						created_at: string;
+						created_by?:
+							| {
+									id: number;
+									first_name: string;
+									last_name: string;
+									email: string;
+							  }
+							| null
+							| undefined;
+						start_date?: string | null | undefined;
+						end_date?: string | null | undefined;
+						conditions?: any;
+						responses_limit?: number | null | undefined;
+						iteration_count?: number | null | undefined;
+						iteration_frequency_days?: number | null | undefined;
+					}>
+				>
+			> => {
+				const validatedParams = params ? ListSurveysSchema.parse(params) : undefined;
+				const searchParams = new URLSearchParams();
+
+				if (validatedParams?.limit)
+					searchParams.append("limit", String(validatedParams.limit));
+				if (validatedParams?.offset)
+					searchParams.append("offset", String(validatedParams.offset));
+				if (validatedParams?.search) searchParams.append("search", validatedParams.search);
+
+				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/${searchParams.toString() ? `?${searchParams}` : ""}`;
+
+				const detailedSurveySchema = z.object({
+					id: z.string(),
+					name: z.string(),
+					description: z.string().nullish(),
+					type: z.enum(["popover", "api", "widget", "external_survey"]),
+					archived: z.boolean(),
+					created_at: z.string(),
+					created_by: z
+						.object({
+							id: z.number(),
+							first_name: z.string(),
+							last_name: z.string(),
+							email: z.string(),
+						})
+						.nullish(),
+					start_date: z.string().nullish(),
+					end_date: z.string().nullish(),
+					conditions: z.any().optional(),
+					responses_limit: z.number().nullish(),
+					iteration_count: z.number().nullish(),
+					iteration_frequency_days: z.number().nullish(),
+				});
+
+				const responseSchema = z.object({
+					results: z.array(detailedSurveySchema),
+				});
+
+				const result = await this.fetchWithSchema(url, responseSchema);
+
+				if (result.success) {
+					return { success: true, data: result.data.results };
+				}
+
+				return result;
+			},
+
+			get: async ({
+				surveyId,
+			}: { surveyId: string }): Promise<
+				Result<{
+					id: string;
+					name: string;
+					description?: string | null | undefined;
+					type: "popover" | "api" | "widget" | "external_survey";
+					questions: any[];
+					archived: boolean;
+					created_at: string;
+					start_date?: string | null | undefined;
+					end_date?: string | null | undefined;
+				}>
+			> => {
+				return this.fetchWithSchema(
+					`${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
+					SurveySchema,
+				);
+			},
+
+			create: async ({
+				data,
+			}: { data: CreateSurveyInput }): Promise<
+				Result<{
+					id: string;
+					name: string;
+					type: "popover" | "api" | "widget" | "external_survey";
+				}>
+			> => {
+				const validatedInput = CreateSurveyInputSchema.parse(data);
+
+				const createResponseSchema = z.object({
+					id: z.string(),
+					name: z.string(),
+					type: z.enum(["popover", "api", "widget", "external_survey"]),
+				});
+
+				return this.fetchWithSchema(
+					`${this.baseUrl}/api/projects/${projectId}/surveys/`,
+					createResponseSchema,
+					{
+						method: "POST",
+						body: JSON.stringify(validatedInput),
+					},
+				);
+			},
+
+			update: async ({
+				surveyId,
+				data,
+			}: { surveyId: string; data: UpdateSurveyInput }): Promise<
+				Result<{
+					id: string;
+					name: string;
+					type: "popover" | "api" | "widget" | "external_survey";
+				}>
+			> => {
+				const validatedInput = UpdateSurveyInputSchema.parse(data);
+
+				const updateResponseSchema = z.object({
+					id: z.string(),
+					name: z.string(),
+					type: z.enum(["popover", "api", "widget", "external_survey"]),
+				});
+
+				return this.fetchWithSchema(
+					`${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
+					updateResponseSchema,
+					{
+						method: "PATCH",
+						body: JSON.stringify(validatedInput),
+					},
+				);
+			},
+
+			delete: async ({
+				surveyId,
+			}: { surveyId: string }): Promise<Result<{ success: boolean; message: string }>> => {
+				try {
+					const response = await fetch(
+						`${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
+						{
+							method: "PATCH",
+							headers: this.buildHeaders(),
+							body: JSON.stringify({ archived: true }),
+						},
+					);
+
+					if (!response.ok) {
+						throw new Error(`Failed to delete survey: ${response.statusText}`);
+					}
+
+					return {
+						success: true,
+						data: {
+							success: true,
+							message: "Survey deleted successfully",
+						},
+					};
+				} catch (error) {
+					return { success: false, error: error as Error };
+				}
 			},
 		};
 	}

@@ -13,7 +13,7 @@ export const addInsightHandler = async (context: Context, params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
 	const numericInsightId = await resolveInsightId(context, data.insightId, projectId);
-	
+
 	const insightResult = await context.api
 		.insights({ projectId })
 		.get({ insightId: data.insightId });
@@ -22,11 +22,11 @@ export const addInsightHandler = async (context: Context, params: Params) => {
 		throw new Error(`Failed to get insight: ${insightResult.error.message}`);
 	}
 
-	const result = await context.api.dashboards({ projectId }).addInsight({ 
+	const result = await context.api.dashboards({ projectId }).addInsight({
 		data: {
 			...data,
-			insightId: numericInsightId
-		}
+			insightId: numericInsightId,
+		},
 	});
 
 	if (!result.success) {

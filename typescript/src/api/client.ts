@@ -27,6 +27,7 @@ import {
 import { type Organization, OrganizationSchema } from "@/schema/orgs";
 import { type Project, ProjectSchema } from "@/schema/projects";
 import { PropertyDefinitionSchema } from "@/schema/properties";
+import { isShortId } from "@/tools/insights/utils";
 import { z } from "zod";
 
 export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
@@ -461,8 +462,7 @@ export class ApiClient {
 
 				// Check if insightId is a short_id (8 character alphanumeric string)
 				// Note: This won't work when we start creating insight id's with 8 digits. (We're at 7 currently)
-				const isShortId = /^[A-Za-z0-9]{8}$/.test(insightId);
-				if (isShortId) {
+				if (isShortId(insightId)) {
 					const searchParams = new URLSearchParams({ short_id: insightId });
 					const url = `${this.baseUrl}/api/projects/${projectId}/insights/?${searchParams}`;
 

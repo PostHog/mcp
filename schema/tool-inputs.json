@@ -604,7 +604,7 @@
       "type": "object",
       "properties": {
         "insightId": {
-          "type": "number"
+          "type": "string"
         }
       },
       "required": [
@@ -681,7 +681,7 @@
       "type": "object",
       "properties": {
         "insightId": {
-          "type": "number"
+          "type": "string"
         },
         "data": {
           "type": "object",

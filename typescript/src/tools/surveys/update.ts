@@ -1,0 +1,48 @@
+import { SurveyUpdateSchema } from "@/schema/tool-inputs";
+import { getToolDefinition } from "@/tools/toolDefinitions";
+import type { Context, Tool } from "@/tools/types";
+import type { z } from "zod";
+
+const schema = SurveyUpdateSchema;
+type Params = z.infer<typeof schema>;
+
+export const updateHandler = async (context: Context, params: Params) => {
+	const { surveyId, data } = params;
+	const projectId = await context.stateManager.getProjectId();
+
+	const surveyResult = await context.api.surveys({ projectId }).update({
+		surveyId,
+		data,
+	});
+
+	if (!surveyResult.success) {
+		throw new Error(`Failed to update survey: ${surveyResult.error.message}`);
+	}
+
+	// Add helpful URL for the survey
+	const surveyWithUrl = {
+		...surveyResult.data,
+		url: `${context.api.getProjectBaseUrl(projectId)}/surveys/${surveyResult.data.id}`,
+	};
+
+	return {
+		content: [{ type: "text", text: JSON.stringify(surveyWithUrl) }],
+	};
+};
+
+const definition = getToolDefinition("survey-update");
+
+const tool = (): Tool<typeof schema> => ({
+	name: "survey-update",
+	description: definition.description,
+	schema,
+	handler: updateHandler,
+	annotations: {
+		destructiveHint: false,
+		idempotentHint: false,
+		openWorldHint: false,
+		readOnlyHint: false,
+	},
+});
+
+export default tool;

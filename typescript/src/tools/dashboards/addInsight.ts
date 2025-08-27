@@ -1,5 +1,6 @@
 import { DashboardAddInsightSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
+import { resolveInsightId } from "@/tools/insights/utils";
 import type { Context, Tool } from "@/tools/types";
 import type { z } from "zod";
 
@@ -11,6 +12,8 @@ export const addInsightHandler = async (context: Context, params: Params) => {
 	const { data } = params;
 	const projectId = await context.stateManager.getProjectId();
 
+	const numericInsightId = await resolveInsightId(context, data.insightId, projectId);
+	
 	const insightResult = await context.api
 		.insights({ projectId })
 		.get({ insightId: data.insightId });
@@ -19,7 +22,12 @@ export const addInsightHandler = async (context: Context, params: Params) => {
 		throw new Error(`Failed to get insight: ${insightResult.error.message}`);
 	}
 
-	const result = await context.api.dashboards({ projectId }).addInsight({ data });
+	const result = await context.api.dashboards({ projectId }).addInsight({ 
+		data: {
+			...data,
+			insightId: numericInsightId
+		}
+	});
 
 	if (!result.success) {
 		throw new Error(`Failed to add insight to dashboard: ${result.error.message}`);

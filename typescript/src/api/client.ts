@@ -443,7 +443,7 @@ export class ApiClient {
 				insightId: string;
 			}): Promise<
 				Result<{
-					id: string;
+					id: number;
 					name?: string | null | undefined;
 					short_id: string;
 					description?: string | null | undefined;
@@ -489,7 +489,6 @@ export class ApiClient {
 					return { success: true, data: insight };
 				}
 
-				// Use path parameter for numeric ID
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
 					simpleInsightSchema,

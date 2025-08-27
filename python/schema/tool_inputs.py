@@ -335,7 +335,7 @@ class InsightDeleteSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    insightId: float
+    insightId: str
 
 
 class Data6(BaseModel):
@@ -360,7 +360,7 @@ class InsightGetSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    insightId: float
+    insightId: str
 
 
 class InsightGetSqlSchema(BaseModel):
@@ -377,7 +377,7 @@ class InsightQuerySchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    insightId: float
+    insightId: str
 
 
 class Data7(BaseModel):
@@ -398,7 +398,7 @@ class InsightUpdateSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    insightId: float
+    insightId: str
     data: Data7
 
 

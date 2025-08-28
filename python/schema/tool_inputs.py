@@ -150,6 +150,16 @@ class ExperimentGetAllSchema(BaseModel):
     )
 
 
+class ExperimentGetSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    experimentId: float
+    """
+    The ID of the experiment to retrieve
+    """
+
+
 class Operator(StrEnum):
     EXACT = "exact"
     IS_NOT = "is_not"

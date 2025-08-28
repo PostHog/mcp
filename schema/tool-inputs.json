@@ -227,6 +227,19 @@
       "properties": {},
       "additionalProperties": false
     },
+    "ExperimentGetSchema": {
+      "type": "object",
+      "properties": {
+        "experimentId": {
+          "type": "number",
+          "description": "The ID of the experiment to retrieve"
+        }
+      },
+      "required": [
+        "experimentId"
+      ],
+      "additionalProperties": false
+    },
     "FeatureFlagCreateSchema": {
       "type": "object",
       "properties": {

@@ -196,6 +196,15 @@ export class ApiClient {
 					return { success: false, error: error as Error };
 				}
 			},
+
+			get: async ({
+				experimentId,
+			}: { experimentId: number }): Promise<Result<Experiment>> => {
+				return this.fetchWithSchema(
+					`${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`,
+					ExperimentSchema,
+				);
+			},
 		};
 	}
 

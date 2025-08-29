@@ -27,15 +27,20 @@ import {
 import { type Organization, OrganizationSchema } from "@/schema/orgs";
 import { type Project, ProjectSchema } from "@/schema/projects";
 import { PropertyDefinitionSchema } from "@/schema/properties";
+import type {
+	CreateSurveyInput,
+	ListSurveysData,
+	UpdateSurveyInput,
+	Survey,
+	SurveyListItem,
+} from "../schema/surveys.js";
 import {
-	type CreateSurveyInput,
 	CreateSurveyInputSchema,
-	type ListSurveysData,
 	ListSurveysSchema,
 	SurveySchema,
-	type UpdateSurveyInput,
 	UpdateSurveyInputSchema,
-} from "@/schema/surveys";
+	SurveyListItemSchema,
+} from "../schema/surveys.js";
 import { z } from "zod";
 
 export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
@@ -756,33 +761,7 @@ export class ApiClient {
 		return {
 			list: async ({
 				params,
-			}: { params?: ListSurveysData } = {}): Promise<
-				Result<
-					Array<{
-						id: string;
-						name: string;
-						description?: string | null | undefined;
-						type: "popover" | "api" | "widget" | "external_survey";
-						archived: boolean;
-						created_at: string;
-						created_by?:
-							| {
-									id: number;
-									first_name: string;
-									last_name: string;
-									email: string;
-							  }
-							| null
-							| undefined;
-						start_date?: string | null | undefined;
-						end_date?: string | null | undefined;
-						conditions?: any;
-						responses_limit?: number | null | undefined;
-						iteration_count?: number | null | undefined;
-						iteration_frequency_days?: number | null | undefined;
-					}>
-				>
-			> => {
+			}: { params?: ListSurveysData } = {}): Promise<Result<Array<SurveyListItem>>> => {
 				const validatedParams = params ? ListSurveysSchema.parse(params) : undefined;
 				const searchParams = new URLSearchParams();
 
@@ -794,31 +773,8 @@ export class ApiClient {
 
 				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/${searchParams.toString() ? `?${searchParams}` : ""}`;
 
-				const detailedSurveySchema = z.object({
-					id: z.string(),
-					name: z.string(),
-					description: z.string().nullish(),
-					type: z.enum(["popover", "api", "widget", "external_survey"]),
-					archived: z.boolean(),
-					created_at: z.string(),
-					created_by: z
-						.object({
-							id: z.number(),
-							first_name: z.string(),
-							last_name: z.string(),
-							email: z.string(),
-						})
-						.nullish(),
-					start_date: z.string().nullish(),
-					end_date: z.string().nullish(),
-					conditions: z.any().optional(),
-					responses_limit: z.number().nullish(),
-					iteration_count: z.number().nullish(),
-					iteration_frequency_days: z.number().nullish(),
-				});
-
 				const responseSchema = z.object({
-					results: z.array(detailedSurveySchema),
+					results: z.array(SurveyListItemSchema),
 				});
 
 				const result = await this.fetchWithSchema(url, responseSchema);
@@ -830,21 +786,7 @@ export class ApiClient {
 				return result;
 			},
 
-			get: async ({
-				surveyId,
-			}: { surveyId: string }): Promise<
-				Result<{
-					id: string;
-					name: string;
-					description?: string | null | undefined;
-					type: "popover" | "api" | "widget" | "external_survey";
-					questions: any[];
-					archived: boolean;
-					created_at: string;
-					start_date?: string | null | undefined;
-					end_date?: string | null | undefined;
-				}>
-			> => {
+			get: async ({ surveyId }: { surveyId: string }): Promise<Result<Survey>> => {
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
 					SurveySchema,

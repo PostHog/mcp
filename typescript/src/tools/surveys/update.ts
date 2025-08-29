@@ -10,6 +10,24 @@ export const updateHandler = async (context: Context, params: Params) => {
 	const { surveyId, data } = params;
 	const projectId = await context.stateManager.getProjectId();
 
+	if (data.questions) {
+		data.questions = data.questions.map((question) => {
+			// Handle single choice questions - convert numeric keys to strings
+			if (
+				"branching" in question &&
+				question.branching?.type === "response_based" &&
+				question.type === "single_choice"
+			) {
+				question.branching.responseValues = Object.fromEntries(
+					Object.entries(question.branching.responseValues).map(([key, value]) => {
+						return [String(key), value];
+					}),
+				);
+			}
+			return question;
+		});
+	}
+
 	const surveyResult = await context.api.surveys({ projectId }).update({
 		surveyId,
 		data,

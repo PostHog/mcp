@@ -1,6 +1,6 @@
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 import { ChatOpenAI } from "@langchain/openai";
-import { PostHogAgentToolkit } from "@posthog/agent-toolkittoolkit/integrations/langchain";
+import { PostHogAgentToolkit } from "@posthog/agent-toolkit/integrations/langchain";
 import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
 import "dotenv/config";
 

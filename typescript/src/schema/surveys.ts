@@ -18,29 +18,51 @@ const EndBranchingSchema = z.object({
 	type: z.literal("end"),
 });
 
-// NPS sentiment values
-const NPSSentimentEnum = z.enum(["detractors", "passives", "promoters"]);
+// Single choice response branching - uses numeric choice indices (0, 1, 2, etc.)
+const SingleChoiceResponseBranchingSchema = z
+	.object({
+		type: z.literal("response_based"),
+		responseValues: z.record(z.string(), z.union([z.number(), z.literal("end")])),
+	})
+	.describe(
+		'For single choice questions: use choice indices as string keys ("0", "1", "2", etc.)',
+	);
+
+// NPS rating response branching - uses sentiment categories
+const NPSResponseBranchingSchema = z
+	.object({
+		type: z.literal("response_based"),
+		responseValues: z.record(
+			z.enum(["detractors", "passives", "promoters"]),
+			z.union([z.number(), z.literal("end")]),
+		),
+	})
+	.describe(
+		'For NPS rating questions: use sentiment keys ("detractors", "passives", "promoters")',
+	);
 
 // General sentiment values
 const GeneralSentimentEnum = z.enum(["negative", "neutral", "positive"]);
 
-// Index-based response branching (for single choice questions)
-const IndexBasedResponseBranchingSchema = z.object({
-	type: z.literal("response_based"),
-	responseValues: z.record(z.number(), z.union([z.number(), z.literal("end")])),
-});
+// Match type enum for URL and device type targeting
+const MatchTypeEnum = z.enum([
+	"regex",
+	"not_regex",
+	"exact",
+	"is_not",
+	"icontains",
+	"not_icontains",
+]);
 
-// NPS sentiment-based response branching (for NPS rating questions)
-const NPSResponseBranchingSchema = z.object({
-	type: z.literal("response_based"),
-	responseValues: z.record(NPSSentimentEnum, z.union([z.number(), z.literal("end")])),
-});
-
-// General sentiment-based response branching (for other rating questions)
-const GeneralSentimentResponseBranchingSchema = z.object({
-	type: z.literal("response_based"),
-	responseValues: z.record(GeneralSentimentEnum, z.union([z.number(), z.literal("end")])),
-});
+// General rating response branching - uses sentiment categories
+const GeneralSentimentResponseBranchingSchema = z
+	.object({
+		type: z.literal("response_based"),
+		responseValues: z.record(GeneralSentimentEnum, z.union([z.number(), z.literal("end")])),
+	})
+	.describe(
+		'For general rating questions: use sentiment keys ("negative", "neutral", "positive")',
+	);
 
 const SpecificQuestionBranchingSchema = z.object({
 	type: z.literal("specific_question"),
@@ -51,7 +73,7 @@ const SpecificQuestionBranchingSchema = z.object({
 const BaseBranchingSchema = z.union([
 	NextQuestionBranchingSchema,
 	EndBranchingSchema,
-	IndexBasedResponseBranchingSchema,
+	SingleChoiceResponseBranchingSchema,
 	SpecificQuestionBranchingSchema,
 ]);
 
@@ -93,7 +115,7 @@ const RatingQuestionSchema = BaseSurveyQuestionSchema.extend({
 const NPSRatingQuestionSchema = BaseSurveyQuestionSchema.extend({
 	type: z.literal("rating"),
 	display: z.enum(["number", "emoji"]).optional(),
-	scale: z.number().optional(),
+	scale: z.literal(10),
 	lowerBoundLabel: z.string().optional(),
 	upperBoundLabel: z.string().optional(),
 	branching: NPSBranchingSchema.optional(),
@@ -123,6 +145,98 @@ export const SurveyQuestionSchema = z.union([
 	MultipleChoiceQuestionSchema,
 ]);
 
+// Survey condition schema
+const SurveyConditionsSchema = z.object({
+	url: z.string().optional(),
+	selector: z.string().optional(),
+	seenSurveyWaitPeriodInDays: z.number().optional(),
+	urlMatchType: MatchTypeEnum.optional(),
+	events: z
+		.object({
+			repeatedActivation: z.boolean().optional(),
+			values: z
+				.array(
+					z.object({
+						name: z.string(),
+					}),
+				)
+				.optional(),
+		})
+		.optional(),
+	actions: z
+		.object({
+			values: z
+				.array(
+					z.object({
+						id: z.number(),
+						name: z.string().optional(),
+						steps: z.array(z.any()).optional(),
+					}),
+				)
+				.optional(),
+		})
+		.optional(),
+	deviceTypes: z.array(z.string()).optional(),
+	deviceTypesMatchType: MatchTypeEnum.optional(),
+	linkedFlagVariant: z.string().optional(),
+});
+
+// Survey appearance schema
+const SurveyAppearanceSchema = z.object({
+	backgroundColor: z.string().optional(),
+	submitButtonColor: z.string().optional(),
+	textColor: z.string().optional(), // deprecated, use auto contrast text color instead
+	submitButtonText: z.string().optional(),
+	submitButtonTextColor: z.string().optional(),
+	descriptionTextColor: z.string().optional(),
+	ratingButtonColor: z.string().optional(),
+	ratingButtonActiveColor: z.string().optional(),
+	ratingButtonHoverColor: z.string().optional(),
+	whiteLabel: z.boolean().optional(),
+	autoDisappear: z.boolean().optional(),
+	displayThankYouMessage: z.boolean().optional(),
+	thankYouMessageHeader: z.string().optional(),
+	thankYouMessageDescription: z.string().optional(),
+	thankYouMessageDescriptionContentType: z.enum(["html", "text"]).optional(),
+	thankYouMessageCloseButtonText: z.string().optional(),
+	borderColor: z.string().optional(),
+	position: z
+		.enum([
+			"top_left",
+			"top_center",
+			"top_right",
+			"middle_left",
+			"middle_center",
+			"middle_right",
+			"left",
+			"right",
+			"center",
+			"next_to_trigger",
+		])
+		.optional(),
+	placeholder: z.string().optional(),
+	shuffleQuestions: z.boolean().optional(),
+	surveyPopupDelaySeconds: z.number().optional(),
+	widgetType: z.enum(["button", "tab", "selector"]).optional(),
+	widgetSelector: z.string().optional(),
+	widgetLabel: z.string().optional(),
+	widgetColor: z.string().optional(),
+	fontFamily: z.string().optional(),
+	maxWidth: z.string().optional(),
+	zIndex: z.string().optional(),
+	disabledButtonOpacity: z.string().optional(),
+	boxPadding: z.string().optional(),
+});
+
+// User schema for created_by fields
+const UserSchema = z.object({
+	id: z.number(),
+	uuid: z.string(),
+	distinct_id: z.string(),
+	first_name: z.string(),
+	email: z.string(),
+});
+
 // Survey input schemas
 export const CreateSurveyInputSchema = z.object({
 	name: z.string(),
@@ -143,81 +257,8 @@ export const UpdateSurveyInputSchema = z.object({
 	description: z.string().optional(),
 	type: z.enum(["popover", "api", "widget", "external_survey"]).optional(),
 	questions: z.array(SurveyQuestionSchema).optional(),
-	conditions: z
-		.object({
-			url: z.string().optional(),
-			selector: z.string().optional(),
-			seenSurveyWaitPeriodInDays: z.number().optional(),
-			urlMatchType: z.enum(["regex", "exact", "icontains", "not_icontains"]).optional(),
-			events: z
-				.object({
-					repeatedActivation: z.boolean().optional(),
-					values: z
-						.array(
-							z.object({
-								name: z.string(),
-							}),
-						)
-						.optional(),
-				})
-				.optional(),
-			actions: z
-				.object({
-					values: z
-						.array(
-							z.object({
-								id: z.number(),
-								name: z.string().optional(),
-								steps: z.array(z.any()).optional(),
-							}),
-						)
-						.optional(),
-				})
-				.optional(),
-			deviceTypes: z.array(z.string()).optional(),
-			deviceTypesMatchType: z
-				.enum(["regex", "exact", "icontains", "not_icontains"])
-				.optional(),
-			linkedFlagVariant: z.string().optional(),
-		})
-		.optional(),
-	appearance: z
-		.object({
-			backgroundColor: z.string().optional(),
-			submitButtonColor: z.string().optional(),
-			submitButtonText: z.string().optional(),
-			submitButtonTextColor: z.string().optional(),
-			ratingButtonColor: z.string().optional(),
-			ratingButtonActiveColor: z.string().optional(),
-			autoDisappear: z.boolean().optional(),
-			displayThankYouMessage: z.boolean().optional(),
-			thankYouMessageHeader: z.string().optional(),
-			thankYouMessageDescription: z.string().optional(),
-			thankYouMessageDescriptionContentType: z.enum(["html", "text"]).optional(),
-			thankYouMessageCloseButtonText: z.string().optional(),
-			borderColor: z.string().optional(),
-			position: z
-				.enum([
-					"top_left",
-					"top_center",
-					"top_right",
-					"middle_left",
-					"middle_center",
-					"middle_right",
-					"left",
-					"right",
-					"center",
-				])
-				.optional(),
-			placeholder: z.string().optional(),
-			shuffleQuestions: z.boolean().optional(),
-			surveyPopupDelaySeconds: z.number().optional(),
-			widgetType: z.enum(["button", "tab", "selector"]).optional(),
-			widgetSelector: z.string().optional(),
-			widgetLabel: z.string().optional(),
-			widgetColor: z.string().optional(),
-		})
-		.optional(),
+	conditions: SurveyConditionsSchema.optional(),
+	appearance: SurveyAppearanceSchema.optional(),
 	schedule: z.enum(["once", "recurring", "always"]).optional(),
 	start_date: z.string().datetime().optional(),
 	end_date: z.string().datetime().optional(),
@@ -245,93 +286,10 @@ export const SurveySchema = z.object({
 	description: z.string().optional(),
 	type: z.enum(["popover", "api", "widget", "external_survey"]),
 	questions: z.array(SurveyQuestionSchema),
-	conditions: z
-		.object({
-			url: z.string().optional(),
-			selector: z.string().optional(),
-			seenSurveyWaitPeriodInDays: z.number().optional(),
-			urlMatchType: z.enum(["regex", "exact", "icontains", "not_icontains"]).optional(),
-			events: z
-				.object({
-					repeatedActivation: z.boolean().optional(),
-					values: z
-						.array(
-							z.object({
-								name: z.string(),
-							}),
-						)
-						.optional(),
-				})
-				.optional(),
-			actions: z
-				.object({
-					values: z
-						.array(
-							z.object({
-								id: z.number(),
-								name: z.string().optional(),
-								steps: z.array(z.any()).optional(),
-							}),
-						)
-						.optional(),
-				})
-				.optional(),
-			deviceTypes: z.array(z.string()).optional(),
-			deviceTypesMatchType: z
-				.enum(["regex", "exact", "icontains", "not_icontains"])
-				.optional(),
-			linkedFlagVariant: z.string().optional(),
-		})
-		.nullable()
-		.optional(),
-	appearance: z
-		.object({
-			backgroundColor: z.string().optional(),
-			submitButtonColor: z.string().optional(),
-			submitButtonText: z.string().optional(),
-			submitButtonTextColor: z.string().optional(),
-			ratingButtonColor: z.string().optional(),
-			ratingButtonActiveColor: z.string().optional(),
-			autoDisappear: z.boolean().optional(),
-			displayThankYouMessage: z.boolean().optional(),
-			thankYouMessageHeader: z.string().optional(),
-			thankYouMessageDescription: z.string().optional(),
-			thankYouMessageDescriptionContentType: z.enum(["html", "text"]).optional(),
-			thankYouMessageCloseButtonText: z.string().optional(),
-			borderColor: z.string().optional(),
-			position: z
-				.enum([
-					"top_left",
-					"top_center",
-					"top_right",
-					"middle_left",
-					"middle_center",
-					"middle_right",
-					"left",
-					"right",
-					"center",
-				])
-				.optional(),
-			placeholder: z.string().optional(),
-			shuffleQuestions: z.boolean().optional(),
-			surveyPopupDelaySeconds: z.number().optional(),
-			widgetType: z.enum(["button", "tab", "selector"]).optional(),
-			widgetSelector: z.string().optional(),
-			widgetLabel: z.string().optional(),
-			widgetColor: z.string().optional(),
-		})
-		.nullable()
-		.optional(),
+	conditions: SurveyConditionsSchema.nullable().optional(),
+	appearance: SurveyAppearanceSchema.nullable().optional(),
 	created_at: z.string(),
-	created_by: z
-		.object({
-			id: z.number(),
-			uuid: z.string(),
-			distinct_id: z.string(),
-			first_name: z.string(),
-			email: z.string(),
-		})
-		.optional(),
+	created_by: UserSchema.optional(),
 	start_date: z.string().nullable().optional(),
 	end_date: z.string().nullable().optional(),
 	archived: z.boolean().optional(),
@@ -349,15 +307,7 @@ export const SurveyListItemSchema = z.object({
 	type: z.enum(["popover", "api", "widget", "external_survey"]),
 	archived: z.boolean().optional(),
 	created_at: z.string(),
-	created_by: z
-		.object({
-			id: z.number(),
-			first_name: z.string(),
-			last_name: z.string(),
-			email: z.string(),
-		})
-		.nullable()
-		.optional(),
+	created_by: UserSchema.nullable().optional(),
 	start_date: z.string().nullable().optional(),
 	end_date: z.string().nullable().optional(),
 	conditions: z.any().optional(),

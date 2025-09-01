@@ -18,7 +18,7 @@ class Data(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    insightId: Annotated[int, Field(gt=0)]
+    insightId: str
     dashboardId: Annotated[int, Field(gt=0)]
 
 
@@ -148,6 +148,16 @@ class ExperimentGetAllSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
+
+
+class ExperimentGetSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    experimentId: float
+    """
+    The ID of the experiment to retrieve
+    """
 
 
 class Operator(StrEnum):
@@ -335,7 +345,7 @@ class InsightDeleteSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    insightId: float
+    insightId: str
 
 
 class Data6(BaseModel):
@@ -360,7 +370,7 @@ class InsightGetSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    insightId: float
+    insightId: str
 
 
 class InsightGetSqlSchema(BaseModel):
@@ -377,7 +387,7 @@ class InsightQuerySchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    insightId: float
+    insightId: str
 
 
 class Data7(BaseModel):
@@ -398,7 +408,7 @@ class InsightUpdateSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    insightId: float
+    insightId: str
     data: Data7
 
 

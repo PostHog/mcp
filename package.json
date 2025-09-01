@@ -1,53 +1,27 @@
 {
-	"name": "remote-mcp-server-authless",
+	"name": "posthog-mcp-monorepo",
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
-		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
-		"start": "wrangler dev",
-		"cf-typegen": "wrangler types",
 		"prepare": "husky",
-		"build": "cd typescript && pnpm run build",
-		"inspector": "npx @modelcontextprotocol/inspector npx -y mcp-remote@latest http://localhost:8787/mcp",
+		"dev": "cd typescript && pnpm dev",
+		"build": "cd typescript && pnpm build",
+		"inspector": "cd typescript && pnpm inspector",
 		"schema:build:json": "tsx typescript/scripts/generate-tool-schema.ts",
+		"test": "cd typescript && pnpm test",
 		"schema:build:python": "bash python/scripts/generate-pydantic-models.sh",
 		"schema:build": "pnpm run schema:build:json && pnpm run schema:build:python",
-		"format:typescript": "biome format --write",
-		"lint:typescript": "biome lint --fix",
-		"test:typescript": "vitest",
-		"test:typescript:integration": "vitest run --config vitest.integration.config.mts",
-		"test:typescript:watch": "vitest watch",
-		"typecheck:typescript": "tsc --project typescript/tsconfig.json --noEmit",
+		"format": "biome format --write",
+		"lint": "biome lint --fix",
 		"format:python": "cd python && uv run ruff format .",
 		"lint:python": "cd python && uv run ruff check --fix .",
 		"test:python": "cd python && uv run pytest tests/ -v",
-		"typecheck:python": "cd python && uvx ty check",
-		"typecheck": "pnpm run typecheck:typescript && pnpm run typecheck:python",
-		"format": "pnpm run format:typescript && pnpm run format:python",
-		"lint": "pnpm run lint:typescript && pnpm run lint:python",
-		"test": "pnpm run test:typescript && pnpm run test:python"
+		"typecheck:python": "cd python && uvx ty check"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"@types/node": "^22.15.34",
-		"dotenv": "^16.4.7",
 		"husky": "^9.1.7",
-		"tsx": "^4.20.3",
-		"typescript": "^5.8.3",
-		"vite": "^5.0.0",
-		"vite-tsconfig-paths": "^5.1.4",
-		"vitest": "^3.2.4",
-		"wrangler": "^4.14.4",
-		"zod-to-json-schema": "^3.24.6"
-	},
-	"dependencies": {
-		"@modelcontextprotocol/sdk": "^1.17.3",
-		"@types/dotenv": "^6.1.1",
-		"agents": "^0.0.113",
-		"ai": "^5.0.18",
-		"posthog-node": "^4.18.0",
-		"zod": "^3.24.4"
+		"tsx": "^4.20.3"
 	},
 	"packageManager": "pnpm@9.15.5+sha256.8472168c3e1fd0bff287e694b053fccbbf20579a3ff9526b6333beab8df65a8d"
 }

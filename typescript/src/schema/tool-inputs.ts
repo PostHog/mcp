@@ -44,6 +44,10 @@ export const ErrorTrackingListSchema = ListErrorsSchema;
 
 export const ExperimentGetAllSchema = z.object({});
 
+export const ExperimentGetSchema = z.object({
+	experimentId: z.number().describe("The ID of the experiment to retrieve"),
+});
+
 export const FeatureFlagCreateSchema = z.object({
 	name: z.string(),
 	key: z.string(),
@@ -74,11 +78,11 @@ export const InsightCreateSchema = z.object({
 });
 
 export const InsightDeleteSchema = z.object({
-	insightId: z.number(),
+	insightId: z.string(),
 });
 
 export const InsightGetSchema = z.object({
-	insightId: z.number(),
+	insightId: z.string(),
 });
 
 export const InsightGetAllSchema = z.object({
@@ -93,11 +97,11 @@ export const InsightGetSqlSchema = z.object({
 });
 
 export const InsightQuerySchema = z.object({
-	insightId: z.number(),
+	insightId: z.string(),
 });
 
 export const InsightUpdateSchema = z.object({
-	insightId: z.number(),
+	insightId: z.string(),
 	data: UpdateInsightInputSchema,
 });
 

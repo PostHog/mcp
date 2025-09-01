@@ -5,7 +5,7 @@ import type { z } from "zod";
 import { ApiClient } from "@/api/client";
 import { getPostHogClient } from "@/integrations/mcp/utils/client";
 import { handleToolError } from "@/integrations/mcp/utils/handleToolError";
-import { CUSTOM_BASE_URL } from "@/lib/constants";
+import { CUSTOM_BASE_URL, MCP_DOCS_URL } from "@/lib/constants";
 import { StateManager } from "@/lib/utils/StateManager";
 import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
 import { hash } from "@/lib/utils/helper-functions";
@@ -195,18 +195,36 @@ export class MyMCP extends McpAgent<Env> {
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext) {
 		const url = new URL(request.url);
+
+		if (url.pathname === "/") {
+			return new Response(
+				`<p>Welcome to the PostHog MCP Server. For setup and usage instructions, see: <a href="${MCP_DOCS_URL}">${MCP_DOCS_URL}</a></p>`,
+				{
+					headers: {
+						"content-type": "text/html",
+					},
+				},
+			);
+		}
+
 		const token = request.headers.get("Authorization")?.split(" ")[1];
 
 		if (!token) {
-			return new Response("No token provided, please provide a valid API token.", {
-				status: 401,
-			});
+			return new Response(
+				`No token provided, please provide a valid API token. View the documentation for more information: ${MCP_DOCS_URL}`,
+				{
+					status: 401,
+				},
+			);
 		}
 
 		if (!token.startsWith("phx_")) {
-			return new Response("Invalid token, please provide a valid API token.", {
-				status: 401,
-			});
+			return new Response(
+				`Invalid token, please provide a valid API token. View the documentation for more information: ${MCP_DOCS_URL}`,
+				{
+					status: 401,
+				},
+			);
 		}
 
 		ctx.props = {

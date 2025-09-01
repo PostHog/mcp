@@ -6,7 +6,7 @@ Documentation: https://posthog.com/docs/model-context-protocol
 
 ### Quick install
 
-You can install the MCP server automatically into popular clients by running the following command:
+You can install the MCP server automatically into Cursor, Claude, Claude Code, VS Code and Zed by running the following command:
 
 ```
 npx @posthog/wizard@latest mcp add
@@ -72,7 +72,7 @@ This repository is organized to support multiple language implementations:
 
 - `pnpm run dev` - Start development server
 - `pnpm run schema:build:json` - Generate JSON schema for other language implementations
-- `pnpm run lint:typescript` - Format and lint code
+- `pnpm run lint && pnpm run format` - Format and lint code
 
 ### Adding New Tools
 

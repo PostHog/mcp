@@ -22,7 +22,11 @@ const EndBranchingSchema = z.object({
 const SingleChoiceResponseBranchingSchema = z
 	.object({
 		type: z.literal("response_based"),
-		responseValues: z.record(z.string(), z.union([z.number(), z.literal("end")])),
+		responseValues: z
+			.record(z.string(), z.union([z.number(), z.literal("end")]))
+			.describe(
+				"Only include keys for responses that should branch to a specific question or 'end'. Omit keys for responses that should proceed to the next question (default behavior).",
+			),
 	})
 	.describe(
 		'For single choice questions: use choice indices as string keys ("0", "1", "2", etc.)',
@@ -32,36 +36,49 @@ const SingleChoiceResponseBranchingSchema = z
 const NPSResponseBranchingSchema = z
 	.object({
 		type: z.literal("response_based"),
-		responseValues: z.record(
-			z.enum(["detractors", "passives", "promoters"]),
-			z.union([z.number(), z.literal("end")]),
-		),
+		responseValues: z
+			.record(
+				z
+					.enum(["detractors", "passives", "promoters"])
+					.describe(
+						"NPS sentiment categories: detractors (0-6), passives (7-8), promoters (9-10)",
+					),
+				z.union([z.number(), z.literal("end")]),
+			)
+			.describe(
+				"Only include keys for responses that should branch to a specific question or 'end'. Omit keys for responses that should proceed to the next question (default behavior).",
+			),
 	})
 	.describe(
-		'For NPS rating questions: use sentiment keys ("detractors", "passives", "promoters")',
+		"For NPS rating questions: use sentiment keys based on score ranges - detractors (0-6), passives (7-8), promoters (9-10)",
 	);
 
-// General sentiment values
-const GeneralSentimentEnum = z.enum(["negative", "neutral", "positive"]);
-
 // Match type enum for URL and device type targeting
-const MatchTypeEnum = z.enum([
-	"regex",
-	"not_regex",
-	"exact",
-	"is_not",
-	"icontains",
-	"not_icontains",
-]);
+const MatchTypeEnum = z
+	.enum(["regex", "not_regex", "exact", "is_not", "icontains", "not_icontains"])
+	.describe(
+		"URL/device matching types: 'regex' (matches regex pattern), 'not_regex' (does not match regex pattern), 'exact' (exact string match), 'is_not' (not exact match), 'icontains' (case-insensitive contains), 'not_icontains' (case-insensitive does not contain)",
+	);
 
 // General rating response branching - uses sentiment categories
 const GeneralSentimentResponseBranchingSchema = z
 	.object({
 		type: z.literal("response_based"),
-		responseValues: z.record(GeneralSentimentEnum, z.union([z.number(), z.literal("end")])),
+		responseValues: z
+			.record(
+				z
+					.enum(["negative", "neutral", "positive"])
+					.describe(
+						"General rating sentiment categories: negative (lower third of scale), neutral (middle third), positive (upper third)",
+					),
+				z.union([z.number(), z.literal("end")]),
+			)
+			.describe(
+				"Only include keys for responses that should branch to a specific question or 'end'. Omit keys for responses that should proceed to the next question (default behavior).",
+			),
 	})
 	.describe(
-		'For general rating questions: use sentiment keys ("negative", "neutral", "positive")',
+		"For general rating questions: use sentiment keys based on scale thirds - negative (lower third), neutral (middle third), positive (upper third)",
 	);
 
 const SpecificQuestionBranchingSchema = z.object({
@@ -105,35 +122,73 @@ const LinkQuestionSchema = BaseSurveyQuestionSchema.extend({
 
 const RatingQuestionSchema = BaseSurveyQuestionSchema.extend({
 	type: z.literal("rating"),
-	display: z.enum(["number", "emoji"]).optional(),
-	scale: z.number().optional(),
-	lowerBoundLabel: z.string().optional(),
-	upperBoundLabel: z.string().optional(),
+	display: z
+		.enum(["number", "emoji"])
+		.optional()
+		.describe("Display format: 'number' shows numeric scale, 'emoji' shows emoji scale"),
+	scale: z
+		.number()
+		.optional()
+		.describe("Rating scale maximum (e.g., 5 for 1-5 scale, 10 for 0-10 scale)"),
+	lowerBoundLabel: z
+		.string()
+		.optional()
+		.describe("Label for the lowest rating (e.g., 'Very Poor')"),
+	upperBoundLabel: z
+		.string()
+		.optional()
+		.describe("Label for the highest rating (e.g., 'Excellent')"),
 	branching: GeneralSentimentBranchingSchema.optional(),
 });
 
 const NPSRatingQuestionSchema = BaseSurveyQuestionSchema.extend({
 	type: z.literal("rating"),
-	display: z.enum(["number", "emoji"]).optional(),
-	scale: z.literal(10),
-	lowerBoundLabel: z.string().optional(),
-	upperBoundLabel: z.string().optional(),
+	display: z.literal("number").describe("NPS questions always use numeric scale"),
+	scale: z.literal(10).describe("NPS questions always use 0-10 scale"),
+	lowerBoundLabel: z
+		.string()
+		.optional()
+		.describe("Label for 0 rating (typically 'Not at all likely')"),
+	upperBoundLabel: z
+		.string()
+		.optional()
+		.describe("Label for 10 rating (typically 'Extremely likely')"),
 	branching: NPSBranchingSchema.optional(),
 });
 
 const SingleChoiceQuestionSchema = BaseSurveyQuestionSchema.extend({
 	type: z.literal("single_choice"),
-	choices: z.array(z.string()),
-	shuffleOptions: z.boolean().optional(),
-	hasOpenChoice: z.boolean().optional(),
+	choices: z
+		.array(z.string())
+		.describe(
+			"Array of choice options. Choice indices (0, 1, 2, etc.) are used for branching logic",
+		),
+	shuffleOptions: z
+		.boolean()
+		.optional()
+		.describe("Whether to randomize the order of choices for each respondent"),
+	hasOpenChoice: z
+		.boolean()
+		.optional()
+		.describe("Whether the last choice (typically 'Other', is an open text input question"),
 	branching: BaseBranchingSchema.optional(),
 });
 
 const MultipleChoiceQuestionSchema = BaseSurveyQuestionSchema.extend({
 	type: z.literal("multiple_choice"),
-	choices: z.array(z.string()),
-	shuffleOptions: z.boolean().optional(),
-	hasOpenChoice: z.boolean().optional(),
+	choices: z
+		.array(z.string())
+		.describe(
+			"Array of choice options. Multiple selections allowed. No branching logic supported.",
+		),
+	shuffleOptions: z
+		.boolean()
+		.optional()
+		.describe("Whether to randomize the order of choices for each respondent"),
+	hasOpenChoice: z
+		.boolean()
+		.optional()
+		.describe("Whether the last choice (typically 'Other', is an open text input question"),
 });
 
 export const SurveyQuestionSchema = z.union([

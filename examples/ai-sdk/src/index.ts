@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { PostHogAgentToolkit } from "@posthog/agents/integrations/ai-sdk";
+import { PostHogAgentToolkit } from "@posthog/agent-toolkit/integrations/ai-sdk";
 import { generateText, stepCountIs } from "ai";
 import "dotenv/config";
 

@@ -208,32 +208,28 @@ const SurveyConditionsSchema = z.object({
 	urlMatchType: MatchTypeEnum.optional(),
 	events: z
 		.object({
-			repeatedActivation: z.boolean().optional(),
+			repeatedActivation: z
+				.boolean()
+				.optional()
+				.describe(
+					"Whether to show the survey every time one of the events is triggered (true), or just once (false)",
+				),
 			values: z
 				.array(
 					z.object({
 						name: z.string(),
 					}),
 				)
-				.optional(),
+				.optional()
+				.describe("Array of event names that trigger the survey"),
 		})
 		.optional(),
-	actions: z
-		.object({
-			values: z
-				.array(
-					z.object({
-						id: z.number(),
-						name: z.string().optional(),
-						steps: z.array(z.any()).optional(),
-					}),
-				)
-				.optional(),
-		})
-		.optional(),
-	deviceTypes: z.array(z.string()).optional(),
+	deviceTypes: z.array(z.enum(["Desktop", "Mobile", "Tablet"])).optional(),
 	deviceTypesMatchType: MatchTypeEnum.optional(),
-	linkedFlagVariant: z.string().optional(),
+	linkedFlagVariant: z
+		.string()
+		.optional()
+		.describe("The variant of the feature flag linked to this survey"),
 });
 
 // Survey appearance schema
@@ -312,6 +308,11 @@ export const CreateSurveyInputSchema = z.object({
 	iteration_count: z.number().nullable().optional(),
 	iteration_frequency_days: z.number().nullable().optional(),
 	enable_partial_responses: z.boolean().optional(),
+	linked_flag_id: z
+		.number()
+		.nullable()
+		.optional()
+		.describe("The feature flag linked to this survey"),
 });
 
 export const UpdateSurveyInputSchema = z.object({
@@ -333,6 +334,11 @@ export const UpdateSurveyInputSchema = z.object({
 	response_sampling_interval: z.number().nullable().optional(),
 	response_sampling_limit: z.number().nullable().optional(),
 	enable_partial_responses: z.boolean().optional(),
+	linked_flag_id: z
+		.number()
+		.nullable()
+		.optional()
+		.describe("ID of the feature flag to link this survey to"),
 });
 
 export const ListSurveysSchema = z.object({

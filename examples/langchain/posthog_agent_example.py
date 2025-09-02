@@ -9,10 +9,6 @@ usage data similar to the TypeScript example.
 import asyncio
 import os
 import sys
-from pathlib import Path
-
-# Add the python package to path for local development
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "python"))
 
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
@@ -23,6 +19,7 @@ from posthog_agent_toolkit.integrations.langchain.toolkit import PostHogAgentToo
 
 async def analyze_product_usage():
     """Analyze product usage using PostHog data."""
+
     print("🚀 PostHog LangChain Agent - Product Usage Analysis\n")
     
     # Initialize the PostHog toolkit with credentials
@@ -31,7 +28,7 @@ async def analyze_product_usage():
         url=os.getenv("POSTHOG_MCP_URL", "https://mcp.posthog.com/mcp")
     )
     
-    # Get the tools (async)
+    # Get the tools
     tools = await toolkit.get_tools()
     
     # Initialize the LLM
@@ -41,7 +38,7 @@ async def analyze_product_usage():
         api_key=os.getenv("OPENAI_API_KEY")
     )
     
-    # Create the prompt template
+    # Create a system prompt for the agent
     prompt = ChatPromptTemplate.from_messages([
         (
             "system",
@@ -52,14 +49,12 @@ async def analyze_product_usage():
         MessagesPlaceholder("agent_scratchpad"),
     ])
     
-    # Create the agent
     agent = create_tool_calling_agent(
         llm=llm,
         tools=tools,
         prompt=prompt,
     )
     
-    # Create the agent executor
     agent_executor = AgentExecutor(
         agent=agent,
         tools=tools,
@@ -67,15 +62,22 @@ async def analyze_product_usage():
         max_iterations=5,
     )
     
-    # Run the analysis query
+    # Invoke the agent with an analysis request
     result = await agent_executor.ainvoke({
         "input": """Please analyze our product usage:
         
-        1. Get all available insights (limit 100) and pick the 5 most relevant ones
-        2. For each insight, query its data
-        3. Summarize the key findings in a brief report
+        1. Get all available insights (limit 100)
+        2. Pick the 5 MOST INTERESTING and VALUABLE insights - prioritize:
+           - User behavior and engagement metrics
+           - Conversion funnels
+           - Retention and growth metrics
+           - Product adoption insights
+           - Revenue or business KPIs
+           AVOID picking feature flag insights unless they show significant business impact
+        3. For each selected insight, query its data and explain why it's important
+        4. Summarize the key findings in a brief report with actionable recommendations
         
-        Keep your response focused and data-driven."""
+        Focus on insights that tell a story about user behavior and business performance."""
     })
     
     print("\n📊 Analysis Complete!\n")

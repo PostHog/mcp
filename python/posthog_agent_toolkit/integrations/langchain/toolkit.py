@@ -9,11 +9,7 @@ from langchain_mcp_adapters.client import MultiServerMCPClient
 
 class PostHogAgentToolkit:
     """
-    A toolkit for interacting with PostHog via the MCP server.
-    
-    This toolkit provides a high-level interface for accessing PostHog's
-    analytics capabilities via the Model Context Protocol, wrapped for
-    use with LangChain agents.
+    A toolkit for interacting with PostHog tools via the MCP server.
     """
 
     _tools: list[BaseTool] | None
@@ -26,11 +22,10 @@ class PostHogAgentToolkit:
     ):
         """
         Initialize the PostHog Agent Toolkit.
-        
+
         Args:
             url: The URL of the PostHog MCP server (default: https://mcp.posthog.com/mcp/)
-            api_key: PostHog API key for authentication
-            headers: Additional headers to include in requests
+            personal_api_key: PostHog API key for authentication
         """
 
         if not personal_api_key:
@@ -57,7 +52,7 @@ class PostHogAgentToolkit:
 
     async def get_tools(self) -> list[BaseTool]:
         """
-        Get all available PostHog tools as LangChain-compatible tools.
+        Get all available PostHog tools as LangChain compatible tools.
 
         Returns:
             List of BaseTool instances that can be used with LangChain agents

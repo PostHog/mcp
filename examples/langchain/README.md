@@ -1,20 +1,16 @@
 # PostHog LangChain Python Integration Example
 
-This example demonstrates how to use PostHog tools with LangChain using the local `posthog_agent_toolkit` package.
+This example demonstrates how to use PostHog tools with LangChain using the `posthog_agent_toolkit` package.
 
 ## Setup
 
 1. Install dependencies:
 ```bash
-# Create and activate virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install the local PostHog Agent Toolkit
-pip install -e ../../python
+# Reinstall the local PostHog Agent Toolkit to ensure latest changes
+uv sync --reinstall-package posthog-agent-toolkit
 
 # Install example dependencies
-pip install langchain langchain-openai python-dotenv
+uv add langchain langchain-openai python-dotenv
 ```
 
 2. Copy the environment file and fill in your credentials:
@@ -30,37 +26,14 @@ cp .env.example .env
 
 Run the example:
 ```bash
-python posthog_agent_example.py
+uv run python posthog_agent_example.py
 ```
 
 The example will:
-1. Connect to PostHog using your API key
-2. Load all available PostHog tools
-3. Create a LangChain agent with GPT-4o-mini
+1. Connect to the PostHog MCP server using your personal API key
+2. Load all available PostHog tools from the MCP server
+3. Create a LangChain agent
 4. Analyze product usage by:
    - Getting available insights
    - Querying data for the most relevant ones
    - Summarizing key findings
-
-## What It Does
-
-The example demonstrates a product usage analysis workflow:
-- Fetches up to 100 insights from your PostHog instance
-- Identifies the 5 most relevant insights
-- Queries the data for each insight
-- Provides a data-driven summary of findings
-
-## Customization
-
-You can modify the analysis query in `posthog_agent_example.py` to:
-- Focus on specific metrics
-- Analyze feature flags
-- Review dashboards
-- Query error tracking data
-- Search PostHog documentation
-
-## Requirements
-
-- Python 3.8+
-- PostHog personal API key with appropriate permissions
-- OpenAI API key (or another LLM provider)

@@ -52,12 +52,14 @@ import updateDashboard from "./dashboards/update";
 // LLM Observability
 import getLLMCosts from "./llmObservability/getLLMCosts";
 
+// Surveys
 import createSurvey from "./surveys/create";
 import deleteSurvey from "./surveys/delete";
 import getSurvey from "./surveys/get";
-// Surveys
 import getAllSurveys from "./surveys/getAll";
 import updateSurvey from "./surveys/update";
+import surveysGlobalStats from "./surveys/global-stats";
+import surveyStats from "./surveys/stats";
 
 export const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
 	// Feature Flags
@@ -113,6 +115,8 @@ export const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
 	createSurvey(),
 	updateSurvey(),
 	deleteSurvey(),
+	surveysGlobalStats(),
+	surveyStats(),
 ];
 
 export type PostHogToolsOptions = {

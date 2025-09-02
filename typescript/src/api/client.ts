@@ -33,6 +33,9 @@ import type {
 	UpdateSurveyInput,
 	Survey,
 	SurveyListItem,
+	SurveyResponseStats,
+	GetSurveyStatsInput,
+	GetSurveySpecificStatsInput,
 } from "../schema/surveys.js";
 import {
 	CreateSurveyInputSchema,
@@ -40,6 +43,9 @@ import {
 	SurveySchema,
 	UpdateSurveyInputSchema,
 	SurveyListItemSchema,
+	SurveyResponseStatsSchema,
+	GetSurveyStatsInputSchema,
+	GetSurveySpecificStatsInputSchema,
 } from "../schema/surveys.js";
 import { z } from "zod";
 
@@ -875,6 +881,46 @@ export class ApiClient {
 				} catch (error) {
 					return { success: false, error: error as Error };
 				}
+			},
+
+			globalStats: async ({
+				params,
+			}: { params?: GetSurveyStatsInput } = {}): Promise<Result<SurveyResponseStats>> => {
+				const validatedParams = params
+					? GetSurveyStatsInputSchema.parse(params)
+					: undefined;
+				const searchParams = new URLSearchParams();
+
+				if (validatedParams?.date_from)
+					searchParams.append("date_from", validatedParams.date_from);
+				if (validatedParams?.date_to)
+					searchParams.append("date_to", validatedParams.date_to);
+
+				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/stats/${searchParams.toString() ? `?${searchParams}` : ""}`;
+
+				return this.fetchWithSchema(url, SurveyResponseStatsSchema);
+			},
+
+			stats: async ({
+				surveyId,
+				params,
+			}: {
+				surveyId: string;
+				params?: Omit<GetSurveySpecificStatsInput, "survey_id">;
+			}): Promise<Result<SurveyResponseStats>> => {
+				const validatedParams = params
+					? GetSurveyStatsInputSchema.parse(params)
+					: undefined;
+				const searchParams = new URLSearchParams();
+
+				if (validatedParams?.date_from)
+					searchParams.append("date_from", validatedParams.date_from);
+				if (validatedParams?.date_to)
+					searchParams.append("date_to", validatedParams.date_to);
+
+				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/stats/${searchParams.toString() ? `?${searchParams}` : ""}`;
+
+				return this.fetchWithSchema(url, SurveyResponseStatsSchema);
 			},
 		};
 	}

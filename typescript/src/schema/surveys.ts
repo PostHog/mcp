@@ -371,9 +371,69 @@ export const SurveyListItemSchema = z.object({
 	iteration_frequency_days: z.number().nullable().optional(),
 });
 
+// Survey response statistics schemas
+export const SurveyEventStatsSchema = z.object({
+	total_count: z.number(),
+	total_count_only_seen: z.number(),
+	unique_persons: z.number(),
+	unique_persons_only_seen: z.number(),
+	first_seen: z.string().nullable(),
+	last_seen: z.string().nullable(),
+});
+
+export const SurveyRatesSchema = z.object({
+	response_rate: z.number(),
+	dismissal_rate: z.number(),
+	unique_users_response_rate: z.number(),
+	unique_users_dismissal_rate: z.number(),
+});
+
+export const SurveyStatsSchema = z.object({
+	"survey shown": SurveyEventStatsSchema,
+	"survey dismissed": SurveyEventStatsSchema,
+	"survey sent": SurveyEventStatsSchema,
+});
+
+export const SurveyResponseStatsSchema = z.object({
+	stats: SurveyStatsSchema,
+	rates: SurveyRatesSchema,
+	survey_id: z.string().optional(),
+	start_date: z.string().nullable().optional(),
+	end_date: z.string().nullable().optional(),
+});
+
+export const GetSurveyStatsInputSchema = z.object({
+	date_from: z
+		.string()
+		.optional()
+		.describe("Optional ISO timestamp for start date (e.g. 2024-01-01T00:00:00Z)"),
+	date_to: z
+		.string()
+		.optional()
+		.describe("Optional ISO timestamp for end date (e.g. 2024-01-31T23:59:59Z)"),
+});
+
+export const GetSurveySpecificStatsInputSchema = z.object({
+	survey_id: z.string().describe("Survey ID to get statistics for"),
+	date_from: z
+		.string()
+		.optional()
+		.describe("Optional ISO timestamp for start date (e.g. 2024-01-01T00:00:00Z)"),
+	date_to: z
+		.string()
+		.optional()
+		.describe("Optional ISO timestamp for end date (e.g. 2024-01-31T23:59:59Z)"),
+});
+
 export type CreateSurveyInput = z.infer<typeof CreateSurveyInputSchema>;
 export type UpdateSurveyInput = z.infer<typeof UpdateSurveyInputSchema>;
 export type ListSurveysData = z.infer<typeof ListSurveysSchema>;
 export type Survey = z.infer<typeof SurveySchema>;
 export type SurveyListItem = z.infer<typeof SurveyListItemSchema>;
 export type SurveyQuestion = z.infer<typeof SurveyQuestionSchema>;
+export type SurveyEventStats = z.infer<typeof SurveyEventStatsSchema>;
+export type SurveyRates = z.infer<typeof SurveyRatesSchema>;
+export type SurveyStats = z.infer<typeof SurveyStatsSchema>;
+export type SurveyResponseStats = z.infer<typeof SurveyResponseStatsSchema>;
+export type GetSurveyStatsInput = z.infer<typeof GetSurveyStatsInputSchema>;
+export type GetSurveySpecificStatsInput = z.infer<typeof GetSurveySpecificStatsInputSchema>;

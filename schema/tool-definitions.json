@@ -154,6 +154,16 @@
 		"category": "Surveys",
 		"summary": "Delete a survey by ID."
 	},
+	"surveys-global-stats": {
+		"description": "Get aggregated response statistics across all surveys in the project. Includes event counts (shown, dismissed, sent), unique respondents, conversion rates, and timing data. Supports optional date filtering.",
+		"category": "Surveys",
+		"summary": "Get aggregated response statistics across all surveys."
+	},
+	"survey-stats": {
+		"description": "Get response statistics for a specific survey. Includes detailed event counts (shown, dismissed, sent), unique respondents, conversion rates, and timing data. Supports optional date filtering.",
+		"category": "Surveys",
+		"summary": "Get response statistics for a specific survey."
+	},
 	"survey-get": {
 		"description": "Get a specific survey by ID. Returns the survey configuration including questions, targeting, and scheduling details.",
 		"category": "Surveys",

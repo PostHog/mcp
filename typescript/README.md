@@ -21,7 +21,7 @@ import { generateText } from "ai";
 
 const toolkit = new PostHogAgentToolkit({
     posthogPersonalApiKey: process.env.POSTHOG_PERSONAL_API_KEY!,
-    posthogApiBaseUrl: "https://us.posthog.com"
+    posthogApiBaseUrl: "https://us.posthog.com" // or https://eu.posthog.com if you are hosting in the EU
 });
 
 const result = await generateText({
@@ -31,7 +31,7 @@ const result = await generateText({
 });
 ```
 
-**[→ See full Vercel AI SDK example](../../examples/ai-sdk/)**
+**[→ See full Vercel AI SDK example](https://github.com/posthog/mcp/tree/main/examples/ai-sdk)**
 
 ### Using with LangChain.js
 
@@ -43,7 +43,7 @@ import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts
 
 const toolkit = new PostHogAgentToolkit({
     posthogPersonalApiKey: process.env.POSTHOG_PERSONAL_API_KEY!,
-    posthogApiBaseUrl: "https://us.posthog.com"
+    posthogApiBaseUrl: "https://us.posthog.com" // or https://eu.posthog.com if you are hosting in the EU
 });
 
 const tools = toolkit.getTools();
@@ -63,7 +63,7 @@ const result = await executor.invoke({
 });
 ```
 
-**[→ See full LangChain.js example](../../examples/langchain-js/)**
+**[→ See full LangChain.js example](https://github.com/posthog/mcp/tree/main/examples/langchain-js)**
 
 ## Available Tools
 

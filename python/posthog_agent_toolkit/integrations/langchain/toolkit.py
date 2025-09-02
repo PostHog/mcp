@@ -1,6 +1,5 @@
 """PostHog Agent Toolkit for LangChain using MCP."""
 
-
 from typing import Any
 
 from langchain_core.tools import BaseTool
@@ -46,7 +45,7 @@ class PostHogAgentToolkit:
                 "headers": {
                     "Authorization": f"Bearer {personal_api_key}",
                     "X-Client-Package": "posthog-agent-toolkit",
-                }
+                },
             }
         }
 

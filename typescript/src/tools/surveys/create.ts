@@ -7,11 +7,10 @@ const schema = SurveyCreateSchema;
 type Params = z.infer<typeof schema>;
 
 export const createHandler = async (context: Context, params: Params) => {
-	const { data } = params;
 	const projectId = await context.stateManager.getProjectId();
 
 	const surveyResult = await context.api.surveys({ projectId }).create({
-		data,
+		data: params,
 	});
 
 	if (!surveyResult.success) {

@@ -298,9 +298,16 @@ export const CreateSurveyInputSchema = z.object({
 	description: z.string().optional(),
 	type: z.enum(["popover", "api", "widget", "external_survey"]).optional(),
 	questions: z.array(SurveyQuestionSchema),
-	start_date: z.string().datetime().optional(),
-	end_date: z.string().datetime().optional(),
-	archived: z.boolean().optional(),
+	appearance: SurveyAppearanceSchema.optional(),
+	start_date: z
+		.string()
+		.datetime()
+		.nullable()
+		.optional()
+		.default(null)
+		.describe(
+			"Setting this will launch the survey immediately. Don't add a start_date unless explicitly requested to do so.",
+		),
 	responses_limit: z.number().nullable().optional(),
 	iteration_count: z.number().nullable().optional(),
 	iteration_frequency_days: z.number().nullable().optional(),

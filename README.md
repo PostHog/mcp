@@ -43,7 +43,7 @@ npx @posthog/wizard@latest mcp add
 - Add a new feature flag for our homepage redesign
 - What are my most common errors?
 
-### Data residency
+### Data processing
 
 The MCP server is hosted on a Cloudflare worker, this can be located outside of the EU / US, so there is no gaurantee that the data will be processed solely within a specific region.
 

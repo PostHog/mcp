@@ -1,6 +1,6 @@
 # PostHog MCP Server - Python Implementation
 
-Python wrapper of the MCP server tools.
+Python wrapper of the MCP server tools to make using PostHog easier in agents.
 
 ## Setup
 

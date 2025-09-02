@@ -8,9 +8,6 @@ This example demonstrates how to use PostHog tools with LangChain using the `pos
 ```bash
 # Reinstall the local PostHog Agent Toolkit to ensure latest changes
 uv sync --reinstall-package posthog-agent-toolkit
-
-# Install example dependencies
-uv add langchain langchain-openai python-dotenv
 ```
 
 2. Copy the environment file and fill in your credentials:

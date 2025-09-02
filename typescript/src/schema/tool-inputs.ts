@@ -149,7 +149,6 @@ export const SurveyGetAllSchema = z.object({
 	data: ListSurveysSchema.optional(),
 });
 
-export const SurveyUpdateSchema = z.object({
+export const SurveyUpdateSchema = UpdateSurveyInputSchema.extend({
 	surveyId: z.string(),
-	data: UpdateSurveyInputSchema,
 });

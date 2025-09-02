@@ -7,11 +7,11 @@ const schema = SurveyUpdateSchema;
 type Params = z.infer<typeof schema>;
 
 export const updateHandler = async (context: Context, params: Params) => {
-	const { surveyId, data } = params;
+	const { surveyId, ...data } = params;
 	const projectId = await context.stateManager.getProjectId();
 
 	if (data.questions) {
-		data.questions = data.questions.map((question) => {
+		data.questions = data.questions.map((question: any) => {
 			// Handle single choice questions - convert numeric keys to strings
 			if (
 				"branching" in question &&

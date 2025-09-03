@@ -126,9 +126,9 @@ const RatingQuestion = BaseSurveyQuestionSchema.extend({
 		.optional()
 		.describe("Display format: 'number' shows numeric scale, 'emoji' shows emoji scale"),
 	scale: z
-		.number()
+		.union([z.literal(3), z.literal(5), z.literal(7)])
 		.optional()
-		.describe("Rating scale maximum (e.g., 5 for 1-5 scale, 10 for 0-10 scale)"),
+		.describe("Rating scale can be one of 3, 5, or 7"),
 	lowerBoundLabel: z
 		.string()
 		.optional()
@@ -138,6 +138,40 @@ const RatingQuestion = BaseSurveyQuestionSchema.extend({
 		.optional()
 		.describe("Label for the highest rating (e.g., 'Excellent')"),
 	branching: RatingBranching.optional(),
+}).superRefine((data, ctx) => {
+	// Validate display-specific scale constraints
+	if (data.display === "emoji" && data.scale && ![3, 5].includes(data.scale)) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.custom,
+			message: "Emoji display only supports scales of 3 or 5",
+			path: ["scale"],
+		});
+	}
+
+	if (data.display === "number" && data.scale && ![5, 7].includes(data.scale)) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.custom,
+			message: "Number display only supports scales of 5 or 7",
+			path: ["scale"],
+		});
+	}
+
+	// Validate response-based branching for rating questions
+	if (data.branching?.type === "response_based") {
+		const responseValues = data.branching.responseValues;
+		const validSentiments = ["negative", "neutral", "positive"];
+
+		// Check that all response keys are valid sentiment categories
+		for (const key of Object.keys(responseValues)) {
+			if (!validSentiments.includes(key)) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: `Invalid sentiment key "${key}". Must be one of: ${validSentiments.join(", ")}`,
+					path: ["branching", "responseValues", key],
+				});
+			}
+		}
+	}
 });
 
 const NPSRatingQuestion = BaseSurveyQuestionSchema.extend({
@@ -153,12 +187,31 @@ const NPSRatingQuestion = BaseSurveyQuestionSchema.extend({
 		.optional()
 		.describe("Label for 10 rating (typically 'Extremely likely')"),
 	branching: NPSBranching.optional(),
+}).superRefine((data, ctx) => {
+	// Validate response-based branching for NPS rating questions
+	if (data.branching?.type === "response_based") {
+		const responseValues = data.branching.responseValues;
+		const validNPSCategories = ["detractors", "passives", "promoters"];
+
+		// Check that all response keys are valid NPS sentiment categories
+		for (const key of Object.keys(responseValues)) {
+			if (!validNPSCategories.includes(key)) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: `Invalid NPS category "${key}". Must be one of: ${validNPSCategories.join(", ")}`,
+					path: ["branching", "responseValues", key],
+				});
+			}
+		}
+	}
 });
 
 const SingleChoiceQuestion = BaseSurveyQuestionSchema.extend({
 	type: z.literal("single_choice"),
 	choices: z
-		.array(z.string())
+		.array(z.string().min(1, "Choice text cannot be empty"))
+		.min(2, "Must have at least 2 choices")
+		.max(20, "Cannot have more than 20 choices")
 		.describe(
 			"Array of choice options. Choice indices (0, 1, 2, etc.) are used for branching logic",
 		),
@@ -171,12 +224,51 @@ const SingleChoiceQuestion = BaseSurveyQuestionSchema.extend({
 		.optional()
 		.describe("Whether the last choice (typically 'Other', is an open text input question"),
 	branching: ChoiceBranching.optional(),
+}).superRefine((data, ctx) => {
+	// Validate unique choices
+	const uniqueChoices = new Set(data.choices);
+	if (uniqueChoices.size !== data.choices.length) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.custom,
+			message: "All choices must be unique",
+			path: ["choices"],
+		});
+	}
+
+	// Validate hasOpenChoice logic
+	if (data.hasOpenChoice && data.choices.length === 0) {
+		ctx.addIssue({
+			code: z.ZodIssueCode.custom,
+			message: "Cannot have open choice without any regular choices",
+			path: ["hasOpenChoice"],
+		});
+	}
+
+	// Validate response-based branching for single choice questions
+	if (data.branching?.type === "response_based") {
+		const responseValues = data.branching.responseValues;
+		const choiceCount = data.choices.length;
+
+		// Check that all response keys are valid choice indices
+		for (const key of Object.keys(responseValues)) {
+			const choiceIndex = Number.parseInt(key, 10);
+			if (Number.isNaN(choiceIndex) || choiceIndex < 0 || choiceIndex >= choiceCount) {
+				ctx.addIssue({
+					code: z.ZodIssueCode.custom,
+					message: `Invalid choice index "${key}". Must be between 0 and ${choiceCount - 1}`,
+					path: ["branching", "responseValues", key],
+				});
+			}
+		}
+	}
 });
 
 const MultipleChoiceQuestion = BaseSurveyQuestionSchema.extend({
 	type: z.literal("multiple_choice"),
 	choices: z
-		.array(z.string())
+		.array(z.string().min(1, "Choice text cannot be empty"))
+		.min(2, "Must have at least 2 choices")
+		.max(20, "Cannot have more than 20 choices")
 		.describe(
 			"Array of choice options. Multiple selections allowed. No branching logic supported.",
 		),
@@ -191,14 +283,28 @@ const MultipleChoiceQuestion = BaseSurveyQuestionSchema.extend({
 });
 
 // Input schema - strict validation for user input
-export const SurveyQuestionInputSchema = z.union([
-	OpenQuestion,
-	LinkQuestion,
-	RatingQuestion,
-	NPSRatingQuestion,
-	SingleChoiceQuestion,
-	MultipleChoiceQuestion,
-]);
+export const SurveyQuestionInputSchema = z
+	.union([
+		OpenQuestion,
+		LinkQuestion,
+		RatingQuestion,
+		NPSRatingQuestion,
+		SingleChoiceQuestion,
+		MultipleChoiceQuestion,
+	])
+	.superRefine((data, ctx) => {
+		// Validate that branching is only used with supported question types
+		if (!("branching" in data) || !data.branching) return;
+
+		const supportedTypes = ["rating", "single_choice"];
+		if (!supportedTypes.includes(data.type)) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: `Branching is not supported for question type "${data.type}". Only supported for: ${supportedTypes.join(", ")}`,
+				path: ["branching"],
+			});
+		}
+	});
 
 // Output schema - permissive for API responses
 export const SurveyQuestionOutputSchema = z.object({
@@ -316,10 +422,10 @@ const User = z.object({
 
 // Survey input schemas
 export const CreateSurveyInputSchema = z.object({
-	name: z.string(),
+	name: z.string().min(1, "Survey name cannot be empty"),
 	description: z.string().optional(),
 	type: z.enum(["popover", "api", "widget", "external_survey"]).optional(),
-	questions: z.array(SurveyQuestionInputSchema),
+	questions: z.array(SurveyQuestionInputSchema).min(1, "Survey must have at least one question"),
 	appearance: SurveyAppearance.optional(),
 	start_date: z
 		.string()
@@ -332,11 +438,13 @@ export const CreateSurveyInputSchema = z.object({
 		),
 	responses_limit: z
 		.number()
+		.positive("Response limit must be positive")
 		.nullable()
 		.optional()
 		.describe("The maximum number of responses before automatically stopping the survey."),
 	iteration_count: z
 		.number()
+		.positive("Iteration count must be positive")
 		.nullable()
 		.optional()
 		.describe(
@@ -344,6 +452,8 @@ export const CreateSurveyInputSchema = z.object({
 		),
 	iteration_frequency_days: z
 		.number()
+		.positive("Iteration frequency must be positive")
+		.max(365, "Iteration frequency cannot exceed 365 days")
 		.nullable()
 		.optional()
 		.describe(
@@ -366,10 +476,13 @@ export const CreateSurveyInputSchema = z.object({
 });
 
 export const UpdateSurveyInputSchema = z.object({
-	name: z.string().optional(),
+	name: z.string().min(1, "Survey name cannot be empty").optional(),
 	description: z.string().optional(),
 	type: z.enum(["popover", "api", "widget", "external_survey"]).optional(),
-	questions: z.array(SurveyQuestionInputSchema).optional(),
+	questions: z
+		.array(SurveyQuestionInputSchema)
+		.min(1, "Survey must have at least one question")
+		.optional(),
 	conditions: SurveyConditions.optional(),
 	appearance: SurveyAppearance.optional(),
 	schedule: z
@@ -395,11 +508,13 @@ export const UpdateSurveyInputSchema = z.object({
 	archived: z.boolean().optional(),
 	responses_limit: z
 		.number()
+		.positive("Response limit must be positive")
 		.nullable()
 		.optional()
 		.describe("The maximum number of responses before automatically stopping the survey."),
 	iteration_count: z
 		.number()
+		.positive("Iteration count must be positive")
 		.nullable()
 		.optional()
 		.describe(
@@ -407,6 +522,8 @@ export const UpdateSurveyInputSchema = z.object({
 		),
 	iteration_frequency_days: z
 		.number()
+		.positive("Iteration frequency must be positive")
+		.max(365, "Iteration frequency cannot exceed 365 days")
 		.nullable()
 		.optional()
 		.describe(
@@ -540,6 +657,19 @@ export const GetSurveySpecificStatsInputSchema = z.object({
 		.string()
 		.optional()
 		.describe("Optional ISO timestamp for end date (e.g. 2024-01-31T23:59:59Z)"),
+});
+
+// Wrapper schemas to convert ZodEffects to ZodObject for TypeScript compatibility
+export const CreateSurveyInputObjectSchema = z.object({
+	data: CreateSurveyInputSchema,
+});
+
+export const UpdateSurveyInputObjectSchema = z.object({
+	data: UpdateSurveyInputSchema,
+});
+
+export const SurveyQuestionInputObjectSchema = z.object({
+	data: SurveyQuestionInputSchema,
 });
 
 // Input types

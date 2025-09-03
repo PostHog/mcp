@@ -1,6 +1,6 @@
 # PostHog Langchain JS Integration Example
 
-This example demonstrates how to use PostHog tools with Langchain JS using the `@posthog/agents` package.
+This example demonstrates how to use PostHog tools with Langchain JS using the `@posthog/agent-toolkit` package.
 
 ## Features
 

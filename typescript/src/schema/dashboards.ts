@@ -75,7 +75,7 @@ export const ListDashboardsSchema = z.object({
 
 // Input schema for adding insight to dashboard
 export const AddInsightToDashboardSchema = z.object({
-	insightId: z.number().int().positive(),
+	insightId: z.string(),
 	dashboardId: z.number().int().positive(),
 });
 

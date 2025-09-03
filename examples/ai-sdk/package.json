@@ -7,7 +7,7 @@
 		"dev": "tsx src/index.ts"
 	},
 	"dependencies": {
-		"@posthog/agents": "file:../../typescript",
+		"@posthog/agent-toolkit": "file:../../typescript",
 		"ai": "^5.0.18",
 		"@ai-sdk/openai": "^2.0.16",
 		"zod": "^3.24.4",

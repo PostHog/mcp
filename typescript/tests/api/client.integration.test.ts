@@ -329,7 +329,7 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 				// Get
 				const getResult = await client
 					.insights({ projectId: testProjectId })
-					.get({ insightId });
+					.get({ insightId: insightId.toString() });
 
 				if (!getResult.success) {
 					console.error("Failed to get insight:", (getResult as any).error);

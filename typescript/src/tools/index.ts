@@ -31,6 +31,7 @@ import listErrors from "./errorTracking/listErrors";
 
 // Experiments
 import getAllExperiments from "./experiments/getAll";
+import getExperiment from "./experiments/get";
 
 import createInsight from "./insights/create";
 import deleteInsight from "./insights/delete";
@@ -88,6 +89,7 @@ export const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
 
 	// Experiments
 	getAllExperiments(),
+	getExperiment(),
 
 	// Insights
 	getAllInsights(),

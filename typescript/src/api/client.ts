@@ -27,6 +27,7 @@ import {
 import { type Organization, OrganizationSchema } from "@/schema/orgs";
 import { type Project, ProjectSchema } from "@/schema/projects";
 import { PropertyDefinitionSchema } from "@/schema/properties";
+import { isShortId } from "@/tools/insights/utils";
 import { z } from "zod";
 import type {
 	CreateSurveyInput,
@@ -214,6 +215,15 @@ export class ApiClient {
 				} catch (error) {
 					return { success: false, error: error as Error };
 				}
+			},
+
+			get: async ({
+				experimentId,
+			}: { experimentId: number }): Promise<Result<Experiment>> => {
+				return this.fetchWithSchema(
+					`${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`,
+					ExperimentSchema,
+				);
 			},
 		};
 	}
@@ -458,7 +468,9 @@ export class ApiClient {
 
 			get: async ({
 				insightId,
-			}: { insightId: number }): Promise<
+			}: {
+				insightId: string;
+			}): Promise<
 				Result<{
 					id: number;
 					name?: string | null | undefined;
@@ -476,6 +488,35 @@ export class ApiClient {
 					query: z.any(),
 					filters: z.any(),
 				});
+
+				// Check if insightId is a short_id (8 character alphanumeric string)
+				// Note: This won't work when we start creating insight id's with 8 digits. (We're at 7 currently)
+				if (isShortId(insightId)) {
+					const searchParams = new URLSearchParams({ short_id: insightId });
+					const url = `${this.baseUrl}/api/projects/${projectId}/insights/?${searchParams}`;
+
+					const responseSchema = z.object({
+						results: z.array(simpleInsightSchema),
+					});
+
+					const result = await this.fetchWithSchema(url, responseSchema);
+
+					if (!result.success) {
+						return result;
+					}
+
+					const insights = result.data.results;
+					const insight = insights[0];
+
+					if (insights.length === 0 || !insight) {
+						return {
+							success: false,
+							error: new Error(`No insight found with short_id: ${insightId}`),
+						};
+					}
+
+					return { success: true, data: insight };
+				}
 
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,

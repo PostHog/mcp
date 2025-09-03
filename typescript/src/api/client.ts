@@ -33,20 +33,20 @@ import type {
 	CreateSurveyInput,
 	GetSurveySpecificStatsInput,
 	GetSurveyStatsInput,
-	ListSurveysData,
-	Survey,
-	SurveyListItem,
-	SurveyResponseStats,
+	ListSurveysInput,
+	SurveyListItemOutput,
+	SurveyOutput,
+	SurveyResponseStatsOutput,
 	UpdateSurveyInput,
 } from "../schema/surveys.js";
 import {
 	CreateSurveyInputSchema,
 	GetSurveySpecificStatsInputSchema,
 	GetSurveyStatsInputSchema,
-	ListSurveysSchema,
-	SurveyListItemSchema,
-	SurveyResponseSchema,
-	SurveyResponseStatsSchema,
+	ListSurveysInputSchema,
+	SurveyListItemOutputSchema,
+	SurveyOutputSchema,
+	SurveyResponseStatsOutputSchema,
 	UpdateSurveyInputSchema,
 } from "../schema/surveys.js";
 
@@ -808,8 +808,10 @@ export class ApiClient {
 		return {
 			list: async ({
 				params,
-			}: { params?: ListSurveysData } = {}): Promise<Result<Array<SurveyListItem>>> => {
-				const validatedParams = params ? ListSurveysSchema.parse(params) : undefined;
+			}: { params?: ListSurveysInput } = {}): Promise<
+				Result<Array<SurveyListItemOutput>>
+			> => {
+				const validatedParams = params ? ListSurveysInputSchema.parse(params) : undefined;
 				const searchParams = new URLSearchParams();
 
 				if (validatedParams?.limit)
@@ -821,7 +823,7 @@ export class ApiClient {
 				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/${searchParams.toString() ? `?${searchParams}` : ""}`;
 
 				const responseSchema = z.object({
-					results: z.array(SurveyListItemSchema),
+					results: z.array(SurveyListItemOutputSchema),
 				});
 
 				const result = await this.fetchWithSchema(url, responseSchema);
@@ -833,10 +835,10 @@ export class ApiClient {
 				return result;
 			},
 
-			get: async ({ surveyId }: { surveyId: string }): Promise<Result<Survey>> => {
+			get: async ({ surveyId }: { surveyId: string }): Promise<Result<SurveyOutput>> => {
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
-					SurveyResponseSchema,
+					SurveyOutputSchema,
 				);
 			},
 
@@ -926,7 +928,9 @@ export class ApiClient {
 
 			globalStats: async ({
 				params,
-			}: { params?: GetSurveyStatsInput } = {}): Promise<Result<SurveyResponseStats>> => {
+			}: { params?: GetSurveyStatsInput } = {}): Promise<
+				Result<SurveyResponseStatsOutput>
+			> => {
 				const validatedParams = params
 					? GetSurveyStatsInputSchema.parse(params)
 					: undefined;
@@ -939,19 +943,13 @@ export class ApiClient {
 
 				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/stats/${searchParams.toString() ? `?${searchParams}` : ""}`;
 
-				return this.fetchWithSchema(url, SurveyResponseStatsSchema);
+				return this.fetchWithSchema(url, SurveyResponseStatsOutputSchema);
 			},
 
-			stats: async ({
-				surveyId,
-				params,
-			}: {
-				surveyId: string;
-				params?: Omit<GetSurveySpecificStatsInput, "survey_id">;
-			}): Promise<Result<SurveyResponseStats>> => {
-				const validatedParams = params
-					? GetSurveyStatsInputSchema.parse(params)
-					: undefined;
+			stats: async (
+				params: GetSurveySpecificStatsInput,
+			): Promise<Result<SurveyResponseStatsOutput>> => {
+				const validatedParams = GetSurveySpecificStatsInputSchema.parse(params);
 				const searchParams = new URLSearchParams();
 
 				if (validatedParams?.date_from)
@@ -959,9 +957,9 @@ export class ApiClient {
 				if (validatedParams?.date_to)
 					searchParams.append("date_to", validatedParams.date_to);
 
-				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/stats/${searchParams.toString() ? `?${searchParams}` : ""}`;
+				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/${validatedParams.survey_id}/stats/${searchParams.toString() ? `?${searchParams}` : ""}`;
 
-				return this.fetchWithSchema(url, SurveyResponseStatsSchema);
+				return this.fetchWithSchema(url, SurveyResponseStatsOutputSchema);
 			},
 		};
 	}

@@ -9,10 +9,7 @@ type Params = z.infer<typeof schema>;
 export const globalStatsHandler = async (context: Context, params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
-	const hasParams = params.date_from || params.date_to;
-	const result = await context.api
-		.surveys({ projectId })
-		.globalStats(hasParams ? { params } : {});
+	const result = await context.api.surveys({ projectId }).globalStats({ params });
 
 	if (!result.success) {
 		throw new Error(`Failed to get survey global stats: ${result.error.message}`);

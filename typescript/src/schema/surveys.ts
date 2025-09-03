@@ -11,16 +11,16 @@ const BaseSurveyQuestionSchema = z.object({
 });
 
 // Branching logic schemas
-const NextQuestionBranchingSchema = z.object({
+const NextQuestionBranching = z.object({
 	type: z.literal("next_question"),
 });
 
-const EndBranchingSchema = z.object({
+const EndBranching = z.object({
 	type: z.literal("end"),
 });
 
-// Single choice response branching - uses numeric choice indices (0, 1, 2, etc.)
-const SingleChoiceResponseBranchingSchema = z
+// Choice response branching - uses numeric choice indices (0, 1, 2, etc.)
+const ChoiceResponseBranching = z
 	.object({
 		type: z.literal("response_based"),
 		responseValues: z
@@ -33,8 +33,8 @@ const SingleChoiceResponseBranchingSchema = z
 		'For single choice questions: use choice indices as string keys ("0", "1", "2", etc.)',
 	);
 
-// NPS rating response branching - uses sentiment categories
-const NPSResponseBranchingSchema = z
+// NPS sentiment branching - uses sentiment categories
+const NPSSentimentBranching = z
 	.object({
 		type: z.literal("response_based"),
 		responseValues: z
@@ -61,8 +61,8 @@ const MatchTypeEnum = z
 		"URL/device matching types: 'regex' (matches regex pattern), 'not_regex' (does not match regex pattern), 'exact' (exact string match), 'is_not' (not exact match), 'icontains' (case-insensitive contains), 'not_icontains' (case-insensitive does not contain)",
 	);
 
-// General rating response branching - uses sentiment categories
-const GeneralSentimentResponseBranchingSchema = z
+// Rating sentiment branching - uses sentiment categories
+const RatingSentimentBranching = z
 	.object({
 		type: z.literal("response_based"),
 		responseValues: z
@@ -70,7 +70,7 @@ const GeneralSentimentResponseBranchingSchema = z
 				z
 					.enum(["negative", "neutral", "positive"])
 					.describe(
-						"General rating sentiment categories: negative (lower third of scale), neutral (middle third), positive (upper third)",
+						"Rating sentiment categories: negative (lower third of scale), neutral (middle third), positive (upper third)",
 					),
 				z.union([z.number(), z.literal("end")]),
 			)
@@ -79,49 +79,47 @@ const GeneralSentimentResponseBranchingSchema = z
 			),
 	})
 	.describe(
-		"For general rating questions: use sentiment keys based on scale thirds - negative (lower third), neutral (middle third), positive (upper third)",
+		"For rating questions: use sentiment keys based on scale thirds - negative (lower third), neutral (middle third), positive (upper third)",
 	);
 
-const SpecificQuestionBranchingSchema = z.object({
+const SpecificQuestionBranching = z.object({
 	type: z.literal("specific_question"),
 	index: z.number(),
 });
 
-// Base branching schema for questions that use index-based branching
-const BaseBranchingSchema = z.union([
-	NextQuestionBranchingSchema,
-	EndBranchingSchema,
-	SingleChoiceResponseBranchingSchema,
-	SpecificQuestionBranchingSchema,
+// Branching schema unions for different question types
+const ChoiceBranching = z.union([
+	NextQuestionBranching,
+	EndBranching,
+	ChoiceResponseBranching,
+	SpecificQuestionBranching,
 ]);
 
-// NPS branching schema for NPS rating questions
-const NPSBranchingSchema = z.union([
-	NextQuestionBranchingSchema,
-	EndBranchingSchema,
-	NPSResponseBranchingSchema,
-	SpecificQuestionBranchingSchema,
+const NPSBranching = z.union([
+	NextQuestionBranching,
+	EndBranching,
+	NPSSentimentBranching,
+	SpecificQuestionBranching,
 ]);
 
-// General sentiment branching schema for other rating questions
-const GeneralSentimentBranchingSchema = z.union([
-	NextQuestionBranchingSchema,
-	EndBranchingSchema,
-	GeneralSentimentResponseBranchingSchema,
-	SpecificQuestionBranchingSchema,
+const RatingBranching = z.union([
+	NextQuestionBranching,
+	EndBranching,
+	RatingSentimentBranching,
+	SpecificQuestionBranching,
 ]);
 
-// Question type schemas
-const OpenQuestionSchema = BaseSurveyQuestionSchema.extend({
+// Question schemas - cleaner naming without Schema suffix
+const OpenQuestion = BaseSurveyQuestionSchema.extend({
 	type: z.literal("open"),
 });
 
-const LinkQuestionSchema = BaseSurveyQuestionSchema.extend({
+const LinkQuestion = BaseSurveyQuestionSchema.extend({
 	type: z.literal("link"),
 	link: z.string().url(),
 });
 
-const RatingQuestionSchema = BaseSurveyQuestionSchema.extend({
+const RatingQuestion = BaseSurveyQuestionSchema.extend({
 	type: z.literal("rating"),
 	display: z
 		.enum(["number", "emoji"])
@@ -139,10 +137,10 @@ const RatingQuestionSchema = BaseSurveyQuestionSchema.extend({
 		.string()
 		.optional()
 		.describe("Label for the highest rating (e.g., 'Excellent')"),
-	branching: GeneralSentimentBranchingSchema.optional(),
+	branching: RatingBranching.optional(),
 });
 
-const NPSRatingQuestionSchema = BaseSurveyQuestionSchema.extend({
+const NPSRatingQuestion = BaseSurveyQuestionSchema.extend({
 	type: z.literal("rating"),
 	display: z.literal("number").describe("NPS questions always use numeric scale"),
 	scale: z.literal(10).describe("NPS questions always use 0-10 scale"),
@@ -154,10 +152,10 @@ const NPSRatingQuestionSchema = BaseSurveyQuestionSchema.extend({
 		.string()
 		.optional()
 		.describe("Label for 10 rating (typically 'Extremely likely')"),
-	branching: NPSBranchingSchema.optional(),
+	branching: NPSBranching.optional(),
 });
 
-const SingleChoiceQuestionSchema = BaseSurveyQuestionSchema.extend({
+const SingleChoiceQuestion = BaseSurveyQuestionSchema.extend({
 	type: z.literal("single_choice"),
 	choices: z
 		.array(z.string())
@@ -172,10 +170,10 @@ const SingleChoiceQuestionSchema = BaseSurveyQuestionSchema.extend({
 		.boolean()
 		.optional()
 		.describe("Whether the last choice (typically 'Other', is an open text input question"),
-	branching: BaseBranchingSchema.optional(),
+	branching: ChoiceBranching.optional(),
 });
 
-const MultipleChoiceQuestionSchema = BaseSurveyQuestionSchema.extend({
+const MultipleChoiceQuestion = BaseSurveyQuestionSchema.extend({
 	type: z.literal("multiple_choice"),
 	choices: z
 		.array(z.string())
@@ -192,17 +190,41 @@ const MultipleChoiceQuestionSchema = BaseSurveyQuestionSchema.extend({
 		.describe("Whether the last choice (typically 'Other', is an open text input question"),
 });
 
-export const SurveyQuestionSchema = z.union([
-	OpenQuestionSchema,
-	LinkQuestionSchema,
-	RatingQuestionSchema,
-	NPSRatingQuestionSchema,
-	SingleChoiceQuestionSchema,
-	MultipleChoiceQuestionSchema,
+// Input schema - strict validation for user input
+export const SurveyQuestionInputSchema = z.union([
+	OpenQuestion,
+	LinkQuestion,
+	RatingQuestion,
+	NPSRatingQuestion,
+	SingleChoiceQuestion,
+	MultipleChoiceQuestion,
 ]);
 
-// Survey condition schema
-const SurveyConditionsSchema = z.object({
+// Output schema - permissive for API responses
+export const SurveyQuestionOutputSchema = z.object({
+	type: z.string(),
+	question: z.string().optional(),
+	description: z.string().optional(),
+	descriptionContentType: z.enum(["html", "text"]).optional(),
+	optional: z.boolean().optional(),
+	buttonText: z.string().optional(),
+	// Rating question fields
+	display: z.string().optional(),
+	scale: z.number().optional(),
+	lowerBoundLabel: z.string().optional(),
+	upperBoundLabel: z.string().optional(),
+	// Choice question fields
+	choices: z.array(z.string()).optional(),
+	shuffleOptions: z.boolean().optional(),
+	hasOpenChoice: z.boolean().optional(),
+	// Link question fields
+	link: z.string().optional(),
+	// Branching logic
+	branching: z.any().optional(),
+});
+
+// Survey targeting conditions - used in input schema
+const SurveyConditions = z.object({
 	url: z.string().optional(),
 	selector: z.string().optional(),
 	seenSurveyWaitPeriodInDays: z
@@ -236,8 +258,8 @@ const SurveyConditionsSchema = z.object({
 		.describe("The variant of the feature flag linked to this survey"),
 });
 
-// Survey appearance schema
-const SurveyAppearanceSchema = z.object({
+// Survey appearance customization - input schema
+const SurveyAppearance = z.object({
 	backgroundColor: z.string().optional(),
 	submitButtonColor: z.string().optional(),
 	textColor: z.string().optional(), // deprecated, use auto contrast text color instead
@@ -283,8 +305,8 @@ const SurveyAppearanceSchema = z.object({
 	boxPadding: z.string().optional(),
 });
 
-// User schema for created_by fields
-const UserSchema = z.object({
+// User data from API responses - output schema
+const User = z.object({
 	id: z.number(),
 	uuid: z.string(),
 	distinct_id: z.string(),
@@ -297,8 +319,8 @@ export const CreateSurveyInputSchema = z.object({
 	name: z.string(),
 	description: z.string().optional(),
 	type: z.enum(["popover", "api", "widget", "external_survey"]).optional(),
-	questions: z.array(SurveyQuestionSchema),
-	appearance: SurveyAppearanceSchema.optional(),
+	questions: z.array(SurveyQuestionInputSchema),
+	appearance: SurveyAppearance.optional(),
 	start_date: z
 		.string()
 		.datetime()
@@ -347,9 +369,9 @@ export const UpdateSurveyInputSchema = z.object({
 	name: z.string().optional(),
 	description: z.string().optional(),
 	type: z.enum(["popover", "api", "widget", "external_survey"]).optional(),
-	questions: z.array(SurveyQuestionSchema).optional(),
-	conditions: SurveyConditionsSchema.optional(),
-	appearance: SurveyAppearanceSchema.optional(),
+	questions: z.array(SurveyQuestionInputSchema).optional(),
+	conditions: SurveyConditions.optional(),
+	appearance: SurveyAppearance.optional(),
 	schedule: z
 		.enum(["once", "recurring", "always"])
 		.optional()
@@ -416,23 +438,23 @@ export const UpdateSurveyInputSchema = z.object({
 		),
 });
 
-export const ListSurveysSchema = z.object({
+export const ListSurveysInputSchema = z.object({
 	limit: z.number().optional(),
 	offset: z.number().optional(),
 	search: z.string().optional(),
 });
 
-// Survey response schemas
-export const SurveyResponseSchema = z.object({
+// Survey output schemas - permissive, comprehensive
+export const SurveyOutputSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	description: z.string().optional(),
 	type: z.enum(["popover", "api", "widget", "external_survey"]),
-	questions: z.array(SurveyQuestionSchema),
-	conditions: SurveyConditionsSchema.nullable().optional(),
-	appearance: SurveyAppearanceSchema.nullable().optional(),
+	questions: z.array(SurveyQuestionOutputSchema),
+	conditions: SurveyConditions.nullable().optional(),
+	appearance: SurveyAppearance.nullable().optional(),
 	created_at: z.string(),
-	created_by: UserSchema.optional(),
+	created_by: User.optional(),
 	start_date: z.string().nullable().optional(),
 	end_date: z.string().nullable().optional(),
 	archived: z.boolean().optional(),
@@ -448,15 +470,15 @@ export const SurveyResponseSchema = z.object({
 		),
 });
 
-// Survey list item schema (used by list endpoint - doesn't include questions)
-export const SurveyListItemSchema = z.object({
+// Survey list item - lightweight version for list endpoints
+export const SurveyListItemOutputSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	description: z.string().nullable().optional(),
 	type: z.enum(["popover", "api", "widget", "external_survey"]),
 	archived: z.boolean().optional(),
 	created_at: z.string(),
-	created_by: UserSchema.nullable().optional(),
+	created_by: User.nullable().optional(),
 	start_date: z.string().nullable().optional(),
 	end_date: z.string().nullable().optional(),
 	conditions: z.any().optional(),
@@ -467,7 +489,7 @@ export const SurveyListItemSchema = z.object({
 });
 
 // Survey response statistics schemas
-export const SurveyEventStatsSchema = z.object({
+export const SurveyEventStatsOutputSchema = z.object({
 	total_count: z.number(),
 	total_count_only_seen: z.number(),
 	unique_persons: z.number(),
@@ -476,22 +498,22 @@ export const SurveyEventStatsSchema = z.object({
 	last_seen: z.string().nullable(),
 });
 
-export const SurveyRatesSchema = z.object({
+export const SurveyRatesOutputSchema = z.object({
 	response_rate: z.number(),
 	dismissal_rate: z.number(),
 	unique_users_response_rate: z.number(),
 	unique_users_dismissal_rate: z.number(),
 });
 
-export const SurveyStatsSchema = z.object({
-	"survey shown": SurveyEventStatsSchema,
-	"survey dismissed": SurveyEventStatsSchema,
-	"survey sent": SurveyEventStatsSchema,
+export const SurveyStatsOutputSchema = z.object({
+	"survey shown": SurveyEventStatsOutputSchema,
+	"survey dismissed": SurveyEventStatsOutputSchema,
+	"survey sent": SurveyEventStatsOutputSchema,
 });
 
-export const SurveyResponseStatsSchema = z.object({
-	stats: SurveyStatsSchema,
-	rates: SurveyRatesSchema,
+export const SurveyResponseStatsOutputSchema = z.object({
+	stats: SurveyStatsOutputSchema,
+	rates: SurveyRatesOutputSchema,
 	survey_id: z.string().optional(),
 	start_date: z.string().nullable().optional(),
 	end_date: z.string().nullable().optional(),
@@ -520,15 +542,19 @@ export const GetSurveySpecificStatsInputSchema = z.object({
 		.describe("Optional ISO timestamp for end date (e.g. 2024-01-31T23:59:59Z)"),
 });
 
+// Input types
 export type CreateSurveyInput = z.infer<typeof CreateSurveyInputSchema>;
 export type UpdateSurveyInput = z.infer<typeof UpdateSurveyInputSchema>;
-export type ListSurveysData = z.infer<typeof ListSurveysSchema>;
-export type Survey = z.infer<typeof SurveyResponseSchema>;
-export type SurveyListItem = z.infer<typeof SurveyListItemSchema>;
-export type SurveyQuestion = z.infer<typeof SurveyQuestionSchema>;
-export type SurveyEventStats = z.infer<typeof SurveyEventStatsSchema>;
-export type SurveyRates = z.infer<typeof SurveyRatesSchema>;
-export type SurveyStats = z.infer<typeof SurveyStatsSchema>;
-export type SurveyResponseStats = z.infer<typeof SurveyResponseStatsSchema>;
+export type ListSurveysInput = z.infer<typeof ListSurveysInputSchema>;
 export type GetSurveyStatsInput = z.infer<typeof GetSurveyStatsInputSchema>;
 export type GetSurveySpecificStatsInput = z.infer<typeof GetSurveySpecificStatsInputSchema>;
+export type SurveyQuestionInput = z.infer<typeof SurveyQuestionInputSchema>;
+
+// Output types
+export type SurveyOutput = z.infer<typeof SurveyOutputSchema>;
+export type SurveyListItemOutput = z.infer<typeof SurveyListItemOutputSchema>;
+export type SurveyEventStatsOutput = z.infer<typeof SurveyEventStatsOutputSchema>;
+export type SurveyRatesOutput = z.infer<typeof SurveyRatesOutputSchema>;
+export type SurveyStatsOutput = z.infer<typeof SurveyStatsOutputSchema>;
+export type SurveyResponseStatsOutput = z.infer<typeof SurveyResponseStatsOutputSchema>;
+export type SurveyQuestionOutput = z.infer<typeof SurveyQuestionOutputSchema>;

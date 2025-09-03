@@ -10,8 +10,9 @@ export const statsHandler = async (context: Context, params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
 	const result = await context.api.surveys({ projectId }).stats({
-		surveyId: params.survey_id,
-		params: { date_from: params.date_from, date_to: params.date_to },
+		survey_id: params.survey_id,
+		date_from: params.date_from,
+		date_to: params.date_to,
 	});
 
 	if (!result.success) {

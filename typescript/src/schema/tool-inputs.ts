@@ -10,7 +10,7 @@ import { FilterGroupsSchema, UpdateFeatureFlagInputSchema } from "./flags";
 import { CreateInsightInputSchema, ListInsightsSchema, UpdateInsightInputSchema } from "./insights";
 import {
 	CreateSurveyInputSchema,
-	ListSurveysSchema,
+	ListSurveysInputSchema,
 	UpdateSurveyInputSchema,
 	GetSurveyStatsInputSchema,
 	GetSurveySpecificStatsInputSchema,
@@ -150,7 +150,7 @@ export const SurveyGetSchema = z.object({
 });
 
 export const SurveyGetAllSchema = z.object({
-	data: ListSurveysSchema.optional(),
+	data: ListSurveysInputSchema.optional(),
 });
 
 export const SurveyUpdateSchema = UpdateSurveyInputSchema.extend({

@@ -308,10 +308,31 @@ export const CreateSurveyInputSchema = z.object({
 		.describe(
 			"Setting this will launch the survey immediately. Don't add a start_date unless explicitly requested to do so.",
 		),
-	responses_limit: z.number().nullable().optional(),
-	iteration_count: z.number().nullable().optional(),
-	iteration_frequency_days: z.number().nullable().optional(),
-	enable_partial_responses: z.boolean().optional(),
+	responses_limit: z
+		.number()
+		.nullable()
+		.optional()
+		.describe("The maximum number of responses before automatically stopping the survey."),
+	iteration_count: z
+		.number()
+		.nullable()
+		.optional()
+		.describe(
+			"For a recurring schedule, this field specifies the number of times the survey should be shown to the user. Use 1 for 'once every X days', higher numbers for multiple repetitions. Works together with iteration_frequency_days to determine the overall survey schedule.",
+		),
+	iteration_frequency_days: z
+		.number()
+		.nullable()
+		.optional()
+		.describe(
+			"For a recurring schedule, this field specifies the interval in days between each survey instance shown to the user, used alongside iteration_count for precise scheduling.",
+		),
+	enable_partial_responses: z
+		.boolean()
+		.optional()
+		.describe(
+			"When at least one question is answered, the response is stored (true). The response is stored when all questions are answered (false).",
+		),
 	linked_flag_id: z
 		.number()
 		.nullable()
@@ -359,12 +380,16 @@ export const UpdateSurveyInputSchema = z.object({
 		.number()
 		.nullable()
 		.optional()
-		.describe("For recurring schedule. Controls how many times the survey should repeat"),
+		.describe(
+			"For a recurring schedule, this field specifies the number of times the survey should be shown to the user. Use 1 for 'once every X days', higher numbers for multiple repetitions. Works together with iteration_frequency_days to determine the overall survey schedule.",
+		),
 	iteration_frequency_days: z
 		.number()
 		.nullable()
 		.optional()
-		.describe("For recurring schedule. The days between each iteration (in iteration_count)"),
+		.describe(
+			"For a recurring schedule, this field specifies the interval in days between each survey instance shown to the user, used alongside iteration_count for precise scheduling.",
+		),
 	enable_partial_responses: z
 		.boolean()
 		.optional()

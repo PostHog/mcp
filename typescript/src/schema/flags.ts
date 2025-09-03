@@ -9,7 +9,7 @@ export interface PostHogFeatureFlag {
 export interface PostHogFlagsResponse {
 	results?: PostHogFeatureFlag[];
 }
-const base = ["exact", "is_not"] as const;
+const base = ["exact", "is_not", "is_set", "is_not_set"] as const;
 const stringOps = [
 	...base,
 	"icontains",
@@ -66,6 +66,11 @@ export const PersonPropertyFilterSchema = z
 			});
 	})
 	.transform((data) => {
+		// when using is_set or is_not_set, set the value the same as the operator
+		if (data.operator === "is_set" || data.operator === "is_not_set") {
+			data.value = data.operator;
+		}
+
 		return {
 			...data,
 			type: "person",

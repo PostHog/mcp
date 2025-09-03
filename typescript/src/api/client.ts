@@ -27,27 +27,27 @@ import {
 import { type Organization, OrganizationSchema } from "@/schema/orgs";
 import { type Project, ProjectSchema } from "@/schema/projects";
 import { PropertyDefinitionSchema } from "@/schema/properties";
+import { z } from "zod";
 import type {
 	CreateSurveyInput,
+	GetSurveySpecificStatsInput,
+	GetSurveyStatsInput,
 	ListSurveysData,
-	UpdateSurveyInput,
 	Survey,
 	SurveyListItem,
 	SurveyResponseStats,
-	GetSurveyStatsInput,
-	GetSurveySpecificStatsInput,
+	UpdateSurveyInput,
 } from "../schema/surveys.js";
 import {
 	CreateSurveyInputSchema,
-	ListSurveysSchema,
-	SurveySchema,
-	UpdateSurveyInputSchema,
-	SurveyListItemSchema,
-	SurveyResponseStatsSchema,
-	GetSurveyStatsInputSchema,
 	GetSurveySpecificStatsInputSchema,
+	GetSurveyStatsInputSchema,
+	ListSurveysSchema,
+	SurveyListItemSchema,
+	SurveyResponseSchema,
+	SurveyResponseStatsSchema,
+	UpdateSurveyInputSchema,
 } from "../schema/surveys.js";
-import { z } from "zod";
 
 export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
 
@@ -795,7 +795,7 @@ export class ApiClient {
 			get: async ({ surveyId }: { surveyId: string }): Promise<Result<Survey>> => {
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
-					SurveySchema,
+					SurveyResponseSchema,
 				);
 			},
 

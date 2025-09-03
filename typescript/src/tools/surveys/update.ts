@@ -40,7 +40,7 @@ export const updateHandler = async (context: Context, params: Params) => {
 	// Add helpful URL for the survey
 	const surveyWithUrl = {
 		...surveyResult.data,
-		url: `${context.api.getProjectBaseUrl(projectId)}/surveys/${surveyResult.data.id}`,
+		url: `${context.api.getProjectBaseUrl(projectId)}/surveys/${surveyResult.data.id}?edit=true`,
 	};
 
 	return {

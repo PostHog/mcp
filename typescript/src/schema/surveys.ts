@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FilterGroupsSchema } from "./flags.js";
 
 // Survey question types
 const BaseSurveyQuestionSchema = z.object({
@@ -204,7 +205,10 @@ export const SurveyQuestionSchema = z.union([
 const SurveyConditionsSchema = z.object({
 	url: z.string().optional(),
 	selector: z.string().optional(),
-	seenSurveyWaitPeriodInDays: z.number().optional(),
+	seenSurveyWaitPeriodInDays: z
+		.number()
+		.optional()
+		.describe("Don't show this survey to users who saw any survey in the last x days."),
 	urlMatchType: MatchTypeEnum.optional(),
 	events: z
 		.object({
@@ -313,6 +317,9 @@ export const CreateSurveyInputSchema = z.object({
 		.nullable()
 		.optional()
 		.describe("The feature flag linked to this survey"),
+	targeting_flag_filters: FilterGroupsSchema.optional().describe(
+		"Target specific users based on their properties. Example: {groups: [{properties: [{key: 'email', value: ['@company.com'], operator: 'icontains'}], rollout_percentage: 100}]}",
+	),
 });
 
 export const UpdateSurveyInputSchema = z.object({
@@ -322,23 +329,66 @@ export const UpdateSurveyInputSchema = z.object({
 	questions: z.array(SurveyQuestionSchema).optional(),
 	conditions: SurveyConditionsSchema.optional(),
 	appearance: SurveyAppearanceSchema.optional(),
-	schedule: z.enum(["once", "recurring", "always"]).optional(),
-	start_date: z.string().datetime().optional(),
-	end_date: z.string().datetime().optional(),
+	schedule: z
+		.enum(["once", "recurring", "always"])
+		.optional()
+		.describe(
+			"Survey scheduling behavior: 'once' = show once per user (default), 'recurring' = repeat based on iteration_count and iteration_frequency_days settings, 'always' = show every time conditions are met (mainly for widget surveys)",
+		),
+	start_date: z
+		.string()
+		.datetime()
+		.optional()
+		.describe(
+			"When the survey should start being shown to users. Setting this will launch the survey",
+		),
+	end_date: z
+		.string()
+		.datetime()
+		.optional()
+		.describe(
+			"When the survey stopped being shown to users. Setting this will complete the survey.",
+		),
 	archived: z.boolean().optional(),
-	responses_limit: z.number().nullable().optional(),
-	iteration_count: z.number().nullable().optional(),
-	iteration_frequency_days: z.number().nullable().optional(),
-	response_sampling_start_date: z.string().datetime().optional(),
-	response_sampling_interval_type: z.enum(["day", "week", "month"]).optional(),
-	response_sampling_interval: z.number().nullable().optional(),
-	response_sampling_limit: z.number().nullable().optional(),
-	enable_partial_responses: z.boolean().optional(),
+	responses_limit: z
+		.number()
+		.nullable()
+		.optional()
+		.describe("The maximum number of responses before automatically stopping the survey."),
+	iteration_count: z
+		.number()
+		.nullable()
+		.optional()
+		.describe("For recurring schedule. Controls how many times the survey should repeat"),
+	iteration_frequency_days: z
+		.number()
+		.nullable()
+		.optional()
+		.describe("For recurring schedule. The days between each iteration (in iteration_count)"),
+	enable_partial_responses: z
+		.boolean()
+		.optional()
+		.describe(
+			"When at least one question is answered, the response is stored (true). The response is stored when all questions are answered (false).",
+		),
 	linked_flag_id: z
 		.number()
 		.nullable()
 		.optional()
-		.describe("ID of the feature flag to link this survey to"),
+		.describe("The feature flag to link to this survey"),
+	targeting_flag_id: z
+		.number()
+		.optional()
+		.describe("An existing targeting flag to use for this survey"),
+	targeting_flag_filters: FilterGroupsSchema.optional().describe(
+		"Target specific users based on their properties. Example: {groups: [{properties: [{key: 'email', value: ['@company.com'], operator: 'icontains'}], rollout_percentage: 50}]}",
+	),
+	remove_targeting_flag: z
+		.boolean()
+		.optional()
+		.describe(
+			"Set to true to completely remove all targeting filters from the survey, making it visible to all users (subject to other display conditions like URL matching).",
+		),
 });
 
 export const ListSurveysSchema = z.object({
@@ -348,7 +398,7 @@ export const ListSurveysSchema = z.object({
 });
 
 // Survey response schemas
-export const SurveySchema = z.object({
+export const SurveyResponseSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	description: z.string().optional(),
@@ -365,6 +415,12 @@ export const SurveySchema = z.object({
 	iteration_count: z.number().nullable().optional(),
 	iteration_frequency_days: z.number().nullable().optional(),
 	enable_partial_responses: z.boolean().optional(),
+	targeting_flag: z
+		.any()
+		.optional()
+		.describe(
+			"Target specific users based on their properties. Example: {groups: [{properties: [{key: 'email', value: ['@company.com'], operator: 'icontains'}], rollout_percentage: 50}]}",
+		),
 });
 
 // Survey list item schema (used by list endpoint - doesn't include questions)
@@ -380,6 +436,7 @@ export const SurveyListItemSchema = z.object({
 	end_date: z.string().nullable().optional(),
 	conditions: z.any().optional(),
 	responses_limit: z.number().nullable().optional(),
+	targeting_flag: z.any().optional(),
 	iteration_count: z.number().nullable().optional(),
 	iteration_frequency_days: z.number().nullable().optional(),
 });
@@ -441,7 +498,7 @@ export const GetSurveySpecificStatsInputSchema = z.object({
 export type CreateSurveyInput = z.infer<typeof CreateSurveyInputSchema>;
 export type UpdateSurveyInput = z.infer<typeof UpdateSurveyInputSchema>;
 export type ListSurveysData = z.infer<typeof ListSurveysSchema>;
-export type Survey = z.infer<typeof SurveySchema>;
+export type Survey = z.infer<typeof SurveyResponseSchema>;
 export type SurveyListItem = z.infer<typeof SurveyListItemSchema>;
 export type SurveyQuestion = z.infer<typeof SurveyQuestionSchema>;
 export type SurveyEventStats = z.infer<typeof SurveyEventStatsSchema>;

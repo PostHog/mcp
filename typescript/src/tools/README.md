@@ -123,7 +123,7 @@ Add a clear, actionable description for your tool and assign it to a feature:
 - `docs` - PostHog documentation search
 
 If your tool doesn't fit any of these features, you can create a new feature category yourself.
-If you do add a new feature, make sure to update the `README.md` in the root of the repository to list the new feature and include it in the tests at `typescript/tests/unit/tool-filtering.test.ts`
+If you do add a new feature, make sure to update the `README.md` in the root of the repository to list the new feature and include it in the tests at `typescript/tests/unit/tool-filtering.test.ts`. You'll also need to update the `AVAILABLE_FEATURES` list in `https://github.com/posthog/wizard/` so it shows up during feature selection when running `wizard mcp add`.
 
 **Description Tips:**
 - Be specific about what the tool does

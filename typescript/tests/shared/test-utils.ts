@@ -1,6 +1,6 @@
 import { ApiClient } from "@/api/client";
-import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
 import { StateManager } from "@/lib/utils/StateManager";
+import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
 import type { Context } from "@/tools/types";
 import { expect } from "vitest";
 
@@ -13,6 +13,7 @@ export interface CreatedResources {
 	featureFlags: number[];
 	insights: number[];
 	dashboards: number[];
+	surveys: string[];
 }
 
 export function validateEnvironmentVariables() {
@@ -87,6 +88,15 @@ export async function cleanupResources(
 		}
 	}
 	resources.dashboards = [];
+
+	for (const surveyId of resources.surveys) {
+		try {
+			await client.surveys({ projectId }).delete({ surveyId, softDelete: false });
+		} catch (error) {
+			console.warn(`Failed to cleanup survey ${surveyId}:`, error);
+		}
+	}
+	resources.surveys = [];
 }
 
 export function parseToolResponse(result: any) {

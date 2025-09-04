@@ -899,26 +899,36 @@ export class ApiClient {
 
 			delete: async ({
 				surveyId,
-			}: { surveyId: string }): Promise<Result<{ success: boolean; message: string }>> => {
+				softDelete = true,
+			}: { surveyId: string; softDelete?: boolean }): Promise<
+				Result<{ success: boolean; message: string }>
+			> => {
 				try {
+					const fetchOptions: RequestInit = {
+						method: softDelete ? "PATCH" : "DELETE",
+						headers: this.buildHeaders(),
+					};
+
+					if (softDelete) {
+						fetchOptions.body = JSON.stringify({ archived: true });
+					}
+
 					const response = await fetch(
 						`${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
-						{
-							method: "PATCH",
-							headers: this.buildHeaders(),
-							body: JSON.stringify({ archived: true }),
-						},
+						fetchOptions,
 					);
 
 					if (!response.ok) {
-						throw new Error(`Failed to delete survey: ${response.statusText}`);
+						throw new Error(
+							`Failed to ${softDelete ? "archive" : "delete"} survey: ${response.statusText}`,
+						);
 					}
 
 					return {
 						success: true,
 						data: {
 							success: true,
-							message: "Survey deleted successfully",
+							message: `Survey ${softDelete ? "archived" : "deleted"} successfully`,
 						},
 					};
 				} catch (error) {

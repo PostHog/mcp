@@ -31,8 +31,13 @@ export const getAllHandler = async (context: Context, params: Params) => {
 		end_date: survey.end_date || undefined, // Don't show null end_date
 	}));
 
+	// Return the response in the expected format with results property
+	const response = {
+		results: formattedSurveys,
+	};
+
 	return {
-		content: [{ type: "text", text: JSON.stringify(formattedSurveys) }],
+		content: [{ type: "text", text: JSON.stringify(response) }],
 	};
 };
 

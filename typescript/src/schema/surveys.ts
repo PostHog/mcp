@@ -579,6 +579,8 @@ export const SurveyOutputSchema = z.object({
 	iteration_count: z.number().nullable().optional(),
 	iteration_frequency_days: z.number().nullable().optional(),
 	enable_partial_responses: z.boolean().optional(),
+	linked_flag_id: z.number().nullable().optional(),
+	schedule: z.string().optional(),
 	targeting_flag: z
 		.any()
 		.optional()
@@ -607,54 +609,57 @@ export const SurveyListItemOutputSchema = z.object({
 
 // Survey response statistics schemas
 export const SurveyEventStatsOutputSchema = z.object({
-	total_count: z.number(),
-	total_count_only_seen: z.number(),
-	unique_persons: z.number(),
-	unique_persons_only_seen: z.number(),
-	first_seen: z.string().nullable(),
-	last_seen: z.string().nullable(),
+	total_count: z.number().optional(),
+	total_count_only_seen: z.number().optional(),
+	unique_persons: z.number().optional(),
+	unique_persons_only_seen: z.number().optional(),
+	first_seen: z.string().nullable().optional(),
+	last_seen: z.string().nullable().optional(),
 });
 
 export const SurveyRatesOutputSchema = z.object({
-	response_rate: z.number(),
-	dismissal_rate: z.number(),
-	unique_users_response_rate: z.number(),
-	unique_users_dismissal_rate: z.number(),
-});
-
-export const SurveyStatsOutputSchema = z.object({
-	"survey shown": SurveyEventStatsOutputSchema,
-	"survey dismissed": SurveyEventStatsOutputSchema,
-	"survey sent": SurveyEventStatsOutputSchema,
+	response_rate: z.number().optional(),
+	dismissal_rate: z.number().optional(),
+	unique_users_response_rate: z.number().optional(),
+	unique_users_dismissal_rate: z.number().optional(),
 });
 
 export const SurveyResponseStatsOutputSchema = z.object({
-	stats: SurveyStatsOutputSchema,
-	rates: SurveyRatesOutputSchema,
 	survey_id: z.string().optional(),
 	start_date: z.string().nullable().optional(),
 	end_date: z.string().nullable().optional(),
+	survey_shown: SurveyEventStatsOutputSchema.optional(),
+	survey_dismissed: SurveyEventStatsOutputSchema.optional(),
+	survey_sent: SurveyEventStatsOutputSchema.optional(),
+	response_rate: z.number().optional(),
+	dismissal_rate: z.number().optional(),
+	unique_users_response_rate: z.number().optional(),
+	unique_users_dismissal_rate: z.number().optional(),
 });
 
 export const GetSurveyStatsInputSchema = z.object({
 	date_from: z
 		.string()
+		.datetime()
 		.optional()
 		.describe("Optional ISO timestamp for start date (e.g. 2024-01-01T00:00:00Z)"),
 	date_to: z
 		.string()
+		.datetime()
 		.optional()
 		.describe("Optional ISO timestamp for end date (e.g. 2024-01-31T23:59:59Z)"),
 });
 
 export const GetSurveySpecificStatsInputSchema = z.object({
-	survey_id: z.string().describe("Survey ID to get statistics for"),
+	survey_id: z.string(),
 	date_from: z
 		.string()
+		.datetime()
 		.optional()
 		.describe("Optional ISO timestamp for start date (e.g. 2024-01-01T00:00:00Z)"),
 	date_to: z
 		.string()
+		.datetime()
 		.optional()
 		.describe("Optional ISO timestamp for end date (e.g. 2024-01-31T23:59:59Z)"),
 });
@@ -685,6 +690,5 @@ export type SurveyOutput = z.infer<typeof SurveyOutputSchema>;
 export type SurveyListItemOutput = z.infer<typeof SurveyListItemOutputSchema>;
 export type SurveyEventStatsOutput = z.infer<typeof SurveyEventStatsOutputSchema>;
 export type SurveyRatesOutput = z.infer<typeof SurveyRatesOutputSchema>;
-export type SurveyStatsOutput = z.infer<typeof SurveyStatsOutputSchema>;
 export type SurveyResponseStatsOutput = z.infer<typeof SurveyResponseStatsOutputSchema>;
 export type SurveyQuestionOutput = z.infer<typeof SurveyQuestionOutputSchema>;

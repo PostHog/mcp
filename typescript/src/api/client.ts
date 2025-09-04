@@ -29,6 +29,26 @@ import { type Project, ProjectSchema } from "@/schema/projects";
 import { PropertyDefinitionSchema } from "@/schema/properties";
 import { isShortId } from "@/tools/insights/utils";
 import { z } from "zod";
+import type {
+	CreateSurveyInput,
+	GetSurveySpecificStatsInput,
+	GetSurveyStatsInput,
+	ListSurveysInput,
+	SurveyListItemOutput,
+	SurveyOutput,
+	SurveyResponseStatsOutput,
+	UpdateSurveyInput,
+} from "../schema/surveys.js";
+import {
+	CreateSurveyInputSchema,
+	GetSurveySpecificStatsInputSchema,
+	GetSurveyStatsInputSchema,
+	ListSurveysInputSchema,
+	SurveyListItemOutputSchema,
+	SurveyOutputSchema,
+	SurveyResponseStatsOutputSchema,
+	UpdateSurveyInputSchema,
+} from "../schema/surveys.js";
 
 export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
 
@@ -780,6 +800,176 @@ export class ApiClient {
 					success: true,
 					data: { distinctId: result.data.distinct_id },
 				};
+			},
+		};
+	}
+
+	surveys({ projectId }: { projectId: string }) {
+		return {
+			list: async ({
+				params,
+			}: { params?: ListSurveysInput } = {}): Promise<
+				Result<Array<SurveyListItemOutput>>
+			> => {
+				const validatedParams = params ? ListSurveysInputSchema.parse(params) : undefined;
+				const searchParams = new URLSearchParams();
+
+				if (validatedParams?.limit)
+					searchParams.append("limit", String(validatedParams.limit));
+				if (validatedParams?.offset)
+					searchParams.append("offset", String(validatedParams.offset));
+				if (validatedParams?.search) searchParams.append("search", validatedParams.search);
+
+				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/${searchParams.toString() ? `?${searchParams}` : ""}`;
+
+				const responseSchema = z.object({
+					results: z.array(SurveyListItemOutputSchema),
+				});
+
+				const result = await this.fetchWithSchema(url, responseSchema);
+
+				if (result.success) {
+					return { success: true, data: result.data.results };
+				}
+
+				return result;
+			},
+
+			get: async ({ surveyId }: { surveyId: string }): Promise<Result<SurveyOutput>> => {
+				return this.fetchWithSchema(
+					`${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
+					SurveyOutputSchema,
+				);
+			},
+
+			create: async ({
+				data,
+			}: { data: CreateSurveyInput }): Promise<
+				Result<{
+					id: string;
+					name: string;
+					type: "popover" | "api" | "widget" | "external_survey";
+				}>
+			> => {
+				const validatedInput = CreateSurveyInputSchema.parse(data);
+
+				const createResponseSchema = z.object({
+					id: z.string(),
+					name: z.string(),
+					type: z.enum(["popover", "api", "widget", "external_survey"]),
+				});
+
+				return this.fetchWithSchema(
+					`${this.baseUrl}/api/projects/${projectId}/surveys/`,
+					createResponseSchema,
+					{
+						method: "POST",
+						body: JSON.stringify(validatedInput),
+					},
+				);
+			},
+
+			update: async ({
+				surveyId,
+				data,
+			}: { surveyId: string; data: UpdateSurveyInput }): Promise<
+				Result<{
+					id: string;
+					name: string;
+					type: "popover" | "api" | "widget" | "external_survey";
+				}>
+			> => {
+				const validatedInput = UpdateSurveyInputSchema.parse(data);
+
+				const updateResponseSchema = z.object({
+					id: z.string(),
+					name: z.string(),
+					type: z.enum(["popover", "api", "widget", "external_survey"]),
+				});
+
+				return this.fetchWithSchema(
+					`${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
+					updateResponseSchema,
+					{
+						method: "PATCH",
+						body: JSON.stringify(validatedInput),
+					},
+				);
+			},
+
+			delete: async ({
+				surveyId,
+				softDelete = true,
+			}: { surveyId: string; softDelete?: boolean }): Promise<
+				Result<{ success: boolean; message: string }>
+			> => {
+				try {
+					const fetchOptions: RequestInit = {
+						method: softDelete ? "PATCH" : "DELETE",
+						headers: this.buildHeaders(),
+					};
+
+					if (softDelete) {
+						fetchOptions.body = JSON.stringify({ archived: true });
+					}
+
+					const response = await fetch(
+						`${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
+						fetchOptions,
+					);
+
+					if (!response.ok) {
+						throw new Error(
+							`Failed to ${softDelete ? "archive" : "delete"} survey: ${response.statusText}`,
+						);
+					}
+
+					return {
+						success: true,
+						data: {
+							success: true,
+							message: `Survey ${softDelete ? "archived" : "deleted"} successfully`,
+						},
+					};
+				} catch (error) {
+					return { success: false, error: error as Error };
+				}
+			},
+
+			globalStats: async ({
+				params,
+			}: { params?: GetSurveyStatsInput } = {}): Promise<
+				Result<SurveyResponseStatsOutput>
+			> => {
+				const validatedParams = params
+					? GetSurveyStatsInputSchema.parse(params)
+					: undefined;
+				const searchParams = new URLSearchParams();
+
+				if (validatedParams?.date_from)
+					searchParams.append("date_from", validatedParams.date_from);
+				if (validatedParams?.date_to)
+					searchParams.append("date_to", validatedParams.date_to);
+
+				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/stats/${searchParams.toString() ? `?${searchParams}` : ""}`;
+
+				return this.fetchWithSchema(url, SurveyResponseStatsOutputSchema);
+			},
+
+			stats: async (
+				params: GetSurveySpecificStatsInput,
+			): Promise<Result<SurveyResponseStatsOutput>> => {
+				const validatedParams = GetSurveySpecificStatsInputSchema.parse(params);
+				const searchParams = new URLSearchParams();
+
+				if (validatedParams?.date_from)
+					searchParams.append("date_from", validatedParams.date_from);
+				if (validatedParams?.date_to)
+					searchParams.append("date_to", validatedParams.date_to);
+
+				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/${validatedParams.survey_id}/stats/${searchParams.toString() ? `?${searchParams}` : ""}`;
+
+				return this.fetchWithSchema(url, SurveyResponseStatsOutputSchema);
 			},
 		};
 	}

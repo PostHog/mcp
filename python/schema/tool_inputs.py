@@ -7,7 +7,7 @@ from enum import Enum, StrEnum
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, RootModel
+from pydantic import AnyUrl, BaseModel, ConfigDict, Field, RootModel
 
 
 class ToolInputs(RootModel[Any]):
@@ -163,6 +163,8 @@ class ExperimentGetSchema(BaseModel):
 class Operator(StrEnum):
     EXACT = "exact"
     IS_NOT = "is_not"
+    IS_SET = "is_set"
+    IS_NOT_SET = "is_not_set"
     ICONTAINS = "icontains"
     NOT_ICONTAINS = "not_icontains"
     REGEX = "regex"
@@ -170,6 +172,8 @@ class Operator(StrEnum):
     IS_CLEANED_PATH_EXACT = "is_cleaned_path_exact"
     exact_1 = "exact"
     is_not_1 = "is_not"
+    is_set_1 = "is_set"
+    is_not_set_1 = "is_not_set"
     GT = "gt"
     GTE = "gte"
     LT = "lt"
@@ -178,6 +182,8 @@ class Operator(StrEnum):
     MAX = "max"
     exact_2 = "exact"
     is_not_2 = "is_not"
+    is_set_2 = "is_set"
+    is_not_set_2 = "is_not_set"
     IN_ = "in"
     NOT_IN = "not_in"
 
@@ -460,3 +466,955 @@ class ProjectSetActiveSchema(BaseModel):
         extra="forbid",
     )
     projectId: Annotated[int, Field(gt=0)]
+
+
+class Type(StrEnum):
+    POPOVER = "popover"
+    API = "api"
+    WIDGET = "widget"
+    EXTERNAL_SURVEY = "external_survey"
+
+
+class DescriptionContentType(StrEnum):
+    HTML = "html"
+    TEXT = "text"
+
+
+class Questions(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["open"] = "open"
+
+
+class Questions1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["link"] = "link"
+    link: AnyUrl
+
+
+class Display(StrEnum):
+    """
+    Display format: 'number' shows numeric scale, 'emoji' shows emoji scale
+    """
+
+    NUMBER = "number"
+    EMOJI = "emoji"
+
+
+class Scale(float, Enum):
+    """
+    Rating scale can be one of 3, 5, or 7
+    """
+
+    NUMBER_3 = 3
+    NUMBER_5 = 5
+    NUMBER_7 = 7
+
+
+class Branching(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["next_question"] = "next_question"
+
+
+class Branching1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["end"] = "end"
+
+
+class Branching2(BaseModel):
+    """
+    For rating questions: use sentiment keys based on scale thirds - negative (lower third), neutral (middle third), positive (upper third)
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["response_based"] = "response_based"
+    responseValues: dict[str, float | str]
+    """
+    Only include keys for responses that should branch to a specific question or 'end'. Omit keys for responses that should proceed to the next question (default behavior).
+    """
+
+
+class Branching3(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["specific_question"] = "specific_question"
+    index: float
+
+
+class Questions2(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["rating"] = "rating"
+    display: Display | None = None
+    """
+    Display format: 'number' shows numeric scale, 'emoji' shows emoji scale
+    """
+    scale: Scale | None = None
+    """
+    Rating scale can be one of 3, 5, or 7
+    """
+    lowerBoundLabel: str | None = None
+    """
+    Label for the lowest rating (e.g., 'Very Poor')
+    """
+    upperBoundLabel: str | None = None
+    """
+    Label for the highest rating (e.g., 'Excellent')
+    """
+    branching: Branching | Branching1 | Branching2 | Branching3 | None = None
+
+
+class Branching4(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["next_question"] = "next_question"
+
+
+class Branching5(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["end"] = "end"
+
+
+class Branching6(BaseModel):
+    """
+    For NPS rating questions: use sentiment keys based on score ranges - detractors (0-6), passives (7-8), promoters (9-10)
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["response_based"] = "response_based"
+    responseValues: dict[str, float | str]
+    """
+    Only include keys for responses that should branch to a specific question or 'end'. Omit keys for responses that should proceed to the next question (default behavior).
+    """
+
+
+class Branching7(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["specific_question"] = "specific_question"
+    index: float
+
+
+class Questions3(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["rating"] = "rating"
+    display: Literal["number"] = "number"
+    """
+    NPS questions always use numeric scale
+    """
+    scale: Literal[10] = 10
+    """
+    NPS questions always use 0-10 scale
+    """
+    lowerBoundLabel: str | None = None
+    """
+    Label for 0 rating (typically 'Not at all likely')
+    """
+    upperBoundLabel: str | None = None
+    """
+    Label for 10 rating (typically 'Extremely likely')
+    """
+    branching: Branching4 | Branching5 | Branching6 | Branching7 | None = None
+
+
+class Choice(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class Branching8(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["next_question"] = "next_question"
+
+
+class Branching9(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["end"] = "end"
+
+
+class Branching10(BaseModel):
+    """
+    For single choice questions: use choice indices as string keys ("0", "1", "2", etc.)
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["response_based"] = "response_based"
+    responseValues: dict[str, float | str]
+    """
+    Only include keys for responses that should branch to a specific question or 'end'. Omit keys for responses that should proceed to the next question (default behavior).
+    """
+
+
+class Branching11(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["specific_question"] = "specific_question"
+    index: float
+
+
+class Questions4(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["single_choice"] = "single_choice"
+    choices: Annotated[list[Choice], Field(max_length=20, min_length=2)]
+    """
+    Array of choice options. Choice indices (0, 1, 2, etc.) are used for branching logic
+    """
+    shuffleOptions: bool | None = None
+    """
+    Whether to randomize the order of choices for each respondent
+    """
+    hasOpenChoice: bool | None = None
+    """
+    Whether the last choice (typically 'Other', is an open text input question
+    """
+    branching: Branching8 | Branching9 | Branching10 | Branching11 | None = None
+
+
+class Questions5(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["multiple_choice"] = "multiple_choice"
+    choices: Annotated[list[Choice], Field(max_length=20, min_length=2)]
+    """
+    Array of choice options. Multiple selections allowed. No branching logic supported.
+    """
+    shuffleOptions: bool | None = None
+    """
+    Whether to randomize the order of choices for each respondent
+    """
+    hasOpenChoice: bool | None = None
+    """
+    Whether the last choice (typically 'Other', is an open text input question
+    """
+
+
+class ThankYouMessageDescriptionContentType(StrEnum):
+    HTML = "html"
+    TEXT = "text"
+
+
+class Position(StrEnum):
+    TOP_LEFT = "top_left"
+    TOP_CENTER = "top_center"
+    TOP_RIGHT = "top_right"
+    MIDDLE_LEFT = "middle_left"
+    MIDDLE_CENTER = "middle_center"
+    MIDDLE_RIGHT = "middle_right"
+    LEFT = "left"
+    RIGHT = "right"
+    CENTER = "center"
+    NEXT_TO_TRIGGER = "next_to_trigger"
+
+
+class WidgetType(StrEnum):
+    BUTTON = "button"
+    TAB = "tab"
+    SELECTOR = "selector"
+
+
+class Appearance(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    backgroundColor: str | None = None
+    submitButtonColor: str | None = None
+    textColor: str | None = None
+    submitButtonText: str | None = None
+    submitButtonTextColor: str | None = None
+    descriptionTextColor: str | None = None
+    ratingButtonColor: str | None = None
+    ratingButtonActiveColor: str | None = None
+    ratingButtonHoverColor: str | None = None
+    whiteLabel: bool | None = None
+    autoDisappear: bool | None = None
+    displayThankYouMessage: bool | None = None
+    thankYouMessageHeader: str | None = None
+    thankYouMessageDescription: str | None = None
+    thankYouMessageDescriptionContentType: ThankYouMessageDescriptionContentType | None = None
+    thankYouMessageCloseButtonText: str | None = None
+    borderColor: str | None = None
+    position: Position | None = None
+    placeholder: str | None = None
+    shuffleQuestions: bool | None = None
+    surveyPopupDelaySeconds: float | None = None
+    widgetType: WidgetType | None = None
+    widgetSelector: str | None = None
+    widgetLabel: str | None = None
+    widgetColor: str | None = None
+    fontFamily: str | None = None
+    maxWidth: str | None = None
+    zIndex: str | None = None
+    disabledButtonOpacity: str | None = None
+    boxPadding: str | None = None
+
+
+class ResponsesLimit(RootModel[float]):
+    root: Annotated[float, Field(gt=0.0)]
+    """
+    The maximum number of responses before automatically stopping the survey.
+    """
+
+
+class IterationCount(RootModel[float]):
+    root: Annotated[float, Field(gt=0.0)]
+    """
+    For a recurring schedule, this field specifies the number of times the survey should be shown to the user. Use 1 for 'once every X days', higher numbers for multiple repetitions. Works together with iteration_frequency_days to determine the overall survey schedule.
+    """
+
+
+class IterationFrequencyDays(RootModel[float]):
+    root: Annotated[float, Field(gt=0.0, le=365.0)]
+    """
+    For a recurring schedule, this field specifies the interval in days between each survey instance shown to the user, used alongside iteration_count for precise scheduling.
+    """
+
+
+class Property2(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    key: str
+    value: str | float | bool | list[str] | list[float]
+    operator: Operator | None = None
+
+
+class Group2(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    properties: list[Property2]
+    rollout_percentage: float
+
+
+class TargetingFlagFilters(BaseModel):
+    """
+    Target specific users based on their properties. Example: {groups: [{properties: [{key: 'email', value: ['@company.com'], operator: 'icontains'}], rollout_percentage: 100}]}
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    groups: list[Group2]
+
+
+class SurveyCreateSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str, Field(min_length=1)]
+    description: str | None = None
+    type: Type | None = None
+    questions: Annotated[
+        list[Questions | Questions1 | Questions2 | Questions3 | Questions4 | Questions5],
+        Field(min_length=1),
+    ]
+    appearance: Appearance | None = None
+    start_date: datetime | None = None
+    """
+    Setting this will launch the survey immediately. Don't add a start_date unless explicitly requested to do so.
+    """
+    responses_limit: ResponsesLimit | None = None
+    """
+    The maximum number of responses before automatically stopping the survey.
+    """
+    iteration_count: IterationCount | None = None
+    """
+    For a recurring schedule, this field specifies the number of times the survey should be shown to the user. Use 1 for 'once every X days', higher numbers for multiple repetitions. Works together with iteration_frequency_days to determine the overall survey schedule.
+    """
+    iteration_frequency_days: IterationFrequencyDays | None = None
+    """
+    For a recurring schedule, this field specifies the interval in days between each survey instance shown to the user, used alongside iteration_count for precise scheduling.
+    """
+    enable_partial_responses: bool | None = None
+    """
+    When at least one question is answered, the response is stored (true). The response is stored when all questions are answered (false).
+    """
+    linked_flag_id: float | None = None
+    """
+    The feature flag linked to this survey
+    """
+    targeting_flag_filters: TargetingFlagFilters | None = None
+    """
+    Target specific users based on their properties. Example: {groups: [{properties: [{key: 'email', value: ['@company.com'], operator: 'icontains'}], rollout_percentage: 100}]}
+    """
+
+
+class SurveyDeleteSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    surveyId: str
+
+
+class Data8(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    limit: float | None = None
+    offset: float | None = None
+    search: str | None = None
+
+
+class SurveyGetAllSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    data: Data8 | None = None
+
+
+class SurveyGetSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    surveyId: str
+
+
+class SurveyGlobalStatsSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    date_from: datetime | None = None
+    """
+    Optional ISO timestamp for start date (e.g. 2024-01-01T00:00:00Z)
+    """
+    date_to: datetime | None = None
+    """
+    Optional ISO timestamp for end date (e.g. 2024-01-31T23:59:59Z)
+    """
+
+
+class SurveyResponseCountsSchema(BaseModel):
+    pass
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+
+class SurveyStatsSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    survey_id: str
+    date_from: datetime | None = None
+    """
+    Optional ISO timestamp for start date (e.g. 2024-01-01T00:00:00Z)
+    """
+    date_to: datetime | None = None
+    """
+    Optional ISO timestamp for end date (e.g. 2024-01-31T23:59:59Z)
+    """
+
+
+class Questions6(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["open"] = "open"
+
+
+class Questions7(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["link"] = "link"
+    link: AnyUrl
+
+
+class Branching12(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["next_question"] = "next_question"
+
+
+class Branching13(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["end"] = "end"
+
+
+class Branching14(BaseModel):
+    """
+    For rating questions: use sentiment keys based on scale thirds - negative (lower third), neutral (middle third), positive (upper third)
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["response_based"] = "response_based"
+    responseValues: dict[str, float | str]
+    """
+    Only include keys for responses that should branch to a specific question or 'end'. Omit keys for responses that should proceed to the next question (default behavior).
+    """
+
+
+class Branching15(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["specific_question"] = "specific_question"
+    index: float
+
+
+class Questions8(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["rating"] = "rating"
+    display: Display | None = None
+    """
+    Display format: 'number' shows numeric scale, 'emoji' shows emoji scale
+    """
+    scale: Scale | None = None
+    """
+    Rating scale can be one of 3, 5, or 7
+    """
+    lowerBoundLabel: str | None = None
+    """
+    Label for the lowest rating (e.g., 'Very Poor')
+    """
+    upperBoundLabel: str | None = None
+    """
+    Label for the highest rating (e.g., 'Excellent')
+    """
+    branching: Branching12 | Branching13 | Branching14 | Branching15 | None = None
+
+
+class Branching16(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["next_question"] = "next_question"
+
+
+class Branching17(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["end"] = "end"
+
+
+class Branching18(BaseModel):
+    """
+    For NPS rating questions: use sentiment keys based on score ranges - detractors (0-6), passives (7-8), promoters (9-10)
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["response_based"] = "response_based"
+    responseValues: dict[str, float | str]
+    """
+    Only include keys for responses that should branch to a specific question or 'end'. Omit keys for responses that should proceed to the next question (default behavior).
+    """
+
+
+class Branching19(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["specific_question"] = "specific_question"
+    index: float
+
+
+class Questions9(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["rating"] = "rating"
+    display: Literal["number"] = "number"
+    """
+    NPS questions always use numeric scale
+    """
+    scale: Literal[10] = 10
+    """
+    NPS questions always use 0-10 scale
+    """
+    lowerBoundLabel: str | None = None
+    """
+    Label for 0 rating (typically 'Not at all likely')
+    """
+    upperBoundLabel: str | None = None
+    """
+    Label for 10 rating (typically 'Extremely likely')
+    """
+    branching: Branching16 | Branching17 | Branching18 | Branching19 | None = None
+
+
+class Branching20(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["next_question"] = "next_question"
+
+
+class Branching21(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["end"] = "end"
+
+
+class Branching22(BaseModel):
+    """
+    For single choice questions: use choice indices as string keys ("0", "1", "2", etc.)
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["response_based"] = "response_based"
+    responseValues: dict[str, float | str]
+    """
+    Only include keys for responses that should branch to a specific question or 'end'. Omit keys for responses that should proceed to the next question (default behavior).
+    """
+
+
+class Branching23(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Literal["specific_question"] = "specific_question"
+    index: float
+
+
+class Questions10(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["single_choice"] = "single_choice"
+    choices: Annotated[list[Choice], Field(max_length=20, min_length=2)]
+    """
+    Array of choice options. Choice indices (0, 1, 2, etc.) are used for branching logic
+    """
+    shuffleOptions: bool | None = None
+    """
+    Whether to randomize the order of choices for each respondent
+    """
+    hasOpenChoice: bool | None = None
+    """
+    Whether the last choice (typically 'Other', is an open text input question
+    """
+    branching: Branching20 | Branching21 | Branching22 | Branching23 | None = None
+
+
+class Questions11(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: str
+    description: str | None = None
+    descriptionContentType: DescriptionContentType | None = None
+    optional: bool | None = None
+    buttonText: str | None = None
+    type: Literal["multiple_choice"] = "multiple_choice"
+    choices: Annotated[list[Choice], Field(max_length=20, min_length=2)]
+    """
+    Array of choice options. Multiple selections allowed. No branching logic supported.
+    """
+    shuffleOptions: bool | None = None
+    """
+    Whether to randomize the order of choices for each respondent
+    """
+    hasOpenChoice: bool | None = None
+    """
+    Whether the last choice (typically 'Other', is an open text input question
+    """
+
+
+class UrlMatchType(StrEnum):
+    """
+    URL/device matching types: 'regex' (matches regex pattern), 'not_regex' (does not match regex pattern), 'exact' (exact string match), 'is_not' (not exact match), 'icontains' (case-insensitive contains), 'not_icontains' (case-insensitive does not contain)
+    """
+
+    REGEX = "regex"
+    NOT_REGEX = "not_regex"
+    EXACT = "exact"
+    IS_NOT = "is_not"
+    ICONTAINS = "icontains"
+    NOT_ICONTAINS = "not_icontains"
+
+
+class Value(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: str
+
+
+class Events(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    repeatedActivation: bool | None = None
+    """
+    Whether to show the survey every time one of the events is triggered (true), or just once (false)
+    """
+    values: list[Value] | None = None
+    """
+    Array of event names that trigger the survey
+    """
+
+
+class DeviceType(StrEnum):
+    DESKTOP = "Desktop"
+    MOBILE = "Mobile"
+    TABLET = "Tablet"
+
+
+class DeviceTypesMatchType(StrEnum):
+    """
+    URL/device matching types: 'regex' (matches regex pattern), 'not_regex' (does not match regex pattern), 'exact' (exact string match), 'is_not' (not exact match), 'icontains' (case-insensitive contains), 'not_icontains' (case-insensitive does not contain)
+    """
+
+    REGEX = "regex"
+    NOT_REGEX = "not_regex"
+    EXACT = "exact"
+    IS_NOT = "is_not"
+    ICONTAINS = "icontains"
+    NOT_ICONTAINS = "not_icontains"
+
+
+class Conditions(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    url: str | None = None
+    selector: str | None = None
+    seenSurveyWaitPeriodInDays: float | None = None
+    """
+    Don't show this survey to users who saw any survey in the last x days.
+    """
+    urlMatchType: UrlMatchType | None = None
+    """
+    URL/device matching types: 'regex' (matches regex pattern), 'not_regex' (does not match regex pattern), 'exact' (exact string match), 'is_not' (not exact match), 'icontains' (case-insensitive contains), 'not_icontains' (case-insensitive does not contain)
+    """
+    events: Events | None = None
+    deviceTypes: list[DeviceType] | None = None
+    deviceTypesMatchType: DeviceTypesMatchType | None = None
+    """
+    URL/device matching types: 'regex' (matches regex pattern), 'not_regex' (does not match regex pattern), 'exact' (exact string match), 'is_not' (not exact match), 'icontains' (case-insensitive contains), 'not_icontains' (case-insensitive does not contain)
+    """
+    linkedFlagVariant: str | None = None
+    """
+    The variant of the feature flag linked to this survey
+    """
+
+
+class Appearance1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    backgroundColor: str | None = None
+    submitButtonColor: str | None = None
+    textColor: str | None = None
+    submitButtonText: str | None = None
+    submitButtonTextColor: str | None = None
+    descriptionTextColor: str | None = None
+    ratingButtonColor: str | None = None
+    ratingButtonActiveColor: str | None = None
+    ratingButtonHoverColor: str | None = None
+    whiteLabel: bool | None = None
+    autoDisappear: bool | None = None
+    displayThankYouMessage: bool | None = None
+    thankYouMessageHeader: str | None = None
+    thankYouMessageDescription: str | None = None
+    thankYouMessageDescriptionContentType: ThankYouMessageDescriptionContentType | None = None
+    thankYouMessageCloseButtonText: str | None = None
+    borderColor: str | None = None
+    position: Position | None = None
+    placeholder: str | None = None
+    shuffleQuestions: bool | None = None
+    surveyPopupDelaySeconds: float | None = None
+    widgetType: WidgetType | None = None
+    widgetSelector: str | None = None
+    widgetLabel: str | None = None
+    widgetColor: str | None = None
+    fontFamily: str | None = None
+    maxWidth: str | None = None
+    zIndex: str | None = None
+    disabledButtonOpacity: str | None = None
+    boxPadding: str | None = None
+
+
+class Schedule(StrEnum):
+    """
+    Survey scheduling behavior: 'once' = show once per user (default), 'recurring' = repeat based on iteration_count and iteration_frequency_days settings, 'always' = show every time conditions are met (mainly for widget surveys)
+    """
+
+    ONCE = "once"
+    RECURRING = "recurring"
+    ALWAYS = "always"
+
+
+class Property3(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    key: str
+    value: str | float | bool | list[str] | list[float]
+    operator: Operator | None = None
+
+
+class Group3(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    properties: list[Property3]
+    rollout_percentage: float
+
+
+class TargetingFlagFilters1(BaseModel):
+    """
+    Target specific users based on their properties. Example: {groups: [{properties: [{key: 'email', value: ['@company.com'], operator: 'icontains'}], rollout_percentage: 50}]}
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    groups: list[Group3]
+
+
+class SurveyUpdateSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: Annotated[str | None, Field(min_length=1)] = None
+    description: str | None = None
+    type: Type | None = None
+    questions: Annotated[
+        list[Questions6 | Questions7 | Questions8 | Questions9 | Questions10 | Questions11] | None,
+        Field(min_length=1),
+    ] = None
+    conditions: Conditions | None = None
+    appearance: Appearance1 | None = None
+    schedule: Schedule | None = None
+    """
+    Survey scheduling behavior: 'once' = show once per user (default), 'recurring' = repeat based on iteration_count and iteration_frequency_days settings, 'always' = show every time conditions are met (mainly for widget surveys)
+    """
+    start_date: datetime | None = None
+    """
+    When the survey should start being shown to users. Setting this will launch the survey
+    """
+    end_date: datetime | None = None
+    """
+    When the survey stopped being shown to users. Setting this will complete the survey.
+    """
+    archived: bool | None = None
+    responses_limit: ResponsesLimit | None = None
+    """
+    The maximum number of responses before automatically stopping the survey.
+    """
+    iteration_count: IterationCount | None = None
+    """
+    For a recurring schedule, this field specifies the number of times the survey should be shown to the user. Use 1 for 'once every X days', higher numbers for multiple repetitions. Works together with iteration_frequency_days to determine the overall survey schedule.
+    """
+    iteration_frequency_days: IterationFrequencyDays | None = None
+    """
+    For a recurring schedule, this field specifies the interval in days between each survey instance shown to the user, used alongside iteration_count for precise scheduling.
+    """
+    enable_partial_responses: bool | None = None
+    """
+    When at least one question is answered, the response is stored (true). The response is stored when all questions are answered (false).
+    """
+    linked_flag_id: float | None = None
+    """
+    The feature flag to link to this survey
+    """
+    targeting_flag_id: float | None = None
+    """
+    An existing targeting flag to use for this survey
+    """
+    targeting_flag_filters: TargetingFlagFilters1 | None = None
+    """
+    Target specific users based on their properties. Example: {groups: [{properties: [{key: 'email', value: ['@company.com'], operator: 'icontains'}], rollout_percentage: 50}]}
+    """
+    remove_targeting_flag: bool | None = None
+    """
+    Set to true to completely remove all targeting filters from the survey, making it visible to all users (subject to other display conditions like URL matching).
+    """
+    surveyId: str

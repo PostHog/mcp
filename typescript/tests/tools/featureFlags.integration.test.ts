@@ -24,6 +24,7 @@ describe("Feature Flags", { concurrent: false }, () => {
 		featureFlags: [],
 		insights: [],
 		dashboards: [],
+		surveys: [],
 	};
 
 	beforeAll(async () => {

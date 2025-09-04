@@ -21,6 +21,7 @@ describe("Organizations", { concurrent: false }, () => {
 		featureFlags: [],
 		insights: [],
 		dashboards: [],
+		surveys: [],
 	};
 
 	beforeAll(async () => {

@@ -21,6 +21,7 @@ describe("Error Tracking", { concurrent: false }, () => {
 		featureFlags: [],
 		insights: [],
 		dashboards: [],
+		surveys: [],
 	};
 
 	beforeAll(async () => {

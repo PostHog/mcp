@@ -19,6 +19,7 @@ describe("LLM Observability", { concurrent: false }, () => {
 		featureFlags: [],
 		insights: [],
 		dashboards: [],
+		surveys: [],
 	};
 
 	beforeAll(async () => {

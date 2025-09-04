@@ -18,6 +18,7 @@ describe("Documentation", { concurrent: false }, () => {
 		featureFlags: [],
 		insights: [],
 		dashboards: [],
+		surveys: [],
 	};
 
 	beforeAll(async () => {

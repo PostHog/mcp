@@ -10,6 +10,7 @@ import { StateManager } from "@/lib/utils/StateManager";
 import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
 import { hash } from "@/lib/utils/helper-functions";
 import { getToolsFromContext } from "@/tools";
+import toolDefinitions from "@/tools/toolDefinitions";
 import type { CloudRegion, Context, State, Tool } from "@/tools/types";
 
 const INSTRUCTIONS = `
@@ -21,6 +22,7 @@ const INSTRUCTIONS = `
 type RequestProperties = {
 	userHash: string;
 	apiToken: string;
+	products?: string[];
 };
 
 // Define our MCP agent with tools
@@ -182,9 +184,28 @@ export class MyMCP extends McpAgent<Env> {
 		};
 	}
 
+	filterToolsByProducts<TSchema extends z.ZodRawShape>(
+		tools: Tool<z.ZodObject<TSchema>>[],
+		products: string[],
+	): Tool<z.ZodObject<TSchema>>[] {
+		return tools.filter((tool) => {
+			const toolDefinition = toolDefinitions[tool.name];
+			if (!toolDefinition?.product) {
+				return true;
+			}
+
+			return toolDefinition.product === "all" || products.includes(toolDefinition.product);
+		});
+	}
+
 	async init() {
 		const context = await this.getContext();
-		const allTools = getToolsFromContext(context);
+		let allTools = getToolsFromContext(context);
+
+		// Filter tools by products if specified
+		if (this.requestProperties.products) {
+			allTools = this.filterToolsByProducts(allTools, this.requestProperties.products);
+		}
 
 		for (const tool of allTools) {
 			this.registerTool(tool, async (params) => tool.handler(context, params));
@@ -227,9 +248,13 @@ export default {
 			);
 		}
 
+		const products = url.searchParams.get("products");
+		const productsArray = products ? products.split(",").map((p) => p.trim()) : undefined;
+
 		ctx.props = {
 			apiToken: token,
 			userHash: hash(token),
+			products: productsArray,
 		};
 
 		if (url.pathname === "/sse" || url.pathname === "/sse/message") {

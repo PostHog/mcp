@@ -89,6 +89,11 @@
 		"feature": "experiments",
 		"summary": "Get all experiments in the project."
 	},
+	"experiment-get": {
+		"description": "Get details of a specific experiment by ID.",
+		"category": "Experiments",
+		"summary": "Get details of a specific experiment."
+	},
 	"insight-create-from-query": {
 		"description": "Save a query as an insight. You should only do this with a valid query that you have seen, or one you have modified slightly. If the user wants to see data, you should use the \"get-sql-insight\" tool to get that data instead. An insight requires a name, query, and other optional properties. The query should use HogQL, which is a variant of Clickhouse SQL.",
 		"category": "Insights & analytics",

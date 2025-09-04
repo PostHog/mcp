@@ -44,6 +44,10 @@ export const ErrorTrackingListSchema = ListErrorsSchema;
 
 export const ExperimentGetAllSchema = z.object({});
 
+export const ExperimentGetSchema = z.object({
+	experimentId: z.number().describe("The ID of the experiment to retrieve"),
+});
+
 export const FeatureFlagCreateSchema = z.object({
 	name: z.string(),
 	key: z.string(),

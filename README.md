@@ -64,9 +64,9 @@ Available features:
 
 To view which tools are available per feature, see our [documentation](https://posthog.com/docs/model-context-protocol) or alternatively check out `schema/tool-definitions.json`,
 
-### Data residency
+### Data processing
 
-The MCP server is hosted on a Cloudflare worker, this can be located outside of the EU / US, so there is no gaurantee that the data will be processed solely within a specific region.
+The MCP server is hosted on a Cloudflare worker, this can be located outside of the EU / US, so there is no guarantee that the data will be processed solely within a specific region.
 
 ### Using self-hosted instances
 

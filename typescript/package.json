@@ -1,7 +1,7 @@
 {
-	"name": "@posthog/agents",
+	"name": "@posthog/agent-toolkit",
 	"version": "0.1.0",
-	"description": "PostHog MCP tools and integrations for AI agents",
+	"description": "PostHog tools for AI agents",
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",
 	"types": "dist/index.d.ts",

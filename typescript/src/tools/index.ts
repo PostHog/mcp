@@ -32,6 +32,7 @@ import listErrors from "./errorTracking/listErrors";
 
 // Experiments
 import getAllExperiments from "./experiments/getAll";
+import getExperiment from "./experiments/get";
 
 import createInsight from "./insights/create";
 import deleteInsight from "./insights/delete";
@@ -81,6 +82,7 @@ const TOOL_MAP: Record<string, () => Tool<ZodObjectAny>> = {
 
 	// Experiments
 	"experiment-get-all": getAllExperiments,
+	"experiment-get": getExperiment,
 
 	// Insights
 	"insights-get-all": getAllInsights,

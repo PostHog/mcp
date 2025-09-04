@@ -4,6 +4,7 @@ import { ApiClient } from "@/api/client";
 import { StateManager } from "@/lib/utils/StateManager";
 import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
 import { hash } from "@/lib/utils/helper-functions";
+import { getToolsForFeatures as getFilteredToolNames } from "./toolDefinitions";
 
 import createFeatureFlag from "./featureFlags/create";
 import deleteFeatureFlag from "./featureFlags/delete";
@@ -52,54 +53,74 @@ import updateDashboard from "./dashboards/update";
 // LLM Observability
 import getLLMCosts from "./llmObservability/getLLMCosts";
 
-export const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
+// Map of tool names to tool factory functions
+const TOOL_MAP: Record<string, () => Tool<ZodObjectAny>> = {
 	// Feature Flags
-	getFeatureFlagDefinition(),
-	getAllFeatureFlags(),
-	createFeatureFlag(),
-	updateFeatureFlag(),
-	deleteFeatureFlag(),
+	"feature-flag-get-definition": getFeatureFlagDefinition,
+	"feature-flag-get-all": getAllFeatureFlags,
+	"create-feature-flag": createFeatureFlag,
+	"update-feature-flag": updateFeatureFlag,
+	"delete-feature-flag": deleteFeatureFlag,
 
 	// Organizations
-	getOrganizations(),
-	setActiveOrganization(),
-	getOrganizationDetails(),
+	"organizations-get": getOrganizations,
+	"switch-organization": setActiveOrganization,
+	"organization-details-get": getOrganizationDetails,
 
 	// Projects
-	getProjects(),
-	setActiveProject(),
-	propertyDefinitions(),
+	"projects-get": getProjects,
+	"switch-project": setActiveProject,
+	"property-definitions": propertyDefinitions,
 
-	// Documentation
-	...(context.env.INKEEP_API_KEY ? [searchDocs()] : []),
+	// Documentation - handled separately due to env check
+	// "docs-search": searchDocs,
 
 	// Error Tracking
-	listErrors(),
-	errorDetails(),
+	"list-errors": listErrors,
+	"error-details": errorDetails,
 
 	// Experiments
-	getAllExperiments(),
+	"experiment-get-all": getAllExperiments,
 
 	// Insights
-	getAllInsights(),
-	getInsight(),
-	createInsight(),
-	updateInsight(),
-	deleteInsight(),
-	queryInsight(),
-	getSqlInsight(),
+	"insights-get-all": getAllInsights,
+	"insight-get": getInsight,
+	"insight-create-from-query": createInsight,
+	"insight-update": updateInsight,
+	"insight-delete": deleteInsight,
+	"insight-query": queryInsight,
+	"get-sql-insight": getSqlInsight,
 
 	// Dashboards
-	getAllDashboards(),
-	getDashboard(),
-	createDashboard(),
-	updateDashboard(),
-	deleteDashboard(),
-	addInsightToDashboard(),
+	"dashboards-get-all": getAllDashboards,
+	"dashboard-get": getDashboard,
+	"dashboard-create": createDashboard,
+	"dashboard-update": updateDashboard,
+	"dashboard-delete": deleteDashboard,
+	"add-insight-to-dashboard": addInsightToDashboard,
 
 	// LLM Observability
-	getLLMCosts(),
-];
+	"get-llm-total-costs-for-project": getLLMCosts,
+};
+
+export const getToolsFromContext = (
+	context: Context,
+	features?: string[],
+): Tool<ZodObjectAny>[] => {
+	const allowedToolNames = getFilteredToolNames(features);
+	const tools: Tool<ZodObjectAny>[] = [];
+
+	for (const toolName of allowedToolNames) {
+		// Special handling for docs-search which requires API key
+		if (toolName === "docs-search" && context.env.INKEEP_API_KEY) {
+			tools.push(searchDocs());
+		} else if (TOOL_MAP[toolName]) {
+			tools.push(TOOL_MAP[toolName]());
+		}
+	}
+
+	return tools;
+};
 
 export type PostHogToolsOptions = {
 	posthogApiToken: string;

@@ -42,6 +42,27 @@ npx @posthog/wizard@latest mcp add
 - What feature flags do I have active?
 - Add a new feature flag for our homepage redesign
 - What are my most common errors?
+- Show me my LLM costs this week
+
+### Feature Filtering
+
+You can limit which tools are available by adding query parameters to the MCP URL:
+
+```
+https://mcp.posthog.com/mcp?features=flags,workspace
+```
+
+Available features:
+- `workspace` - Organization and project management
+- `error-tracking` - [Error monitoring and debugging](https://posthog.com/docs/errors)
+- `dashboards` - [Dashboard creation and management](https://posthog.com/docs/product-analytics/dashboards)
+- `insights` - [Analytics insights and SQL queries](https://posthog.com/docs/product-analytics/insights)
+- `experiments` - [A/B testing experiments](https://posthog.com/docs/experiments)
+- `flags` - [Feature flag management](https://posthog.com/docs/feature-flags)
+- `llm-analytics` - [LLM usage and cost tracking](https://posthog.com/docs/llm-analytics)
+- `docs` - PostHog documentation search
+
+To view which tools are available per feature, see our [documentation](https://posthog.com/docs/model-context-protocol) or alternatively check out `schema/tool-definitions.json`,
 
 ### Data residency
 
@@ -90,7 +111,7 @@ INKEEP_API_KEY="..."
 
 ### Configuring the Model Context Protocol Inspector
 
-During development you can directly inspect the MCP tool call results using the [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector). 
+During development you can directly inspect the MCP tool call results using the [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector).
 
 You can run it using the following command:
 
@@ -113,4 +134,3 @@ npx
 ```
 -y mcp-remote@latest http://localhost:8787/mcp --header "Authorization: Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}"
 ```
-

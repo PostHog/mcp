@@ -3,6 +3,7 @@ import toolDefinitionsJson from "../../../schema/tool-definitions.json";
 export interface ToolDefinition {
 	description: string;
 	category?: string;
+	feature?: string;
 	summary?: string;
 }
 
@@ -20,4 +21,14 @@ export function getToolDefinition(toolName: string): ToolDefinition {
 	}
 
 	return definition;
+}
+
+export function getToolsForFeatures(features?: string[]): string[] {
+	if (!features || features.length === 0) {
+		return Object.keys(toolDefinitions);
+	}
+
+	return Object.entries(toolDefinitions)
+		.filter(([_, definition]) => definition.feature && features.includes(definition.feature))
+		.map(([toolName, _]) => toolName);
 }

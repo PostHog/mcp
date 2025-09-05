@@ -70,9 +70,10 @@ const HogQLFilters = z.object({
 
 // Entity nodes
 const BaseEntityNode = z.object({
-	id: z.union([z.string(), z.number()]),
+	// id: z.union([z.string(), z.number()]), TODO: what to do with updates and ids?
 	name: z.string().optional(),
 	custom_name: z.string().optional(),
+	math: z.enum(["total"]).optional(),
 	order: z.number().optional(),
 	properties: z.union([z.array(AnyPropertyFilter), PropertyGroupFilter]).optional(),
 });
@@ -134,7 +135,6 @@ const HogQLQuerySchema = z.object({
 	kind: z.literal("HogQLQuery"),
 	query: z.string(),
 	filters: HogQLFilters.optional(),
-	explain: z.boolean().optional(),
 });
 
 // Funnels filter
@@ -160,12 +160,21 @@ const FunnelsQuerySchema = InsightsQueryBase.extend({
 	breakdownFilter: BreakdownFilter.optional(),
 });
 
-// Any insight query
+// Insight Schema
+const InsightVizNodeSchema = z.object({
+	kind: z.literal("InsightVizNode"),
+	source: z.discriminatedUnion("kind", [TrendsQuerySchema, FunnelsQuerySchema]),
+});
 
+const DataVisualizationNodeSchema = z.object({
+	kind: z.literal("DataVisualizationNode"),
+	source: HogQLQuerySchema,
+});
+
+// Any insight query
 const InsightQuerySchema = z.discriminatedUnion("kind", [
-	TrendsQuerySchema,
-	FunnelsQuerySchema,
-	HogQLQuerySchema,
+	InsightVizNodeSchema,
+	DataVisualizationNodeSchema,
 ]);
 
 // Export all schemas
@@ -201,6 +210,8 @@ export {
 	TrendsQuerySchema,
 	FunnelsQuerySchema,
 	HogQLQuerySchema,
+	InsightVizNodeSchema,
+	DataVisualizationNodeSchema,
 	InsightQuerySchema,
 };
 

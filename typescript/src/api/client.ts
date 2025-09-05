@@ -67,6 +67,10 @@ export class ApiClient {
 		options?: RequestInit,
 	): Promise<Result<T>> {
 		try {
+			if (options?.method === 'POST' || options?.method === 'PATCH') {
+				console.log(`[API Request] ${options.method} ${url}, Body: ${options.body}`);
+			}
+			
 			const response = await fetch(url, {
 				...options,
 				headers: {
@@ -80,7 +84,16 @@ export class ApiClient {
 					throw new Error(ErrorCode.INVALID_API_KEY);
 				}
 
-				const errorData = (await response.json()) as any;
+				const errorText = await response.text();
+				console.log(`[API Error] Status: ${response.status}, URL: ${url}, Response: ${errorText}`);
+				
+				let errorData: any;
+				try {
+					errorData = JSON.parse(errorText);
+				} catch {
+					errorData = { detail: errorText };
+				}
+				
 				if (errorData.type === "validation_error" && errorData.code) {
 					throw new Error(`Validation error: ${errorData.code}`);
 				}
@@ -468,17 +481,9 @@ export class ApiClient {
 				insightId,
 				data,
 			}: { insightId: number; data: any }): Promise<Result<SimpleInsight>> => {
-				const updateResponseSchema = z
-					.object({
-						id: z.number(),
-						name: z.string(),
-						short_id: z.string(),
-					})
-					.passthrough();
-
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
-					updateResponseSchema,
+					SimpleInsightSchema,
 					{
 						method: "PATCH",
 						body: JSON.stringify(data),

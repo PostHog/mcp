@@ -15,7 +15,7 @@ import type { CloudRegion, Context, State, Tool } from "@/tools/types";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
-- If some resource from another tool is not found, ask the user if they want to try finding it in another project.
+- If you get errors due to permissions being denied, check that you have the correct active project and that the user has access to the required project.
 - If you cannot answer the user's PostHog related request or question using other available tools in this MCP, use the 'docs-search' tool to provide information from the documentation to guide user how they can do it themselves - when doing so provide condensed instructions with links to sources.
 `;
 
@@ -27,7 +27,7 @@ type RequestProperties = {
 // Define our MCP agent with tools
 export class MyMCP extends McpAgent<Env> {
 	server = new McpServer({
-		name: "PostHog MCP",
+		name: "PostHog",
 		version: "1.0.0",
 		instructions: INSTRUCTIONS,
 	});

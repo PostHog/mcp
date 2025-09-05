@@ -5,6 +5,7 @@ import type { z } from "zod";
 import { ApiClient } from "@/api/client";
 import { getPostHogClient } from "@/integrations/mcp/utils/client";
 import { handleToolError } from "@/integrations/mcp/utils/handleToolError";
+import type { AnalyticsEvent } from "@/lib/analytics";
 import { CUSTOM_BASE_URL, MCP_DOCS_URL } from "@/lib/constants";
 import { StateManager } from "@/lib/utils/StateManager";
 import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
@@ -131,7 +132,7 @@ export class MyMCP extends McpAgent<Env> {
 		return _distinctId;
 	}
 
-	async trackEvent(event: string, properties: Record<string, any> = {}) {
+	async trackEvent(event: AnalyticsEvent, properties: Record<string, any> = {}) {
 		try {
 			const distinctId = await this.getDistinctId();
 
@@ -148,8 +149,26 @@ export class MyMCP extends McpAgent<Env> {
 		handler: (params: z.infer<z.ZodObject<TSchema>>) => Promise<any>,
 	): void {
 		const wrappedHandler = async (params: z.infer<z.ZodObject<TSchema>>) => {
+			const validation = tool.schema.safeParse(params);
+
+			console.log("Tool called:", tool.name, "validation:", validation.success);
+
+			if (!validation.success) {
+				await this.trackEvent("mcp tool call", {
+					tool: tool.name,
+					valid_input: false,
+				});
+				return [
+					{
+						type: "text",
+						text: `Invalid input: ${validation.error.message}`,
+					},
+				];
+			}
+
 			await this.trackEvent("mcp tool call", {
 				tool: tool.name,
+				valid_input: true,
 			});
 
 			try {

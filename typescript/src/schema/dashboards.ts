@@ -10,7 +10,6 @@ export const DashboardTileSchema = z.object({
 		created_at: z.string().nullish(),
 		updated_at: z.string().nullish(),
 		favorited: z.boolean().nullish(),
-		saved: z.boolean().nullish(),
 		tags: z.array(z.string()).nullish(),
 	}),
 	order: z.number(),

@@ -21,7 +21,6 @@ export const InsightSchema = z.object({
 		})
 		.optional()
 		.nullable(),
-	saved: z.boolean(),
 	favorited: z.boolean().nullish(),
 	deleted: z.boolean(),
 	dashboard: z.number().nullish(),
@@ -48,7 +47,6 @@ export const CreateInsightInputSchema = z.object({
 	name: z.string(),
 	query: InsightQuerySchema,
 	description: z.string().optional(),
-	saved: z.boolean().default(true),
 	favorited: z.boolean().default(false),
 	tags: z.array(z.string()).optional(),
 });
@@ -58,7 +56,6 @@ export const UpdateInsightInputSchema = z.object({
 	description: z.string().optional(),
 	filters: z.record(z.any()).optional(),
 	query: z.record(z.any()).optional(),
-	saved: z.boolean().optional(),
 	favorited: z.boolean().optional(),
 	dashboard: z.number().optional(),
 	tags: z.array(z.string()).optional(),
@@ -67,7 +64,6 @@ export const UpdateInsightInputSchema = z.object({
 export const ListInsightsSchema = z.object({
 	limit: z.number().optional(),
 	offset: z.number().optional(),
-	saved: z.boolean().optional(),
 	favorited: z.boolean().optional(),
 	search: z.string().optional(),
 });

@@ -377,7 +377,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 					},
-					saved: true,
 					favorited: false,
 				},
 			});
@@ -440,7 +439,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							interval: "day",
 						},
 					},
-					saved: true,
 					favorited: false,
 				};
 
@@ -496,7 +494,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 						favorited: false,
-						saved: true,
 					};
 
 					const result = await client.insights({ projectId: testProjectId }).create({
@@ -546,7 +543,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 						favorited: false,
-						saved: true,
 					};
 
 					const result = await client.insights({ projectId: testProjectId }).create({
@@ -594,7 +590,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 						favorited: false,
-						saved: true,
 					};
 
 					const result = await client.insights({ projectId: testProjectId }).create({
@@ -639,7 +634,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 						},
 					},
 					favorited: false,
-					saved: true,
 				};
 
 				const result = await client.insights({ projectId: testProjectId }).create({
@@ -694,7 +688,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 						},
 					},
 					favorited: false,
-					saved: true,
 				};
 
 				const result = await client.insights({ projectId: testProjectId }).create({
@@ -740,7 +733,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 						},
 					},
 					favorited: false,
-					saved: true,
 				};
 
 				const result = await client.insights({ projectId: testProjectId }).create({
@@ -797,7 +789,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 						favorited: false,
-						saved: true,
 					};
 
 					const result = await client.insights({ projectId: testProjectId }).create({
@@ -853,7 +844,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 						favorited: false,
-						saved: true,
 					};
 
 					const result = await client.insights({ projectId: testProjectId }).create({
@@ -906,7 +896,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 						favorited: false,
-						saved: true,
 					};
 
 					const result = await client.insights({ projectId: testProjectId }).create({
@@ -946,7 +935,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 					},
-					saved: true,
 					favorited: false,
 				};
 
@@ -995,7 +983,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 					},
-					saved: true,
 					favorited: false,
 				};
 
@@ -1050,7 +1037,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 					},
-					saved: true,
 					favorited: false,
 				};
 

@@ -38,6 +38,7 @@ const definition = getToolDefinition("list-errors");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "list-errors",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: listErrorsHandler,

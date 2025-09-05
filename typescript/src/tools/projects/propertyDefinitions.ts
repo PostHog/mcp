@@ -24,6 +24,7 @@ const definition = getToolDefinition("property-definitions");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "property-definitions",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: propertyDefinitionsHandler,

@@ -25,6 +25,7 @@ const definition = getToolDefinition("experiment-get");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "experiment-get",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: getHandler,

@@ -28,6 +28,7 @@ export const updateHandler = async (context: Context, params: Params) => {
 
 const tool = (): Tool<typeof schema> => ({
 	name: "dashboard-update",
+	title: getToolDefinition("dashboard-update").title,
 	description: getToolDefinition("dashboard-update").description,
 	schema,
 	handler: updateHandler,

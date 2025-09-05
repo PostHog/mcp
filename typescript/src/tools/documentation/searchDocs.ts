@@ -30,6 +30,7 @@ const definition = getToolDefinition("docs-search");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "docs-search",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: searchDocsHandler,

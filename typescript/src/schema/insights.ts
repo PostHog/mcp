@@ -3,10 +3,11 @@ import { InsightQuerySchema } from "./query";
 
 export const InsightSchema = z.object({
 	id: z.number(),
+	short_id: z.string(),
 	name: z.string().nullish(),
 	description: z.string().nullish(),
 	filters: z.record(z.any()),
-	query: z.record(z.any()).nullish(),
+	query: z.any().nullish(),
 	result: z.any().optional(),
 	created_at: z.string(),
 	updated_at: z.string(),
@@ -20,7 +21,6 @@ export const InsightSchema = z.object({
 		})
 		.optional()
 		.nullable(),
-	saved: z.boolean(),
 	favorited: z.boolean().nullish(),
 	deleted: z.boolean(),
 	dashboard: z.number().nullish(),
@@ -31,11 +31,22 @@ export const InsightSchema = z.object({
 	tags: z.array(z.string()).nullish(),
 });
 
+export const SimpleInsightSchema = InsightSchema.pick({
+	id: true,
+	name: true,
+	short_id: true,
+	description: true,
+	filters: true,
+	query: true,
+	created_at: true,
+	updated_at: true,
+	favorited: true,
+});
+
 export const CreateInsightInputSchema = z.object({
 	name: z.string(),
 	query: InsightQuerySchema,
 	description: z.string().optional(),
-	saved: z.boolean().default(true),
 	favorited: z.boolean().default(false),
 	tags: z.array(z.string()).optional(),
 });
@@ -45,7 +56,6 @@ export const UpdateInsightInputSchema = z.object({
 	description: z.string().optional(),
 	filters: z.record(z.any()).optional(),
 	query: z.record(z.any()).optional(),
-	saved: z.boolean().optional(),
 	favorited: z.boolean().optional(),
 	dashboard: z.number().optional(),
 	tags: z.array(z.string()).optional(),
@@ -54,7 +64,6 @@ export const UpdateInsightInputSchema = z.object({
 export const ListInsightsSchema = z.object({
 	limit: z.number().optional(),
 	offset: z.number().optional(),
-	saved: z.boolean().optional(),
 	favorited: z.boolean().optional(),
 	search: z.string().optional(),
 });
@@ -63,6 +72,7 @@ export type PostHogInsight = z.infer<typeof InsightSchema>;
 export type CreateInsightInput = z.infer<typeof CreateInsightInputSchema>;
 export type UpdateInsightInput = z.infer<typeof UpdateInsightInputSchema>;
 export type ListInsightsData = z.infer<typeof ListInsightsSchema>;
+export type SimpleInsight = z.infer<typeof SimpleInsightSchema>;
 
 export const SQLInsightResponseSchema = z.array(
 	z.object({

@@ -5,6 +5,7 @@ import type { z } from "zod";
 import { ApiClient } from "@/api/client";
 import { getPostHogClient } from "@/integrations/mcp/utils/client";
 import { handleToolError } from "@/integrations/mcp/utils/handleToolError";
+import type { AnalyticsEvent } from "@/lib/analytics";
 import { CUSTOM_BASE_URL, MCP_DOCS_URL } from "@/lib/constants";
 import { StateManager } from "@/lib/utils/StateManager";
 import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
@@ -14,7 +15,7 @@ import type { CloudRegion, Context, State, Tool } from "@/tools/types";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
-- If some resource from another tool is not found, ask the user if they want to try finding it in another project.
+- If you get errors due to permissions being denied, check that you have the correct active project and that the user has access to the required project.
 - If you cannot answer the user's PostHog related request or question using other available tools in this MCP, use the 'docs-search' tool to provide information from the documentation to guide user how they can do it themselves - when doing so provide condensed instructions with links to sources.
 `;
 
@@ -26,7 +27,7 @@ type RequestProperties = {
 // Define our MCP agent with tools
 export class MyMCP extends McpAgent<Env> {
 	server = new McpServer({
-		name: "PostHog MCP",
+		name: "PostHog",
 		version: "1.0.0",
 		instructions: INSTRUCTIONS,
 	});
@@ -131,7 +132,7 @@ export class MyMCP extends McpAgent<Env> {
 		return _distinctId;
 	}
 
-	async trackEvent(event: string, properties: Record<string, any> = {}) {
+	async trackEvent(event: AnalyticsEvent, properties: Record<string, any> = {}) {
 		try {
 			const distinctId = await this.getDistinctId();
 
@@ -148,8 +149,26 @@ export class MyMCP extends McpAgent<Env> {
 		handler: (params: z.infer<z.ZodObject<TSchema>>) => Promise<any>,
 	): void {
 		const wrappedHandler = async (params: z.infer<z.ZodObject<TSchema>>) => {
+			const validation = tool.schema.safeParse(params);
+
+			console.log("Tool called:", tool.name, "validation:", validation.success);
+
+			if (!validation.success) {
+				await this.trackEvent("mcp tool call", {
+					tool: tool.name,
+					valid_input: false,
+				});
+				return [
+					{
+						type: "text",
+						text: `Invalid input: ${validation.error.message}`,
+					},
+				];
+			}
+
 			await this.trackEvent("mcp tool call", {
 				tool: tool.name,
+				valid_input: true,
 			});
 
 			try {

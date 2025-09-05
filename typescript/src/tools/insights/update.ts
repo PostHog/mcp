@@ -1,8 +1,8 @@
 import { InsightUpdateSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
-import { resolveInsightId } from "./utils";
 import type { z } from "zod";
+import { resolveInsightId } from "./utils";
 
 const schema = InsightUpdateSchema;
 
@@ -13,6 +13,7 @@ export const updateHandler = async (context: Context, params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
 	const numericId = await resolveInsightId(context, insightId, projectId);
+
 	const insightResult = await context.api.insights({ projectId }).update({
 		insightId: numericId,
 		data,

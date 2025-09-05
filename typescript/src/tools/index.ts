@@ -29,16 +29,16 @@ import errorDetails from "./errorTracking/errorDetails";
 // Error Tracking
 import listErrors from "./errorTracking/listErrors";
 
+import getExperiment from "./experiments/get";
 // Experiments
 import getAllExperiments from "./experiments/getAll";
-import getExperiment from "./experiments/get";
 
 import createInsight from "./insights/create";
 import deleteInsight from "./insights/delete";
+import generateHogQLFromQuestion from "./insights/generateHogQLFromQuestion";
 import getInsight from "./insights/get";
 // Insights
 import getAllInsights from "./insights/getAll";
-import getSqlInsight from "./insights/getSqlInsight";
 import queryInsight from "./insights/query";
 import updateInsight from "./insights/update";
 
@@ -91,7 +91,7 @@ export const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
 	updateInsight(),
 	deleteInsight(),
 	queryInsight(),
-	getSqlInsight(),
+	generateHogQLFromQuestion(),
 
 	// Dashboards
 	getAllDashboards(),

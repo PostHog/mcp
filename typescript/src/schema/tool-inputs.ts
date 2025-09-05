@@ -89,8 +89,8 @@ export const InsightGetAllSchema = z.object({
 	data: ListInsightsSchema.optional(),
 });
 
-export const InsightGetSqlSchema = z.object({
-	query: z
+export const InsightGenerateHogQLFromQuestionSchema = z.object({
+	question: z
 		.string()
 		.max(1000)
 		.describe("Your natural language query describing the SQL insight (max 1000 characters)."),

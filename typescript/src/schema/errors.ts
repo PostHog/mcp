@@ -26,9 +26,7 @@ export const ListErrorsSchema = z.object({
 	dateTo: z.string().datetime().optional(),
 	orderDirection: z.nativeEnum(OrderDirectionErrors).optional(),
 	filterTestAccounts: z.boolean().optional(),
-	// limit: z.number().optional(),
 	status: z.nativeEnum(StatusErrors).optional(),
-	// TODO: assigned to
 });
 
 export const ErrorDetailsSchema = z.object({

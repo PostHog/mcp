@@ -1,4 +1,5 @@
 import { SurveyGetAllSchema } from "@/schema/tool-inputs";
+import { formatSurveys } from "@/tools/surveys/utils/survey-utils";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
 import type { z } from "zod";
@@ -7,31 +8,16 @@ const schema = SurveyGetAllSchema;
 type Params = z.infer<typeof schema>;
 
 export const getAllHandler = async (context: Context, params: Params) => {
-	const { data } = params;
 	const projectId = await context.stateManager.getProjectId();
 
-	const surveysResult = await context.api
-		.surveys({ projectId })
-		.list(data ? { params: data } : {});
+	const surveysResult = await context.api.surveys({ projectId }).list(params ? { params } : {});
 
 	if (!surveysResult.success) {
 		throw new Error(`Failed to get surveys: ${surveysResult.error.message}`);
 	}
 
-	// Format the surveys with better status display
-	const formattedSurveys = surveysResult.data.map((survey) => ({
-		...survey,
-		status: survey.archived
-			? "archived"
-			: survey.start_date === null || survey.start_date === undefined
-				? "draft"
-				: survey.end_date
-					? "completed"
-					: "active",
-		end_date: survey.end_date || undefined, // Don't show null end_date
-	}));
+	const formattedSurveys = formatSurveys(surveysResult.data, context, projectId);
 
-	// Return the response in the expected format with results property
 	const response = {
 		results: formattedSurveys,
 	};
@@ -51,7 +37,7 @@ const tool = (): Tool<typeof schema> => ({
 	annotations: {
 		destructiveHint: false,
 		idempotentHint: true,
-		openWorldHint: false,
+		openWorldHint: true,
 		readOnlyHint: true,
 	},
 });

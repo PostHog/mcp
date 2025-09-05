@@ -1,4 +1,5 @@
 import { SurveyUpdateSchema } from "@/schema/tool-inputs";
+import { formatSurvey } from "@/tools/surveys/utils/survey-utils";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
 import type { z } from "zod";
@@ -37,14 +38,10 @@ export const updateHandler = async (context: Context, params: Params) => {
 		throw new Error(`Failed to update survey: ${surveyResult.error.message}`);
 	}
 
-	// Add helpful URL for the survey
-	const surveyWithUrl = {
-		...surveyResult.data,
-		url: `${context.api.getProjectBaseUrl(projectId)}/surveys/${surveyResult.data.id}?edit=true`,
-	};
+	const formattedSurvey = formatSurvey(surveyResult.data, context, projectId);
 
 	return {
-		content: [{ type: "text", text: JSON.stringify(surveyWithUrl) }],
+		content: [{ type: "text", text: JSON.stringify(formattedSurvey) }],
 	};
 };
 

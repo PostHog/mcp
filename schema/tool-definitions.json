@@ -167,11 +167,17 @@
 		"summary": "Fetches projects that the user has access to in the current organization.",
 		"title": "Get projects"
 	},
-	"property-definitions": {
-		"description": "Get event and property definitions for the project.",
-		"category": "Organization & project management",
-		"summary": "Get event and property definitions for the project.",
-		"title": "Get events and properties"
+	"event-definitions-list": {
+		"description": "List all event definitions in the project with optional filtering. Can filter by search term.",
+		"category": "Events & properties",
+		"summary": "List all event definitions in the project with optional filtering.",
+		"title": "List all events"
+	},
+	"event-properties-get": {
+		"description": "Get common properties for an event.",
+		"category": "Events & properties",
+		"summary": "Get common properties for an event.",
+		"title": "Get event properties"
 	},
 	"switch-project": {
 		"description": "Change the active project from the default project. You should only use this tool if the user asks you to change the project - otherwise, the default project will be used.",

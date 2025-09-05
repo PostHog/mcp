@@ -164,9 +164,14 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 		});
 
 		it("should get property definitions", async () => {
-			const result = await client
-				.projects()
-				.propertyDefinitions({ projectId: testProjectId });
+			const result = await client.projects().propertyDefinitions({
+				projectId: testProjectId,
+				eventNames: ["$pageview"],
+				excludeCoreProperties: true,
+				filterByEventNames: true,
+				isFeatureFlag: false,
+				limit: 100,
+			});
 
 			expect(result.success).toBe(true);
 
@@ -177,6 +182,53 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 					expect(propDef).toHaveProperty("id");
 					expect(propDef).toHaveProperty("name");
 				}
+			}
+		});
+
+		it("should get event definitions", async () => {
+			const result = await client.projects().eventDefinitions({ projectId: testProjectId });
+
+			expect(result.success).toBe(true);
+
+			if (result.success) {
+				expect(Array.isArray(result.data)).toBe(true);
+				if (result.data.length > 0) {
+					const eventDef = result.data[0];
+					expect(eventDef).toHaveProperty("id");
+					expect(eventDef).toHaveProperty("name");
+					expect(eventDef).toHaveProperty("last_seen_at");
+				}
+			}
+		});
+
+		it("should get event definitions with search parameter", async () => {
+			const result = await client.projects().eventDefinitions({
+				projectId: testProjectId,
+				search: "pageview",
+			});
+
+			expect(result.success).toBe(true);
+
+			if (result.success) {
+				expect(Array.isArray(result.data)).toBe(true);
+				// All returned events should contain "pageview" in their name
+				for (const eventDef of result.data) {
+					expect(eventDef.name.toLowerCase()).toContain("pageview");
+				}
+			}
+		});
+
+		it("should return empty array when searching for non-existent events", async () => {
+			const result = await client.projects().eventDefinitions({
+				projectId: testProjectId,
+				search: "non-existent-event-xyz123",
+			});
+
+			expect(result.success).toBe(true);
+
+			if (result.success) {
+				expect(Array.isArray(result.data)).toBe(true);
+				expect(result.data.length).toBe(0);
 			}
 		});
 	});

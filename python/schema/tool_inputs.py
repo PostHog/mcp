@@ -441,6 +441,16 @@ class OrganizationSetActiveSchema(BaseModel):
     orgId: UUID
 
 
+class ProjectEventDefinitionsSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    q: str | None = None
+    """
+    Search query to filter event names. Only use if there are lots of events.
+    """
+
+
 class ProjectGetAllSchema(BaseModel):
     pass
     model_config = ConfigDict(
@@ -449,10 +459,13 @@ class ProjectGetAllSchema(BaseModel):
 
 
 class ProjectPropertyDefinitionsSchema(BaseModel):
-    pass
     model_config = ConfigDict(
         extra="forbid",
     )
+    eventName: str
+    """
+    Event name to filter properties by
+    """
 
 
 class ProjectSetActiveSchema(BaseModel):

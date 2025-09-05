@@ -1,6 +1,12 @@
 import { ErrorCode } from "@/lib/errors";
 import { withPagination } from "@/lib/utils/api";
-import { ApiPropertyDefinitionSchema } from "@/schema/api";
+import { getSearchParamsFromRecord } from "@/lib/utils/helper-functions";
+import {
+	type ApiEventDefinition,
+	ApiEventDefinitionSchema,
+	type ApiPropertyDefinition,
+	ApiPropertyDefinitionSchema,
+} from "@/schema/api";
 import {
 	type CreateDashboardInput,
 	CreateDashboardInputSchema,
@@ -174,10 +180,39 @@ export class ApiClient {
 
 			propertyDefinitions: async ({
 				projectId,
-			}: { projectId: string }): Promise<Result<any[]>> => {
+				eventNames,
+				excludeCoreProperties,
+				filterByEventNames,
+				isFeatureFlag,
+				limit,
+				offset,
+			}: {
+				projectId: string;
+				eventNames?: string[];
+				excludeCoreProperties?: boolean;
+				filterByEventNames?: boolean;
+				isFeatureFlag?: boolean;
+				limit?: number;
+				offset?: number;
+			}): Promise<Result<ApiPropertyDefinition[]>> => {
 				try {
+					const params = {
+						event_names: eventNames?.length ? JSON.stringify(eventNames) : undefined,
+						exclude_core_properties: excludeCoreProperties,
+						filter_by_event_names: filterByEventNames,
+						is_feature_flag: isFeatureFlag,
+						limit,
+						offset,
+					};
+
+					const searchParams = getSearchParamsFromRecord(params);
+
+					const url = `${this.baseUrl}/api/projects/${projectId}/property_definitions/${
+						searchParams.toString() ? `?${searchParams}` : ""
+					}`;
+
 					const propertyDefinitions = await withPagination(
-						`${this.baseUrl}/api/projects/${projectId}/property_definitions/`,
+						url,
 						this.config.apiToken,
 						ApiPropertyDefinitionSchema,
 					);
@@ -186,11 +221,30 @@ export class ApiClient {
 						(def) => !def.hidden,
 					);
 
-					const validated = propertyDefinitionsWithoutHidden.map((def) =>
-						PropertyDefinitionSchema.parse(def),
+					return { success: true, data: propertyDefinitionsWithoutHidden };
+				} catch (error) {
+					return { success: false, error: error as Error };
+				}
+			},
+
+			eventDefinitions: async ({
+				projectId,
+				search,
+			}: { projectId: string; search?: string | undefined }): Promise<
+				Result<ApiEventDefinition[]>
+			> => {
+				try {
+					const searchParams = getSearchParamsFromRecord({ search });
+
+					const requestUrl = `${this.baseUrl}/api/projects/${projectId}/event_definitions/${searchParams.toString() ? `?${searchParams}` : ""}`;
+
+					const eventDefinitions = await withPagination(
+						requestUrl,
+						this.config.apiToken,
+						ApiEventDefinitionSchema,
 					);
 
-					return { success: true, data: validated };
+					return { success: true, data: eventDefinitions };
 				} catch (error) {
 					return { success: false, error: error as Error };
 				}

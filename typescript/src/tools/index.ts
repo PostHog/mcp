@@ -52,6 +52,7 @@ import updateDashboard from "./dashboards/update";
 
 // LLM Observability
 import getLLMCosts from "./llmObservability/getLLMCosts";
+import eventDefinitions from "./projects/eventDefinitions";
 
 export const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
 	// Feature Flags
@@ -70,6 +71,7 @@ export const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
 	getProjects(),
 	setActiveProject(),
 	propertyDefinitions(),
+	eventDefinitions(),
 
 	// Documentation
 	...(context.env.INKEEP_API_KEY ? [searchDocs()] : []),

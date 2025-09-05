@@ -309,24 +309,24 @@ export const SurveyQuestionInputSchema = z
 // Output schema - permissive for API responses
 export const SurveyQuestionOutputSchema = z.object({
 	type: z.string(),
-	question: z.string().optional(),
-	description: z.string().optional(),
-	descriptionContentType: z.enum(["html", "text"]).optional(),
-	optional: z.boolean().optional(),
-	buttonText: z.string().optional(),
+	question: z.string().nullish(),
+	description: z.string().nullish(),
+	descriptionContentType: z.enum(["html", "text"]).nullish(),
+	optional: z.boolean().nullish(),
+	buttonText: z.string().nullish(),
 	// Rating question fields
-	display: z.string().optional(),
-	scale: z.number().optional(),
-	lowerBoundLabel: z.string().optional(),
-	upperBoundLabel: z.string().optional(),
+	display: z.string().nullish(),
+	scale: z.number().nullish(),
+	lowerBoundLabel: z.string().nullish(),
+	upperBoundLabel: z.string().nullish(),
 	// Choice question fields
-	choices: z.array(z.string()).optional(),
-	shuffleOptions: z.boolean().optional(),
-	hasOpenChoice: z.boolean().optional(),
+	choices: z.array(z.string()).nullish(),
+	shuffleOptions: z.boolean().nullish(),
+	hasOpenChoice: z.boolean().nullish(),
 	// Link question fields
-	link: z.string().optional(),
+	link: z.string().nullish(),
 	// Branching logic
-	branching: z.any().optional(),
+	branching: z.any().nullish(),
 });
 
 // Survey targeting conditions - used in input schema
@@ -565,25 +565,25 @@ export const ListSurveysInputSchema = z.object({
 export const SurveyOutputSchema = z.object({
 	id: z.string(),
 	name: z.string(),
-	description: z.string().optional(),
+	description: z.string().nullish(),
 	type: z.enum(["popover", "api", "widget", "external_survey"]),
 	questions: z.array(SurveyQuestionOutputSchema),
-	conditions: SurveyConditions.nullable().optional(),
-	appearance: SurveyAppearance.nullable().optional(),
+	conditions: SurveyConditions.nullish(),
+	appearance: SurveyAppearance.nullish(),
 	created_at: z.string(),
-	created_by: User.optional(),
-	start_date: z.string().nullable().optional(),
-	end_date: z.string().nullable().optional(),
-	archived: z.boolean().optional(),
-	responses_limit: z.number().nullable().optional(),
-	iteration_count: z.number().nullable().optional(),
-	iteration_frequency_days: z.number().nullable().optional(),
-	enable_partial_responses: z.boolean().optional(),
-	linked_flag_id: z.number().nullable().optional(),
-	schedule: z.string().optional(),
+	created_by: User.nullish(),
+	start_date: z.string().nullish(),
+	end_date: z.string().nullish(),
+	archived: z.boolean().nullish(),
+	responses_limit: z.number().nullish(),
+	iteration_count: z.number().nullish(),
+	iteration_frequency_days: z.number().nullish(),
+	enable_partial_responses: z.boolean().nullish(),
+	linked_flag_id: z.number().nullish(),
+	schedule: z.string().nullish(),
 	targeting_flag: z
 		.any()
-		.optional()
+		.nullish()
 		.describe(
 			"Target specific users based on their properties. Example: {groups: [{properties: [{key: 'email', value: ['@company.com'], operator: 'icontains'}], rollout_percentage: 50}]}",
 		),
@@ -593,48 +593,48 @@ export const SurveyOutputSchema = z.object({
 export const SurveyListItemOutputSchema = z.object({
 	id: z.string(),
 	name: z.string(),
-	description: z.string().nullable().optional(),
+	description: z.string().nullish(),
 	type: z.enum(["popover", "api", "widget", "external_survey"]),
-	archived: z.boolean().optional(),
+	archived: z.boolean().nullish(),
 	created_at: z.string(),
-	created_by: User.nullable().optional(),
-	start_date: z.string().nullable().optional(),
-	end_date: z.string().nullable().optional(),
-	conditions: z.any().optional(),
-	responses_limit: z.number().nullable().optional(),
-	targeting_flag: z.any().optional(),
-	iteration_count: z.number().nullable().optional(),
-	iteration_frequency_days: z.number().nullable().optional(),
+	created_by: User.nullish(),
+	start_date: z.string().nullish(),
+	end_date: z.string().nullish(),
+	conditions: z.any().nullish(),
+	responses_limit: z.number().nullish(),
+	targeting_flag: z.any().nullish(),
+	iteration_count: z.number().nullish(),
+	iteration_frequency_days: z.number().nullish(),
 });
 
 // Survey response statistics schemas
 export const SurveyEventStatsOutputSchema = z.object({
-	total_count: z.number().optional(),
-	total_count_only_seen: z.number().optional(),
-	unique_persons: z.number().optional(),
-	unique_persons_only_seen: z.number().optional(),
-	first_seen: z.string().nullable().optional(),
-	last_seen: z.string().nullable().optional(),
+	total_count: z.number().nullish(),
+	total_count_only_seen: z.number().nullish(),
+	unique_persons: z.number().nullish(),
+	unique_persons_only_seen: z.number().nullish(),
+	first_seen: z.string().nullish(),
+	last_seen: z.string().nullish(),
 });
 
 export const SurveyRatesOutputSchema = z.object({
-	response_rate: z.number().optional(),
-	dismissal_rate: z.number().optional(),
-	unique_users_response_rate: z.number().optional(),
-	unique_users_dismissal_rate: z.number().optional(),
+	response_rate: z.number().nullish(),
+	dismissal_rate: z.number().nullish(),
+	unique_users_response_rate: z.number().nullish(),
+	unique_users_dismissal_rate: z.number().nullish(),
 });
 
 export const SurveyResponseStatsOutputSchema = z.object({
-	survey_id: z.string().optional(),
-	start_date: z.string().nullable().optional(),
-	end_date: z.string().nullable().optional(),
-	survey_shown: SurveyEventStatsOutputSchema.optional(),
-	survey_dismissed: SurveyEventStatsOutputSchema.optional(),
-	survey_sent: SurveyEventStatsOutputSchema.optional(),
-	response_rate: z.number().optional(),
-	dismissal_rate: z.number().optional(),
-	unique_users_response_rate: z.number().optional(),
-	unique_users_dismissal_rate: z.number().optional(),
+	survey_id: z.string().nullish(),
+	start_date: z.string().nullish(),
+	end_date: z.string().nullish(),
+	survey_shown: SurveyEventStatsOutputSchema.nullish(),
+	survey_dismissed: SurveyEventStatsOutputSchema.nullish(),
+	survey_sent: SurveyEventStatsOutputSchema.nullish(),
+	response_rate: z.number().nullish(),
+	dismissal_rate: z.number().nullish(),
+	unique_users_response_rate: z.number().nullish(),
+	unique_users_dismissal_rate: z.number().nullish(),
 });
 
 export const GetSurveyStatsInputSchema = z.object({

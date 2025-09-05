@@ -68,20 +68,50 @@ const HogQLFilters = z.object({
 	filterTestAccounts: z.boolean().optional(),
 });
 
-// Entity nodes
-const BaseEntityNode = z.object({
+// Math types that don't require a property
+const BaseMathType = z.enum([
+	"total",
+	"dau",
+	"weekly_active",
+	"monthly_active",
+	"unique_session",
+	"first_time_for_user",
+	"first_matching_event_for_user",
+]);
+
+// Math types that require a math_property
+const PropertyMathType = z.enum(["avg", "sum", "min", "max", "median", "p75", "p90", "p95", "p99"]);
+
+// Combined math types
+const MathType = z.union([BaseMathType, PropertyMathType]);
+
+const PROPERTY_MATH_TYPES = ["avg", "sum", "min", "max", "median", "p75", "p90", "p95", "p99"];
+
+// Base entity object without refinement for extension
+const BaseEntityObject = z.object({
 	// id: z.union([z.string(), z.number()]), TODO: what to do with updates and ids?
 	custom_name: z.string().optional(),
-	math: z.enum(["total"]).optional(),
+	math: MathType.optional(),
+	math_property: z.string().optional(),
 	// order: z.number().optional(), this is getting used in funnels incorrectly
 	properties: z.union([z.array(AnyPropertyFilter), PropertyGroupFilter]).optional(),
 });
 
-const EventsNode = BaseEntityNode.extend({
+const EventsNode = BaseEntityObject.extend({
 	kind: z.literal("EventsNode"),
 	event: z.string().optional(),
 	limit: z.number().optional(),
-});
+}).refine(
+	(data) => {
+		if (PROPERTY_MATH_TYPES.includes(data.math || "")) {
+			return !!data.math_property;
+		}
+		return true;
+	},
+	{
+		message: `math_property is required for ${PROPERTY_MATH_TYPES.join(", ")} math types`,
+	},
+);
 
 const AnyEntityNode = EventsNode;
 
@@ -93,7 +123,6 @@ const InsightsQueryBase = z.object({
 		.union([z.array(AnyPropertyFilter), PropertyGroupFilter])
 		.optional()
 		.default([]),
-	aggregation_group_type_index: z.number().nullable().optional(),
 });
 
 // Breakdown filter
@@ -154,7 +183,7 @@ const FunnelsFilter = z.object({
 const FunnelsQuerySchema = InsightsQueryBase.extend({
 	kind: z.literal("FunnelsQuery"),
 	interval: IntervalType.optional(),
-	series: z.array(AnyEntityNode),
+	series: z.array(AnyEntityNode).min(2, "At least two steps are required for a funnel"),
 	funnelsFilter: FunnelsFilter.optional(),
 	breakdownFilter: BreakdownFilter.optional(),
 });
@@ -189,6 +218,10 @@ export {
 	BreakdownAttributionType,
 	FunnelLayout,
 	FunnelConversionWindowTimeUnit,
+	// Math types
+	BaseMathType,
+	PropertyMathType,
+	MathType,
 	// Base types
 	DateRange,
 	PropertyFilter,

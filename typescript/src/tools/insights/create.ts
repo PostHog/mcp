@@ -23,10 +23,10 @@ export const createHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
 };
 
-const definition = getToolDefinition("insight-create-from-query");
+const definition = getToolDefinition("insight-create");
 
 const tool = (): Tool<typeof schema> => ({
-	name: "insight-create-from-query",
+	name: "insight-create",
 	title: definition.title,
 	description: definition.description,
 	schema,

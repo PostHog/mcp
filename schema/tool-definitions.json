@@ -95,8 +95,8 @@
 		"summary": "Get details of a specific experiment.",
 		"title": "Get experiment details"
 	},
-	"insight-create-from-query": {
-		"description": "Save a query as an insight. You should only do this with a valid query that you have seen, or one you have modified slightly. If the user wants to see data, you should use the \"get-sql-insight\" tool to get that data instead. An insight requires a name, query, and other optional properties. The query should use HogQL, which is a variant of Clickhouse SQL.",
+	"insight-create": {
+		"description": "Create an insight. This can be a trend / funnel / HogQL insight. Where possible, use a trend or a funnel. If you want to use a HogQL insight, you should first use the \"insight-generate-hogql-from-query\" tool to get the HogQL, and then use that HogQL query to create the insight, this is slow so you should only do it if a trend / funnel will not work. An insight requires a name, query, and other optional properties. HogQL is a custom variant of Clickhouse SQL - it does not support many normal SQL operations.",
 		"category": "Insights & analytics",
 		"summary": "Save a query as an insight.",
 		"title": "Create insight from query"
@@ -125,14 +125,14 @@
 		"summary": "Get all insights in the project with optional filtering.",
 		"title": "Get all insights"
 	},
-	"get-sql-insight": {
+	"insights-generate-hogql-from-question": {
 		"description": "Queries project's PostHog data based on a provided natural language question - don't provide SQL query as input but describe the output you want. Data warehouse schema includes data like events and persons. Fetches the result as a Server-Sent Events (SSE) stream and provides the concatenated data content. When giving the results back to the user, first show the SQL query that was used, then provide results in reasily readable format. You should also offer to save the query as an insight if the user wants to.",
 		"category": "Insights & analytics",
 		"summary": "Queries project's PostHog data based on a provided natural language question.",
-		"title": "Create SQL insight from question"
+		"title": "Generate SQL"
 	},
 	"insight-update": {
-		"description": "Update an existing insight by ID. Can update name, description, filters, and other properties.",
+		"description": "Update an existing insight by ID. Can update name, description, filters, and other properties. You should get the insight before update it to see it's current query structure, and only modify the parts needed to answer the user's request.",
 		"category": "Insights & analytics",
 		"summary": "Update an existing insight by ID.",
 		"title": "Update insight"

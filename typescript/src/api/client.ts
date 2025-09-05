@@ -844,24 +844,12 @@ export class ApiClient {
 
 			create: async ({
 				data,
-			}: { data: CreateSurveyInput }): Promise<
-				Result<{
-					id: string;
-					name: string;
-					type: "popover" | "api" | "widget" | "external_survey";
-				}>
-			> => {
+			}: { data: CreateSurveyInput }): Promise<Result<SurveyOutput>> => {
 				const validatedInput = CreateSurveyInputSchema.parse(data);
-
-				const createResponseSchema = z.object({
-					id: z.string(),
-					name: z.string(),
-					type: z.enum(["popover", "api", "widget", "external_survey"]),
-				});
 
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/surveys/`,
-					createResponseSchema,
+					SurveyOutputSchema,
 					{
 						method: "POST",
 						body: JSON.stringify(validatedInput),
@@ -872,24 +860,12 @@ export class ApiClient {
 			update: async ({
 				surveyId,
 				data,
-			}: { surveyId: string; data: UpdateSurveyInput }): Promise<
-				Result<{
-					id: string;
-					name: string;
-					type: "popover" | "api" | "widget" | "external_survey";
-				}>
-			> => {
+			}: { surveyId: string; data: UpdateSurveyInput }): Promise<Result<SurveyOutput>> => {
 				const validatedInput = UpdateSurveyInputSchema.parse(data);
-
-				const updateResponseSchema = z.object({
-					id: z.string(),
-					name: z.string(),
-					type: z.enum(["popover", "api", "widget", "external_survey"]),
-				});
 
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/surveys/${surveyId}/`,
-					updateResponseSchema,
+					SurveyOutputSchema,
 					{
 						method: "PATCH",
 						body: JSON.stringify(validatedInput),

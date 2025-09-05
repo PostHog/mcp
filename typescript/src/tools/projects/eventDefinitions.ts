@@ -11,7 +11,9 @@ type Params = z.infer<typeof schema>;
 export const eventDefinitionsHandler = async (context: Context, _params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
-	const eventDefsResult = await context.api.projects().eventDefinitions({ projectId });
+	const eventDefsResult = await context.api
+		.projects()
+		.eventDefinitions({ projectId, search: _params.q });
 
 	if (!eventDefsResult.success) {
 		throw new Error(`Failed to get event definitions: ${eventDefsResult.error.message}`);

@@ -186,6 +186,37 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 				}
 			}
 		});
+
+		it("should get event definitions with search parameter", async () => {
+			const result = await client.projects().eventDefinitions({ 
+				projectId: testProjectId, 
+				search: "pageview" 
+			});
+
+			expect(result.success).toBe(true);
+
+			if (result.success) {
+				expect(Array.isArray(result.data)).toBe(true);
+				// All returned events should contain "pageview" in their name
+				for (const eventDef of result.data) {
+					expect(eventDef.name.toLowerCase()).toContain("pageview");
+				}
+			}
+		});
+
+		it("should return empty array when searching for non-existent events", async () => {
+			const result = await client.projects().eventDefinitions({ 
+				projectId: testProjectId, 
+				search: "non-existent-event-xyz123" 
+			});
+
+			expect(result.success).toBe(true);
+
+			if (result.success) {
+				expect(Array.isArray(result.data)).toBe(true);
+				expect(result.data.length).toBe(0);
+			}
+		});
 	});
 
 	describe("Feature Flags API", () => {

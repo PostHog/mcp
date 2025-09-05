@@ -224,10 +224,21 @@ export class ApiClient {
 
 			eventDefinitions: async ({
 				projectId,
-			}: { projectId: string }): Promise<Result<ApiEventDefinition[]>> => {
+				search,
+			}: { projectId: string; search?: string | undefined }): Promise<
+				Result<ApiEventDefinition[]>
+			> => {
 				try {
+					const searchParams = new URLSearchParams();
+
+					if (search) {
+						searchParams.append("search", search);
+					}
+
+					const requestUrl = `${this.baseUrl}/api/projects/${projectId}/event_definitions/${searchParams.toString() ? `?${searchParams}` : ""}`;
+
 					const eventDefinitions = await withPagination(
-						`${this.baseUrl}/api/projects/${projectId}/event_definitions/`,
+						requestUrl,
 						this.config.apiToken,
 						ApiEventDefinitionSchema,
 					);

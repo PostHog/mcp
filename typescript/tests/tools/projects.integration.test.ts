@@ -158,6 +158,42 @@ describe("Projects", { concurrent: false }, () => {
 				expect(pageviewEvent).toBeDefined();
 			}
 		});
+
+		it("should filter event definitions with search parameter", async () => {
+			const result = await eventDefsTool.handler(context, { q: "pageview" });
+			const eventDefs = parseToolResponse(result);
+
+			expect(Array.isArray(eventDefs)).toBe(true);
+			
+			// All returned events should contain "pageview" in their name
+			for (const event of eventDefs) {
+				expect(event.name.toLowerCase()).toContain("pageview");
+			}
+		});
+
+		it("should return empty array when searching for non-existent events", async () => {
+			const result = await eventDefsTool.handler(context, { q: "non-existent-event-xyz123" });
+			const eventDefs = parseToolResponse(result);
+
+			expect(Array.isArray(eventDefs)).toBe(true);
+			expect(eventDefs.length).toBe(0);
+		});
+
+		it("should return all events when no search parameter is provided", async () => {
+			const resultWithoutSearch = await eventDefsTool.handler(context, {});
+			const resultWithSearch = await eventDefsTool.handler(context, { q: "pageview" });
+			
+			const allEventDefs = parseToolResponse(resultWithoutSearch);
+			const filteredEventDefs = parseToolResponse(resultWithSearch);
+
+			expect(Array.isArray(allEventDefs)).toBe(true);
+			expect(Array.isArray(filteredEventDefs)).toBe(true);
+			
+			if (allEventDefs.length > 0 && filteredEventDefs.length > 0) {
+				// Filtered results should be a subset of all results
+				expect(filteredEventDefs.length).toBeLessThanOrEqual(allEventDefs.length);
+			}
+		});
 	});
 
 	describe("Projects workflow", () => {

@@ -28,6 +28,7 @@ const definition = getToolDefinition("event-definitions-list");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "event-definitions-list",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: eventDefinitionsHandler,

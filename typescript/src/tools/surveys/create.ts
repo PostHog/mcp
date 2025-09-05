@@ -10,6 +10,25 @@ type Params = z.infer<typeof schema>;
 export const createHandler = async (context: Context, params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
+	// Process questions to handle branching logic
+	if (params.questions) {
+		params.questions = params.questions.map((question: any) => {
+			// Handle single choice questions - convert numeric keys to strings
+			if (
+				"branching" in question &&
+				question.branching?.type === "response_based" &&
+				question.type === "single_choice"
+			) {
+				question.branching.responseValues = Object.fromEntries(
+					Object.entries(question.branching.responseValues).map(([key, value]) => {
+						return [String(key), value];
+					}),
+				);
+			}
+			return question;
+		});
+	}
+
 	const surveyResult = await context.api.surveys({ projectId }).create({
 		data: params,
 	});

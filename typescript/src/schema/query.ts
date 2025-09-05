@@ -89,11 +89,9 @@ const PROPERTY_MATH_TYPES = ["avg", "sum", "min", "max", "median", "p75", "p90",
 
 // Base entity object without refinement for extension
 const BaseEntityObject = z.object({
-	// id: z.union([z.string(), z.number()]), TODO: what to do with updates and ids?
-	custom_name: z.string().optional(),
+	custom_name: z.string().describe("A display name"),
 	math: MathType.optional(),
 	math_property: z.string().optional(),
-	// order: z.number().optional(), this is getting used in funnels incorrectly
 	properties: z.union([z.array(AnyPropertyFilter), PropertyGroupFilter]).optional(),
 });
 

@@ -13,6 +13,7 @@ import getProjectsTool from "@/tools/projects/getProjects";
 import propertyDefinitionsTool from "@/tools/projects/propertyDefinitions";
 import setActiveProjectTool from "@/tools/projects/setActive";
 import type { Context } from "@/tools/types";
+import { v4 as uuidv4 } from "uuid";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 describe("Projects", { concurrent: false }, () => {
@@ -82,11 +83,13 @@ describe("Projects", { concurrent: false }, () => {
 		});
 	});
 
-	describe("property-definitions tool", () => {
+	describe("event-properties-get tool", () => {
 		const propertyDefsTool = propertyDefinitionsTool();
 
 		it.skip("should get property definitions for active project", async () => {
-			const result = await propertyDefsTool.handler(context, {});
+			const result = await propertyDefsTool.handler(context, {
+				eventName: "$pageview",
+			});
 			const propertyDefs = parseToolResponse(result);
 
 			expect(propertyDefs).toHaveProperty("event_properties");
@@ -99,7 +102,9 @@ describe("Projects", { concurrent: false }, () => {
 		});
 
 		it.skip("should return property definitions with proper structure", async () => {
-			const result = await propertyDefsTool.handler(context, {});
+			const result = await propertyDefsTool.handler(context, {
+				eventName: "$pageview",
+			});
 			const propertyDefs = parseToolResponse(result);
 
 			if (propertyDefs.event_properties.length > 0) {

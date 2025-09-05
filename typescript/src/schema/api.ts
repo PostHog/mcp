@@ -13,7 +13,26 @@ export const ApiPropertyDefinitionSchema = z.object({
 	verified_at: z.string().nullish(),
 	verified_by: z.string().nullish(),
 	hidden: z.boolean().nullish(),
-	tags: z.array(z.string()).default([]),
+	tags: z.array(z.string()).nullish(),
+});
+
+export const ApiEventDefintionSchema = z.object({
+	id: z.string().uuid(),
+	name: z.string(),
+	owner: z.string().nullish(),
+	description: z.string().nullish(),
+	created_at: z.string().nullish(),
+	updated_at: z.string().nullish(),
+	updated_by: z.string().nullish(),
+	last_seen_at: z.string().nullish(),
+	verified: z.boolean().nullish(),
+	verified_at: z.string().nullish(),
+	verified_by: z.string().nullish(),
+	hidden: z.boolean().nullish(),
+	is_action: z.boolean().nullish(),
+	post_to_slack: z.boolean().nullish(),
+	default_columns: z.array(z.string().nullish()).nullish(),
+	tags: z.array(z.string().nullish()).nullish(),
 });
 
 export const ApiListResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
@@ -23,3 +42,6 @@ export const ApiListResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
 		previous: z.string().nullish(),
 		results: z.array(dataSchema),
 	});
+
+export type ApiPropertyDefinition = z.infer<typeof ApiPropertyDefinitionSchema>;
+export type ApiEventDefinition = z.infer<typeof ApiEventDefintionSchema>;

@@ -1,6 +1,11 @@
 import { ErrorCode } from "@/lib/errors";
 import { withPagination } from "@/lib/utils/api";
-import { ApiPropertyDefinitionSchema } from "@/schema/api";
+import {
+	type ApiEventDefinition,
+	ApiEventDefintionSchema,
+	type ApiPropertyDefinition,
+	ApiPropertyDefinitionSchema,
+} from "@/schema/api";
 import {
 	type CreateDashboardInput,
 	CreateDashboardInputSchema,
@@ -157,10 +162,52 @@ export class ApiClient {
 
 			propertyDefinitions: async ({
 				projectId,
-			}: { projectId: string }): Promise<Result<any[]>> => {
+				eventNames,
+				excludeCoreProperties,
+				filterByEventNames,
+				isFeatureFlag,
+				limit,
+				offset,
+			}: {
+				projectId: string;
+				eventNames?: string[];
+				excludeCoreProperties?: boolean;
+				filterByEventNames?: boolean;
+				isFeatureFlag?: boolean;
+				limit?: number;
+				offset?: number;
+			}): Promise<Result<ApiPropertyDefinition[]>> => {
 				try {
+					const searchParams = new URLSearchParams();
+
+					if (eventNames && eventNames.length > 0) {
+						searchParams.append("event_names", JSON.stringify(eventNames));
+					}
+					if (excludeCoreProperties !== undefined) {
+						searchParams.append(
+							"exclude_core_properties",
+							String(excludeCoreProperties),
+						);
+					}
+					if (filterByEventNames !== undefined) {
+						searchParams.append("filter_by_event_names", String(filterByEventNames));
+					}
+					if (isFeatureFlag !== undefined) {
+						searchParams.append("is_feature_flag", String(isFeatureFlag));
+					}
+					if (limit !== undefined) {
+						searchParams.append("limit", String(limit));
+					}
+					if (offset !== undefined) {
+						searchParams.append("offset", String(offset));
+					}
+
+					const url = `${this.baseUrl}/api/projects/${projectId}/property_definitions/${
+						searchParams.toString() ? `?${searchParams}` : ""
+					}`;
+
 					const propertyDefinitions = await withPagination(
-						`${this.baseUrl}/api/projects/${projectId}/property_definitions/`,
+						url,
 						this.config.apiToken,
 						ApiPropertyDefinitionSchema,
 					);
@@ -169,11 +216,23 @@ export class ApiClient {
 						(def) => !def.hidden,
 					);
 
-					const validated = propertyDefinitionsWithoutHidden.map((def) =>
-						PropertyDefinitionSchema.parse(def),
+					return { success: true, data: propertyDefinitionsWithoutHidden };
+				} catch (error) {
+					return { success: false, error: error as Error };
+				}
+			},
+
+			eventDefinitions: async ({
+				projectId,
+			}: { projectId: string }): Promise<Result<ApiEventDefinition[]>> => {
+				try {
+					const eventDefinitions = await withPagination(
+						`${this.baseUrl}/api/projects/${projectId}/event_definitions/`,
+						this.config.apiToken,
+						ApiEventDefintionSchema,
 					);
 
-					return { success: true, data: validated };
+					return { success: true, data: eventDefinitions };
 				} catch (error) {
 					return { success: false, error: error as Error };
 				}

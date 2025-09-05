@@ -1,9 +1,18 @@
-import { type ApiListResponseSchema, ApiPropertyDefinitionSchema } from "@/schema/api";
+import {
+	ApiEventDefintionSchema,
+	type ApiListResponseSchema,
+	ApiPropertyDefinitionSchema,
+} from "@/schema/api";
 import type { z } from "zod";
 
 export const PropertyDefinitionSchema = ApiPropertyDefinitionSchema.pick({
 	name: true,
 	property_type: true,
+});
+
+export const EventDefinitionSchema = ApiEventDefintionSchema.pick({
+	name: true,
+	last_seen_at: true,
 });
 
 export type PropertyDefinition = z.infer<typeof ApiPropertyDefinitionSchema>;

@@ -188,9 +188,9 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 		});
 
 		it("should get event definitions with search parameter", async () => {
-			const result = await client.projects().eventDefinitions({ 
-				projectId: testProjectId, 
-				search: "pageview" 
+			const result = await client.projects().eventDefinitions({
+				projectId: testProjectId,
+				search: "pageview",
 			});
 
 			expect(result.success).toBe(true);
@@ -205,9 +205,9 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 		});
 
 		it("should return empty array when searching for non-existent events", async () => {
-			const result = await client.projects().eventDefinitions({ 
-				projectId: testProjectId, 
-				search: "non-existent-event-xyz123" 
+			const result = await client.projects().eventDefinitions({
+				projectId: testProjectId,
+				search: "non-existent-event-xyz123",
 			});
 
 			expect(result.success).toBe(true);

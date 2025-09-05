@@ -164,7 +164,7 @@ describe("Projects", { concurrent: false }, () => {
 			const eventDefs = parseToolResponse(result);
 
 			expect(Array.isArray(eventDefs)).toBe(true);
-			
+
 			// All returned events should contain "pageview" in their name
 			for (const event of eventDefs) {
 				expect(event.name.toLowerCase()).toContain("pageview");
@@ -182,13 +182,13 @@ describe("Projects", { concurrent: false }, () => {
 		it("should return all events when no search parameter is provided", async () => {
 			const resultWithoutSearch = await eventDefsTool.handler(context, {});
 			const resultWithSearch = await eventDefsTool.handler(context, { q: "pageview" });
-			
+
 			const allEventDefs = parseToolResponse(resultWithoutSearch);
 			const filteredEventDefs = parseToolResponse(resultWithSearch);
 
 			expect(Array.isArray(allEventDefs)).toBe(true);
 			expect(Array.isArray(filteredEventDefs)).toBe(true);
-			
+
 			if (allEventDefs.length > 0 && filteredEventDefs.length > 0) {
 				// Filtered results should be a subset of all results
 				expect(filteredEventDefs.length).toBeLessThanOrEqual(allEventDefs.length);

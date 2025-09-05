@@ -150,16 +150,14 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 		});
 
 		it("should get property definitions", async () => {
-			const result = await client
-				.projects()
-				.propertyDefinitions({ 
-					projectId: testProjectId,
-					eventNames: ["$pageview"],
-					excludeCoreProperties: true,
-					filterByEventNames: true,
-					isFeatureFlag: false,
-					limit: 100
-				});
+			const result = await client.projects().propertyDefinitions({
+				projectId: testProjectId,
+				eventNames: ["$pageview"],
+				excludeCoreProperties: true,
+				filterByEventNames: true,
+				isFeatureFlag: false,
+				limit: 100,
+			});
 
 			expect(result.success).toBe(true);
 
@@ -174,9 +172,7 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 		});
 
 		it("should get event definitions", async () => {
-			const result = await client
-				.projects()
-				.eventDefinitions({ projectId: testProjectId });
+			const result = await client.projects().eventDefinitions({ projectId: testProjectId });
 
 			expect(result.success).toBe(true);
 

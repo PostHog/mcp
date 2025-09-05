@@ -71,10 +71,9 @@ const HogQLFilters = z.object({
 // Entity nodes
 const BaseEntityNode = z.object({
 	// id: z.union([z.string(), z.number()]), TODO: what to do with updates and ids?
-	name: z.string().optional(),
 	custom_name: z.string().optional(),
 	math: z.enum(["total"]).optional(),
-	order: z.number().optional(),
+	// order: z.number().optional(), this is getting used in funnels incorrectly
 	properties: z.union([z.array(AnyPropertyFilter), PropertyGroupFilter]).optional(),
 });
 

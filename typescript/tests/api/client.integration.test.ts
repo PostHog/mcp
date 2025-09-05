@@ -676,13 +676,11 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 									kind: "EventsNode",
 									event: "$pageview",
 									math: "total",
-									order: 0,
 								},
 								{
 									kind: "EventsNode",
 									event: "button_clicked",
 									math: "total",
-									order: 1,
 								},
 							],
 							properties: [],
@@ -729,13 +727,11 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 										kind: "EventsNode",
 										event: "$pageview",
 										math: "total",
-										order: 0,
 									},
 									{
 										kind: "EventsNode",
 										event: "button_clicked",
 										math: "total",
-										order: 1,
 									},
 								],
 								funnelsFilter: {
@@ -785,13 +781,11 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 										kind: "EventsNode",
 										event: "$pageview",
 										math: "total",
-										order: 0,
 									},
 									{
 										kind: "EventsNode",
 										event: "button_clicked",
 										math: "total",
-										order: 1,
 									},
 								],
 								breakdownFilter: {
@@ -843,13 +837,11 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 										kind: "EventsNode",
 										event: "$pageview",
 										math: "total",
-										order: 0,
 									},
 									{
 										kind: "EventsNode",
 										event: "button_clicked",
 										math: "total",
-										order: 1,
 									},
 								],
 								funnelsFilter: {

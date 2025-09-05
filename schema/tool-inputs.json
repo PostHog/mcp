@@ -1666,20 +1666,14 @@
     "SurveyGetAllSchema": {
       "type": "object",
       "properties": {
-        "data": {
-          "type": "object",
-          "properties": {
-            "limit": {
-              "type": "number"
-            },
-            "offset": {
-              "type": "number"
-            },
-            "search": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
+        "limit": {
+          "type": "number"
+        },
+        "offset": {
+          "type": "number"
+        },
+        "search": {
+          "type": "string"
         }
       },
       "additionalProperties": false

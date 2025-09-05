@@ -904,20 +904,13 @@ class SurveyDeleteSchema(BaseModel):
     surveyId: str
 
 
-class Data8(BaseModel):
+class SurveyGetAllSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     limit: float | None = None
     offset: float | None = None
     search: str | None = None
-
-
-class SurveyGetAllSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    data: Data8 | None = None
 
 
 class SurveyGetSchema(BaseModel):

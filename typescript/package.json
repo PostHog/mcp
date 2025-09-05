@@ -38,14 +38,7 @@
 		"test:watch": "vitest watch",
 		"typecheck": "tsc --noEmit"
 	},
-	"keywords": [
-		"posthog",
-		"mcp",
-		"ai",
-		"agents",
-		"analytics",
-		"feature-flags"
-	],
+	"keywords": ["posthog", "mcp", "ai", "agents", "analytics", "feature-flags"],
 	"author": "PostHog Inc.",
 	"license": "MIT",
 	"peerDependencies": {
@@ -77,8 +70,5 @@
 		"wrangler": "^4.14.4",
 		"zod-to-json-schema": "^3.24.6"
 	},
-	"files": [
-		"dist",
-		"README.md"
-	]
+	"files": ["dist", "README.md"]
 }

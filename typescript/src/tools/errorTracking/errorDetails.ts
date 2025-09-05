@@ -35,6 +35,7 @@ const definition = getToolDefinition("error-details");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "error-details",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: errorDetailsHandler,

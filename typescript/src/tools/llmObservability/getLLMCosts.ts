@@ -47,6 +47,7 @@ const definition = getToolDefinition("get-llm-total-costs-for-project");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "get-llm-total-costs-for-project",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: getLLMCostsHandler,

@@ -160,13 +160,13 @@ export class MyMCP extends McpAgent<Env> {
 			}
 		};
 
-		this.server.tool(
+		this.server.registerTool(
 			tool.name,
-			tool.description,
-			tool.schema.shape,
 			{
-				...tool.annotations,
-				title: tool.name,
+				title: tool.title,
+				description: tool.description,
+				inputSchema: tool.schema.shape,
+				annotations: tool.annotations,
 			},
 			wrappedHandler as unknown as ToolCallback<TSchema>,
 		);

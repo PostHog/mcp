@@ -21,6 +21,7 @@ const definition = getToolDefinition("switch-project");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "switch-project",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: setActiveHandler,

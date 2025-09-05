@@ -2,142 +2,170 @@
 	"add-insight-to-dashboard": {
 		"description": "Add an existing insight to a dashboard. Requires insight ID and dashboard ID. Optionally supports layout and color customization.",
 		"category": "Dashboards",
-		"summary": "Add an existing insight to a dashboard."
+		"summary": "Add an existing insight to a dashboard.",
+		"title": "Add insight to dashboard"
 	},
 	"dashboard-create": {
 		"description": "Create a new dashboard in the project. Requires name and optional description, tags, and other properties.",
 		"category": "Dashboards",
-		"summary": "Create a new dashboard in the project."
+		"summary": "Create a new dashboard in the project.",
+		"title": "Create dashboard"
 	},
 	"dashboard-delete": {
 		"description": "Delete a dashboard by ID (soft delete - marks as deleted).",
 		"category": "Dashboards",
-		"summary": "Delete a dashboard by ID."
+		"summary": "Delete a dashboard by ID.",
+		"title": "Delete dashboard"
 	},
 	"dashboard-get": {
 		"description": "Get a specific dashboard by ID. The response will include insights / tiles that are on the dashboard.",
 		"category": "Dashboards",
-		"summary": "Get a specific dashboard by ID, including insights that are on the dashboard."
+		"summary": "Get a specific dashboard by ID, including insights that are on the dashboard.",
+		"title": "Get dashboard"
 	},
 	"dashboards-get-all": {
 		"description": "Get all dashboards in the project with optional filtering. Can filter by pinned status, search term, or pagination.",
 		"category": "Dashboards",
-		"summary": "Get all dashboards in the project with optional filtering."
+		"summary": "Get all dashboards in the project with optional filtering.",
+		"title": "Get all dashboards"
 	},
 	"dashboard-update": {
 		"description": "Update an existing dashboard by ID. Can update name, description, pinned status or tags.",
 		"category": "Dashboards",
-		"summary": "Update an existing dashboard by ID."
+		"summary": "Update an existing dashboard by ID.",
+		"title": "Update dashboard"
 	},
 	"docs-search": {
 		"description": "Use this tool to search the PostHog documentation for information that can help the user with their request. Use it as a fallback when you cannot answer the user's request using other tools in this MCP. Only use this tool for PostHog related questions.",
 		"category": "Documentation",
-		"summary": "Search the PostHog documentation for information."
+		"summary": "Search the PostHog documentation for information.",
+		"title": "Search docs"
 	},
 	"error-details": {
 		"description": "Use this tool to get the details of an error in the project.",
 		"category": "Error tracking",
-		"summary": "Get the details of an error in the project."
+		"summary": "Get the details of an error in the project.",
+		"title": "Get error details"
 	},
 	"list-errors": {
 		"description": "Use this tool to list errors in the project.",
 		"category": "Error tracking",
-		"summary": "List errors in the project."
+		"summary": "List errors in the project.",
+		"title": "List errors"
 	},
 	"create-feature-flag": {
 		"description": "Creates a new feature flag in the project. Once you have created a feature flag, you should: Ask the user if they want to add it to their codebase, Use the \"search-docs\" tool to find documentation on how to add feature flags to the codebase (search for the right language / framework), Clarify where it should be added and then add it.",
 		"category": "Feature flags",
-		"summary": "Creates a new feature flag in the project."
+		"summary": "Creates a new feature flag in the project.",
+		"title": "Create feature flag"
 	},
 	"delete-feature-flag": {
 		"description": "Delete a feature flag in the project.",
 		"category": "Feature flags",
-		"summary": "Delete a feature flag in the project."
+		"summary": "Delete a feature flag in the project.",
+		"title": "Delete feature flag"
 	},
 	"feature-flag-get-all": {
 		"description": "Get all feature flags in the project.",
 		"category": "Feature flags",
-		"summary": "Get all feature flags in the project."
+		"summary": "Get all feature flags in the project.",
+		"title": "Get all feature flags"
 	},
 	"feature-flag-get-definition": {
 		"description": "Get the definition of a feature flag. You can provide either the flagId or the flagKey. If you provide both, the flagId will be used.",
 		"category": "Feature flags",
-		"summary": "Get the definition of a feature flag."
+		"summary": "Get the definition of a feature flag.",
+		"title": "Get feature flag definition"
 	},
 	"update-feature-flag": {
 		"description": "Update a new feature flag in the project. To enable a feature flag, you should make sure it is active and the rollout percentage is set to 100 for the group you want to target. To disable a feature flag, you should make sure it is inactive, you can keep the rollout percentage as it is.",
 		"category": "Feature flags",
-		"summary": "Update a feature flag in the project."
+		"summary": "Update a feature flag in the project.",
+		"title": "Update feature flag"
 	},
 	"experiment-get-all": {
 		"description": "Get all experiments in the project.",
 		"category": "Experiments",
-		"summary": "Get all experiments in the project."
+		"summary": "Get all experiments in the project.",
+		"title": "Get all experiments"
 	},
 	"experiment-get": {
 		"description": "Get details of a specific experiment by ID.",
 		"category": "Experiments",
-		"summary": "Get details of a specific experiment."
+		"summary": "Get details of a specific experiment.",
+		"title": "Get experiment details"
 	},
 	"insight-create-from-query": {
 		"description": "Save a query as an insight. You should only do this with a valid query that you have seen, or one you have modified slightly. If the user wants to see data, you should use the \"get-sql-insight\" tool to get that data instead. An insight requires a name, query, and other optional properties. The query should use HogQL, which is a variant of Clickhouse SQL.",
 		"category": "Insights & analytics",
-		"summary": "Save a query as an insight."
+		"summary": "Save a query as an insight.",
+		"title": "Create insight from query"
 	},
 	"insight-delete": {
 		"description": "Delete an insight by ID (soft delete - marks as deleted).",
 		"category": "Insights & analytics",
-		"summary": "Delete an insight by ID."
+		"summary": "Delete an insight by ID.",
+		"title": "Delete insight"
 	},
 	"insight-get": {
 		"description": "Get a specific insight by ID.",
 		"category": "Insights & analytics",
-		"summary": "Get a specific insight by ID."
+		"summary": "Get a specific insight by ID.",
+		"title": "Get insight"
 	},
 	"insight-query": {
 		"description": "Execute a query on an existing insight to get its results/data. Provide the insight ID to retrieve the current query results.",
 		"category": "Insights & analytics",
-		"summary": "Execute a query on an existing insight to get its results/data."
+		"summary": "Execute a query on an existing insight to get its results/data.",
+		"title": "Query insight"
 	},
 	"insights-get-all": {
 		"description": "Get all insights in the project with optional filtering. Can filter by saved status, favorited status, or search term.",
 		"category": "Insights & analytics",
-		"summary": "Get all insights in the project with optional filtering."
+		"summary": "Get all insights in the project with optional filtering.",
+		"title": "Get all insights"
 	},
 	"get-sql-insight": {
 		"description": "Queries project's PostHog data based on a provided natural language question - don't provide SQL query as input but describe the output you want. Data warehouse schema includes data like events and persons. Fetches the result as a Server-Sent Events (SSE) stream and provides the concatenated data content. When giving the results back to the user, first show the SQL query that was used, then provide results in reasily readable format. You should also offer to save the query as an insight if the user wants to.",
 		"category": "Insights & analytics",
-		"summary": "Queries project's PostHog data based on a provided natural language question."
+		"summary": "Queries project's PostHog data based on a provided natural language question.",
+		"title": "Create SQL insight from question"
 	},
 	"insight-update": {
 		"description": "Update an existing insight by ID. Can update name, description, filters, and other properties.",
 		"category": "Insights & analytics",
-		"summary": "Update an existing insight by ID."
+		"summary": "Update an existing insight by ID.",
+		"title": "Update insight"
 	},
 	"get-llm-total-costs-for-project": {
 		"description": "Fetches the total LLM daily costs for each model for a project over a given number of days. If no number of days is provided, it defaults to 7. The results are sorted by model name. The total cost is rounded to 4 decimal places. The query is executed against the project's data warehouse. Show the results as a Markdown formatted table with the following information for each model: Model name, Total cost in USD, Each day's date, Each day's cost in USD. Write in bold the model name with the highest total cost. Properly render the markdown table in the response.",
 		"category": "LLM observability",
-		"summary": "Fetches the total LLM daily costs for each model for a project over a given number of days."
+		"summary": "Fetches the total LLM daily costs for each model for a project over a given number of days.",
+		"title": "Get LLM costs"
 	},
 	"organization-details-get": {
 		"description": "Get the details of the active organization.",
 		"category": "Organization & project management",
-		"summary": "Get the details of the active organization."
+		"summary": "Get the details of the active organization.",
+		"title": "Get organization details"
 	},
 	"organizations-get": {
 		"description": "Get the organizations the user has access to.",
 		"category": "Organization & project management",
-		"summary": "Get the organizations the user has access to."
+		"summary": "Get the organizations the user has access to.",
+		"title": "Get organizations"
 	},
 	"switch-organization": {
 		"description": "Change the active organization from the default organization. You should only use this tool if the user asks you to change the organization - otherwise, the default organization will be used.",
 		"category": "Organization & project management",
-		"summary": "Change the active organization from the default organization."
+		"summary": "Change the active organization from the default organization.",
+		"title": "Switch active organization"
 	},
 	"projects-get": {
 		"description": "Fetches projects that the user has access to in the current organization.",
 		"category": "Organization & project management",
-		"summary": "Fetches projects that the user has access to in the current organization."
+		"summary": "Fetches projects that the user has access to in the current organization.",
+		"title": "Get projects"
 	},
 	"event-definitions-list": {
 		"description": "List all event definitions in the project with optional filtering. Can filter by search term.",
@@ -154,6 +182,7 @@
 	"switch-project": {
 		"description": "Change the active project from the default project. You should only use this tool if the user asks you to change the project - otherwise, the default project will be used.",
 		"category": "Organization & project management",
-		"summary": "Change the active project from the default project."
+		"summary": "Change the active project from the default project.",
+		"title": "Switch active project"
 	}
 }

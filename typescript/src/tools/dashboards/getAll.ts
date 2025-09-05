@@ -23,6 +23,7 @@ export const getAllHandler = async (context: Context, params: Params) => {
 
 const tool = (): Tool<typeof schema> => ({
 	name: "dashboards-get-all",
+	title: getToolDefinition("dashboards-get-all").title,
 	description: getToolDefinition("dashboards-get-all").description,
 	schema,
 	handler: getAllHandler,

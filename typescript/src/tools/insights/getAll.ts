@@ -28,6 +28,7 @@ const definition = getToolDefinition("insights-get-all");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "insights-get-all",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: getAllHandler,

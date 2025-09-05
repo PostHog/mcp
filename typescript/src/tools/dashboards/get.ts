@@ -23,6 +23,7 @@ const definition = getToolDefinition("dashboard-get");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "dashboard-get",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: getHandler,

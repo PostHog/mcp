@@ -23,6 +23,7 @@ const definition = getToolDefinition("feature-flag-get-all");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "feature-flag-get-all",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: getAllHandler,

@@ -37,6 +37,7 @@ const definition = getToolDefinition("event-properties-get");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "event-properties-get",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: propertyDefinitionsHandler,

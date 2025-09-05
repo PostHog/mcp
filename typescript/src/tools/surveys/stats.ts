@@ -34,7 +34,7 @@ const tool = (): Tool<typeof schema> => ({
 	annotations: {
 		destructiveHint: false,
 		idempotentHint: true,
-		openWorldHint: false,
+		openWorldHint: true,
 		readOnlyHint: true,
 	},
 });

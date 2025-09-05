@@ -152,7 +152,14 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 		it("should get property definitions", async () => {
 			const result = await client
 				.projects()
-				.propertyDefinitions({ projectId: testProjectId });
+				.propertyDefinitions({ 
+					projectId: testProjectId,
+					eventNames: ["$pageview"],
+					excludeCoreProperties: true,
+					filterByEventNames: true,
+					isFeatureFlag: false,
+					limit: 100
+				});
 
 			expect(result.success).toBe(true);
 
@@ -162,6 +169,24 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 					const propDef = result.data[0];
 					expect(propDef).toHaveProperty("id");
 					expect(propDef).toHaveProperty("name");
+				}
+			}
+		});
+
+		it("should get event definitions", async () => {
+			const result = await client
+				.projects()
+				.eventDefinitions({ projectId: testProjectId });
+
+			expect(result.success).toBe(true);
+
+			if (result.success) {
+				expect(Array.isArray(result.data)).toBe(true);
+				if (result.data.length > 0) {
+					const eventDef = result.data[0];
+					expect(eventDef).toHaveProperty("id");
+					expect(eventDef).toHaveProperty("name");
+					expect(eventDef).toHaveProperty("last_seen_at");
 				}
 			}
 		});

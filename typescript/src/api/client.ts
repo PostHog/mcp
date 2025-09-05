@@ -1,5 +1,6 @@
 import { ErrorCode } from "@/lib/errors";
 import { withPagination } from "@/lib/utils/api";
+import { getSearchParamsFromRecord } from "@/lib/utils/helper-functions";
 import {
 	type ApiEventDefinition,
 	ApiEventDefinitionSchema,
@@ -178,29 +179,16 @@ export class ApiClient {
 				offset?: number;
 			}): Promise<Result<ApiPropertyDefinition[]>> => {
 				try {
-					const searchParams = new URLSearchParams();
+					const params = {
+						event_names: eventNames?.length ? JSON.stringify(eventNames) : undefined,
+						exclude_core_properties: excludeCoreProperties,
+						filter_by_event_names: filterByEventNames,
+						is_feature_flag: isFeatureFlag,
+						limit,
+						offset,
+					};
 
-					if (eventNames && eventNames.length > 0) {
-						searchParams.append("event_names", JSON.stringify(eventNames));
-					}
-					if (excludeCoreProperties !== undefined) {
-						searchParams.append(
-							"exclude_core_properties",
-							String(excludeCoreProperties),
-						);
-					}
-					if (filterByEventNames !== undefined) {
-						searchParams.append("filter_by_event_names", String(filterByEventNames));
-					}
-					if (isFeatureFlag !== undefined) {
-						searchParams.append("is_feature_flag", String(isFeatureFlag));
-					}
-					if (limit !== undefined) {
-						searchParams.append("limit", String(limit));
-					}
-					if (offset !== undefined) {
-						searchParams.append("offset", String(offset));
-					}
+					const searchParams = getSearchParamsFromRecord(params);
 
 					const url = `${this.baseUrl}/api/projects/${projectId}/property_definitions/${
 						searchParams.toString() ? `?${searchParams}` : ""
@@ -229,11 +217,7 @@ export class ApiClient {
 				Result<ApiEventDefinition[]>
 			> => {
 				try {
-					const searchParams = new URLSearchParams();
-
-					if (search) {
-						searchParams.append("search", search);
-					}
+					const searchParams = getSearchParamsFromRecord({ search });
 
 					const requestUrl = `${this.baseUrl}/api/projects/${projectId}/event_definitions/${searchParams.toString() ? `?${searchParams}` : ""}`;
 

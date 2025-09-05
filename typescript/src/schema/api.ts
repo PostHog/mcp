@@ -16,7 +16,7 @@ export const ApiPropertyDefinitionSchema = z.object({
 	tags: z.array(z.string()).nullish(),
 });
 
-export const ApiEventDefintionSchema = z.object({
+export const ApiEventDefinitionSchema = z.object({
 	id: z.string().uuid(),
 	name: z.string(),
 	owner: z.string().nullish(),
@@ -44,4 +44,4 @@ export const ApiListResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
 	});
 
 export type ApiPropertyDefinition = z.infer<typeof ApiPropertyDefinitionSchema>;
-export type ApiEventDefinition = z.infer<typeof ApiEventDefintionSchema>;
+export type ApiEventDefinition = z.infer<typeof ApiEventDefinitionSchema>;

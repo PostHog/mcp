@@ -19,8 +19,6 @@ export const withPagination = async <T>(
 
 	const data = await response.json();
 
-	console.log("Fetched data:", data);
-
 	const responseSchema = ApiListResponseSchema<z.ZodType<T>>(dataSchema);
 
 	const parsedData = responseSchema.parse(data);

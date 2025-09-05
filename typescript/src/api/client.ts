@@ -2,7 +2,7 @@ import { ErrorCode } from "@/lib/errors";
 import { withPagination } from "@/lib/utils/api";
 import {
 	type ApiEventDefinition,
-	ApiEventDefintionSchema,
+	ApiEventDefinitionSchema,
 	type ApiPropertyDefinition,
 	ApiPropertyDefinitionSchema,
 } from "@/schema/api";
@@ -229,7 +229,7 @@ export class ApiClient {
 					const eventDefinitions = await withPagination(
 						`${this.baseUrl}/api/projects/${projectId}/event_definitions/`,
 						this.config.apiToken,
-						ApiEventDefintionSchema,
+						ApiEventDefinitionSchema,
 					);
 
 					return { success: true, data: eventDefinitions };

@@ -50,8 +50,8 @@ import getDashboard from "./dashboards/get";
 import getAllDashboards from "./dashboards/getAll";
 import updateDashboard from "./dashboards/update";
 
-// LLM Observability
-import getLLMCosts from "./llmObservability/getLLMCosts";
+// LLM Analytics
+import getLLMCosts from "./llmAnalytics/getLLMCosts";
 import eventDefinitions from "./projects/eventDefinitions";
 
 export const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
@@ -101,7 +101,7 @@ export const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
 	deleteDashboard(),
 	addInsightToDashboard(),
 
-	// LLM Observability
+	// LLM Analytics
 	getLLMCosts(),
 ];
 

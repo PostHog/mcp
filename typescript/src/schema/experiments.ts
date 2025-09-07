@@ -1,13 +1,19 @@
 import { z } from "zod";
 
 import { FeatureFlagSchema } from "./flags";
+import { DateRangeSchema } from "./query";
 
 const ExperimentType = ["web", "product"] as const;
 
 const ExperimentConclusion = ["won", "lost", "inconclusive", "stopped_early", "invalid"] as const;
 
-export const ExperimentMetricType = z.enum(["funnel", "mean", "ratio"]);
-
+/**
+ * This is the schema for the experiment metric base properties.
+ * It references the ExperimentMetricBaseProperties type from
+ * @posthog/frontend/src/queries/schema/schema-general.ts
+ *
+ * TODO: Add the schemas for FunnelConversionWindowTimeUnit
+ */
 export const ExperimentMetricBasePropertiesSchema = z.object({
 	kind: z.literal("ExperimentMetric"),
 	uuid: z.string().optional(),
@@ -16,37 +22,39 @@ export const ExperimentMetricBasePropertiesSchema = z.object({
 	conversion_window_unit: z.any().optional(), // FunnelConversionWindowTimeUnit
 });
 
+/**
+ * This is the schema for the experiment metric outlier handling.
+ * It references the ExperimentMetricOutlierHandling type from
+ * @posthog/frontend/src/queries/schema/schema-general.ts
+ */
 export const ExperimentMetricOutlierHandlingSchema = z.object({
 	lower_bound_percentile: z.number().optional(),
 	upper_bound_percentile: z.number().optional(),
 });
 
-export const ExperimentDataWarehouseNodeSchema = z.object({
-	kind: z.literal("ExperimentDataWarehouseNode"),
-	table_name: z.string(),
-	timestamp_field: z.string(),
-	events_join_key: z.string(),
-	data_warehouse_join_key: z.string(),
-	// EntityNode properties
-	name: z.string().optional(),
-	custom_name: z.string().optional(),
-	math: z.any().optional(),
-	math_multiplier: z.number().optional(),
-	math_property: z.string().optional(),
-	math_property_type: z.string().optional(),
-	math_property_revenue_currency: z.any().optional(),
-	math_hogql: z.string().optional(),
-	math_group_type_index: z
-		.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4)])
-		.optional(),
-	properties: z.array(z.any()).optional(),
-	fixedProperties: z.array(z.any()).optional(),
-});
-
+/**
+ * This is the schema for the experiment metric source.
+ * It references the ExperimentMetricSource type from
+ * @posthog/frontend/src/queries/schema/schema-general.ts
+ *
+ * TODO: Add the schemas for the EventsNode and ActionsNode and ExperimentDataWarehouseNode
+ */
 export const ExperimentMetricSourceSchema = z.any(); // EventsNode | ActionsNode | ExperimentDataWarehouseNode
 
+/**
+ * This is the schema for the experiment funnel metric step.
+ * It references the ExperimentFunnelMetricStep type from
+ * @posthog/frontend/src/queries/schema/schema-general.ts
+ *
+ * TODO: Add the schemas for the EventsNode and ActionsNode
+ */
 export const ExperimentFunnelMetricStepSchema = z.any(); // EventsNode | ActionsNode
 
+/**
+ * This is the schema for the experiment mean metric.
+ * It references the ExperimentMeanMetric type from
+ * @posthog/frontend/src/queries/schema/schema-general.ts
+ */
 export const ExperimentMeanMetricSchema = z
 	.object({
 		metric_type: z.literal("mean"),
@@ -55,6 +63,11 @@ export const ExperimentMeanMetricSchema = z
 	.merge(ExperimentMetricBasePropertiesSchema)
 	.merge(ExperimentMetricOutlierHandlingSchema);
 
+/**
+ * This is the schema for the experiment funnel metric.
+ * It references the ExperimentFunnelMetric type from
+ * @posthog/frontend/src/queries/schema/schema-general.ts
+ */
 export const ExperimentFunnelMetricSchema = z
 	.object({
 		metric_type: z.literal("funnel"),
@@ -63,6 +76,11 @@ export const ExperimentFunnelMetricSchema = z
 	})
 	.merge(ExperimentMetricBasePropertiesSchema);
 
+/**
+ * This is the schema for the experiment ratio metric.
+ * It references the ExperimentRatioMetric type from
+ * @posthog/frontend/src/queries/schema/schema-general.ts
+ */
 export const ExperimentRatioMetricSchema = z
 	.object({
 		metric_type: z.literal("ratio"),
@@ -71,21 +89,36 @@ export const ExperimentRatioMetricSchema = z
 	})
 	.merge(ExperimentMetricBasePropertiesSchema);
 
+/**
+ * This is the schema for the experiment metric.
+ * It references the ExperimentMetric type from
+ * @posthog/frontend/src/queries/schema/schema-general.ts
+ */
 export const ExperimentMetricSchema = z.union([
 	ExperimentMeanMetricSchema,
 	ExperimentFunnelMetricSchema,
 	ExperimentRatioMetricSchema,
 ]);
 
-export const ExperimentExposureConfigSchema = z.object({
+/**
+ * This is the schema for the experiment exposure config.
+ * It references the ExperimentEventExposureConfig type from
+ * @posthog/frontend/src/queries/schema/schema-general.ts
+ */
+export const ExperimentEventExposureConfigSchema = z.object({
 	kind: z.literal("ExperimentEventExposureConfig"),
 	event: z.string(),
 	properties: z.array(z.any()), // this is an array of AnyPropertyFilter
 });
 
+/**
+ * This is the schema for the experiment exposure criteria.
+ * It references the ExperimentExposureCriteria type from
+ * @posthog/frontend/src/queries/schema/schema-general.ts
+ */
 export const ExperimentExposureCriteriaSchema = z.object({
 	filterTestAccounts: z.boolean().optional(),
-	exposure_config: ExperimentExposureConfigSchema.optional(),
+	exposure_config: ExperimentEventExposureConfigSchema.optional(),
 	multiple_variant_handling: z.enum(["exclude", "first_seen"]).optional(),
 });
 
@@ -137,12 +170,45 @@ export const ExperimentSchema = z.object({
 	conclusion_comment: z.string().nullish(),
 });
 
+/**
+ * This is the schema for the experiment exposure query.
+ * It references the ExperimentExposureQuery type from
+ * @posthog/frontend/src/queries/schema/schema-general.ts
+ */
+export const ExperimentExposureQuerySchema = z.object({
+	kind: z.literal("ExperimentExposureQuery"),
+	experiment_id: z.number(),
+	experiment_name: z.string(),
+	exposure_criteria: ExperimentExposureCriteriaSchema.optional(),
+	feature_flag: FeatureFlagSchema.optional(),
+	start_date: z.string().nullish(),
+	end_date: z.string().nullish(),
+	holdout: z.any().optional(),
+});
+
+export const ExperimentExposureTimeSeriesSchema = z.object({
+	variant: z.string(),
+	days: z.array(z.string()),
+	exposure_counts: z.array(z.number()),
+});
+
+export const ExperimentExposureQueryResponseSchema = z.object({
+	kind: z.literal("ExperimentExposureQueryResponse"),
+	timeseries: z.array(ExperimentExposureTimeSeriesSchema),
+	total_exposures: z.record(z.string(), z.number()),
+	date_range: DateRangeSchema,
+});
+
+// experiment type
 export type Experiment = z.infer<typeof ExperimentSchema>;
-export type ExperimentMetricType = z.infer<typeof ExperimentMetricType>;
+//metric types
 export type ExperimentMetricBaseProperties = z.infer<typeof ExperimentMetricBasePropertiesSchema>;
 export type ExperimentMetricOutlierHandling = z.infer<typeof ExperimentMetricOutlierHandlingSchema>;
-export type ExperimentDataWarehouseNode = z.infer<typeof ExperimentDataWarehouseNodeSchema>;
 export type ExperimentMeanMetric = z.infer<typeof ExperimentMeanMetricSchema>;
 export type ExperimentFunnelMetric = z.infer<typeof ExperimentFunnelMetricSchema>;
 export type ExperimentRatioMetric = z.infer<typeof ExperimentRatioMetricSchema>;
 export type ExperimentMetric = z.infer<typeof ExperimentMetricSchema>;
+// query types
+export type ExperimentExposureQuery = z.infer<typeof ExperimentExposureQuerySchema>;
+// response types
+export type ExperimentExposureQueryResponse = z.infer<typeof ExperimentExposureQueryResponseSchema>;

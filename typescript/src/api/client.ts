@@ -20,7 +20,11 @@ import {
 	SimpleDashboardSchema,
 } from "@/schema/dashboards";
 import type { Experiment } from "@/schema/experiments";
-import { ExperimentSchema } from "@/schema/experiments";
+import {
+	ExperimentExposureQueryResponseSchema,
+	ExperimentExposureQuerySchema,
+	ExperimentSchema,
+} from "@/schema/experiments";
 import {
 	type CreateFeatureFlagInput,
 	CreateFeatureFlagInputSchema,
@@ -315,6 +319,201 @@ export class ApiClient {
 					`${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`,
 					ExperimentSchema,
 				);
+			},
+			getResults: async ({
+				experimentId,
+				refresh = false,
+			}: {
+				experimentId: number;
+				refresh?: boolean;
+			}): Promise<
+				Result<{
+					experiment: Experiment;
+					primaryMetricsResults: any[];
+					secondaryMetricsResults: any[];
+					exposures: any;
+				}>
+			> => {
+				// First get the experiment details
+				const experimentResult = await this.experiments({ projectId }).get({
+					experimentId,
+				});
+				if (!experimentResult.success) {
+					return experimentResult;
+				}
+
+				const experiment = experimentResult.data;
+
+				// Prepare metrics queries
+				const primaryMetrics = [...(experiment.metrics || [])];
+				const sharedPrimaryMetrics = (experiment.saved_metrics || [])
+					.filter((sm: any) => sm.metadata.type === "primary")
+					.map((sm: any) => sm.query);
+				const allPrimaryMetrics = [...primaryMetrics, ...sharedPrimaryMetrics];
+
+				const sharedSecondaryMetrics = (experiment.saved_metrics || [])
+					.filter((sm: any) => sm.metadata.type === "secondary")
+					.map((sm: any) => sm.query);
+				const allSecondaryMetrics = [
+					...(experiment.metrics_secondary || []),
+					...sharedSecondaryMetrics,
+				];
+
+				// Execute queries for primary metrics
+				const primaryResults = await Promise.all(
+					allPrimaryMetrics.map(async (metric) => {
+						try {
+							const queryBody = {
+								kind: "ExperimentQuery",
+								metric,
+								experiment_id: experimentId,
+							};
+
+							const result = await this.query({ projectId }).execute({
+								queryBody,
+							});
+
+							return result.success ? result.data : null;
+						} catch (error) {
+							return null;
+						}
+					}),
+				);
+
+				// Execute queries for secondary metrics
+				const secondaryResults = await Promise.all(
+					allSecondaryMetrics.map(async (metric) => {
+						try {
+							const queryBody = {
+								kind: "ExperimentQuery",
+								metric,
+								experiment_id: experimentId,
+							};
+
+							const result = await this.query({ projectId }).execute({
+								queryBody,
+							});
+
+							return result.success ? result.data : null;
+						} catch (error) {
+							return null;
+						}
+					}),
+				);
+
+				// Execute exposure query if the experiment is running
+				let exposures = null;
+				if (experiment.start_date) {
+					try {
+						const exposureQueryBody = {
+							kind: "ExperimentExposureQuery",
+							experiment_id: experimentId,
+							experiment_name: experiment.name,
+							exposure_criteria: experiment.exposure_criteria,
+							feature_flag: experiment.feature_flag,
+							start_date: experiment.start_date,
+							end_date: experiment.end_date,
+							holdout: experiment.holdout,
+						};
+
+						const exposureResult = await this.query({ projectId }).execute({
+							queryBody: exposureQueryBody,
+						});
+
+						if (exposureResult.success) {
+							exposures = exposureResult.data;
+						}
+					} catch (error) {
+						// Exposure query failed, but we can still return other results
+						console.warn("Failed to load experiment exposures:", error);
+					}
+				}
+
+				return {
+					success: true,
+					data: {
+						experiment,
+						primaryMetricsResults: primaryResults,
+						secondaryMetricsResults: secondaryResults,
+						exposures,
+					},
+				};
+			},
+
+			getExposures: async ({
+				experimentId,
+				refresh = false,
+			}: {
+				experimentId: number;
+				refresh?: boolean;
+			}): Promise<
+				Result<{
+					experiment: Experiment;
+					exposures: any;
+				}>
+			> => {
+				/**
+				 * we have to get the experiment details first. There's no guarantee
+				 * that the user has queried for the experiment details before.
+				 */
+				const experimentDetails = await this.experiments({ projectId }).get({
+					experimentId,
+				});
+				if (!experimentDetails.success) return experimentDetails;
+
+				const experiment = experimentDetails.data;
+
+				/**
+				 * Validate that the experiment has started
+				 */
+				if (!experiment.start_date) {
+					return {
+						success: false,
+						error: new Error(
+							`Experiment "${experiment.name}" has not started yet. Exposure data is only available for started experiments.`,
+						),
+					};
+				}
+
+				const exposureQuery = {
+					kind: "ExperimentExposureQuery",
+					experiment_id: experimentId,
+					experiment_name: experiment.name,
+					exposure_criteria: experiment.exposure_criteria,
+					feature_flag: experiment.feature_flag,
+					start_date: experiment.start_date,
+					end_date: experiment.end_date,
+					holdout: experiment.holdout,
+				};
+
+				// Validate against existing ExperimentExposureQuerySchema
+				const validated = ExperimentExposureQuerySchema.parse(exposureQuery);
+
+				// The API expects a QueryRequest object with the query wrapped
+				const queryRequest = {
+					query: validated,
+				};
+
+				const result = await this.fetchWithSchema(
+					`${this.baseUrl}/api/environments/${projectId}/query/`,
+					ExperimentExposureQueryResponseSchema,
+					{
+						method: "POST",
+						body: JSON.stringify(queryRequest),
+					},
+				);
+
+				if (!result.success) {
+					return result;
+				}
+
+				return {
+					success: true,
+					data: {
+						experiment,
+						exposures: result.data,
+					},
+				};
 			},
 		};
 	}

@@ -223,6 +223,16 @@
 			"readOnlyHint": true
 		}
 	},
+	"experiment-get-results": {
+		"description": "Get experiment results including metrics data (primary and secondary) and exposure data. This tool fetches the experiment details and executes the necessary queries to get complete experiment results. Only works with new experiments (not legacy experiments).",
+		"category": "Experiments",
+		"summary": "Get experiment results including metrics and exposure data."
+	},
+	"experiment-exposure-query": {
+		"description": "Get exposure data for a specific experiment including daily timeseries and total exposures per variant. Only works with started experiments (experiments with a start_date).",
+		"category": "Experiments",
+		"summary": "Get experiment exposure data for started experiments."
+	},
 	"insight-create-from-query": {
 		"description": "Create an insight from a query that you have previously tested with 'query-run'. You should check the query runs, before creating an insight. Do not create an insight before running the query, unless you know already that it is correct (e.g. you are making a minor modification to an existing query you have seen).",
 		"category": "Insights & analytics",

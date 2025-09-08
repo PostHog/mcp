@@ -226,6 +226,23 @@
       "properties": {},
       "additionalProperties": false
     },
+    "ExperimentGetResultsSchema": {
+      "type": "object",
+      "properties": {
+        "experimentId": {
+          "type": "number",
+          "description": "The ID of the experiment to get results for"
+        },
+        "refresh": {
+          "type": "boolean",
+          "description": "Force refresh of results instead of using cached values"
+        }
+      },
+      "required": [
+        "experimentId"
+      ],
+      "additionalProperties": false
+    },
     "ExperimentGetSchema": {
       "type": "object",
       "properties": {

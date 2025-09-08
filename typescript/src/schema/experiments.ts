@@ -142,7 +142,7 @@ export const ExperimentSchema = z.object({
 	metrics: z.array(z.union([ExperimentMetricSchema, z.any()])).optional(),
 	metrics_secondary: z.array(z.union([ExperimentMetricSchema, z.any()])).optional(),
 	saved_metrics: z.array(z.any()).optional(),
-	saved_metrics_ids: z.nullable(z.array(z.any())),
+	saved_metrics_ids: z.array(z.any()).nullable(),
 	parameters: z
 		.object({
 			feature_flag_variants: z.array(
@@ -193,10 +193,13 @@ export const ExperimentExposureTimeSeriesSchema = z.object({
 });
 
 export const ExperimentExposureQueryResponseSchema = z.object({
-	kind: z.literal("ExperimentExposureQueryResponse"),
+	kind: z.literal("ExperimentExposureQuery"), // API returns the query kind, not a response kind
 	timeseries: z.array(ExperimentExposureTimeSeriesSchema),
 	total_exposures: z.record(z.string(), z.number()),
-	date_range: DateRangeSchema,
+	date_range: z.object({
+		date_from: z.string(),
+		date_to: z.string().nullable(), // API can return null for date_to
+	}),
 });
 
 // experiment type

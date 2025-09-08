@@ -67,51 +67,147 @@ export const ExperimentExposureQueryToolSchema = z.object({
 });
 
 export const ExperimentCreateSchema = z.object({
-	name: z.string().min(1).describe("Experiment name - should clearly describe what is being tested"),
-	
-	description: z.string().optional().describe("Detailed description of the experiment hypothesis, what changes are being tested, and expected outcomes"),
-	
-	feature_flag_key: z.string().describe("Feature flag key (letters, numbers, hyphens, underscores only). IMPORTANT: First search for existing feature flags that might be suitable using the feature-flags-get-all tool, then suggest reusing existing ones or creating a new key based on the experiment name"),
-	
-	type: z.enum(["product", "web"]).default("product").describe("Experiment type: 'product' for backend/API changes, 'web' for frontend UI changes"),
-	
+	name: z
+		.string()
+		.min(1)
+		.describe("Experiment name - should clearly describe what is being tested"),
+
+	description: z
+		.string()
+		.optional()
+		.describe(
+			"Detailed description of the experiment hypothesis, what changes are being tested, and expected outcomes",
+		),
+
+	feature_flag_key: z
+		.string()
+		.describe(
+			"Feature flag key (letters, numbers, hyphens, underscores only). IMPORTANT: First search for existing feature flags that might be suitable using the feature-flags-get-all tool, then suggest reusing existing ones or creating a new key based on the experiment name",
+		),
+
+	type: z
+		.enum(["product", "web"])
+		.default("product")
+		.describe(
+			"Experiment type: 'product' for backend/API changes, 'web' for frontend UI changes",
+		),
+
 	// Primary metrics with guidance
-	primary_metrics: z.array(z.object({
-		name: z.string().optional().describe("Human-readable metric name"),
-		metric_type: z.enum(["mean", "funnel", "ratio"]).describe("Metric type: 'mean' for average values (revenue, time spent), 'funnel' for conversion flows, 'ratio' for comparing two metrics"),
-		event_name: z.string().optional().describe("PostHog event name - search existing events or suggest based on experiment goal"),
-		properties: z.record(z.any()).optional().describe("Event properties to filter on"),
-		description: z.string().optional().describe("What this metric measures and why it's important for the experiment"),
-	})).optional().describe("Primary metrics to measure experiment success. Ask user what they want to optimize for, then suggest appropriate metrics and events"),
-	
+	primary_metrics: z
+		.array(
+			z.object({
+				name: z.string().optional().describe("Human-readable metric name"),
+				metric_type: z
+					.enum(["mean", "funnel", "ratio"])
+					.describe(
+						"Metric type: 'mean' for average values (revenue, time spent), 'funnel' for conversion flows, 'ratio' for comparing two metrics",
+					),
+				event_name: z
+					.string()
+					.optional()
+					.describe(
+						"REQUIRED for metrics to work: PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase'). For funnels, this is the first step. Use '$pageview' if unsure. Search project-property-definitions tool for available events.",
+					),
+				funnel_steps: z
+					.array(z.string())
+					.optional()
+					.describe(
+						"For funnel metrics only: Array of event names for each funnel step (e.g., ['product_view', 'add_to_cart', 'checkout', 'purchase'])",
+					),
+				properties: z.record(z.any()).optional().describe("Event properties to filter on"),
+				description: z
+					.string()
+					.optional()
+					.describe(
+						"What this metric measures and why it's important for the experiment",
+					),
+			}),
+		)
+		.optional()
+		.describe(
+			"Primary metrics to measure experiment success. IMPORTANT: Each metric needs event_name to track data. For funnels, provide funnel_steps array with event names for each step. Ask user what events they track, or use project-property-definitions to find available events.",
+		),
+
 	// Secondary metrics for additional insights
-	secondary_metrics: z.array(z.object({
-		name: z.string().optional().describe("Human-readable metric name"),
-		metric_type: z.enum(["mean", "funnel", "ratio"]).describe("Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics"),
-		event_name: z.string().optional().describe("PostHog event name for secondary monitoring"),
-		properties: z.record(z.any()).optional().describe("Event properties to filter on"),
-		description: z.string().optional().describe("What this secondary metric measures"),
-	})).optional().describe("Secondary metrics to monitor for potential side effects or additional insights"),
-	
+	secondary_metrics: z
+		.array(
+			z.object({
+				name: z.string().optional().describe("Human-readable metric name"),
+				metric_type: z
+					.enum(["mean", "funnel", "ratio"])
+					.describe(
+						"Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics",
+					),
+				event_name: z
+					.string()
+					.optional()
+					.describe("REQUIRED: PostHog event name. Use '$pageview' if unsure."),
+				funnel_steps: z
+					.array(z.string())
+					.optional()
+					.describe(
+						"For funnel metrics only: Array of event names for each funnel step",
+					),
+				properties: z.record(z.any()).optional().describe("Event properties to filter on"),
+				description: z.string().optional().describe("What this secondary metric measures"),
+			}),
+		)
+		.optional()
+		.describe("Secondary metrics to monitor for potential side effects or additional insights. Each metric needs event_name."),
+
 	// Feature flag variants
-	variants: z.array(z.object({
-		key: z.string().describe("Variant key (e.g., 'control', 'variant_a', 'new_design')"),
-		name: z.string().optional().describe("Human-readable variant name"),
-		rollout_percentage: z.number().min(0).max(100).describe("Percentage of users to show this variant"),
-	})).optional().describe("Experiment variants. If not specified, defaults to 50/50 control/test split. Ask user how many variants they need and what each tests"),
-	
+	variants: z
+		.array(
+			z.object({
+				key: z
+					.string()
+					.describe("Variant key (e.g., 'control', 'variant_a', 'new_design')"),
+				name: z.string().optional().describe("Human-readable variant name"),
+				rollout_percentage: z
+					.number()
+					.min(0)
+					.max(100)
+					.describe("Percentage of users to show this variant"),
+			}),
+		)
+		.optional()
+		.describe(
+			"Experiment variants. If not specified, defaults to 50/50 control/test split. Ask user how many variants they need and what each tests",
+		),
+
 	// Experiment parameters
-	minimum_detectable_effect: z.number().default(30).describe("Minimum detectable effect in percentage. Lower values require more users but detect smaller changes. Suggest 20-30% for most experiments"),
-	
+	minimum_detectable_effect: z
+		.number()
+		.default(30)
+		.describe(
+			"Minimum detectable effect in percentage. Lower values require more users but detect smaller changes. Suggest 20-30% for most experiments",
+		),
+
 	// Exposure and targeting
-	filter_test_accounts: z.boolean().default(true).describe("Whether to filter out internal test accounts"),
-	
-	target_properties: z.record(z.any()).optional().describe("Properties to target specific user segments (e.g., country, subscription type)"),
-	
+	filter_test_accounts: z
+		.boolean()
+		.default(true)
+		.describe("Whether to filter out internal test accounts"),
+
+	target_properties: z
+		.record(z.any())
+		.optional()
+		.describe("Properties to target specific user segments (e.g., country, subscription type)"),
+
 	// Control flags
-	draft: z.boolean().default(true).describe("Create as draft (true) or launch immediately (false). Recommend draft for review first"),
-	
-	holdout_id: z.number().optional().describe("Holdout group ID if this experiment should exclude users from other experiments"),
+	draft: z
+		.boolean()
+		.default(true)
+		.describe(
+			"Create as draft (true) or launch immediately (false). Recommend draft for review first",
+		),
+
+	holdout_id: z
+		.number()
+		.optional()
+		.describe(
+			"Holdout group ID if this experiment should exclude users from other experiments",
+		),
 });
 
 export const FeatureFlagCreateSchema = z.object({

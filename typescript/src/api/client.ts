@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 import { ErrorCode } from "@/lib/errors";
 import { withPagination } from "@/lib/utils/api";
 import { getSearchParamsFromRecord } from "@/lib/utils/helper-functions";
@@ -21,6 +23,7 @@ import {
 } from "@/schema/dashboards";
 import type { Experiment } from "@/schema/experiments";
 import {
+	ExperimentCreatePayloadSchema,
 	ExperimentExposureQueryResponseSchema,
 	ExperimentExposureQuerySchema,
 	ExperimentSchema,
@@ -545,6 +548,7 @@ export class ApiClient {
 					name?: string;
 					metric_type: "mean" | "funnel" | "ratio";
 					event_name?: string;
+					funnel_steps?: string[];
 					properties?: Record<string, any>;
 					description?: string;
 				}>;
@@ -552,6 +556,7 @@ export class ApiClient {
 					name?: string;
 					metric_type: "mean" | "funnel" | "ratio";
 					event_name?: string;
+					funnel_steps?: string[];
 					properties?: Record<string, any>;
 					description?: string;
 				}>;
@@ -566,56 +571,110 @@ export class ApiClient {
 				draft?: boolean;
 				holdout_id?: number;
 			}): Promise<Result<Experiment>> => {
-				// Transform and validate input
-				const payload = {
+				// Helper function to transform simple metrics to ExperimentMetric
+				const transformMetric = (m: {
+					name?: string;
+					metric_type: "mean" | "funnel" | "ratio";
+					event_name?: string;
+					funnel_steps?: string[];
+					properties?: Record<string, any>;
+					description?: string;
+				}): any => {
+					const baseMetric = {
+						kind: "ExperimentMetric" as const,
+						uuid: uuidv4(), // Generate UUID for each metric
+						name: m.name,
+						metric_type: m.metric_type,
+					};
+					
+					// Use event_name or default to $pageview
+					const eventName = m.event_name || "$pageview";
+					const eventProperties = m.properties || [];
+					
+					if (m.metric_type === "mean") {
+						return {
+							...baseMetric,
+							source: {
+								kind: "EventsNode" as const,
+								event: eventName,
+								properties: eventProperties,
+							},
+						};
+					}
+					if (m.metric_type === "funnel") {
+						// If funnel_steps provided, use those; otherwise use single event
+						const steps = m.funnel_steps && m.funnel_steps.length > 0 
+							? m.funnel_steps.map(event => ({
+								kind: "EventsNode" as const,
+								event: event,
+								properties: eventProperties,
+							}))
+							: [{
+								kind: "EventsNode" as const,
+								event: eventName,
+								properties: eventProperties,
+							}];
+						
+						return {
+							...baseMetric,
+							series: steps,
+						};
+					}
+					// ratio metric
+					return {
+						...baseMetric,
+						numerator: {
+							kind: "EventsNode" as const,
+							event: eventName,
+							properties: eventProperties,
+						},
+						denominator: { 
+							kind: "EventsNode" as const, 
+							event: "$pageview", 
+							properties: [] 
+						},
+					};
+				};
+
+				// Build and validate payload using Zod
+				const payload = ExperimentCreatePayloadSchema.parse({
 					name: experimentData.name,
 					description: experimentData.description,
 					feature_flag_key: experimentData.feature_flag_key,
-					type: experimentData.type || "product",
+					type: experimentData.type,
 					
-					// Let backend generate UUIDs for metrics
-					metrics: experimentData.primary_metrics?.map(m => ({
-						name: m.name,
-						metric_type: m.metric_type,
-						event_name: m.event_name,
-						properties: m.properties,
-						description: m.description,
-					})) || [],
-					
-					metrics_secondary: experimentData.secondary_metrics?.map(m => ({
-						name: m.name,  
-						metric_type: m.metric_type,
-						event_name: m.event_name,
-						properties: m.properties,
-						description: m.description,
-					})) || [],
-					
+					// Transform metrics to proper ExperimentMetric objects
+					metrics: experimentData.primary_metrics?.map(transformMetric),
+					metrics_secondary: experimentData.secondary_metrics?.map(transformMetric),
+
 					parameters: {
 						feature_flag_variants: experimentData.variants || [
 							{ key: "control", rollout_percentage: 50 },
-							{ key: "test", rollout_percentage: 50 }
+							{ key: "test", rollout_percentage: 50 },
 						],
-						minimum_detectable_effect: experimentData.minimum_detectable_effect || 30
+						minimum_detectable_effect: experimentData.minimum_detectable_effect,
 					},
-					
+
 					exposure_criteria: {
 						filterTestAccounts: experimentData.filter_test_accounts ?? true,
-						...(experimentData.target_properties && { properties: experimentData.target_properties })
+						...(experimentData.target_properties && {
+							properties: experimentData.target_properties,
+						}),
 					},
-					
-					...(experimentData.holdout_id && { holdout_id: experimentData.holdout_id }),
-					
+
+					holdout_id: experimentData.holdout_id,
+
 					// Only set start_date if not draft
-					...(!experimentData.draft && { start_date: new Date().toISOString() })
-				};
-				
+					...(!experimentData.draft && { start_date: new Date().toISOString() }),
+				});
+
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/experiments/`,
 					ExperimentSchema,
 					{
 						method: "POST",
-						body: JSON.stringify(payload)
-					}
+						body: JSON.stringify(payload),
+					},
 				);
 			},
 		};

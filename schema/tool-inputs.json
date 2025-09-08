@@ -266,7 +266,14 @@
               },
               "event_name": {
                 "type": "string",
-                "description": "PostHog event name - search existing events or suggest based on experiment goal"
+                "description": "REQUIRED for metrics to work: PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase'). For funnels, this is the first step. Use '$pageview' if unsure. Search project-property-definitions tool for available events."
+              },
+              "funnel_steps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "For funnel metrics only: Array of event names for each funnel step (e.g., ['product_view', 'add_to_cart', 'checkout', 'purchase'])"
               },
               "properties": {
                 "type": "object",
@@ -283,7 +290,7 @@
             ],
             "additionalProperties": false
           },
-          "description": "Primary metrics to measure experiment success. Ask user what they want to optimize for, then suggest appropriate metrics and events"
+          "description": "Primary metrics to measure experiment success. IMPORTANT: Each metric needs event_name to track data. For funnels, provide funnel_steps array with event names for each step. Ask user what events they track, or use project-property-definitions to find available events."
         },
         "secondary_metrics": {
           "type": "array",
@@ -305,7 +312,14 @@
               },
               "event_name": {
                 "type": "string",
-                "description": "PostHog event name for secondary monitoring"
+                "description": "REQUIRED: PostHog event name. Use '$pageview' if unsure."
+              },
+              "funnel_steps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "For funnel metrics only: Array of event names for each funnel step"
               },
               "properties": {
                 "type": "object",
@@ -322,7 +336,7 @@
             ],
             "additionalProperties": false
           },
-          "description": "Secondary metrics to monitor for potential side effects or additional insights"
+          "description": "Secondary metrics to monitor for potential side effects or additional insights. Each metric needs event_name."
         },
         "variants": {
           "type": "array",

@@ -17,10 +17,8 @@ export const getExposuresHandler = async (context: Context, params: Params) => {
 
 	const result = await context.api.experiments({ projectId }).getExposures({
 		experimentId: params.experimentId,
-		refresh: params.refresh || false,
+		refresh: params.refresh,
 	});
-
-	console.log("XXXXXX", result);
 
 	if (!result.success) {
 		throw new Error(`Failed to get experiment exposures: ${result.error.message}`);

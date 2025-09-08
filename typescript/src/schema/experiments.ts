@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { FeatureFlagSchema } from "./flags";
-import { DateRangeSchema } from "./query";
 
 const ExperimentType = ["web", "product"] as const;
 

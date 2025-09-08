@@ -41,8 +41,7 @@
               "type": "string"
             },
             "pinned": {
-              "type": "boolean",
-              "default": false
+              "type": "boolean"
             },
             "tags": {
               "type": "array",
@@ -529,8 +528,7 @@
               "type": "string"
             },
             "favorited": {
-              "type": "boolean",
-              "default": false
+              "type": "boolean"
             },
             "tags": {
               "type": "array",
@@ -540,7 +538,8 @@
             }
           },
           "required": [
-            "name"
+            "name",
+            "favorited"
           ],
           "additionalProperties": false
         }
@@ -1825,8 +1824,7 @@
                               "enum": [
                                 "horizontal",
                                 "vertical"
-                              ],
-                              "default": "vertical"
+                              ]
                             },
                             "breakdownAttributionType": {
                               "type": "string",
@@ -1834,8 +1832,7 @@
                                 "first_touch",
                                 "last_touch",
                                 "all_events"
-                              ],
-                              "default": "first_touch"
+                              ]
                             },
                             "breakdownAttributionValue": {
                               "type": "number"
@@ -1852,8 +1849,7 @@
                                 "ordered",
                                 "unordered",
                                 "strict"
-                              ],
-                              "default": "ordered"
+                              ]
                             },
                             "funnelVizType": {
                               "type": "string",
@@ -1861,8 +1857,7 @@
                                 "steps",
                                 "time_to_convert",
                                 "trends"
-                              ],
-                              "default": "steps"
+                              ]
                             },
                             "funnelWindowInterval": {
                               "type": "number",
@@ -1884,8 +1879,7 @@
                               "enum": [
                                 "total",
                                 "previous"
-                              ],
-                              "default": "total"
+                              ]
                             }
                           },
                           "additionalProperties": false

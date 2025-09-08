@@ -35,7 +35,7 @@ class Data1(BaseModel):
     )
     name: Annotated[str, Field(min_length=1)]
     description: str | None = None
-    pinned: bool | None = False
+    pinned: bool | None = None
     tags: list[str] | None = None
 
 
@@ -290,7 +290,7 @@ class Data5(BaseModel):
     name: str
     query: Any | None = None
     description: str | None = None
-    favorited: bool | None = False
+    favorited: bool
     tags: list[str] | None = None
 
 
@@ -715,16 +715,16 @@ class FunnelsFilter(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    layout: Layout | None = Layout.VERTICAL
-    breakdownAttributionType: BreakdownAttributionType | None = BreakdownAttributionType.FIRST_TOUCH
+    layout: Layout | None = None
+    breakdownAttributionType: BreakdownAttributionType | None = None
     breakdownAttributionValue: float | None = None
     funnelToStep: float | None = None
     funnelFromStep: float | None = None
-    funnelOrderType: FunnelOrderType | None = FunnelOrderType.ORDERED
-    funnelVizType: FunnelVizType | None = FunnelVizType.STEPS
+    funnelOrderType: FunnelOrderType | None = None
+    funnelVizType: FunnelVizType | None = None
     funnelWindowInterval: float | None = 14
     funnelWindowIntervalUnit: FunnelWindowIntervalUnit | None = FunnelWindowIntervalUnit.DAY
-    funnelStepReference: FunnelStepReference | None = FunnelStepReference.TOTAL
+    funnelStepReference: FunnelStepReference | None = None
 
 
 class BreakdownFilter1(BaseModel):

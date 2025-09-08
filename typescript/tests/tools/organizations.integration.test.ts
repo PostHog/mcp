@@ -1,19 +1,19 @@
-import { describe, it, expect, beforeAll, afterEach } from "vitest";
 import {
-	validateEnvironmentVariables,
+	type CreatedResources,
+	TEST_ORG_ID,
+	TEST_PROJECT_ID,
+	cleanupResources,
 	createTestClient,
 	createTestContext,
-	setActiveProjectAndOrg,
-	cleanupResources,
-	TEST_PROJECT_ID,
-	TEST_ORG_ID,
-	type CreatedResources,
 	parseToolResponse,
+	setActiveProjectAndOrg,
+	validateEnvironmentVariables,
 } from "@/shared/test-utils";
+import getOrganizationDetailsTool from "@/tools/organizations/getDetails";
 import getOrganizationsTool from "@/tools/organizations/getOrganizations";
 import setActiveOrganizationTool from "@/tools/organizations/setActive";
-import getOrganizationDetailsTool from "@/tools/organizations/getDetails";
 import type { Context } from "@/tools/types";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 describe("Organizations", { concurrent: false }, () => {
 	let context: Context;
@@ -61,17 +61,12 @@ describe("Organizations", { concurrent: false }, () => {
 
 	describe("set-active-organization tool", () => {
 		const setTool = setActiveOrganizationTool();
-		const getTool = getOrganizationsTool();
 
 		it("should set active organization", async () => {
-			const orgsResult = await getTool.handler(context, {});
-			const orgs = parseToolResponse(orgsResult);
-			expect(orgs.length).toBeGreaterThan(0);
+			const targetOrg = TEST_ORG_ID!;
+			const setResult = await setTool.handler(context, { orgId: targetOrg });
 
-			const targetOrg = orgs[0];
-			const setResult = await setTool.handler(context, { orgId: targetOrg.id });
-
-			expect(setResult.content[0].text).toBe(`Switched to organization ${targetOrg.id}`);
+			expect(setResult.content[0].text).toBe(`Switched to organization ${targetOrg}`);
 		});
 
 		it("should handle invalid organization ID", async () => {

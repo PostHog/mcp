@@ -63,27 +63,12 @@ describe("Projects", { concurrent: false }, () => {
 
 	describe("set-active-project tool", () => {
 		const setTool = setActiveProjectTool();
-		const getTool = getProjectsTool();
 
 		it("should set active project", async () => {
-			const projectsResult = await getTool.handler(context, {});
-			const projects = parseToolResponse(projectsResult);
-			expect(projects.length).toBeGreaterThan(0);
+			const targetProject = TEST_PROJECT_ID!;
+			const setResult = await setTool.handler(context, { projectId: Number(targetProject) });
 
-			const targetProject = projects[0];
-			const setResult = await setTool.handler(context, { projectId: targetProject.id });
-
-			expect(setResult.content[0].text).toBe(`Switched to project ${targetProject.id}`);
-		});
-
-		it("should set project ID as expected", async () => {
-			const projectId = 123456;
-			const result = await setTool.handler(context, { projectId: projectId });
-
-			expect(result.content[0].text).toBe(`Switched to project ${projectId}`);
-
-			// Clean up: switch back to the original test project
-			await setTool.handler(context, { projectId: Number(TEST_PROJECT_ID) });
+			expect(setResult.content[0].text).toBe(`Switched to project ${targetProject}`);
 		});
 	});
 

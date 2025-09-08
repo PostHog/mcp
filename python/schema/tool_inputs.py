@@ -283,6 +283,156 @@ class FeatureFlagUpdateSchema(BaseModel):
     data: Data4
 
 
+class Data5(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: str
+    query: Any | None = None
+    description: str | None = None
+    favorited: bool | None = False
+    tags: list[str] | None = None
+
+
+class InsightCreateSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    data: Data5
+
+
+class InsightDeleteSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    insightId: str
+
+
+class InsightGenerateHogQLFromQuestionSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: Annotated[str, Field(max_length=1000)]
+    """
+    Your natural language query describing the SQL insight (max 1000 characters).
+    """
+
+
+class Data6(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    limit: float | None = None
+    offset: float | None = None
+    favorited: bool | None = None
+    search: str | None = None
+
+
+class InsightGetAllSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    data: Data6 | None = None
+
+
+class InsightGetSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    insightId: str
+
+
+class InsightQueryInputSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    insightId: str
+
+
+class Data7(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: str | None = None
+    description: str | None = None
+    filters: dict[str, Any] | None = None
+    query: dict[str, Any] | None = None
+    favorited: bool | None = None
+    dashboard: float | None = None
+    tags: list[str] | None = None
+
+
+class InsightUpdateSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    insightId: str
+    data: Data7
+
+
+class LLMObservabilityGetCostsSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    projectId: Annotated[int, Field(gt=0)]
+    days: float | None = None
+
+
+class OrganizationGetAllSchema(BaseModel):
+    pass
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+
+class OrganizationGetDetailsSchema(BaseModel):
+    pass
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+
+class OrganizationSetActiveSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    orgId: UUID
+
+
+class ProjectEventDefinitionsSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    q: str | None = None
+    """
+    Search query to filter event names. Only use if there are lots of events.
+    """
+
+
+class ProjectGetAllSchema(BaseModel):
+    pass
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+
+class ProjectPropertyDefinitionsSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    eventName: str
+    """
+    Event name to filter properties by
+    """
+
+
+class ProjectSetActiveSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    projectId: Annotated[int, Field(gt=0)]
+
+
 class DateRange(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -389,7 +539,10 @@ class Series(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    custom_name: str | None = None
+    custom_name: str
+    """
+    A display name
+    """
     math: Math | None = None
     math_property: str | None = None
     properties: list[Properties3 | Properties4] | Properties5 | None = None
@@ -510,7 +663,10 @@ class Series1(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    custom_name: str | None = None
+    custom_name: str
+    """
+    A display name
+    """
     math: Math | None = None
     math_property: str | None = None
     properties: list[Properties9 | Properties10] | Properties11 | None = None
@@ -646,151 +802,8 @@ class Query1(BaseModel):
     source: Source2
 
 
-class Data5(BaseModel):
+class QueryRunInputSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    name: str
     query: Query | Query1
-    description: str | None = None
-    favorited: bool | None = False
-    tags: list[str] | None = None
-
-
-class InsightCreateSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    data: Data5
-
-
-class InsightDeleteSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    insightId: str
-
-
-class InsightGenerateHogQLFromQuestionSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    question: Annotated[str, Field(max_length=1000)]
-    """
-    Your natural language query describing the SQL insight (max 1000 characters).
-    """
-
-
-class Data6(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    limit: float | None = None
-    offset: float | None = None
-    favorited: bool | None = None
-    search: str | None = None
-
-
-class InsightGetAllSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    data: Data6 | None = None
-
-
-class InsightGetSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    insightId: str
-
-
-class InsightQuerySchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    insightId: str
-
-
-class Data7(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    name: str | None = None
-    description: str | None = None
-    filters: dict[str, Any] | None = None
-    query: dict[str, Any] | None = None
-    favorited: bool | None = None
-    dashboard: float | None = None
-    tags: list[str] | None = None
-
-
-class InsightUpdateSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    insightId: str
-    data: Data7
-
-
-class LLMObservabilityGetCostsSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    projectId: Annotated[int, Field(gt=0)]
-    days: float | None = None
-
-
-class OrganizationGetAllSchema(BaseModel):
-    pass
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-
-
-class OrganizationGetDetailsSchema(BaseModel):
-    pass
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-
-
-class OrganizationSetActiveSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    orgId: UUID
-
-
-class ProjectEventDefinitionsSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    q: str | None = None
-    """
-    Search query to filter event names. Only use if there are lots of events.
-    """
-
-
-class ProjectGetAllSchema(BaseModel):
-    pass
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-
-
-class ProjectPropertyDefinitionsSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    eventName: str
-    """
-    Event name to filter properties by
-    """
-
-
-class ProjectSetActiveSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    projectId: Annotated[int, Field(gt=0)]

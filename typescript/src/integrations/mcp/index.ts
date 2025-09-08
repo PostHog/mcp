@@ -151,8 +151,6 @@ export class MyMCP extends McpAgent<Env> {
 		const wrappedHandler = async (params: z.infer<z.ZodObject<TSchema>>) => {
 			const validation = tool.schema.safeParse(params);
 
-			console.log("Tool called:", tool.name, "validation:", validation.success);
-
 			if (!validation.success) {
 				await this.trackEvent("mcp tool call", {
 					tool: tool.name,

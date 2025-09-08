@@ -10,15 +10,11 @@ type Params = z.infer<typeof schema>;
 export const queryRunHandler = async (context: Context, params: Params) => {
 	const { query } = params;
 
-	console.log("Running query:", query);
-
 	const projectId = await context.stateManager.getProjectId();
 
 	const queryResult = await context.api.insights({ projectId }).query({
 		query: query,
 	});
-
-	console.log("Query result:", queryResult);
 
 	if (!queryResult.success) {
 		throw new Error(`Failed to query insight: ${queryResult.error.message}`);

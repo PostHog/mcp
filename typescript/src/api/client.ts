@@ -73,10 +73,6 @@ export class ApiClient {
 		options?: RequestInit,
 	): Promise<Result<T>> {
 		try {
-			if (options?.method === "POST" || options?.method === "PATCH") {
-				console.log(`[API Request] ${options.method} ${url}, Body: ${options.body}`);
-			}
-
 			const response = await fetch(url, {
 				...options,
 				headers: {
@@ -91,9 +87,6 @@ export class ApiClient {
 				}
 
 				const errorText = await response.text();
-				console.log(
-					`[API Error] Status: ${response.status}, URL: ${url}, Response: ${errorText}`,
-				);
 
 				let errorData: any;
 				try {

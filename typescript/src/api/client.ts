@@ -27,6 +27,7 @@ import {
 	ExperimentExposureQueryResponseSchema,
 	ExperimentExposureQuerySchema,
 	ExperimentSchema,
+	ExperimentUpdatePayloadSchema,
 } from "@/schema/experiments";
 import {
 	type CreateFeatureFlagInput,
@@ -679,6 +680,48 @@ export class ApiClient {
 						body: JSON.stringify(payload),
 					},
 				);
+			},
+
+			update: async ({
+				experimentId,
+				updateData,
+			}: {
+				experimentId: number;
+				updateData: z.infer<typeof ExperimentUpdatePayloadSchema>;
+			}): Promise<Result<Experiment>> => {
+				try {
+					// Helper function to ensure metrics have UUIDs (for metrics added in updates)
+					const ensureMetricUuid = (metric: any): any => {
+						if (!metric.uuid) {
+							return { ...metric, uuid: uuidv4() };
+						}
+						return metric;
+					};
+
+					// Transform metrics if present to ensure they have UUIDs
+					const payload = { ...updateData };
+					if (payload.metrics) {
+						payload.metrics = payload.metrics.map(ensureMetricUuid);
+					}
+					if (payload.metrics_secondary) {
+						payload.metrics_secondary = payload.metrics_secondary.map(ensureMetricUuid);
+					}
+
+					// Validate payload
+					const validated = ExperimentUpdatePayloadSchema.parse(payload);
+
+					// Make API call
+					return this.fetchWithSchema(
+						`${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`,
+						ExperimentSchema,
+						{
+							method: "PATCH",
+							body: JSON.stringify(validated),
+						},
+					);
+				} catch (error) {
+					return { success: false, error: new Error(`Update failed: ${error}`) };
+				}
 			},
 		};
 	}

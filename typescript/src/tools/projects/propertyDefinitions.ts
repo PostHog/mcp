@@ -1,28 +1,33 @@
 import { PropertyDefinitionSchema } from "@/schema/properties";
-import { ProjectPropertyDefinitionsSchema } from "@/schema/tool-inputs";
+import { ProjectPropertyDefinitionsInputSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
 import type { z } from "zod";
 
-const schema = ProjectPropertyDefinitionsSchema;
+const schema = ProjectPropertyDefinitionsInputSchema;
 
 type Params = z.infer<typeof schema>;
 
 export const propertyDefinitionsHandler = async (context: Context, params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
+	if (!params.eventName && params.type === "event") {
+		throw new Error("eventName is required for event type");
+	}
+
 	const propDefsResult = await context.api.projects().propertyDefinitions({
 		projectId,
-		eventNames: [params.eventName],
-		excludeCoreProperties: true,
-		filterByEventNames: true,
+		eventNames: params.eventName ? [params.eventName] : undefined,
+		filterByEventNames: params.type === "event",
 		isFeatureFlag: false,
-		limit: 100,
+		limit: 200,
+		type: params.type,
+		excludeCoreProperties: !params.includePredefinedProperties,
 	});
 
 	if (!propDefsResult.success) {
 		throw new Error(
-			`Failed to get property definitions for event ${params.eventName}: ${propDefsResult.error.message}`,
+			`Failed to get property definitions for ${params.type}s: ${propDefsResult.error.message}`,
 		);
 	}
 
@@ -33,10 +38,10 @@ export const propertyDefinitionsHandler = async (context: Context, params: Param
 	};
 };
 
-const definition = getToolDefinition("event-properties-get");
+const definition = getToolDefinition("properties-get");
 
 const tool = (): Tool<typeof schema> => ({
-	name: "event-properties-get",
+	name: "properties-get",
 	title: definition.title,
 	description: definition.description,
 	schema,

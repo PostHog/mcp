@@ -209,12 +209,12 @@
 		"summary": "List all event definitions in the project with optional filtering.",
 		"title": "List all events"
 	},
-	"event-properties-get": {
-		"description": "Get common properties for an event.",
+	"properties-get": {
+		"description": "Get properties for events, persons, groups or sessions. This gives a list of properties that can be used in queries for the event, person group or session.",
 		"category": "Events & properties",
 		"feature": "events",
-		"summary": "Get common properties for an event.",
-		"title": "Get event properties"
+		"summary": "Get properties for events, persons, groups or sessions.",
+		"title": "Get properties"
 	},
 	"property-definitions": {
 		"description": "Get event and property definitions for the project.",

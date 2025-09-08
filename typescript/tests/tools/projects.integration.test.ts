@@ -72,11 +72,12 @@ describe("Projects", { concurrent: false }, () => {
 		});
 	});
 
-	describe("event-properties-get tool", () => {
+	describe("properties-get tool", () => {
 		const propertyDefsTool = propertyDefinitionsTool();
 
 		it("should get property definitions for a specific event", async () => {
 			const result = await propertyDefsTool.handler(context, {
+				type: "event",
 				eventName: "$pageview",
 			});
 			const propertyDefs = parseToolResponse(result);
@@ -86,6 +87,7 @@ describe("Projects", { concurrent: false }, () => {
 
 		it("should return property definitions with proper structure", async () => {
 			const result = await propertyDefsTool.handler(context, {
+				type: "event",
 				eventName: "$pageview",
 			});
 			const propertyDefs = parseToolResponse(result);
@@ -102,6 +104,7 @@ describe("Projects", { concurrent: false }, () => {
 		it("should handle invalid event names gracefully", async () => {
 			try {
 				const result = await propertyDefsTool.handler(context, {
+					type: "event",
 					eventName: `non-existent-event-${uuidv4()}`,
 				});
 				const propertyDefs = parseToolResponse(result);
@@ -109,6 +112,33 @@ describe("Projects", { concurrent: false }, () => {
 			} catch (error) {
 				expect(error).toBeInstanceOf(Error);
 			}
+		});
+
+		it("should get property definitions for persons", async () => {
+			const result = await propertyDefsTool.handler(context, {
+				type: "person",
+			});
+			const propertyDefs = parseToolResponse(result);
+			expect(Array.isArray(propertyDefs)).toBe(true);
+			expect(propertyDefs.length).toBeGreaterThan(0);
+		});
+
+		it("should get property definitions for groups", async () => {
+			const result = await propertyDefsTool.handler(context, {
+				type: "group",
+			});
+			const propertyDefs = parseToolResponse(result);
+			expect(Array.isArray(propertyDefs)).toBe(true);
+			expect(propertyDefs.length).toBeGreaterThan(0);
+		});
+
+		it("should get property definitions for sessions", async () => {
+			const result = await propertyDefsTool.handler(context, {
+				type: "session",
+			});
+			const propertyDefs = parseToolResponse(result);
+			expect(Array.isArray(propertyDefs)).toBe(true);
+			expect(propertyDefs.length).toBeGreaterThan(0);
 		});
 	});
 

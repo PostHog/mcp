@@ -181,14 +181,16 @@ export class ApiClient {
 				isFeatureFlag,
 				limit,
 				offset,
+				type,
 			}: {
 				projectId: string;
-				eventNames?: string[];
+				eventNames?: string[] | undefined;
 				excludeCoreProperties?: boolean;
 				filterByEventNames?: boolean;
 				isFeatureFlag?: boolean;
 				limit?: number;
 				offset?: number;
+				type?: "event" | "person" | "group" | "session";
 			}): Promise<Result<ApiPropertyDefinition[]>> => {
 				try {
 					const params = {
@@ -196,8 +198,10 @@ export class ApiClient {
 						exclude_core_properties: excludeCoreProperties,
 						filter_by_event_names: filterByEventNames,
 						is_feature_flag: isFeatureFlag,
-						limit,
-						offset,
+						limit: limit ?? 100,
+						offset: offset ?? 0,
+						type: type ?? "event",
+						exclude_hidden: true,
 					};
 
 					const searchParams = getSearchParamsFromRecord(params);
@@ -205,6 +209,8 @@ export class ApiClient {
 					const url = `${this.baseUrl}/api/projects/${projectId}/property_definitions/${
 						searchParams.toString() ? `?${searchParams}` : ""
 					}`;
+
+					console.log({ url });
 
 					const propertyDefinitions = await withPagination(
 						url,

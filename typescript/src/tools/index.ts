@@ -21,7 +21,7 @@ import setActiveOrganization from "./organizations/setActive";
 import eventDefinitions from "./projects/eventDefinitions";
 // Projects
 import getProjects from "./projects/getProjects";
-import getEventProperties from "./projects/propertyDefinitions";
+import getProperties from "./projects/propertyDefinitions";
 import setActiveProject from "./projects/setActive";
 
 // Documentation
@@ -77,7 +77,7 @@ const TOOL_MAP: Record<string, () => Tool<ZodObjectAny>> = {
 	"projects-get": getProjects,
 	"switch-project": setActiveProject,
 	"event-definitions-list": eventDefinitions,
-	"event-properties-get": getEventProperties,
+	"properties-get": getProperties,
 
 	// Documentation - handled separately due to env check
 	// "docs-search": searchDocs,

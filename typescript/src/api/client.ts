@@ -454,8 +454,6 @@ export class ApiClient {
 					searchParams.append("limit", String(validatedParams.limit));
 				if (validatedParams?.offset)
 					searchParams.append("offset", String(validatedParams.offset));
-				if (validatedParams?.saved !== undefined)
-					searchParams.append("saved", String(validatedParams.saved));
 				if (validatedParams?.search) searchParams.append("search", validatedParams.search);
 
 				const url = `${this.baseUrl}/api/projects/${projectId}/insights/${searchParams.toString() ? `?${searchParams}` : ""}`;

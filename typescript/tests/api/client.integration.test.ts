@@ -2,19 +2,6 @@ import { ApiClient } from "@/api/client";
 import type { CreateInsightInput } from "@/schema/insights";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
-// Helper function for detailed API logging
-const logApiResponse = (testName: string, success: boolean, data?: any, error?: any) => {
-	console.log(`[${testName}] API Response:`, {
-		success,
-		...(success
-			? { data: JSON.stringify(data, null, 2) }
-			: {
-					error: error?.message,
-					fullError: JSON.stringify(error, null, 2),
-				}),
-	});
-};
-
 const API_BASE_URL = process.env.TEST_POSTHOG_API_BASE_URL || "http://localhost:8010";
 const API_TOKEN = process.env.TEST_POSTHOG_PERSONAL_API_KEY;
 const TEST_ORG_ID = process.env.TEST_ORG_ID;
@@ -446,13 +433,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 					data: insightData,
 				});
 
-				logApiResponse(
-					"Basic Trends",
-					result.success,
-					result.success ? result.data : undefined,
-					result.success ? undefined : (result as any).error,
-				);
-
 				expect(result.success).toBe(true);
 				if (result.success) {
 					createdResources.insights.push(result.data.id);
@@ -500,13 +480,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 						data: insightData,
 					});
 
-					logApiResponse(
-						`Trends ${display}`,
-						result.success,
-						result.success ? result.data : undefined,
-						result.success ? undefined : (result as any).error,
-					);
-
 					expect(result.success).toBe(true);
 					if (result.success) {
 						createdResources.insights.push(result.data.id);
@@ -549,13 +522,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 						data: insightData,
 					});
 
-					logApiResponse(
-						`Trends Breakdown ${breakdownType}`,
-						result.success,
-						result.success ? result.data : undefined,
-						result.success ? undefined : (result as any).error,
-					);
-
 					expect(result.success).toBe(true);
 					if (result.success) {
 						createdResources.insights.push(result.data.id);
@@ -596,13 +562,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 						data: insightData,
 					});
 
-					logApiResponse(
-						`Trends Interval ${interval}`,
-						result.success,
-						result.success ? result.data : undefined,
-						result.success ? undefined : (result as any).error,
-					);
-
 					expect(result.success).toBe(true);
 					if (result.success) {
 						createdResources.insights.push(result.data.id);
@@ -639,13 +598,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 				const result = await client.insights({ projectId: testProjectId }).create({
 					data: insightData,
 				});
-
-				logApiResponse(
-					"Trends Compare",
-					result.success,
-					result.success ? result.data : undefined,
-					result.success ? undefined : (result as any).error,
-				);
 
 				expect(result.success).toBe(true);
 				if (result.success) {
@@ -694,13 +646,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 					data: insightData,
 				});
 
-				logApiResponse(
-					"Trends Property Filter",
-					result.success,
-					result.success ? result.data : undefined,
-					result.success ? undefined : (result as any).error,
-				);
-
 				expect(result.success).toBe(true);
 				if (result.success) {
 					createdResources.insights.push(result.data.id);
@@ -738,13 +683,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 				const result = await client.insights({ projectId: testProjectId }).create({
 					data: insightData,
 				});
-
-				logApiResponse(
-					"Basic Funnel",
-					result.success,
-					result.success ? result.data : undefined,
-					result.success ? undefined : (result as any).error,
-				);
 
 				expect(result.success).toBe(true);
 				if (result.success) {
@@ -795,13 +733,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 						data: insightData,
 					});
 
-					logApiResponse(
-						`Funnel ${config.layout} ${config.orderType}`,
-						result.success,
-						result.success ? result.data : undefined,
-						result.success ? undefined : (result as any).error,
-					);
-
 					expect(result.success).toBe(true);
 					if (result.success) {
 						createdResources.insights.push(result.data.id);
@@ -850,13 +781,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 						data: insightData,
 					});
 
-					logApiResponse(
-						`Funnel Attribution ${attribution}`,
-						result.success,
-						result.success ? result.data : undefined,
-						result.success ? undefined : (result as any).error,
-					);
-
 					expect(result.success).toBe(true);
 					if (result.success) {
 						createdResources.insights.push(result.data.id);
@@ -902,13 +826,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 						data: insightData,
 					});
 
-					logApiResponse(
-						`Funnel Window ${unit}`,
-						result.success,
-						result.success ? result.data : undefined,
-						result.success ? undefined : (result as any).error,
-					);
-
 					expect(result.success).toBe(true);
 					if (result.success) {
 						createdResources.insights.push(result.data.id);
@@ -941,13 +858,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 				const result = await client.insights({ projectId: testProjectId }).create({
 					data: insightData,
 				});
-
-				logApiResponse(
-					"Basic HogQL",
-					result.success,
-					result.success ? result.data : undefined,
-					result.success ? undefined : (result as any).error,
-				);
 
 				expect(result.success).toBe(true);
 				if (result.success) {
@@ -989,13 +899,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 				const result = await client.insights({ projectId: testProjectId }).create({
 					data: insightData,
 				});
-
-				logApiResponse(
-					"HogQL Aggregation",
-					result.success,
-					result.success ? result.data : undefined,
-					result.success ? undefined : (result as any).error,
-				);
 
 				expect(result.success).toBe(true);
 				if (result.success) {
@@ -1043,13 +946,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 				const result = await client.insights({ projectId: testProjectId }).create({
 					data: insightData,
 				});
-
-				logApiResponse(
-					"HogQL Property Filter",
-					result.success,
-					result.success ? result.data : undefined,
-					result.success ? undefined : (result as any).error,
-				);
 
 				expect(result.success).toBe(true);
 				if (result.success) {

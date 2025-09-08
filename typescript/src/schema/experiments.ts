@@ -201,8 +201,56 @@ export const ExperimentExposureQueryResponseSchema = z.object({
 	}),
 });
 
+/**
+ * Schema for creating a new experiment
+ * This validates the payload sent to the API
+ */
+export const ExperimentCreatePayloadSchema = z.object({
+	name: z.string(),
+	description: z.string().optional(),
+	feature_flag_key: z.string(),
+	type: z.enum(ExperimentType).optional(),
+	
+	// Base fields required by API
+	filters: z.object({}).default({}),
+	saved_metrics_ids: z.array(z.any()).default([]),
+	saved_metrics: z.array(z.any()).default([]),
+	primary_metrics_ordered_uuids: z.null().default(null),
+	secondary_metrics_ordered_uuids: z.null().default(null),
+	archived: z.boolean().default(false),
+	deleted: z.boolean().default(false),
+	
+	// Metrics - these will be transformed from simple input to proper ExperimentMetric
+	metrics: z.array(ExperimentMetricSchema).optional().default([]),
+	metrics_secondary: z.array(ExperimentMetricSchema).optional().default([]),
+	
+	// Parameters
+	parameters: z.object({
+		feature_flag_variants: z.array(z.object({
+			key: z.string(),
+			name: z.string().optional(),
+			rollout_percentage: z.number(),
+		})).default([
+			{ key: "control", rollout_percentage: 50 },
+			{ key: "test", rollout_percentage: 50 }
+		]),
+		minimum_detectable_effect: z.number().optional(),
+	}).optional(),
+	
+	// Exposure criteria
+	exposure_criteria: z.object({
+		filterTestAccounts: z.boolean().default(true),
+		properties: z.any().optional(),
+	}).optional(),
+	
+	// Optional fields
+	holdout_id: z.number().optional(),
+	start_date: z.string().optional(), // Set when not draft
+});
+
 // experiment type
 export type Experiment = z.infer<typeof ExperimentSchema>;
+export type ExperimentCreatePayload = z.infer<typeof ExperimentCreatePayloadSchema>;
 //metric types
 export type ExperimentMetricBaseProperties = z.infer<typeof ExperimentMetricBasePropertiesSchema>;
 export type ExperimentMetricOutlierHandling = z.infer<typeof ExperimentMetricOutlierHandlingSchema>;

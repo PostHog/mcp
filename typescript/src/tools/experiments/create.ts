@@ -14,20 +14,9 @@ type Params = z.infer<typeof schema>;
 export const createExperimentHandler = async (context: Context, params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
-	const result = await context.api.experiments({ projectId }).create({
-		name: params.name,
-		description: params.description,
-		feature_flag_key: params.feature_flag_key,
-		type: params.type,
-		primary_metrics: params.primary_metrics,
-		secondary_metrics: params.secondary_metrics,
-		variants: params.variants,
-		minimum_detectable_effect: params.minimum_detectable_effect,
-		filter_test_accounts: params.filter_test_accounts,
-		target_properties: params.target_properties,
-		draft: params.draft,
-		holdout_id: params.holdout_id,
-	});
+	// The API client handles all validation and transformation with Zod
+	// We just need to pass the params with proper type casting
+	const result = await context.api.experiments({ projectId }).create(params as any);
 
 	if (!result.success) {
 		throw new Error(`Failed to create experiment: ${result.error.message}`);

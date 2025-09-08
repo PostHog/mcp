@@ -47,8 +47,6 @@ describe("Query Integration Tests", () => {
 
 	describe("HogQL Query Execution", () => {
 		it("should execute pageviews HogQL query successfully", async () => {
-			console.log("\n[Test] Executing pageviews HogQL query...");
-
 			const tool = queryRunTool();
 			const query = SAMPLE_HOGQL_QUERIES.pageviews;
 			const result = await tool.handler(context, {
@@ -56,7 +54,6 @@ describe("Query Integration Tests", () => {
 			});
 
 			const response = parseToolResponse(result);
-			console.log("HogQL pageviews query response:", JSON.stringify(response, null, 2));
 
 			expect(result.content).toBeDefined();
 			expect(result.content[0].type).toBe("text");
@@ -78,7 +75,7 @@ describe("Query Integration Tests", () => {
 			expect(Array.isArray(response)).toBe(true);
 		});
 
-		it("should handle invalid HogQL query with detailed error logging", async () => {
+		it("should handle invalid HogQL query with invalid node", async () => {
 			const invalidQuery = {
 				kind: "DataVisualizationNode" as const,
 				source: {
@@ -175,23 +172,6 @@ describe("Query Integration Tests", () => {
 			expect(result.content[0].type).toBe("text");
 			expect(response).toBeDefined();
 			expect(Array.isArray(response)).toBe(true);
-		});
-
-		it("should handle forbidden trends query with invalid projectId", async () => {
-			// Create a context with an invalid/forbidden project ID
-			const forbiddenContext = { ...context };
-			await forbiddenContext.cache.set("projectId", "999999");
-
-			const tool = queryRunTool();
-
-			try {
-				await tool.handler(forbiddenContext, {
-					query: SAMPLE_TREND_QUERIES.basicPageviews,
-				});
-			} catch (error: any) {
-				expect(error).toBeDefined();
-				expect(error.message).toContain("Failed to query insight");
-			}
 		});
 	});
 

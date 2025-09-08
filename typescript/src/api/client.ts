@@ -99,7 +99,9 @@ export class ApiClient {
 					throw new Error(`Validation error: ${errorData.code}`);
 				}
 
-				throw new Error(`Request failed: ${response.statusText}`);
+				throw new Error(
+					`Request failed:\nStatus Code: ${response.status} (${response.statusText})\nError Message: ${errorText}`,
+				);
 			}
 
 			const rawData = await response.json();

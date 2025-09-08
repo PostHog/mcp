@@ -47,7 +47,7 @@ export const CreateInsightInputSchema = z.object({
 	name: z.string(),
 	query: z.any(), // NOTE: This is intentionally z.any() to avoid populating the context with the complicated query schema, but we prompt the LLM to use 'query-run' to check queries, before creating insights.
 	description: z.string().optional(),
-	favorited: z.boolean().default(false),
+	favorited: z.boolean(),
 	tags: z.array(z.string()).optional(),
 });
 

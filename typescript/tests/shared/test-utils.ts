@@ -1,6 +1,7 @@
 import { ApiClient } from "@/api/client";
-import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
 import { StateManager } from "@/lib/utils/StateManager";
+import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
+import type { InsightQuery } from "@/schema/query";
 import type { Context } from "@/tools/types";
 import { expect } from "vitest";
 
@@ -99,11 +100,13 @@ export function generateUniqueKey(prefix: string): string {
 	return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 }
 
-export const SAMPLE_HOGQL_QUERIES = {
+type SampleHogQLQuery = "pageviews" | "topEvents";
+
+export const SAMPLE_HOGQL_QUERIES: Record<SampleHogQLQuery, InsightQuery> = {
 	pageviews: {
-		kind: "DataVisualizationNode" as const,
+		kind: "DataVisualizationNode",
 		source: {
-			kind: "HogQLQuery" as const,
+			kind: "HogQLQuery",
 			query: "SELECT event, count() AS event_count FROM events WHERE timestamp >= now() - INTERVAL 7 DAY AND event = '$pageview' GROUP BY event ORDER BY event_count DESC LIMIT 10",
 			filters: {
 				dateRange: {
@@ -114,9 +117,9 @@ export const SAMPLE_HOGQL_QUERIES = {
 		},
 	},
 	topEvents: {
-		kind: "DataVisualizationNode" as const,
+		kind: "DataVisualizationNode",
 		source: {
-			kind: "HogQLQuery" as const,
+			kind: "HogQLQuery",
 			query: "SELECT event, count() AS event_count FROM events WHERE timestamp >= now() - INTERVAL 7 DAY GROUP BY event ORDER BY event_count DESC LIMIT 10",
 			filters: {
 				dateRange: {
@@ -124,6 +127,339 @@ export const SAMPLE_HOGQL_QUERIES = {
 					date_to: "-1d",
 				},
 			},
+		},
+	},
+};
+
+type SampleTrendQuery =
+	| "basicPageviews"
+	| "uniqueUsers"
+	| "multipleEvents"
+	| "withBreakdown"
+	| "withPropertyFilter";
+
+export const SAMPLE_TREND_QUERIES: Record<SampleTrendQuery, InsightQuery> = {
+	basicPageviews: {
+		kind: "InsightVizNode",
+		source: {
+			kind: "TrendsQuery",
+			series: [
+				{
+					kind: "EventsNode",
+					event: "$pageview",
+					custom_name: "Page Views",
+					math: "total",
+				},
+			],
+			dateRange: {
+				date_from: "-7d",
+				date_to: null,
+			},
+			interval: "day",
+			properties: [],
+			filterTestAccounts: false,
+		},
+	},
+	uniqueUsers: {
+		kind: "InsightVizNode",
+		source: {
+			kind: "TrendsQuery",
+			series: [
+				{
+					kind: "EventsNode",
+					event: "$pageview",
+					custom_name: "Unique Users",
+					math: "dau",
+				},
+			],
+			dateRange: {
+				date_from: "-30d",
+				date_to: null,
+			},
+			interval: "day",
+			properties: [],
+			filterTestAccounts: true,
+		},
+	},
+	multipleEvents: {
+		kind: "InsightVizNode",
+		source: {
+			kind: "TrendsQuery",
+			series: [
+				{
+					kind: "EventsNode",
+					event: "$pageview",
+					custom_name: "Page Views",
+					math: "total",
+				},
+				{
+					kind: "EventsNode",
+					event: "button_clicked",
+					custom_name: "Button Clicks",
+					math: "total",
+				},
+			],
+			dateRange: {
+				date_from: "-14d",
+				date_to: null,
+			},
+			interval: "day",
+			properties: [],
+			filterTestAccounts: false,
+		},
+	},
+	withBreakdown: {
+		kind: "InsightVizNode",
+		source: {
+			kind: "TrendsQuery",
+			series: [
+				{
+					kind: "EventsNode",
+					event: "$pageview",
+					custom_name: "Page Views by Browser",
+					math: "total",
+				},
+			],
+			breakdownFilter: {
+				breakdown_type: "event",
+				breakdown: "$browser",
+				breakdown_limit: 10,
+			},
+			dateRange: {
+				date_from: "-7d",
+				date_to: null,
+			},
+			interval: "day",
+			properties: [],
+			filterTestAccounts: false,
+		},
+	},
+	withPropertyFilter: {
+		kind: "InsightVizNode",
+		source: {
+			kind: "TrendsQuery",
+			series: [
+				{
+					kind: "EventsNode",
+					event: "$pageview",
+					custom_name: "Chrome/Safari Page Views",
+					math: "total",
+					properties: [
+						{
+							key: "$browser",
+							value: ["Chrome", "Safari"],
+							operator: "exact",
+							type: "event",
+						},
+					],
+				},
+			],
+			dateRange: {
+				date_from: "-7d",
+				date_to: null,
+			},
+			interval: "day",
+			properties: [],
+			filterTestAccounts: false,
+		},
+	},
+};
+
+type SampleFunnelQuery =
+	| "basicFunnel"
+	| "strictOrderFunnel"
+	| "funnelWithBreakdown"
+	| "conversionWindow"
+	| "onboardingFunnel";
+
+export const SAMPLE_FUNNEL_QUERIES: Record<SampleFunnelQuery, InsightQuery> = {
+	basicFunnel: {
+		kind: "InsightVizNode",
+		source: {
+			kind: "FunnelsQuery",
+			series: [
+				{
+					kind: "EventsNode",
+					event: "$pageview",
+					custom_name: "Page View",
+				},
+				{
+					kind: "EventsNode",
+					event: "button_clicked",
+					custom_name: "Button Clicked",
+				},
+			],
+			dateRange: {
+				date_from: "-7d",
+				date_to: null,
+			},
+			properties: [],
+			filterTestAccounts: false,
+		},
+	},
+	strictOrderFunnel: {
+		kind: "InsightVizNode",
+		source: {
+			kind: "FunnelsQuery",
+			series: [
+				{
+					kind: "EventsNode",
+					event: "$pageview",
+					custom_name: "Landing Page View",
+				},
+				{
+					kind: "EventsNode",
+					event: "sign_up_started",
+					custom_name: "Sign Up Started",
+				},
+				{
+					kind: "EventsNode",
+					event: "sign_up_completed",
+					custom_name: "Sign Up Completed",
+				},
+			],
+			funnelsFilter: {
+				layout: "vertical",
+				breakdownAttributionType: "first_touch",
+				funnelOrderType: "strict",
+				funnelVizType: "steps",
+				funnelWindowInterval: 7,
+				funnelWindowIntervalUnit: "day",
+				funnelStepReference: "total",
+			},
+			dateRange: {
+				date_from: "-30d",
+				date_to: null,
+			},
+			properties: [],
+			filterTestAccounts: false,
+		},
+	},
+	funnelWithBreakdown: {
+		kind: "InsightVizNode",
+		source: {
+			kind: "FunnelsQuery",
+			series: [
+				{
+					kind: "EventsNode",
+					event: "$pageview",
+					custom_name: "Product Page View",
+				},
+				{
+					kind: "EventsNode",
+					event: "purchase",
+					custom_name: "Purchase",
+				},
+			],
+			breakdownFilter: {
+				breakdown_type: "event",
+				breakdown: "$browser",
+				breakdown_limit: 5,
+			},
+			funnelsFilter: {
+				layout: "vertical",
+				breakdownAttributionType: "first_touch",
+				funnelOrderType: "ordered",
+				funnelVizType: "steps",
+				funnelWindowInterval: 14,
+				funnelWindowIntervalUnit: "day",
+				funnelStepReference: "total",
+			},
+			dateRange: {
+				date_from: "-14d",
+				date_to: null,
+			},
+			properties: [],
+			filterTestAccounts: false,
+		},
+	},
+	conversionWindow: {
+		kind: "InsightVizNode",
+		source: {
+			kind: "FunnelsQuery",
+			series: [
+				{
+					kind: "EventsNode",
+					event: "$pageview",
+					custom_name: "Page View",
+				},
+				{
+					kind: "EventsNode",
+					event: "add_to_cart",
+					custom_name: "Add to Cart",
+				},
+				{
+					kind: "EventsNode",
+					event: "purchase",
+					custom_name: "Purchase",
+				},
+			],
+			funnelsFilter: {
+				layout: "vertical",
+				breakdownAttributionType: "first_touch",
+				funnelOrderType: "ordered",
+				funnelVizType: "steps",
+				funnelWindowInterval: 1,
+				funnelWindowIntervalUnit: "hour",
+				funnelStepReference: "total",
+			},
+			dateRange: {
+				date_from: "-7d",
+				date_to: null,
+			},
+			properties: [],
+			filterTestAccounts: false,
+		},
+	},
+	onboardingFunnel: {
+		kind: "InsightVizNode",
+		source: {
+			kind: "FunnelsQuery",
+			series: [
+				{
+					kind: "EventsNode",
+					event: "Signed In",
+					custom_name: "User Signs In",
+				},
+				{
+					kind: "EventsNode",
+					event: "$pageview",
+					properties: [
+						{
+							key: "$pathname",
+							type: "event",
+							value: "get-started",
+							operator: "icontains",
+						},
+					],
+					custom_name: "Views Get-Started Page",
+				},
+				{
+					kind: "EventsNode",
+					event: "Integration Connected",
+					custom_name: "Connects Integration",
+				},
+				{
+					kind: "EventsNode",
+					event: "Onboarding Completed",
+					custom_name: "Completes Onboarding",
+				},
+			],
+			dateRange: {
+				date_to: "today",
+				date_from: "-30d",
+			},
+			funnelsFilter: {
+				layout: "vertical",
+				breakdownAttributionType: "first_touch",
+				funnelOrderType: "ordered",
+				funnelVizType: "steps",
+				funnelWindowInterval: 24,
+				funnelWindowIntervalUnit: "hour",
+				funnelStepReference: "total",
+			},
+			properties: [],
+			filterTestAccounts: true,
 		},
 	},
 };

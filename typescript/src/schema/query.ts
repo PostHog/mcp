@@ -165,16 +165,16 @@ const HogQLQuerySchema = z.object({
 
 // Funnels filter
 const FunnelsFilter = z.object({
-	layout: FunnelLayout.optional().default("vertical"),
-	breakdownAttributionType: BreakdownAttributionType.optional().default("first_touch"),
+	layout: FunnelLayout.optional(),
+	breakdownAttributionType: BreakdownAttributionType.optional(),
 	breakdownAttributionValue: z.number().optional(),
 	funnelToStep: z.number().optional(),
 	funnelFromStep: z.number().optional(),
-	funnelOrderType: FunnelOrderType.optional().default("ordered"),
-	funnelVizType: FunnelVizType.optional().default("steps"),
+	funnelOrderType: FunnelOrderType.optional(),
+	funnelVizType: FunnelVizType.optional(),
 	funnelWindowInterval: z.number().optional().default(14),
 	funnelWindowIntervalUnit: FunnelConversionWindowTimeUnit.optional().default("day"),
-	funnelStepReference: FunnelStepReference.optional().default("total"),
+	funnelStepReference: FunnelStepReference.optional(),
 });
 
 // Funnels query

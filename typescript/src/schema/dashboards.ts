@@ -51,7 +51,7 @@ export const SimpleDashboardSchema = DashboardSchema.pick({
 export const CreateDashboardInputSchema = z.object({
 	name: z.string().min(1, "Dashboard name is required"),
 	description: z.string().optional(),
-	pinned: z.boolean().optional().default(false),
+	pinned: z.boolean().optional(),
 	tags: z.array(z.string()).optional(),
 });
 

@@ -77,6 +77,7 @@ const definition = getToolDefinition("create-feature-flag");
 const tool = (): Tool<typeof schema> => ({
     name: "create-feature-flag",
     description: definition.description,
+    title: definition.title, // This is the human-readable tool title, the name is for the LLM to identify the tool and invoke it.
     schema,
     handler: createHandler,
     annotations: {

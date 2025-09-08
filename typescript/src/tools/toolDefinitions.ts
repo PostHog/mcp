@@ -5,6 +5,7 @@ export interface ToolDefinition {
 	category?: string;
 	feature?: string;
 	summary?: string;
+	title: string;
 }
 
 export type ToolDefinitions = Record<string, ToolDefinition>;

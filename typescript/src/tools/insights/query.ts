@@ -41,6 +41,7 @@ const definition = getToolDefinition("insight-query");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "insight-query",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: queryHandler,

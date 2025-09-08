@@ -33,6 +33,7 @@ const definition = getToolDefinition("create-feature-flag");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "create-feature-flag",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: createHandler,

@@ -100,15 +100,31 @@ export default tool;
 
 ### 3. Add Tool Definition (`schema/tool-definitions.json`)
 
-Add a clear, actionable description for your tool:
+Add a clear, actionable description for your tool and assign it to a feature:
 
 ```json
 {
     "create-feature-flag": {
-        "description": "Creates a new feature flag in the project. Once you have created a feature flag, you should: Ask the user if they want to add it to their codebase, Use the \"search-docs\" tool to find documentation on how to add feature flags to the codebase (search for the right language / framework), Clarify where it should be added and then add it."
+        "description": "Creates a new feature flag in the project. Once you have created a feature flag, you should: Ask the user if they want to add it to their codebase, Use the \"search-docs\" tool to find documentation on how to add feature flags to the codebase (search for the right language / framework), Clarify where it should be added and then add it.",
+        "category": "Feature flags",
+        "feature": "flags",
+        "summary": "Creates a new feature flag in the project."
     }
 }
 ```
+
+**Available Features:**
+- `flags` - [Feature flag management](https://posthog.com/docs/feature-flags)
+- `workspace` - [Organization and project management](https://posthog.com/docs/getting-started/cloud)
+- `error-tracking` - [Error monitoring and debugging](https://posthog.com/docs/errors)
+- `dashboards` - [Dashboard creation and management](https://posthog.com/docs/product-analytics/dashboards)
+- `insights` - [Analytics insights and SQL queries](https://posthog.com/docs/product-analytics/insights)
+- `experiments` - [A/B testing experiments](https://posthog.com/docs/experiments)
+- `llm-analytics` - [LLM usage and cost tracking](https://posthog.com/docs/llm-analytics)
+- `docs` - PostHog documentation search
+
+If your tool doesn't fit any of these features, you can create a new feature category yourself.
+If you do add a new feature, make sure to update the `README.md` in the root of the repository to list the new feature and include it in the tests at `typescript/tests/unit/tool-filtering.test.ts`. You'll also need to update the `AVAILABLE_FEATURES` list in `https://github.com/posthog/wizard/` so it shows up during feature selection when running `wizard mcp add`.
 
 **Description Tips:**
 - Be specific about what the tool does

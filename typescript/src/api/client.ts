@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 import { ErrorCode } from "@/lib/errors";
 import { withPagination } from "@/lib/utils/api";
 import { getSearchParamsFromRecord } from "@/lib/utils/helper-functions";
@@ -16,7 +18,13 @@ import {
 	SimpleDashboardSchema,
 } from "@/schema/dashboards";
 import type { Experiment } from "@/schema/experiments";
-import { ExperimentSchema } from "@/schema/experiments";
+import {
+	ExperimentCreatePayloadSchema,
+	ExperimentExposureQueryResponseSchema,
+	ExperimentExposureQuerySchema,
+	ExperimentSchema,
+	ExperimentUpdatePayloadSchema,
+} from "@/schema/experiments";
 import {
 	type CreateFeatureFlagInput,
 	CreateFeatureFlagInputSchema,
@@ -258,6 +266,405 @@ export class ApiClient {
 					`${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`,
 					ExperimentSchema,
 				);
+			},
+			getExposures: async ({
+				experimentId,
+				refresh = false,
+			}: {
+				experimentId: number;
+				refresh: boolean;
+			}): Promise<
+				Result<{
+					experiment: Experiment;
+					exposures: any;
+				}>
+			> => {
+				/**
+				 * we have to get the experiment details first. There's no guarantee
+				 * that the user has queried for the experiment details before.
+				 */
+				const experimentDetails = await this.experiments({ projectId }).get({
+					experimentId,
+				});
+				if (!experimentDetails.success) return experimentDetails;
+
+				const experiment = experimentDetails.data;
+
+				/**
+				 * Validate that the experiment has started
+				 */
+				if (!experiment.start_date) {
+					return {
+						success: false,
+						error: new Error(
+							`Experiment "${experiment.name}" has not started yet. Exposure data is only available for started experiments.`,
+						),
+					};
+				}
+
+				const exposureQuery = {
+					kind: "ExperimentExposureQuery",
+					experiment_id: experimentId,
+					experiment_name: experiment.name,
+					exposure_criteria: experiment.exposure_criteria,
+					feature_flag: experiment.feature_flag,
+					start_date: experiment.start_date,
+					end_date: experiment.end_date,
+					holdout: experiment.holdout,
+				};
+
+				// Validate against existing ExperimentExposureQuerySchema
+				const validated = ExperimentExposureQuerySchema.parse(exposureQuery);
+
+				// The API expects a QueryRequest object with the query wrapped
+				const queryRequest: any = {
+					query: validated,
+					...(refresh ? { refresh: "blocking" } : {}),
+				};
+
+				const result = await this.fetchWithSchema(
+					`${this.baseUrl}/api/environments/${projectId}/query/`,
+					ExperimentExposureQueryResponseSchema,
+					{
+						method: "POST",
+						body: JSON.stringify(queryRequest),
+					},
+				);
+
+				if (!result.success) {
+					return result;
+				}
+
+				return {
+					success: true,
+					data: {
+						experiment,
+						exposures: result.data,
+					},
+				};
+			},
+			getMetricResults: async ({
+				experimentId,
+				refresh = false,
+			}: {
+				experimentId: number;
+				refresh?: boolean;
+			}): Promise<
+				Result<{
+					experiment: Experiment;
+					primaryMetricsResults: any[];
+					secondaryMetricsResults: any[];
+					exposures: any;
+				}>
+			> => {
+				/**
+				 * we have to get the experiment details first. There's no guarantee
+				 * that the user has queried for the experiment details before.
+				 */
+				const experimentDetails = await this.experiments({ projectId }).get({
+					experimentId,
+				});
+				if (!experimentDetails.success) {
+					return experimentDetails;
+				}
+
+				const experiment = experimentDetails.data;
+
+				/**
+				 * Validate that the experiment has started
+				 */
+				if (!experiment.start_date) {
+					return {
+						success: false,
+						error: new Error(
+							`Experiment "${experiment.name}" has not started yet. Results are only available for started experiments.`,
+						),
+					};
+				}
+
+				/**
+				 * let's get the experiment exposure details to get the full
+				 * picture of the resutls.
+				 */
+				const experimentExposure = await this.experiments({ projectId }).getExposures({
+					experimentId,
+					refresh,
+				});
+				if (!experimentExposure.success) {
+					return experimentExposure;
+				}
+				const exposures = experimentExposure.data;
+
+				// Prepare metrics queries
+				const primaryMetrics = [...(experiment.metrics || [])];
+				const sharedPrimaryMetrics = (experiment.saved_metrics || [])
+					.filter((sm: any) => sm.metadata.type === "primary")
+					.map((sm: any) => sm.query);
+				const allPrimaryMetrics = [...primaryMetrics, ...sharedPrimaryMetrics];
+
+				const sharedSecondaryMetrics = (experiment.saved_metrics || [])
+					.filter((sm: any) => sm.metadata.type === "secondary")
+					.map((sm: any) => sm.query);
+				const allSecondaryMetrics = [
+					...(experiment.metrics_secondary || []),
+					...sharedSecondaryMetrics,
+				];
+
+				// Execute queries for primary metrics
+				const primaryResults = await Promise.all(
+					allPrimaryMetrics.map(async (metric) => {
+						try {
+							const queryBody = {
+								kind: "ExperimentQuery",
+								metric,
+								experiment_id: experimentId,
+							};
+
+							const queryRequest = {
+								query: queryBody,
+								...(refresh ? { refresh: "blocking" } : {}),
+							};
+
+							const result = await this.fetchWithSchema(
+								`${this.baseUrl}/api/environments/${projectId}/query/`,
+								z.any(),
+								{
+									method: "POST",
+									body: JSON.stringify(queryRequest),
+								},
+							);
+
+							return result.success ? result.data : null;
+						} catch (error) {
+							return null;
+						}
+					}),
+				);
+
+				// Execute queries for secondary metrics
+				const secondaryResults = await Promise.all(
+					allSecondaryMetrics.map(async (metric) => {
+						try {
+							const queryBody = {
+								kind: "ExperimentQuery",
+								metric,
+								experiment_id: experimentId,
+							};
+
+							const queryRequest = {
+								query: queryBody,
+								...(refresh ? { refresh: "blocking" } : {}),
+							};
+
+							const result = await this.fetchWithSchema(
+								`${this.baseUrl}/api/environments/${projectId}/query/`,
+								z.any(),
+								{
+									method: "POST",
+									body: JSON.stringify(queryRequest),
+								},
+							);
+
+							return result.success ? result.data : null;
+						} catch (error) {
+							return null;
+						}
+					}),
+				);
+
+				return {
+					success: true,
+					data: {
+						experiment,
+						primaryMetricsResults: primaryResults,
+						secondaryMetricsResults: secondaryResults,
+						exposures,
+					},
+				};
+			},
+
+			create: async (experimentData: {
+				name: string;
+				description?: string;
+				feature_flag_key: string;
+				type?: "product" | "web";
+				primary_metrics?: Array<{
+					name?: string;
+					metric_type: "mean" | "funnel" | "ratio";
+					event_name?: string;
+					funnel_steps?: string[];
+					properties?: Record<string, any>;
+					description?: string;
+				}>;
+				secondary_metrics?: Array<{
+					name?: string;
+					metric_type: "mean" | "funnel" | "ratio";
+					event_name?: string;
+					funnel_steps?: string[];
+					properties?: Record<string, any>;
+					description?: string;
+				}>;
+				variants?: Array<{
+					key: string;
+					name?: string;
+					rollout_percentage: number;
+				}>;
+				minimum_detectable_effect?: number;
+				filter_test_accounts?: boolean;
+				target_properties?: Record<string, any>;
+				draft?: boolean;
+				holdout_id?: number;
+			}): Promise<Result<Experiment>> => {
+				// Helper function to transform simple metrics to ExperimentMetric
+				const transformMetric = (m: {
+					name?: string;
+					metric_type: "mean" | "funnel" | "ratio";
+					event_name?: string;
+					funnel_steps?: string[];
+					properties?: Record<string, any>;
+					description?: string;
+				}): any => {
+					const baseMetric = {
+						kind: "ExperimentMetric" as const,
+						uuid: uuidv4(), // Generate UUID for each metric
+						name: m.name,
+						metric_type: m.metric_type,
+					};
+
+					// Use event_name or default to $pageview
+					const eventName = m.event_name || "$pageview";
+					const eventProperties = m.properties || [];
+
+					if (m.metric_type === "mean") {
+						return {
+							...baseMetric,
+							source: {
+								kind: "EventsNode" as const,
+								event: eventName,
+								properties: eventProperties,
+							},
+						};
+					}
+					if (m.metric_type === "funnel") {
+						// If funnel_steps provided, use those; otherwise use single event
+						const steps =
+							m.funnel_steps && m.funnel_steps.length > 0
+								? m.funnel_steps.map((event) => ({
+										kind: "EventsNode" as const,
+										event: event,
+										properties: eventProperties,
+									}))
+								: [
+										{
+											kind: "EventsNode" as const,
+											event: eventName,
+											properties: eventProperties,
+										},
+									];
+
+						return {
+							...baseMetric,
+							series: steps,
+						};
+					}
+					// ratio metric
+					return {
+						...baseMetric,
+						numerator: {
+							kind: "EventsNode" as const,
+							event: eventName,
+							properties: eventProperties,
+						},
+						denominator: {
+							kind: "EventsNode" as const,
+							event: "$pageview",
+							properties: [],
+						},
+					};
+				};
+
+				// Build and validate payload using Zod
+				const payload = ExperimentCreatePayloadSchema.parse({
+					name: experimentData.name,
+					description: experimentData.description,
+					feature_flag_key: experimentData.feature_flag_key,
+					type: experimentData.type,
+
+					// Transform metrics to proper ExperimentMetric objects
+					metrics: experimentData.primary_metrics?.map(transformMetric),
+					metrics_secondary: experimentData.secondary_metrics?.map(transformMetric),
+
+					parameters: {
+						feature_flag_variants: experimentData.variants || [
+							{ key: "control", rollout_percentage: 50 },
+							{ key: "test", rollout_percentage: 50 },
+						],
+						minimum_detectable_effect: experimentData.minimum_detectable_effect,
+					},
+
+					exposure_criteria: {
+						filterTestAccounts: experimentData.filter_test_accounts ?? true,
+						...(experimentData.target_properties && {
+							properties: experimentData.target_properties,
+						}),
+					},
+
+					holdout_id: experimentData.holdout_id,
+
+					// Only set start_date if not draft
+					...(!experimentData.draft && { start_date: new Date().toISOString() }),
+				});
+
+				return this.fetchWithSchema(
+					`${this.baseUrl}/api/projects/${projectId}/experiments/`,
+					ExperimentSchema,
+					{
+						method: "POST",
+						body: JSON.stringify(payload),
+					},
+				);
+			},
+
+			update: async ({
+				experimentId,
+				updateData,
+			}: {
+				experimentId: number;
+				updateData: z.infer<typeof ExperimentUpdatePayloadSchema>;
+			}): Promise<Result<Experiment>> => {
+				try {
+					// Helper function to ensure metrics have UUIDs (for metrics added in updates)
+					const ensureMetricUuid = (metric: any): any => {
+						if (!metric.uuid) {
+							return { ...metric, uuid: uuidv4() };
+						}
+						return metric;
+					};
+
+					// Transform metrics if present to ensure they have UUIDs
+					const payload = { ...updateData };
+					if (payload.metrics) {
+						payload.metrics = payload.metrics.map(ensureMetricUuid);
+					}
+					if (payload.metrics_secondary) {
+						payload.metrics_secondary = payload.metrics_secondary.map(ensureMetricUuid);
+					}
+
+					// Validate payload
+					const validated = ExperimentUpdatePayloadSchema.parse(payload);
+
+					// Make API call
+					return this.fetchWithSchema(
+						`${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`,
+						ExperimentSchema,
+						{
+							method: "PATCH",
+							body: JSON.stringify(validated),
+						},
+					);
+				} catch (error) {
+					return { success: false, error: new Error(`Update failed: ${error}`) };
+				}
 			},
 		};
 	}

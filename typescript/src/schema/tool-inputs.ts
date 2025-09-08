@@ -145,15 +145,15 @@ export const ExperimentCreateSchema = z.object({
 				funnel_steps: z
 					.array(z.string())
 					.optional()
-					.describe(
-						"For funnel metrics only: Array of event names for each funnel step",
-					),
+					.describe("For funnel metrics only: Array of event names for each funnel step"),
 				properties: z.record(z.any()).optional().describe("Event properties to filter on"),
 				description: z.string().optional().describe("What this secondary metric measures"),
 			}),
 		)
 		.optional()
-		.describe("Secondary metrics to monitor for potential side effects or additional insights. Each metric needs event_name."),
+		.describe(
+			"Secondary metrics to monitor for potential side effects or additional insights. Each metric needs event_name.",
+		),
 
 	// Feature flag variants
 	variants: z

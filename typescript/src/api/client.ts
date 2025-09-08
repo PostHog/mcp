@@ -586,11 +586,11 @@ export class ApiClient {
 						name: m.name,
 						metric_type: m.metric_type,
 					};
-					
+
 					// Use event_name or default to $pageview
 					const eventName = m.event_name || "$pageview";
 					const eventProperties = m.properties || [];
-					
+
 					if (m.metric_type === "mean") {
 						return {
 							...baseMetric,
@@ -603,18 +603,21 @@ export class ApiClient {
 					}
 					if (m.metric_type === "funnel") {
 						// If funnel_steps provided, use those; otherwise use single event
-						const steps = m.funnel_steps && m.funnel_steps.length > 0 
-							? m.funnel_steps.map(event => ({
-								kind: "EventsNode" as const,
-								event: event,
-								properties: eventProperties,
-							}))
-							: [{
-								kind: "EventsNode" as const,
-								event: eventName,
-								properties: eventProperties,
-							}];
-						
+						const steps =
+							m.funnel_steps && m.funnel_steps.length > 0
+								? m.funnel_steps.map((event) => ({
+										kind: "EventsNode" as const,
+										event: event,
+										properties: eventProperties,
+									}))
+								: [
+										{
+											kind: "EventsNode" as const,
+											event: eventName,
+											properties: eventProperties,
+										},
+									];
+
 						return {
 							...baseMetric,
 							series: steps,
@@ -628,10 +631,10 @@ export class ApiClient {
 							event: eventName,
 							properties: eventProperties,
 						},
-						denominator: { 
-							kind: "EventsNode" as const, 
-							event: "$pageview", 
-							properties: [] 
+						denominator: {
+							kind: "EventsNode" as const,
+							event: "$pageview",
+							properties: [],
 						},
 					};
 				};
@@ -642,7 +645,7 @@ export class ApiClient {
 					description: experimentData.description,
 					feature_flag_key: experimentData.feature_flag_key,
 					type: experimentData.type,
-					
+
 					// Transform metrics to proper ExperimentMetric objects
 					metrics: experimentData.primary_metrics?.map(transformMetric),
 					metrics_secondary: experimentData.secondary_metrics?.map(transformMetric),

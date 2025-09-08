@@ -45,7 +45,7 @@ export const SimpleInsightSchema = InsightSchema.pick({
 
 export const CreateInsightInputSchema = z.object({
 	name: z.string(),
-	query: InsightQuerySchema,
+	query: z.any(),
 	description: z.string().optional(),
 	favorited: z.boolean().default(false),
 	tags: z.array(z.string()).optional(),

@@ -8,6 +8,7 @@ import {
 import { ErrorDetailsSchema, ListErrorsSchema } from "./errors";
 import { FilterGroupsSchema, UpdateFeatureFlagInputSchema } from "./flags";
 import { CreateInsightInputSchema, ListInsightsSchema, UpdateInsightInputSchema } from "./insights";
+import { InsightQuerySchema } from "./query";
 
 export const DashboardAddInsightSchema = z.object({
 	data: AddInsightToDashboardSchema,
@@ -96,7 +97,7 @@ export const InsightGenerateHogQLFromQuestionSchema = z.object({
 		.describe("Your natural language query describing the SQL insight (max 1000 characters)."),
 });
 
-export const InsightQuerySchema = z.object({
+export const InsightQueryInputSchema = z.object({
 	insightId: z.string(),
 });
 
@@ -133,4 +134,8 @@ export const ProjectPropertyDefinitionsSchema = z.object({
 
 export const ProjectSetActiveSchema = z.object({
 	projectId: z.number().int().positive(),
+});
+
+export const QueryRunInputSchema = z.object({
+	query: InsightQuerySchema,
 });

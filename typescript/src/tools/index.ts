@@ -35,7 +35,7 @@ import getAllExperiments from "./experiments/getAll";
 
 import createInsight from "./insights/create";
 import deleteInsight from "./insights/delete";
-import generateHogQLFromQuestion from "./insights/generateHogQLFromQuestion";
+
 import getInsight from "./insights/get";
 // Insights
 import getAllInsights from "./insights/getAll";
@@ -46,9 +46,13 @@ import addInsightToDashboard from "./dashboards/addInsight";
 import createDashboard from "./dashboards/create";
 import deleteDashboard from "./dashboards/delete";
 import getDashboard from "./dashboards/get";
+
 // Dashboards
 import getAllDashboards from "./dashboards/getAll";
 import updateDashboard from "./dashboards/update";
+import generateHogQLFromQuestion from "./query/generateHogQLFromQuestion";
+// Query
+import queryRun from "./query/run";
 
 // LLM Observability
 import getLLMCosts from "./llmObservability/getLLMCosts";
@@ -91,6 +95,9 @@ export const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
 	updateInsight(),
 	deleteInsight(),
 	queryInsight(),
+
+	// Query
+	queryRun(),
 	generateHogQLFromQuestion(),
 
 	// Dashboards

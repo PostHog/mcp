@@ -30,10 +30,10 @@ export const generateHogQLHandler = async (context: Context, params: Params) => 
 	return { content: [{ type: "text", text: JSON.stringify(result.data) }] };
 };
 
-const definition = getToolDefinition("insights-generate-hogql-from-question");
+const definition = getToolDefinition("query-generate-hogql-from-question");
 
 const tool = (): Tool<typeof schema> => ({
-	name: "insights-generate-hogql-from-question",
+	name: "query-generate-hogql-from-question",
 	title: definition.title,
 	description: definition.description,
 	schema,

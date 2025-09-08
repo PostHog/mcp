@@ -96,7 +96,7 @@
 		"title": "Get experiment details"
 	},
 	"insight-create": {
-		"description": "Create an insight. This can be a trend / funnel / HogQL insight. Where possible, use a trend or a funnel. If you want to use a HogQL insight, you should first use the \"insight-generate-hogql-from-query\" tool to get the HogQL, and then use that HogQL query to create the insight, this is slow so you should only do it if a trend / funnel will not work. An insight requires a name, query, and other optional properties. HogQL is a custom variant of Clickhouse SQL - it does not support many normal SQL operations.",
+		"description": "Create an insight from a query that you have previously tested with 'query-run'. You should check the query runs, before creating an insight. Do not create an insight before running the query, unless you know already that it is correct (e.g. you are making a minor modification to an existing query you have seen).",
 		"category": "Insights & analytics",
 		"summary": "Save a query as an insight.",
 		"title": "Create insight from query"
@@ -125,17 +125,23 @@
 		"summary": "Get all insights in the project with optional filtering.",
 		"title": "Get all insights"
 	},
-	"insights-generate-hogql-from-question": {
-		"description": "Queries project's PostHog data based on a provided natural language question - don't provide SQL query as input but describe the output you want. Data warehouse schema includes data like events and persons. Fetches the result as a Server-Sent Events (SSE) stream and provides the concatenated data content. When giving the results back to the user, first show the SQL query that was used, then provide results in reasily readable format. You should also offer to save the query as an insight if the user wants to.",
-		"category": "Insights & analytics",
-		"summary": "Queries project's PostHog data based on a provided natural language question.",
-		"title": "Generate SQL"
-	},
 	"insight-update": {
 		"description": "Update an existing insight by ID. Can update name, description, filters, and other properties. You should get the insight before update it to see it's current query structure, and only modify the parts needed to answer the user's request.",
 		"category": "Insights & analytics",
 		"summary": "Update an existing insight by ID.",
 		"title": "Update insight"
+	},
+	"query-run": {
+		"description": "You should use this to answer questions that a user has about their data and for when you want to create a new insight. You can use 'event-definitions-list' to get events to use in the query, and 'event-properties-list' to get properties for those events. It can run a trend, funnel or HogQL query. Where possible, use a trend or funnel rather than a HogQL query, unless you know the HogQL is correct (e.g. it came from a previous insight.).",
+		"category": "Insights & analytics",
+		"summary": "Run a trend, funnel or HogQL query.",
+		"title": "Run query"
+	},
+	"query-generate-hogql-from-question": {
+		"description": "This is a slow tool, and you should only use it once you have tried to create a query using the 'query-run' tool, or the query is too complicated to create a trend / funnel. Queries project's PostHog data based on a provided natural language question - don't provide SQL query as input but describe the output you want. When giving the results back to the user, first show the SQL query that was used, then provide results in reasily readable format. You should also offer to save the query as an insight if the user wants to.",
+		"category": "Insights & analytics",
+		"summary": "Queries project's PostHog data based on a provided natural language question.",
+		"title": "Generate SQL"
 	},
 	"get-llm-total-costs-for-project": {
 		"description": "Fetches the total LLM daily costs for each model for a project over a given number of days. If no number of days is provided, it defaults to 7. The results are sorted by model name. The total cost is rounded to 4 decimal places. The query is executed against the project's data warehouse. Show the results as a Markdown formatted table with the following information for each model: Model name, Total cost in USD, Each day's date, Each day's cost in USD. Write in bold the model name with the highest total cost. Properly render the markdown table in the response.",

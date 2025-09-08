@@ -32,8 +32,9 @@ import errorDetails from "./errorTracking/errorDetails";
 // Error Tracking
 import listErrors from "./errorTracking/listErrors";
 
-import getExperiment from "./experiments/get";
 // Experiments
+import createExperiment from "./experiments/create";
+import getExperiment from "./experiments/get";
 import getAllExperiments from "./experiments/getAll";
 
 import createInsight from "./insights/create";

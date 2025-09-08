@@ -221,6 +221,168 @@
       },
       "additionalProperties": false
     },
+    "ExperimentCreateSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Experiment name - should clearly describe what is being tested"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the experiment hypothesis, what changes are being tested, and expected outcomes"
+        },
+        "feature_flag_key": {
+          "type": "string",
+          "description": "Feature flag key (letters, numbers, hyphens, underscores only). IMPORTANT: First search for existing feature flags that might be suitable using the feature-flags-get-all tool, then suggest reusing existing ones or creating a new key based on the experiment name"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "product",
+            "web"
+          ],
+          "default": "product",
+          "description": "Experiment type: 'product' for backend/API changes, 'web' for frontend UI changes"
+        },
+        "primary_metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Human-readable metric name"
+              },
+              "metric_type": {
+                "type": "string",
+                "enum": [
+                  "mean",
+                  "funnel",
+                  "ratio"
+                ],
+                "description": "Metric type: 'mean' for average values (revenue, time spent), 'funnel' for conversion flows, 'ratio' for comparing two metrics"
+              },
+              "event_name": {
+                "type": "string",
+                "description": "PostHog event name - search existing events or suggest based on experiment goal"
+              },
+              "properties": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Event properties to filter on"
+              },
+              "description": {
+                "type": "string",
+                "description": "What this metric measures and why it's important for the experiment"
+              }
+            },
+            "required": [
+              "metric_type"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Primary metrics to measure experiment success. Ask user what they want to optimize for, then suggest appropriate metrics and events"
+        },
+        "secondary_metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Human-readable metric name"
+              },
+              "metric_type": {
+                "type": "string",
+                "enum": [
+                  "mean",
+                  "funnel",
+                  "ratio"
+                ],
+                "description": "Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics"
+              },
+              "event_name": {
+                "type": "string",
+                "description": "PostHog event name for secondary monitoring"
+              },
+              "properties": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Event properties to filter on"
+              },
+              "description": {
+                "type": "string",
+                "description": "What this secondary metric measures"
+              }
+            },
+            "required": [
+              "metric_type"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Secondary metrics to monitor for potential side effects or additional insights"
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string",
+                "description": "Variant key (e.g., 'control', 'variant_a', 'new_design')"
+              },
+              "name": {
+                "type": "string",
+                "description": "Human-readable variant name"
+              },
+              "rollout_percentage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Percentage of users to show this variant"
+              }
+            },
+            "required": [
+              "key",
+              "rollout_percentage"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Experiment variants. If not specified, defaults to 50/50 control/test split. Ask user how many variants they need and what each tests"
+        },
+        "minimum_detectable_effect": {
+          "type": "number",
+          "default": 30,
+          "description": "Minimum detectable effect in percentage. Lower values require more users but detect smaller changes. Suggest 20-30% for most experiments"
+        },
+        "filter_test_accounts": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to filter out internal test accounts"
+        },
+        "target_properties": {
+          "type": "object",
+          "additionalProperties": {},
+          "description": "Properties to target specific user segments (e.g., country, subscription type)"
+        },
+        "draft": {
+          "type": "boolean",
+          "default": true,
+          "description": "Create as draft (true) or launch immediately (false). Recommend draft for review first"
+        },
+        "holdout_id": {
+          "type": "number",
+          "description": "Holdout group ID if this experiment should exclude users from other experiments"
+        }
+      },
+      "required": [
+        "name",
+        "feature_flag_key"
+      ],
+      "additionalProperties": false
+    },
     "ExperimentExposureQueryToolSchema": {
       "type": "object",
       "properties": {
@@ -270,7 +432,8 @@
         }
       },
       "required": [
-        "experimentId"
+        "experimentId",
+        "refresh"
       ],
       "additionalProperties": false
     },

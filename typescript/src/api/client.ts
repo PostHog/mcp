@@ -535,6 +535,89 @@ export class ApiClient {
 					},
 				};
 			},
+
+			create: async (experimentData: {
+				name: string;
+				description?: string;
+				feature_flag_key: string;
+				type?: "product" | "web";
+				primary_metrics?: Array<{
+					name?: string;
+					metric_type: "mean" | "funnel" | "ratio";
+					event_name?: string;
+					properties?: Record<string, any>;
+					description?: string;
+				}>;
+				secondary_metrics?: Array<{
+					name?: string;
+					metric_type: "mean" | "funnel" | "ratio";
+					event_name?: string;
+					properties?: Record<string, any>;
+					description?: string;
+				}>;
+				variants?: Array<{
+					key: string;
+					name?: string;
+					rollout_percentage: number;
+				}>;
+				minimum_detectable_effect?: number;
+				filter_test_accounts?: boolean;
+				target_properties?: Record<string, any>;
+				draft?: boolean;
+				holdout_id?: number;
+			}): Promise<Result<Experiment>> => {
+				// Transform and validate input
+				const payload = {
+					name: experimentData.name,
+					description: experimentData.description,
+					feature_flag_key: experimentData.feature_flag_key,
+					type: experimentData.type || "product",
+					
+					// Let backend generate UUIDs for metrics
+					metrics: experimentData.primary_metrics?.map(m => ({
+						name: m.name,
+						metric_type: m.metric_type,
+						event_name: m.event_name,
+						properties: m.properties,
+						description: m.description,
+					})) || [],
+					
+					metrics_secondary: experimentData.secondary_metrics?.map(m => ({
+						name: m.name,  
+						metric_type: m.metric_type,
+						event_name: m.event_name,
+						properties: m.properties,
+						description: m.description,
+					})) || [],
+					
+					parameters: {
+						feature_flag_variants: experimentData.variants || [
+							{ key: "control", rollout_percentage: 50 },
+							{ key: "test", rollout_percentage: 50 }
+						],
+						minimum_detectable_effect: experimentData.minimum_detectable_effect || 30
+					},
+					
+					exposure_criteria: {
+						filterTestAccounts: experimentData.filter_test_accounts ?? true,
+						...(experimentData.target_properties && { properties: experimentData.target_properties })
+					},
+					
+					...(experimentData.holdout_id && { holdout_id: experimentData.holdout_id }),
+					
+					// Only set start_date if not draft
+					...(!experimentData.draft && { start_date: new Date().toISOString() })
+				};
+				
+				return this.fetchWithSchema(
+					`${this.baseUrl}/api/projects/${projectId}/experiments/`,
+					ExperimentSchema,
+					{
+						method: "POST",
+						body: JSON.stringify(payload)
+					}
+				);
+			},
 		};
 	}
 

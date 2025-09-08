@@ -209,6 +209,11 @@
 			"readOnlyHint": true
 		}
 	},
+	"experiment-create": {
+		"description": "Create a comprehensive A/B test experiment. This tool guides you to collect all necessary information from the user through conversation. PROCESS: 1) Understand experiment goal and hypothesis 2) Search existing feature flags with 'feature-flags-get-all' tool first and suggest reuse or new key 3) Help user define success metrics by asking what they want to optimize (conversions, revenue, engagement, etc.) 4) Suggest appropriate PostHog events for metrics based on their goals 5) Configure variants (default 50/50 control/test unless they specify otherwise) 6) Set targeting criteria if needed 7) Recommend creating as draft first. Ask clarifying questions about: experiment hypothesis, target metrics, user segments, expected impact, and success criteria.",
+		"category": "Experiments",
+		"summary": "Create A/B test experiment with guided metric and feature flag setup"
+	},
 	"experiment-get": {
 		"description": "Get details of a specific experiment by ID.",
 		"category": "Experiments",

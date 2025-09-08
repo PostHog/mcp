@@ -30,6 +30,7 @@ import errorDetails from "./errorTracking/errorDetails";
 import listErrors from "./errorTracking/listErrors";
 
 // Experiments
+import createExperiment from "./experiments/create";
 import getAllExperiments from "./experiments/getAll";
 import getExperiment from "./experiments/get";
 import getExperimentExposures from "./experiments/getExposures";
@@ -83,6 +84,7 @@ export const getToolsFromContext = (context: Context): Tool<ZodObjectAny>[] => [
 	errorDetails(),
 
 	// Experiments
+	createExperiment(),
 	getAllExperiments(),
 	getExperiment(),
 	getExperimentExposures(),

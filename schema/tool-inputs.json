@@ -244,7 +244,20 @@
       "properties": {},
       "additionalProperties": false
     },
-    "ExperimentGetResultsSchema": {
+    "ExperimentGetSchema": {
+      "type": "object",
+      "properties": {
+        "experimentId": {
+          "type": "number",
+          "description": "The ID of the experiment to retrieve"
+        }
+      },
+      "required": [
+        "experimentId"
+      ],
+      "additionalProperties": false
+    },
+    "ExperimentMetricResultsGetSchema": {
       "type": "object",
       "properties": {
         "experimentId": {
@@ -254,19 +267,6 @@
         "refresh": {
           "type": "boolean",
           "description": "Force refresh of results instead of using cached values"
-        }
-      },
-      "required": [
-        "experimentId"
-      ],
-      "additionalProperties": false
-    },
-    "ExperimentGetSchema": {
-      "type": "object",
-      "properties": {
-        "experimentId": {
-          "type": "number",
-          "description": "The ID of the experiment to retrieve"
         }
       },
       "required": [

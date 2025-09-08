@@ -111,7 +111,7 @@
 		"summary": "Get details of a specific experiment.",
 		"title": "Get experiment details"
 	},
-	"insight-create": {
+	"insight-create-from-query": {
 		"description": "Create an insight from a query that you have previously tested with 'query-run'. You should check the query runs, before creating an insight. Do not create an insight before running the query, unless you know already that it is correct (e.g. you are making a minor modification to an existing query you have seen).",
 		"category": "Insights & analytics",
 		"feature": "insights",

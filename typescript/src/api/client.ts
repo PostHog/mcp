@@ -439,13 +439,12 @@ export class ApiClient {
 					},
 				};
 			},
-
 			getExposures: async ({
 				experimentId,
 				refresh = false,
 			}: {
 				experimentId: number;
-				refresh?: boolean;
+				refresh: boolean;
 			}): Promise<
 				Result<{
 					experiment: Experiment;
@@ -490,8 +489,9 @@ export class ApiClient {
 				const validated = ExperimentExposureQuerySchema.parse(exposureQuery);
 
 				// The API expects a QueryRequest object with the query wrapped
-				const queryRequest = {
+				const queryRequest: any = {
 					query: validated,
+					...(refresh ? { refresh: "blocking" } : {}),
 				};
 
 				const result = await this.fetchWithSchema(

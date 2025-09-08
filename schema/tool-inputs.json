@@ -221,6 +221,24 @@
       },
       "additionalProperties": false
     },
+    "ExperimentExposureQueryToolSchema": {
+      "type": "object",
+      "properties": {
+        "experimentId": {
+          "type": "number",
+          "description": "The ID of the experiment to get exposure data for"
+        },
+        "refresh": {
+          "type": "boolean",
+          "description": "Force refresh of results instead of using cached values"
+        }
+      },
+      "required": [
+        "experimentId",
+        "refresh"
+      ],
+      "additionalProperties": false
+    },
     "ExperimentGetAllSchema": {
       "type": "object",
       "properties": {},

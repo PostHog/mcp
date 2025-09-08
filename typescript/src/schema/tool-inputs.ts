@@ -66,10 +66,7 @@ export const ExperimentGetResultsSchema = z.object({
 
 export const ExperimentExposureQueryToolSchema = z.object({
 	experimentId: z.number().describe("The ID of the experiment to get exposure data for"),
-	refresh: z
-		.boolean()
-		.optional()
-		.describe("Force refresh of results instead of using cached values"),
+	refresh: z.boolean().describe("Force refresh of results instead of using cached values"),
 });
 
 export const FeatureFlagCreateSchema = z.object({

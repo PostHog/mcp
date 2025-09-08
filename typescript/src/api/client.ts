@@ -416,9 +416,19 @@ export class ApiClient {
 								experiment_id: experimentId,
 							};
 
-							const result = await this.query({ projectId }).execute({
-								queryBody,
-							});
+							const queryRequest = {
+								query: queryBody,
+								...(refresh ? { refresh: "blocking" } : {}),
+							};
+
+							const result = await this.fetchWithSchema(
+								`${this.baseUrl}/api/environments/${projectId}/query/`,
+								z.any(),
+								{
+									method: "POST",
+									body: JSON.stringify(queryRequest),
+								},
+							);
 
 							return result.success ? result.data : null;
 						} catch (error) {
@@ -437,9 +447,19 @@ export class ApiClient {
 								experiment_id: experimentId,
 							};
 
-							const result = await this.query({ projectId }).execute({
-								queryBody,
-							});
+							const queryRequest = {
+								query: queryBody,
+								...(refresh ? { refresh: "blocking" } : {}),
+							};
+
+							const result = await this.fetchWithSchema(
+								`${this.baseUrl}/api/environments/${projectId}/query/`,
+								z.any(),
+								{
+									method: "POST",
+									body: JSON.stringify(queryRequest),
+								},
+							);
 
 							return result.success ? result.data : null;
 						} catch (error) {

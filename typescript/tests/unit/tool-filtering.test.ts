@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { getToolsForFeatures } from "@/tools/toolDefinitions";
+import { describe, expect, it } from "vitest";
 
 describe("Tool Filtering", () => {
 	const featureTests = [
@@ -37,7 +37,8 @@ describe("Tool Filtering", () => {
 				"dashboards-get-all",
 				"add-insight-to-dashboard",
 				"insights-get-all",
-				"get-sql-insight",
+				"query-generate-hogql-from-question",
+				"query-run",
 				"insight-create-from-query",
 			],
 		},

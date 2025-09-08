@@ -643,10 +643,7 @@
               "type": "object",
               "additionalProperties": {}
             },
-            "query": {
-              "type": "object",
-              "additionalProperties": {}
-            },
+            "query": {},
             "favorited": {
               "type": "boolean"
             },

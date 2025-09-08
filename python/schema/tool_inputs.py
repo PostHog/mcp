@@ -356,7 +356,7 @@ class Data7(BaseModel):
     name: str | None = None
     description: str | None = None
     filters: dict[str, Any] | None = None
-    query: dict[str, Any] | None = None
+    query: Any | None = None
     favorited: bool | None = None
     dashboard: float | None = None
     tags: list[str] | None = None

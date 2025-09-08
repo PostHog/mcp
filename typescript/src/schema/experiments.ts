@@ -256,9 +256,58 @@ export const ExperimentCreatePayloadSchema = z.object({
 	start_date: z.string().optional(), // Set when not draft
 });
 
+/**
+ * Schema for updating existing experiments
+ * All fields are optional to support partial updates
+ */
+export const ExperimentUpdatePayloadSchema = z
+	.object({
+		name: z.string().optional(),
+		description: z.string().nullish(),
+		start_date: z.string().nullish(),
+		end_date: z.string().nullish(),
+
+		// Parameters
+		parameters: z
+			.object({
+				feature_flag_variants: z
+					.array(
+						z.object({
+							key: z.string(),
+							name: z.string().optional(),
+							rollout_percentage: z.number(),
+						}),
+					)
+					.optional(),
+				minimum_detectable_effect: z.number().nullish(),
+				recommended_running_time: z.number().nullish(),
+				recommended_sample_size: z.number().nullish(),
+				variant_screenshot_media_ids: z.record(z.array(z.string())).optional(),
+			})
+			.optional(),
+
+		// Metrics
+		metrics: z.array(ExperimentMetricSchema).optional(),
+		metrics_secondary: z.array(ExperimentMetricSchema).optional(),
+		primary_metrics_ordered_uuids: z.array(z.string()).nullish(),
+		secondary_metrics_ordered_uuids: z.array(z.string()).nullish(),
+
+		// State management
+		archived: z.boolean().optional(),
+		conclusion: z.enum(ExperimentConclusion).nullish(),
+		conclusion_comment: z.string().nullish(),
+
+		// Configuration
+		exposure_criteria: ExperimentExposureCriteriaSchema.optional(),
+		saved_metrics_ids: z.array(z.any()).nullish(),
+		stats_config: z.any().optional(),
+	})
+	.strict();
+
 // experiment type
 export type Experiment = z.infer<typeof ExperimentSchema>;
 export type ExperimentCreatePayload = z.infer<typeof ExperimentCreatePayloadSchema>;
+export type ExperimentUpdatePayload = z.infer<typeof ExperimentUpdatePayloadSchema>;
 //metric types
 export type ExperimentMetricBaseProperties = z.infer<typeof ExperimentMetricBasePropertiesSchema>;
 export type ExperimentMetricOutlierHandling = z.infer<typeof ExperimentMetricOutlierHandlingSchema>;

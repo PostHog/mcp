@@ -53,8 +53,6 @@ export function handleToolError(error: any, tool?: string, distinctId?: string):
 					error,
 				);
 
-	console.error(`[MCP Error][${mcpError.tool}]`, mcpError.getTrackingData());
-
 	getPostHogClient().captureException(mcpError, distinctId, {
 		team: "growth",
 		tool: mcpError.tool,

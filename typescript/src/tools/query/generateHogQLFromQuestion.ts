@@ -1,17 +1,17 @@
-import { InsightGetSqlSchema } from "@/schema/tool-inputs";
+import { InsightGenerateHogQLFromQuestionSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
 import type { z } from "zod";
 
-const schema = InsightGetSqlSchema;
+const schema = InsightGenerateHogQLFromQuestionSchema;
 
 type Params = z.infer<typeof schema>;
 
-export const getSqlInsightHandler = async (context: Context, params: Params) => {
-	const { query } = params;
+export const generateHogQLHandler = async (context: Context, params: Params) => {
+	const { question } = params;
 	const projectId = await context.stateManager.getProjectId();
 
-	const result = await context.api.insights({ projectId }).sqlInsight({ query });
+	const result = await context.api.insights({ projectId }).sqlInsight({ query: question });
 
 	if (!result.success) {
 		throw new Error(`Failed to execute SQL insight: ${result.error.message}`);
@@ -30,14 +30,14 @@ export const getSqlInsightHandler = async (context: Context, params: Params) => 
 	return { content: [{ type: "text", text: JSON.stringify(result.data) }] };
 };
 
-const definition = getToolDefinition("get-sql-insight");
+const definition = getToolDefinition("query-generate-hogql-from-question");
 
 const tool = (): Tool<typeof schema> => ({
-	name: "get-sql-insight",
+	name: "query-generate-hogql-from-question",
 	title: definition.title,
 	description: definition.description,
 	schema,
-	handler: getSqlInsightHandler,
+	handler: generateHogQLHandler,
 	annotations: {
 		destructiveHint: false,
 		idempotentHint: false,

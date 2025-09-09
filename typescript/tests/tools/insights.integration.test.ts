@@ -49,7 +49,6 @@ describe("Insights", { concurrent: false }, () => {
 					name: generateUniqueKey("Test Pageview Insight"),
 					description: "Integration test for pageview insight",
 					query: SAMPLE_HOGQL_QUERIES.pageviews,
-					saved: true,
 					favorited: false,
 				},
 			};
@@ -70,7 +69,6 @@ describe("Insights", { concurrent: false }, () => {
 					name: generateUniqueKey("Test Top Events Insight"),
 					description: "Integration test for top events insight",
 					query: SAMPLE_HOGQL_QUERIES.topEvents,
-					saved: true,
 					favorited: false,
 				},
 			};
@@ -91,7 +89,6 @@ describe("Insights", { concurrent: false }, () => {
 					description: "Integration test with tags",
 					query: SAMPLE_HOGQL_QUERIES.pageviews,
 					tags: ["test", "integration"],
-					saved: true,
 					favorited: false,
 				},
 			};
@@ -116,7 +113,6 @@ describe("Insights", { concurrent: false }, () => {
 					name: generateUniqueKey("Original Insight Name"),
 					description: "Original description",
 					query: SAMPLE_HOGQL_QUERIES.pageviews,
-					saved: true,
 					favorited: false,
 				},
 			};
@@ -146,7 +142,6 @@ describe("Insights", { concurrent: false }, () => {
 					name: generateUniqueKey("Query Update Test"),
 					description: "Testing query updates",
 					query: SAMPLE_HOGQL_QUERIES.pageviews,
-					saved: true,
 					favorited: false,
 				},
 			};
@@ -198,7 +193,6 @@ describe("Insights", { concurrent: false }, () => {
 					name: generateUniqueKey("Get Test Insight"),
 					description: "Test insight for get operation",
 					query: SAMPLE_HOGQL_QUERIES.pageviews,
-					saved: true,
 					favorited: false,
 				},
 			};
@@ -227,7 +221,6 @@ describe("Insights", { concurrent: false }, () => {
 					name: generateUniqueKey("Query Test Insight"),
 					description: "Test insight for query operation",
 					query: SAMPLE_HOGQL_QUERIES.pageviews,
-					saved: true,
 					favorited: false,
 				},
 			};
@@ -259,7 +252,6 @@ describe("Insights", { concurrent: false }, () => {
 					name: generateUniqueKey("Delete Test Insight"),
 					description: "Test insight for deletion",
 					query: SAMPLE_HOGQL_QUERIES.pageviews,
-					saved: true,
 					favorited: false,
 				},
 			};
@@ -289,7 +281,6 @@ describe("Insights", { concurrent: false }, () => {
 					name: generateUniqueKey("Workflow Test Insight"),
 					description: "Testing full workflow",
 					query: SAMPLE_HOGQL_QUERIES.pageviews,
-					saved: true,
 					favorited: false,
 				},
 			};

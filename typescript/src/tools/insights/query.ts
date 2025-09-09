@@ -1,9 +1,9 @@
-import { InsightQuerySchema } from "@/schema/tool-inputs";
+import { InsightQueryInputSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
 import type { z } from "zod";
 
-const schema = InsightQuerySchema;
+const schema = InsightQueryInputSchema;
 
 type Params = z.infer<typeof schema>;
 

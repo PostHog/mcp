@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { QuerySchema } from "./query";
 
 export const DashboardTileSchema = z.object({
 	insight: z.object({
@@ -7,11 +6,10 @@ export const DashboardTileSchema = z.object({
 		name: z.string(),
 		derived_name: z.string().nullable(),
 		description: z.string().nullable(),
-		query: QuerySchema,
+		query: z.any(),
 		created_at: z.string().nullish(),
 		updated_at: z.string().nullish(),
 		favorited: z.boolean().nullish(),
-		saved: z.boolean().nullish(),
 		tags: z.array(z.string()).nullish(),
 	}),
 	order: z.number(),
@@ -53,7 +51,7 @@ export const SimpleDashboardSchema = DashboardSchema.pick({
 export const CreateDashboardInputSchema = z.object({
 	name: z.string().min(1, "Dashboard name is required"),
 	description: z.string().optional(),
-	pinned: z.boolean().optional().default(false),
+	pinned: z.boolean().optional(),
 	tags: z.array(z.string()).optional(),
 });
 

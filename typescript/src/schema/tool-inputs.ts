@@ -8,6 +8,7 @@ import {
 import { ErrorDetailsSchema, ListErrorsSchema } from "./errors";
 import { FilterGroupsSchema, UpdateFeatureFlagInputSchema } from "./flags";
 import { CreateInsightInputSchema, ListInsightsSchema, UpdateInsightInputSchema } from "./insights";
+import { InsightQuerySchema } from "./query";
 
 export const DashboardAddInsightSchema = z.object({
 	data: AddInsightToDashboardSchema,
@@ -89,14 +90,14 @@ export const InsightGetAllSchema = z.object({
 	data: ListInsightsSchema.optional(),
 });
 
-export const InsightGetSqlSchema = z.object({
-	query: z
+export const InsightGenerateHogQLFromQuestionSchema = z.object({
+	question: z
 		.string()
 		.max(1000)
 		.describe("Your natural language query describing the SQL insight (max 1000 characters)."),
 });
 
-export const InsightQuerySchema = z.object({
+export const InsightQueryInputSchema = z.object({
 	insightId: z.string(),
 });
 
@@ -127,10 +128,22 @@ export const ProjectEventDefinitionsSchema = z.object({
 		.describe("Search query to filter event names. Only use if there are lots of events."),
 });
 
-export const ProjectPropertyDefinitionsSchema = z.object({
-	eventName: z.string().describe("Event name to filter properties by"),
+export const ProjectPropertyDefinitionsInputSchema = z.object({
+	type: z.enum(["event", "person"]).describe("Type of properties to get"),
+	eventName: z
+		.string()
+		.describe("Event name to filter properties by, required for event type")
+		.optional(),
+	includePredefinedProperties: z
+		.boolean()
+		.optional()
+		.describe("Whether to include predefined properties"),
 });
 
 export const ProjectSetActiveSchema = z.object({
 	projectId: z.number().int().positive(),
+});
+
+export const QueryRunInputSchema = z.object({
+	query: InsightQuerySchema,
 });

@@ -63,35 +63,21 @@ describe("Projects", { concurrent: false }, () => {
 
 	describe("set-active-project tool", () => {
 		const setTool = setActiveProjectTool();
-		const getTool = getProjectsTool();
 
 		it("should set active project", async () => {
-			const projectsResult = await getTool.handler(context, {});
-			const projects = parseToolResponse(projectsResult);
-			expect(projects.length).toBeGreaterThan(0);
+			const targetProject = TEST_PROJECT_ID!;
+			const setResult = await setTool.handler(context, { projectId: Number(targetProject) });
 
-			const targetProject = projects[0];
-			const setResult = await setTool.handler(context, { projectId: targetProject.id });
-
-			expect(setResult.content[0].text).toBe(`Switched to project ${targetProject.id}`);
-		});
-
-		it("should set project ID as expected", async () => {
-			const projectId = 123456;
-			const result = await setTool.handler(context, { projectId: projectId });
-
-			expect(result.content[0].text).toBe(`Switched to project ${projectId}`);
-
-			// Clean up: switch back to the original test project
-			await setTool.handler(context, { projectId: Number(TEST_PROJECT_ID) });
+			expect(setResult.content[0].text).toBe(`Switched to project ${targetProject}`);
 		});
 	});
 
-	describe("event-properties-get tool", () => {
+	describe("properties-list tool", () => {
 		const propertyDefsTool = propertyDefinitionsTool();
 
 		it("should get property definitions for a specific event", async () => {
 			const result = await propertyDefsTool.handler(context, {
+				type: "event",
 				eventName: "$pageview",
 			});
 			const propertyDefs = parseToolResponse(result);
@@ -101,6 +87,7 @@ describe("Projects", { concurrent: false }, () => {
 
 		it("should return property definitions with proper structure", async () => {
 			const result = await propertyDefsTool.handler(context, {
+				type: "event",
 				eventName: "$pageview",
 			});
 			const propertyDefs = parseToolResponse(result);
@@ -117,6 +104,7 @@ describe("Projects", { concurrent: false }, () => {
 		it("should handle invalid event names gracefully", async () => {
 			try {
 				const result = await propertyDefsTool.handler(context, {
+					type: "event",
 					eventName: `non-existent-event-${uuidv4()}`,
 				});
 				const propertyDefs = parseToolResponse(result);
@@ -124,6 +112,15 @@ describe("Projects", { concurrent: false }, () => {
 			} catch (error) {
 				expect(error).toBeInstanceOf(Error);
 			}
+		});
+
+		it("should get property definitions for persons", async () => {
+			const result = await propertyDefsTool.handler(context, {
+				type: "person",
+			});
+			const propertyDefs = parseToolResponse(result);
+			expect(Array.isArray(propertyDefs)).toBe(true);
+			expect(propertyDefs.length).toBeGreaterThan(0);
 		});
 	});
 

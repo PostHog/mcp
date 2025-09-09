@@ -210,8 +210,6 @@ export class ApiClient {
 						searchParams.toString() ? `?${searchParams}` : ""
 					}`;
 
-					console.log({ url });
-
 					const propertyDefinitions = await withPagination(
 						url,
 						this.config.apiToken,

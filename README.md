@@ -116,7 +116,7 @@ To view which tools are available per feature, see our [documentation](https://p
 
 ### Data processing
 
-The MCP server is hosted on a Cloudflare worker, this can be located outside of the EU / US, so there is no guarantee that the data will be processed solely within a specific region.
+The MCP server is hosted on a Cloudflare worker which can be located outside of the EU / US, for this reason the MCP server does not store any sensitive data outside of your cloud region.
 
 ### Using self-hosted instances
 

@@ -61,7 +61,7 @@ describe("Projects", { concurrent: false }, () => {
 		});
 	});
 
-	describe("set-active-project tool", () => {
+	describe("switch-project tool", () => {
 		const setTool = setActiveProjectTool();
 
 		it("should set active project", async () => {

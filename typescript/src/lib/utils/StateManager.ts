@@ -1,14 +1,106 @@
 import type { ApiClient } from "@/api/client";
+import type { ApiPersonalApiKey, ApiUser } from "@/schema/api";
 import type { State } from "@/tools/types";
 import type { ScopedCache } from "./cache/ScopedCache";
 
 export class StateManager {
 	private _cache: ScopedCache<State>;
 	private _api: ApiClient;
+	private _user?: ApiUser;
+	private _apiKey?: ApiPersonalApiKey;
 
 	constructor(cache: ScopedCache<State>, api: ApiClient) {
 		this._cache = cache;
 		this._api = api;
+	}
+
+	private async _fetchUser() {
+		const userResult = await this._api.users().me();
+		if (!userResult.success) {
+			throw new Error(`Failed to get user: ${userResult.error.message}`);
+		}
+		return userResult.data;
+	}
+
+	async getUser() {
+		if (!this._user) {
+			this._user = await this._fetchUser();
+		}
+
+		return this._user;
+	}
+
+	private async _fetchApiKey() {
+		const apiKeyResult = await this._api.apiKeys().current();
+		if (!apiKeyResult.success) {
+			throw new Error(`Failed to get API key: ${apiKeyResult.error.message}`);
+		}
+		return apiKeyResult.data;
+	}
+
+	private async _getApiKey() {
+		if (!this._apiKey) {
+			this._apiKey = await this._fetchApiKey();
+		}
+		return this._apiKey;
+	}
+
+	async getDistinctId() {
+		let _distinctId = await this._cache.get("distinctId");
+
+		if (!_distinctId) {
+			const user = await this.getUser();
+
+			await this._cache.set("distinctId", user.distinct_id);
+			_distinctId = user.distinct_id;
+		}
+
+		return _distinctId;
+	}
+
+	private async _getOrganizationsWithAccess() {
+		const { scoped_organizations, scoped_teams } = await this._getApiKey();
+		const { organizations, organization: activeOrganization } = await this.getUser();
+
+		const organizationsWithAccess = [];
+
+		if (scoped_organizations.length > 0) {
+			organizationsWithAccess.push(...scoped_organizations);
+		}
+
+		// Key is not scoped to any organizations or teams, so we return all organizations
+		if (organizationsWithAccess.length === 0 && scoped_teams.length === 0) {
+			organizationsWithAccess.push(...organizations.map((organization) => organization.id));
+		}
+
+		if (organizationsWithAccess.length === 0 && scoped_teams.length > 0) {
+			// TODO: Get orgs from projects in teams
+		}
+
+		const activeOrganizationId = activeOrganization?.id;
+
+		return organizationsWithAccess.sort((a, b) => {
+			if (a === activeOrganizationId) return -1;
+			if (b === activeOrganizationId) return 1;
+			return 0;
+		});
+	}
+
+	async getOrgID(): Promise<string> {
+		const orgId = await this._cache.get("orgId");
+
+		if (!orgId) {
+			const organizationIds = await this._getOrganizationsWithAccess();
+
+			if (organizationIds.length >= 1) {
+				await this._cache.set("orgId", organizationIds[0]!);
+				return organizationIds[0]!;
+			}
+
+			throw new Error("Personal API key does not have access to any organizations");
+		}
+
+		return orgId;
 	}
 
 	async getProjectId(): Promise<string> {
@@ -17,6 +109,7 @@ export class StateManager {
 		if (!projectId) {
 			const orgId = await this.getOrgID();
 			const projectsResult = await this._api.organizations().projects({ orgId }).list();
+
 			if (!projectsResult.success) {
 				throw new Error(`Failed to get projects: ${projectsResult.error.message}`);
 			}
@@ -38,48 +131,5 @@ export class StateManager {
 		}
 
 		return projectId;
-	}
-
-	async getDistinctId() {
-		let _distinctId = await this._cache.get("distinctId");
-
-		if (!_distinctId) {
-			const userResult = await this._api.users().me();
-			if (!userResult.success) {
-				throw new Error(`Failed to get user: ${userResult.error.message}`);
-			}
-			await this._cache.set("distinctId", userResult.data.distinctId);
-			_distinctId = userResult.data.distinctId;
-		}
-
-		return _distinctId;
-	}
-
-	async getOrgID(): Promise<string> {
-		const orgId = await this._cache.get("orgId");
-
-		if (!orgId) {
-			const orgsResult = await this._api.organizations().list();
-			if (!orgsResult.success) {
-				throw new Error(`Failed to get organizations: ${orgsResult.error.message}`);
-			}
-
-			// If there is only one org, set it as the active org
-			if (orgsResult.data.length === 1) {
-				await this._cache.set("orgId", orgsResult.data[0]!.id.toString());
-				return orgsResult.data[0]!.id.toString();
-			}
-
-			const currentOrg = await this._api.organizations().get({ orgId: "@current" });
-
-			if (!currentOrg.success) {
-				throw new Error(`Failed to get current organization: ${currentOrg.error.message}`);
-			}
-
-			await this._cache.set("orgId", currentOrg.data.id.toString());
-			return currentOrg.data.id.toString();
-		}
-
-		return orgId;
 	}
 }

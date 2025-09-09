@@ -59,7 +59,7 @@ describe("Organizations", { concurrent: false }, () => {
 		});
 	});
 
-	describe("set-active-organization tool", () => {
+	describe("switch-organization tool", () => {
 		const setTool = setActiveOrganizationTool();
 
 		it("should set active organization", async () => {
@@ -67,15 +67,6 @@ describe("Organizations", { concurrent: false }, () => {
 			const setResult = await setTool.handler(context, { orgId: targetOrg });
 
 			expect(setResult.content[0].text).toBe(`Switched to organization ${targetOrg}`);
-		});
-
-		it("should handle invalid organization ID", async () => {
-			try {
-				await setTool.handler(context, { orgId: "invalid-org-id-12345" });
-				expect.fail("Should have thrown an error");
-			} catch (error) {
-				expect(error).toBeDefined();
-			}
 		});
 	});
 

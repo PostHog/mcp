@@ -128,8 +128,16 @@ export const ProjectEventDefinitionsSchema = z.object({
 		.describe("Search query to filter event names. Only use if there are lots of events."),
 });
 
-export const ProjectPropertyDefinitionsSchema = z.object({
-	eventName: z.string().describe("Event name to filter properties by"),
+export const ProjectPropertyDefinitionsInputSchema = z.object({
+	type: z.enum(["event", "person"]).describe("Type of properties to get"),
+	eventName: z
+		.string()
+		.describe("Event name to filter properties by, required for event type")
+		.optional(),
+	includePredefinedProperties: z
+		.boolean()
+		.optional()
+		.describe("Whether to include predefined properties"),
 });
 
 export const ProjectSetActiveSchema = z.object({

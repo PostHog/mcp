@@ -416,13 +416,30 @@ class ProjectGetAllSchema(BaseModel):
     )
 
 
-class ProjectPropertyDefinitionsSchema(BaseModel):
+class Type(StrEnum):
+    """
+    Type of properties to get
+    """
+
+    EVENT = "event"
+    PERSON = "person"
+
+
+class ProjectPropertyDefinitionsInputSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    eventName: str
+    type: Type
     """
-    Event name to filter properties by
+    Type of properties to get
+    """
+    eventName: str | None = None
+    """
+    Event name to filter properties by, required for event type
+    """
+    includePredefinedProperties: bool | None = None
+    """
+    Whether to include predefined properties
     """
 
 
@@ -452,7 +469,7 @@ class Properties(BaseModel):
     type: str | None = None
 
 
-class Type(StrEnum):
+class Type1(StrEnum):
     AND_ = "AND"
     OR_ = "OR"
 
@@ -471,7 +488,7 @@ class Properties1(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type
+    type: Type1
     values: list[Value]
 
 
@@ -479,7 +496,7 @@ class Properties2(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type
+    type: Type1
     values: list[Value]
 
 
@@ -523,7 +540,7 @@ class Properties4(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type
+    type: Type1
     values: list[Value]
 
 
@@ -531,7 +548,7 @@ class Properties5(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type
+    type: Type1
     values: list[Value]
 
 
@@ -621,7 +638,7 @@ class Properties7(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type
+    type: Type1
     values: list[Value]
 
 
@@ -629,7 +646,7 @@ class Properties8(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type
+    type: Type1
     values: list[Value]
 
 
@@ -647,7 +664,7 @@ class Properties10(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type
+    type: Type1
     values: list[Value]
 
 
@@ -655,7 +672,7 @@ class Properties11(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type
+    type: Type1
     values: list[Value]
 
 
@@ -772,7 +789,7 @@ class Properties13(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type
+    type: Type1
     values: list[Value]
 
 

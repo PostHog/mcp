@@ -150,27 +150,31 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 			}
 		});
 
-		it("should get property definitions", async () => {
-			const result = await client.projects().propertyDefinitions({
-				projectId: testProjectId,
-				eventNames: ["$pageview"],
-				excludeCoreProperties: true,
-				filterByEventNames: true,
-				isFeatureFlag: false,
-				limit: 100,
-			});
+		it.each(["event", "person"] as const)(
+			"should get property definitions for %s type",
+			async (type) => {
+				const result = await client.projects().propertyDefinitions({
+					projectId: testProjectId,
+					type,
+					eventNames: type === "event" ? ["$pageview"] : undefined,
+					excludeCoreProperties: false,
+					filterByEventNames: type === "event",
+					isFeatureFlag: false,
+					limit: 100,
+				});
 
-			expect(result.success).toBe(true);
+				expect(result.success).toBe(true);
 
-			if (result.success) {
-				expect(Array.isArray(result.data)).toBe(true);
-				if (result.data.length > 0) {
-					const propDef = result.data[0];
-					expect(propDef).toHaveProperty("id");
-					expect(propDef).toHaveProperty("name");
+				if (result.success) {
+					expect(Array.isArray(result.data)).toBe(true);
+					if (result.data.length > 0) {
+						const propDef = result.data[0];
+						expect(propDef).toHaveProperty("id");
+						expect(propDef).toHaveProperty("name");
+					}
 				}
-			}
-		});
+			},
+		);
 
 		it("should get event definitions", async () => {
 			const result = await client.projects().eventDefinitions({ projectId: testProjectId });

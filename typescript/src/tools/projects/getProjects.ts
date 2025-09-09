@@ -11,7 +11,9 @@ export const getProjectsHandler = async (context: Context, _params: Params) => {
 	const orgId = await context.stateManager.getOrgID();
 
 	if (!orgId) {
-		throw new Error("API key does not have access to any organizations.");
+		throw new Error(
+			"API key does not have access to any organizations. This is likely because the API key is scoped to a project, and not an organization.",
+		);
 	}
 
 	const projectsResult = await context.api.organizations().projects({ orgId }).list();

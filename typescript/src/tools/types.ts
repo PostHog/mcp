@@ -25,6 +25,7 @@ export type Context = {
 
 export type Tool<TSchema extends z.ZodTypeAny = z.ZodTypeAny> = {
 	name: string;
+	title: string;
 	description: string;
 	schema: TSchema;
 	handler: (context: Context, params: z.infer<TSchema>) => Promise<any>;

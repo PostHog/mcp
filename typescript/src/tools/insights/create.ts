@@ -27,6 +27,7 @@ const definition = getToolDefinition("insight-create-from-query");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "insight-create-from-query",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: createHandler,

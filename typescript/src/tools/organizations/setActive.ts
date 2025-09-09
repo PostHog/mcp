@@ -20,6 +20,7 @@ const definition = getToolDefinition("switch-organization");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "switch-organization",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: setActiveHandler,

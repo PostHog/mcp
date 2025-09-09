@@ -34,6 +34,7 @@ const definition = getToolDefinition("update-feature-flag");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "update-feature-flag",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: updateHandler,

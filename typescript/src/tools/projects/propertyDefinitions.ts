@@ -1,3 +1,4 @@
+import { PropertyDefinitionSchema } from "@/schema/properties";
 import { ProjectPropertyDefinitionsSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
@@ -7,23 +8,36 @@ const schema = ProjectPropertyDefinitionsSchema;
 
 type Params = z.infer<typeof schema>;
 
-export const propertyDefinitionsHandler = async (context: Context, _params: Params) => {
+export const propertyDefinitionsHandler = async (context: Context, params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
-	const propDefsResult = await context.api.projects().propertyDefinitions({ projectId });
+	const propDefsResult = await context.api.projects().propertyDefinitions({
+		projectId,
+		eventNames: [params.eventName],
+		excludeCoreProperties: true,
+		filterByEventNames: true,
+		isFeatureFlag: false,
+		limit: 100,
+	});
 
 	if (!propDefsResult.success) {
-		throw new Error(`Failed to get property definitions: ${propDefsResult.error.message}`);
+		throw new Error(
+			`Failed to get property definitions for event ${params.eventName}: ${propDefsResult.error.message}`,
+		);
 	}
+
+	const simplifiedProperties = PropertyDefinitionSchema.array().parse(propDefsResult.data);
+
 	return {
-		content: [{ type: "text", text: JSON.stringify(propDefsResult.data) }],
+		content: [{ type: "text", text: JSON.stringify(simplifiedProperties) }],
 	};
 };
 
-const definition = getToolDefinition("property-definitions");
+const definition = getToolDefinition("event-properties-get");
 
 const tool = (): Tool<typeof schema> => ({
-	name: "property-definitions",
+	name: "event-properties-get",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: propertyDefinitionsHandler,

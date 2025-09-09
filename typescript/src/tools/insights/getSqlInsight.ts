@@ -34,6 +34,7 @@ const definition = getToolDefinition("get-sql-insight");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "get-sql-insight",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: getSqlInsightHandler,

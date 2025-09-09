@@ -38,6 +38,7 @@ const definition = getToolDefinition("delete-feature-flag");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "delete-feature-flag",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: deleteHandler,

@@ -21,6 +21,7 @@ const INSTRUCTIONS = `
 type RequestProperties = {
 	userHash: string;
 	apiToken: string;
+	features?: string[];
 };
 
 // Define our MCP agent with tools
@@ -160,13 +161,13 @@ export class MyMCP extends McpAgent<Env> {
 			}
 		};
 
-		this.server.tool(
+		this.server.registerTool(
 			tool.name,
-			tool.description,
-			tool.schema.shape,
 			{
-				...tool.annotations,
-				title: tool.name,
+				title: tool.title,
+				description: tool.description,
+				inputSchema: tool.schema.shape,
+				annotations: tool.annotations,
 			},
 			wrappedHandler as unknown as ToolCallback<TSchema>,
 		);
@@ -184,7 +185,9 @@ export class MyMCP extends McpAgent<Env> {
 
 	async init() {
 		const context = await this.getContext();
-		const allTools = getToolsFromContext(context);
+		// Get features from request properties if available
+		const features = this.requestProperties.features;
+		const allTools = getToolsFromContext(context, features);
 
 		for (const tool of allTools) {
 			this.registerTool(tool, async (params) => tool.handler(context, params));
@@ -232,12 +235,20 @@ export default {
 			userHash: hash(token),
 		};
 
-		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
-			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
+		// Search params are used to build up the list of available tools. If no features are provided, all tools are available.
+		// If features are provided, only tools matching those features will be available.
+		// Features are provided as a comma-separated list in the "features" query parameter.
+		// Example: ?features=org,insights
+		const featuresParam = url.searchParams.get("features");
+		const features = featuresParam ? featuresParam.split(",").filter(Boolean) : undefined;
+		ctx.props = { ...ctx.props, features };
+
+		if (url.pathname.startsWith("/mcp")) {
+			return MyMCP.serve("/mcp").fetch(request, env, ctx);
 		}
 
-		if (url.pathname === "/mcp") {
-			return MyMCP.serve("/mcp").fetch(request, env, ctx);
+		if (url.pathname.startsWith("/sse")) {
+			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
 		}
 
 		return new Response("Not found", { status: 404 });

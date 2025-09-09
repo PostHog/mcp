@@ -120,7 +120,16 @@ export const OrganizationSetActiveSchema = z.object({
 
 export const ProjectGetAllSchema = z.object({});
 
-export const ProjectPropertyDefinitionsSchema = z.object({});
+export const ProjectEventDefinitionsSchema = z.object({
+	q: z
+		.string()
+		.optional()
+		.describe("Search query to filter event names. Only use if there are lots of events."),
+});
+
+export const ProjectPropertyDefinitionsSchema = z.object({
+	eventName: z.string().describe("Event name to filter properties by"),
+});
 
 export const ProjectSetActiveSchema = z.object({
 	projectId: z.number().int().positive(),

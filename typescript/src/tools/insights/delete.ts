@@ -26,6 +26,7 @@ const definition = getToolDefinition("insight-delete");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "insight-delete",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: deleteHandler,

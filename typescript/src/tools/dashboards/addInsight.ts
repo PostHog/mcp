@@ -46,6 +46,7 @@ const definition = getToolDefinition("add-insight-to-dashboard");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "add-insight-to-dashboard",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: addInsightHandler,

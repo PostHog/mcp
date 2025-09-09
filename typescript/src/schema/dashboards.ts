@@ -39,7 +39,7 @@ export const DashboardSchema = z.object({
 	filters: z.record(z.any()).nullish(),
 	variables: z.record(z.any()).nullish(),
 	tags: z.array(z.string()).nullish(),
-	tiles: z.array(DashboardTileSchema).nullish(),
+	tiles: z.array(DashboardTileSchema.nullish()).nullish(),
 });
 
 export const SimpleDashboardSchema = DashboardSchema.pick({

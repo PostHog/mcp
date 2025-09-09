@@ -1,0 +1,24 @@
+[project]
+name = "posthog-langchain-example"
+version = "0.1.0"
+description = "PostHog LangChain integration example"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "posthog-agent-toolkit",
+    "langchain>=0.3.0",
+    "langchain-openai>=0.2.0",
+    "langchain-core>=0.3.0",
+    "python-dotenv>=1.0.0",
+]
+
+[tool.uv.sources]
+posthog-agent-toolkit = { path = "../../python", editable = true }
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.black]
+line-length = 120
+target-version = ['py311']

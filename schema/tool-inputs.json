@@ -776,6 +776,16 @@
       ],
       "additionalProperties": false
     },
+    "ProjectEventDefinitionsSchema": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "type": "string",
+          "description": "Search query to filter event names. Only use if there are lots of events."
+        }
+      },
+      "additionalProperties": false
+    },
     "ProjectGetAllSchema": {
       "type": "object",
       "properties": {},
@@ -783,7 +793,15 @@
     },
     "ProjectPropertyDefinitionsSchema": {
       "type": "object",
-      "properties": {},
+      "properties": {
+        "eventName": {
+          "type": "string",
+          "description": "Event name to filter properties by"
+        }
+      },
+      "required": [
+        "eventName"
+      ],
       "additionalProperties": false
     },
     "ProjectSetActiveSchema": {

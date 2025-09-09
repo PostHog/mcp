@@ -105,7 +105,7 @@ describe("StateManager", () => {
 			vi.spyOn(stateManager, "getUser").mockResolvedValue(mockUser);
 
 			await expect(stateManager.setDefaultOrganizationAndProject()).rejects.toThrow(
-				"API key has access to multiple projects"
+				"API key has access to multiple projects",
 			);
 		});
 
@@ -187,7 +187,7 @@ describe("StateManager", () => {
 			};
 
 			await expect(stateManager.setDefaultOrganizationAndProject()).rejects.toThrow(
-				"API key does not have access to any projects"
+				"API key does not have access to any projects",
 			);
 		});
 
@@ -215,7 +215,7 @@ describe("StateManager", () => {
 			};
 
 			await expect(stateManager.setDefaultOrganizationAndProject()).rejects.toThrow(
-				mockError
+				mockError,
 			);
 		});
 	});
@@ -230,10 +230,12 @@ describe("StateManager", () => {
 		});
 
 		it("should call setDefaultOrganizationAndProject when not cached", async () => {
-			const spy = vi.spyOn(stateManager, "setDefaultOrganizationAndProject").mockResolvedValue({
-				organizationId: "default-org",
-				projectId: 123,
-			});
+			const spy = vi
+				.spyOn(stateManager, "setDefaultOrganizationAndProject")
+				.mockResolvedValue({
+					organizationId: "default-org",
+					projectId: 123,
+				});
 
 			const result = await stateManager.getOrgID();
 
@@ -252,10 +254,12 @@ describe("StateManager", () => {
 		});
 
 		it("should call setDefaultOrganizationAndProject when not cached", async () => {
-			const spy = vi.spyOn(stateManager, "setDefaultOrganizationAndProject").mockResolvedValue({
-				organizationId: "default-org",
-				projectId: 789,
-			});
+			const spy = vi
+				.spyOn(stateManager, "setDefaultOrganizationAndProject")
+				.mockResolvedValue({
+					organizationId: "default-org",
+					projectId: 789,
+				});
 
 			const result = await stateManager.getProjectId();
 

@@ -7,7 +7,7 @@ export type CloudRegion = "us" | "eu";
 
 export type State = {
 	projectId: string | undefined;
-	orgId: string | undefined;
+	orgId: string | null | undefined;
 	distinctId: string | undefined;
 	region: CloudRegion | undefined;
 };

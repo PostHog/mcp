@@ -73,10 +73,6 @@ export class StateManager {
 			organizationsWithAccess.push(...organizations.map((organization) => organization.id));
 		}
 
-		if (organizationsWithAccess.length === 0 && scoped_teams.length > 0) {
-			// TODO: Get orgs from projects in teams
-		}
-
 		const activeOrganizationId = activeOrganization?.id;
 
 		return organizationsWithAccess.sort((a, b) => {
@@ -92,12 +88,31 @@ export class StateManager {
 		if (!orgId) {
 			const organizationIds = await this._getOrganizationsWithAccess();
 
-			if (organizationIds.length >= 1) {
+			if (organizationIds.length > 0) {
 				await this._cache.set("orgId", organizationIds[0]!);
 				return organizationIds[0]!;
 			}
 
-			throw new Error("Personal API key does not have access to any organizations");
+			// Token does not have access to any organizations, select one from a project
+			const { scoped_teams } = await this._getApiKey();
+
+			if (scoped_teams.length === 0) {
+				throw new Error("API key does not have access to any organizations or teams");
+			}
+
+			const projectsResult = await this._api
+				.projects()
+				.get({ projectId: String(scoped_teams[0]!) });
+
+			if (!projectsResult.success) {
+				throw new Error("Failed to access any projects with API key");
+			}
+
+			console.log("projectsResult", projectsResult.data);
+
+			await this._cache.set("orgId", projectsResult.data.organization);
+
+			return projectsResult.data.organization;
 		}
 
 		return orgId;

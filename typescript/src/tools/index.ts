@@ -77,7 +77,7 @@ const TOOL_MAP: Record<string, () => Tool<ZodObjectAny>> = {
 	"projects-get": getProjects,
 	"switch-project": setActiveProject,
 	"event-definitions-list": eventDefinitions,
-	"properties-get": getProperties,
+	"properties-list": getProperties,
 
 	// Documentation - handled separately due to env check
 	// "docs-search": searchDocs,

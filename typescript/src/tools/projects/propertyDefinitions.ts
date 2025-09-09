@@ -38,10 +38,10 @@ export const propertyDefinitionsHandler = async (context: Context, params: Param
 	};
 };
 
-const definition = getToolDefinition("properties-get");
+const definition = getToolDefinition("properties-list");
 
 const tool = (): Tool<typeof schema> => ({
-	name: "properties-get",
+	name: "properties-list",
 	title: definition.title,
 	description: definition.description,
 	schema,

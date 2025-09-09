@@ -72,7 +72,7 @@ describe("Projects", { concurrent: false }, () => {
 		});
 	});
 
-	describe("properties-get tool", () => {
+	describe("properties-list tool", () => {
 		const propertyDefsTool = propertyDefinitionsTool();
 
 		it("should get property definitions for a specific event", async () => {

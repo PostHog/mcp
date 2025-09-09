@@ -209,8 +209,8 @@
 		"summary": "List all event definitions in the project with optional filtering.",
 		"title": "List all events"
 	},
-	"properties-get": {
-		"description": "Get properties for events or persons. If fetching event properties, you must provide an event name.",
+	"properties-list": {
+		"description": "List properties for events or persons. If fetching event properties, you must provide an event name.",
 		"category": "Events & properties",
 		"feature": "events",
 		"summary": "Get properties for events or persons.",

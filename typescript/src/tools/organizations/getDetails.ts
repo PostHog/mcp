@@ -10,6 +10,10 @@ type Params = z.infer<typeof schema>;
 export const getDetailsHandler = async (context: Context, _params: Params) => {
 	const orgId = await context.stateManager.getOrgID();
 
+	if (!orgId) {
+		throw new Error("API key does not have access to any organizations");
+	}
+
 	const orgResult = await context.api.organizations().get({ orgId });
 
 	if (!orgResult.success) {

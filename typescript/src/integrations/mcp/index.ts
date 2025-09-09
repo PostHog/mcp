@@ -126,8 +126,8 @@ export class MyMCP extends McpAgent<Env> {
 			if (!userResult.success) {
 				throw new Error(`Failed to get user: ${userResult.error.message}`);
 			}
-			await this.cache.set("distinctId", userResult.data.distinctId);
-			_distinctId = userResult.data.distinctId;
+			await this.cache.set("distinctId", userResult.data.distinct_id);
+			_distinctId = userResult.data.distinct_id;
 		}
 
 		return _distinctId;

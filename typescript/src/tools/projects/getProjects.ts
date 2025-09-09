@@ -9,6 +9,11 @@ type Params = z.infer<typeof schema>;
 
 export const getProjectsHandler = async (context: Context, _params: Params) => {
 	const orgId = await context.stateManager.getOrgID();
+
+	if (!orgId) {
+		throw new Error("API key does not have access to any organizations.");
+	}
+
 	const projectsResult = await context.api.organizations().projects({ orgId }).list();
 
 	if (!projectsResult.success) {

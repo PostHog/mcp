@@ -58,61 +58,72 @@ export class StateManager {
 		return _distinctId;
 	}
 
-	private async _getOrganizationsWithAccess() {
+	private async _getDefaultOrganizationAndProject(): Promise<{
+		organizationId?: string;
+		projectId: number;
+	}> {
 		const { scoped_organizations, scoped_teams } = await this._getApiKey();
-		const { organizations, organization: activeOrganization } = await this.getUser();
+		const { organization: activeOrganization, team: activeTeam } = await this.getUser();
 
-		const organizationsWithAccess = [];
+		if (scoped_teams.length > 0) {
+			// Keys scoped to projects should only be scoped to one project
+			if (scoped_teams.length > 1) {
+				throw new Error(
+					"API key has access to multiple projects, please specify a single project ID or change the API key to have access to an organization to include the projects within it.",
+				);
+			}
 
-		if (scoped_organizations.length > 0) {
-			organizationsWithAccess.push(...scoped_organizations);
+			const projectId = scoped_teams[0]!;
+
+			return { projectId };
 		}
 
-		// Key is not scoped to any organizations or teams, so we return all organizations
-		if (organizationsWithAccess.length === 0 && scoped_teams.length === 0) {
-			organizationsWithAccess.push(...organizations.map((organization) => organization.id));
+		if (
+			scoped_organizations.length === 0 ||
+			scoped_organizations.includes(activeOrganization.id)
+		) {
+			return { organizationId: activeOrganization.id, projectId: activeTeam.id };
 		}
 
-		const activeOrganizationId = activeOrganization?.id;
+		const organizationId = scoped_organizations[0]!;
 
-		return organizationsWithAccess.sort((a, b) => {
-			if (a === activeOrganizationId) return -1;
-			if (b === activeOrganizationId) return 1;
-			return 0;
-		});
+		const projectsResult = await this._api
+			.organizations()
+			.projects({ orgId: organizationId })
+			.list();
+
+		if (!projectsResult.success) {
+			throw projectsResult.error;
+		}
+
+		if (projectsResult.data.length === 0) {
+			throw new Error("API key does not have access to any projects");
+		}
+
+		const projectId = projectsResult.data[0]!;
+
+		return { organizationId, projectId: Number(projectId) };
 	}
 
-	async getOrgID(): Promise<string> {
+	async setDefaultOrganizationAndProject() {
+		const { organizationId, projectId } = await this._getDefaultOrganizationAndProject();
+
+		if (organizationId) {
+			await this._cache.set("orgId", organizationId);
+		}
+
+		await this._cache.set("projectId", projectId.toString());
+
+		return { organizationId, projectId };
+	}
+
+	async getOrgID(): Promise<string | undefined> {
 		const orgId = await this._cache.get("orgId");
 
 		if (!orgId) {
-			const organizationIds = await this._getOrganizationsWithAccess();
+			const { organizationId } = await this.setDefaultOrganizationAndProject();
 
-			if (organizationIds.length > 0) {
-				await this._cache.set("orgId", organizationIds[0]!);
-				return organizationIds[0]!;
-			}
-
-			// Token does not have access to any organizations, select one from a project
-			const { scoped_teams } = await this._getApiKey();
-
-			if (scoped_teams.length === 0) {
-				throw new Error("API key does not have access to any organizations or teams");
-			}
-
-			const projectsResult = await this._api
-				.projects()
-				.get({ projectId: String(scoped_teams[0]!) });
-
-			if (!projectsResult.success) {
-				throw new Error("Failed to access any projects with API key");
-			}
-
-			console.log("projectsResult", projectsResult.data);
-
-			await this._cache.set("orgId", projectsResult.data.organization);
-
-			return projectsResult.data.organization;
+			return organizationId;
 		}
 
 		return orgId;
@@ -122,27 +133,8 @@ export class StateManager {
 		const projectId = await this._cache.get("projectId");
 
 		if (!projectId) {
-			const orgId = await this.getOrgID();
-			const projectsResult = await this._api.organizations().projects({ orgId }).list();
-
-			if (!projectsResult.success) {
-				throw new Error(`Failed to get projects: ${projectsResult.error.message}`);
-			}
-
-			// If there is only one project, set it as the active project
-			if (projectsResult.data.length === 1) {
-				await this._cache.set("projectId", projectsResult.data[0]!.id.toString());
-				return projectsResult.data[0]!.id.toString();
-			}
-
-			const currentProject = await this._api.projects().get({ projectId: "@current" });
-
-			if (!currentProject.success) {
-				throw new Error(`Failed to get current project: ${currentProject.error.message}`);
-			}
-
-			await this._cache.set("projectId", currentProject.data.id.toString());
-			return currentProject.data.id.toString();
+			const { projectId } = await this.setDefaultOrganizationAndProject();
+			return projectId.toString();
 		}
 
 		return projectId;

@@ -9,6 +9,7 @@ import {
 	type ApiPropertyDefinition,
 	ApiPropertyDefinitionSchema,
 	type ApiUser,
+	ApiUserSchema,
 } from "@/schema/api";
 import {
 	type CreateDashboardInput,
@@ -797,28 +798,7 @@ export class ApiClient {
 			me: async (): Promise<Result<ApiUser>> => {
 				const result = await this.fetchWithSchema(
 					`${this.baseUrl}/api/users/@me/`,
-					z.object({
-						distinct_id: z.string(),
-						organizations: z
-							.array(
-								z.object({
-									id: z.any(),
-									name: z.any(),
-								}),
-							)
-							.nullish(),
-						team: z
-							.object({
-								id: z.any(),
-								organization_id: z.any(),
-							})
-							.nullish(),
-						organization: z
-							.object({
-								id: z.any(),
-							})
-							.nullish(),
-					}),
+					ApiUserSchema,
 				);
 
 				if (!result.success) {

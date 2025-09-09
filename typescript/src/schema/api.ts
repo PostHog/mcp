@@ -43,16 +43,16 @@ export const ApiListResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
 		results: z.array(dataSchema),
 	});
 
-export const ApiUser = z.object({
-	id: z.string().uuid(),
-	distinct_id: z.any(),
+export const ApiUserSchema = z.object({
+	distinct_id: z.string(),
 	organizations: z.array(
 		z.object({
 			id: z.string().uuid(),
 		}),
 	),
 	team: z.object({
-		id: z.string().uuid(),
+		id: z.number(),
+		organization: z.string().uuid(),
 	}),
 	organization: z.object({
 		id: z.string().uuid(),
@@ -67,5 +67,5 @@ export const ApiPersonalApiKeySchema = z.object({
 
 export type ApiPropertyDefinition = z.infer<typeof ApiPropertyDefinitionSchema>;
 export type ApiEventDefinition = z.infer<typeof ApiEventDefinitionSchema>;
-export type ApiUser = z.infer<typeof ApiUser>;
+export type ApiUser = z.infer<typeof ApiUserSchema>;
 export type ApiPersonalApiKey = z.infer<typeof ApiPersonalApiKeySchema>;

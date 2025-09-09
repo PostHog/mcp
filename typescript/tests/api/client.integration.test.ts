@@ -1086,7 +1086,7 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 
 			if (result.success) {
 				expect(result.data).toHaveProperty("distinctId");
-				expect(typeof result.data.distinctId).toBe("string");
+				expect(typeof result.data.distinct_id).toBe("string");
 			}
 		});
 	});

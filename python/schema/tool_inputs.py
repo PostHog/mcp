@@ -423,8 +423,6 @@ class Type(StrEnum):
 
     EVENT = "event"
     PERSON = "person"
-    GROUP = "group"
-    SESSION = "session"
 
 
 class ProjectPropertyDefinitionsInputSchema(BaseModel):

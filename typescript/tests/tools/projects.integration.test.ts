@@ -122,24 +122,6 @@ describe("Projects", { concurrent: false }, () => {
 			expect(Array.isArray(propertyDefs)).toBe(true);
 			expect(propertyDefs.length).toBeGreaterThan(0);
 		});
-
-		it("should get property definitions for groups", async () => {
-			const result = await propertyDefsTool.handler(context, {
-				type: "group",
-			});
-			const propertyDefs = parseToolResponse(result);
-			expect(Array.isArray(propertyDefs)).toBe(true);
-			expect(propertyDefs.length).toBeGreaterThan(0);
-		});
-
-		it("should get property definitions for sessions", async () => {
-			const result = await propertyDefsTool.handler(context, {
-				type: "session",
-			});
-			const propertyDefs = parseToolResponse(result);
-			expect(Array.isArray(propertyDefs)).toBe(true);
-			expect(propertyDefs.length).toBeGreaterThan(0);
-		});
 	});
 
 	describe("event-definitions-list tool", () => {

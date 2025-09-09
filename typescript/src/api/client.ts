@@ -190,7 +190,7 @@ export class ApiClient {
 				isFeatureFlag?: boolean;
 				limit?: number;
 				offset?: number;
-				type?: "event" | "person" | "group" | "session";
+				type?: "event" | "person";
 			}): Promise<Result<ApiPropertyDefinition[]>> => {
 				try {
 					const params = {
@@ -210,6 +210,8 @@ export class ApiClient {
 						searchParams.toString() ? `?${searchParams}` : ""
 					}`;
 
+					console.log("url", url);
+
 					const propertyDefinitions = await withPagination(
 						url,
 						this.config.apiToken,
@@ -222,6 +224,7 @@ export class ApiClient {
 
 					return { success: true, data: propertyDefinitionsWithoutHidden };
 				} catch (error) {
+					console.error("Error fetching property definitions:", error);
 					return { success: false, error: error as Error };
 				}
 			},

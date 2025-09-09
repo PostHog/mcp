@@ -129,7 +129,7 @@ export const ProjectEventDefinitionsSchema = z.object({
 });
 
 export const ProjectPropertyDefinitionsInputSchema = z.object({
-	type: z.enum(["event", "person", "group", "session"]).describe("Type of properties to get"),
+	type: z.enum(["event", "person"]).describe("Type of properties to get"),
 	eventName: z
 		.string()
 		.describe("Event name to filter properties by, required for event type")

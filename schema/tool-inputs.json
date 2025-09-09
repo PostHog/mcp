@@ -726,9 +726,7 @@
           "type": "string",
           "enum": [
             "event",
-            "person",
-            "group",
-            "session"
+            "person"
           ],
           "description": "Type of properties to get"
         },

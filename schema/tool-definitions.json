@@ -210,10 +210,10 @@
 		"title": "List all events"
 	},
 	"properties-get": {
-		"description": "Get properties for events, persons, groups or sessions. This gives a list of properties that can be used in queries for the event, person group or session.",
+		"description": "Get properties for events or persons. If fetching event properties, you must provide an event name.",
 		"category": "Events & properties",
 		"feature": "events",
-		"summary": "Get properties for events, persons, groups or sessions.",
+		"summary": "Get properties for events or persons.",
 		"title": "Get properties"
 	},
 	"property-definitions": {

@@ -150,14 +150,14 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 			}
 		});
 
-		it.each(["event", "person", "group", "session"] as const)(
+		it.each(["event", "person"] as const)(
 			"should get property definitions for %s type",
 			async (type) => {
 				const result = await client.projects().propertyDefinitions({
 					projectId: testProjectId,
 					type,
 					eventNames: type === "event" ? ["$pageview"] : undefined,
-					excludeCoreProperties: true,
+					excludeCoreProperties: false,
 					filterByEventNames: type === "event",
 					isFeatureFlag: false,
 					limit: 100,

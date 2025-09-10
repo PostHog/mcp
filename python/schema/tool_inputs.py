@@ -370,7 +370,7 @@ class InsightUpdateSchema(BaseModel):
     data: Data7
 
 
-class LLMObservabilityGetCostsSchema(BaseModel):
+class LLMAnalyticsGetCostsSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )

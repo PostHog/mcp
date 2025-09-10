@@ -665,7 +665,7 @@
       ],
       "additionalProperties": false
     },
-    "LLMObservabilityGetCostsSchema": {
+    "LLMAnalyticsGetCostsSchema": {
       "type": "object",
       "properties": {
         "projectId": {

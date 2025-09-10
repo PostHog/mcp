@@ -106,7 +106,7 @@ export const InsightUpdateSchema = z.object({
 	data: UpdateInsightInputSchema,
 });
 
-export const LLMObservabilityGetCostsSchema = z.object({
+export const LLMAnalyticsGetCostsSchema = z.object({
 	projectId: z.number().int().positive(),
 	days: z.number().optional(),
 });

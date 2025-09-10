@@ -1,8 +1,8 @@
-import { LLMObservabilityGetCostsSchema } from "@/schema/tool-inputs";
+import { LLMAnalyticsGetCostsSchema } from "@/schema/tool-inputs";
 import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
-const schema = LLMObservabilityGetCostsSchema;
+const schema = LLMAnalyticsGetCostsSchema;
 
 type Params = z.infer<typeof schema>;
 

@@ -10,10 +10,10 @@ import {
 	type CreatedResources,
 	parseToolResponse,
 } from "@/shared/test-utils";
-import getLLMCostsTool from "@/tools/llmObservability/getLLMCosts";
+import getLLMCostsTool from "@/tools/llmAnalytics/getLLMCosts";
 import type { Context } from "@/tools/types";
 
-describe("LLM Observability", { concurrent: false }, () => {
+describe("LLM Analytics", { concurrent: false }, () => {
 	let context: Context;
 	const createdResources: CreatedResources = {
 		featureFlags: [],
@@ -65,7 +65,7 @@ describe("LLM Observability", { concurrent: false }, () => {
 		});
 	});
 
-	describe("LLM Observability workflow", () => {
+	describe("LLM Analytics workflow", () => {
 		it("should support getting costs for different time periods", async () => {
 			const costsTool = getLLMCostsTool();
 

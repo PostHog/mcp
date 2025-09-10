@@ -111,7 +111,7 @@ const TOOL_MAP: Record<string, () => ToolBase<ZodObjectAny>> = {
 	"dashboard-delete": deleteDashboard,
 	"add-insight-to-dashboard": addInsightToDashboard,
 
-	// LLM Observability
+	// LLM Analytics
 	"get-llm-total-costs-for-project": getLLMCosts,
 };
 

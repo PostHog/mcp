@@ -7,7 +7,7 @@ const createMockContext = (): Context => ({
 	cache: {} as any,
 	env: { INKEEP_API_KEY: undefined },
 	stateManager: {
-		getApiKey: async () => ({ scopes: ['*'] })
+		getApiKey: async () => ({ scopes: ["*"] }),
 	} as any,
 });
 

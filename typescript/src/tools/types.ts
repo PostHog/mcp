@@ -1,6 +1,7 @@
 import type { ApiClient } from "@/api/client";
 import type { StateManager } from "@/lib/utils/StateManager";
 import type { ScopedCache } from "@/lib/utils/cache/ScopedCache";
+import type { ApiRedactedPersonalApiKey } from "@/schema/api";
 import type { z } from "zod";
 
 export type CloudRegion = "us" | "eu";
@@ -10,6 +11,7 @@ export type State = {
 	orgId: string | undefined;
 	distinctId: string | undefined;
 	region: CloudRegion | undefined;
+	apiKey: ApiRedactedPersonalApiKey | undefined;
 };
 
 export type Env = {
@@ -29,6 +31,7 @@ export type Tool<TSchema extends z.ZodTypeAny = z.ZodTypeAny> = {
 	description: string;
 	schema: TSchema;
 	handler: (context: Context, params: z.infer<TSchema>) => Promise<any>;
+	scopes: string[];
 	annotations: {
 		destructiveHint: boolean;
 		idempotentHint: boolean;
@@ -36,5 +39,10 @@ export type Tool<TSchema extends z.ZodTypeAny = z.ZodTypeAny> = {
 		readOnlyHint: boolean;
 	};
 };
+
+export type ToolBase<TSchema extends z.ZodTypeAny = z.ZodTypeAny> = Omit<
+	Tool<TSchema>,
+	"title" | "description" | "scopes"
+>;
 
 export type ZodObjectAny = z.ZodObject<any, any, any, any, any>;

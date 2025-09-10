@@ -1,5 +1,5 @@
 import type { ApiClient } from "@/api/client";
-import type { ApiPersonalApiKey, ApiUser } from "@/schema/api";
+import type { ApiUser } from "@/schema/api";
 import type { State } from "@/tools/types";
 import type { ScopedCache } from "./cache/ScopedCache";
 
@@ -7,7 +7,6 @@ export class StateManager {
 	private _cache: ScopedCache<State>;
 	private _api: ApiClient;
 	private _user?: ApiUser;
-	private _apiKey?: ApiPersonalApiKey;
 
 	constructor(cache: ScopedCache<State>, api: ApiClient) {
 		this._cache = cache;
@@ -38,11 +37,15 @@ export class StateManager {
 		return apiKeyResult.data;
 	}
 
-	private async _getApiKey() {
-		if (!this._apiKey) {
-			this._apiKey = await this._fetchApiKey();
+	async getApiKey() {
+		let _apiKey = await this._cache.get("apiKey");
+
+		if (!_apiKey) {
+			_apiKey = await this._fetchApiKey();
+			await this._cache.set("apiKey", _apiKey);
 		}
-		return this._apiKey;
+
+		return _apiKey;
 	}
 
 	async getDistinctId() {
@@ -62,7 +65,7 @@ export class StateManager {
 		organizationId?: string;
 		projectId: number;
 	}> {
-		const { scoped_organizations, scoped_teams } = await this._getApiKey();
+		const { scoped_organizations, scoped_teams } = await this.getApiKey();
 		const { organization: activeOrganization, team: activeTeam } = await this.getUser();
 
 		if (scoped_teams.length > 0) {

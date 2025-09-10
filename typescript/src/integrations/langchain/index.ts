@@ -53,9 +53,9 @@ export class PostHogAgentToolkit {
 	 * Get all the tools for the PostHog Agent Toolkit
 	 * @returns An array of DynamicStructuredTool tools
 	 */
-	getTools(): DynamicStructuredTool[] {
+	async getTools(): Promise<DynamicStructuredTool[]> {
 		const context = this.getContext();
-		const allTools = getToolsFromContext(context);
+		const allTools = await getToolsFromContext(context);
 
 		return allTools.map((t) => {
 			return new DynamicStructuredTool({

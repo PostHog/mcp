@@ -56,6 +56,7 @@ import generateHogQLFromQuestion from "./query/generateHogQLFromQuestion";
 // Query
 import queryRun from "./query/run";
 
+import { hasScopes } from "@/lib/utils/api";
 // LLM Observability
 import getLLMCosts from "./llmObservability/getLLMCosts";
 
@@ -114,10 +115,10 @@ const TOOL_MAP: Record<string, () => Tool<ZodObjectAny>> = {
 	"get-llm-total-costs-for-project": getLLMCosts,
 };
 
-export const getToolsFromContext = (
+export const getToolsFromContext = async (
 	context: Context,
 	features?: string[],
-): Tool<ZodObjectAny>[] => {
+): Promise<Tool<ZodObjectAny>[]> => {
 	const allowedToolNames = getFilteredToolNames(features);
 	const tools: Tool<ZodObjectAny>[] = [];
 
@@ -130,7 +131,13 @@ export const getToolsFromContext = (
 		}
 	}
 
-	return tools;
+	const { scopes } = await context.stateManager.getApiKey();
+
+	const filteredTools = tools.filter((tool) => {
+		return hasScopes(scopes, tool.scopes);
+	});
+
+	return filteredTools;
 };
 
 export type PostHogToolsOptions = {
@@ -163,9 +170,9 @@ export class PostHogAgentToolkit {
 			stateManager: new StateManager(cache, api),
 		};
 	}
-	getTools(): Tool<ZodObjectAny>[] {
+	async getTools(): Promise<Tool<ZodObjectAny>[]> {
 		const context = this.getContext();
-		return getToolsFromContext(context);
+		return await getToolsFromContext(context);
 	}
 }
 

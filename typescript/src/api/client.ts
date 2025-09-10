@@ -4,8 +4,8 @@ import { getSearchParamsFromRecord } from "@/lib/utils/helper-functions";
 import {
 	type ApiEventDefinition,
 	ApiEventDefinitionSchema,
-	type ApiPersonalApiKey,
-	ApiPersonalApiKeySchema,
+	type ApiRedactedPersonalApiKey,
+	ApiRedactedPersonalApiKeySchema,
 	type ApiPropertyDefinition,
 	ApiPropertyDefinitionSchema,
 	type ApiUser,
@@ -170,10 +170,10 @@ export class ApiClient {
 
 	apiKeys() {
 		return {
-			current: async (): Promise<Result<ApiPersonalApiKey>> => {
+			current: async (): Promise<Result<ApiRedactedPersonalApiKey>> => {
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/personal_api_keys/@current`,
-					ApiPersonalApiKeySchema,
+					ApiRedactedPersonalApiKeySchema,
 				);
 			},
 		};

@@ -53,9 +53,9 @@ export class PostHogAgentToolkit {
 	 * Get all the tools for the PostHog Agent Toolkit
 	 * @returns A record of tool names to Vercel tools
 	 */
-	getTools(): Record<string, VercelTool> {
+	async getTools(): Promise<Record<string, VercelTool>> {
 		const context = this.getContext();
-		const allTools = getToolsFromContext(context);
+		const allTools = await getToolsFromContext(context);
 
 		return allTools.reduce(
 			(acc, t) => {

@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { getToolsFromContext } from "@/tools";
 import type { Context } from "@/tools/types";
+import { describe, expect, it } from "vitest";
 
 const createMockContext = (): Context => ({
 	api: {} as any,
@@ -53,9 +53,9 @@ describe("Feature Routing Integration", () => {
 		},
 	];
 
-	it.each(integrationTests)("should return $description", ({ features, expectedTools }) => {
+	it.each(integrationTests)("should return $description", async ({ features, expectedTools }) => {
 		const context = createMockContext();
-		const tools = getToolsFromContext(context, features);
+		const tools = await getToolsFromContext(context, features);
 		const toolNames = tools.map((t) => t.name);
 
 		for (const tool of expectedTools) {

@@ -59,7 +59,7 @@ export const ApiUserSchema = z.object({
 	}),
 });
 
-export const ApiPersonalApiKeySchema = z.object({
+export const ApiRedactedPersonalApiKeySchema = z.object({
 	scopes: z.array(z.string()), // TODO: restrict available tools automatically based on scopes
 	scoped_teams: z.array(z.number()),
 	scoped_organizations: z.array(z.string()),
@@ -68,4 +68,4 @@ export const ApiPersonalApiKeySchema = z.object({
 export type ApiPropertyDefinition = z.infer<typeof ApiPropertyDefinitionSchema>;
 export type ApiEventDefinition = z.infer<typeof ApiEventDefinitionSchema>;
 export type ApiUser = z.infer<typeof ApiUserSchema>;
-export type ApiPersonalApiKey = z.infer<typeof ApiPersonalApiKeySchema>;
+export type ApiRedactedPersonalApiKey = z.infer<typeof ApiRedactedPersonalApiKeySchema>;

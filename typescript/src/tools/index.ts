@@ -58,7 +58,7 @@ import queryRun from "./query/run";
 
 import { hasScopes } from "@/lib/utils/api";
 // LLM Observability
-import getLLMCosts from "./llmObservability/getLLMCosts";
+import getLLMCosts from "./llmAnalytics/getLLMCosts";
 
 // Map of tool names to tool factory functions
 const TOOL_MAP: Record<string, () => ToolBase<ZodObjectAny>> = {

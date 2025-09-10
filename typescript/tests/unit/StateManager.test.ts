@@ -1,7 +1,7 @@
 import type { ApiClient } from "@/api/client";
 import { StateManager } from "@/lib/utils/StateManager";
 import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
-import type { ApiPersonalApiKey, ApiUser } from "@/schema/api";
+import type { ApiRedactedPersonalApiKey, ApiUser } from "@/schema/api";
 import type { State } from "@/tools/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -15,7 +15,7 @@ describe("StateManager", () => {
 		organization: { id: "org-1" },
 	};
 
-	const mockApiKey: ApiPersonalApiKey = {
+	const mockApiKey: ApiRedactedPersonalApiKey = {
 		scopes: ["user:read", "insight:write"],
 		scoped_organizations: [],
 		scoped_teams: [],

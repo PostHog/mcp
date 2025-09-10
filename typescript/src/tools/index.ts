@@ -1,10 +1,10 @@
-import type { Context, Tool, ZodObjectAny } from "./types";
+import type { Context, Tool, ToolBase, ZodObjectAny } from "./types";
 
 import { ApiClient } from "@/api/client";
 import { StateManager } from "@/lib/utils/StateManager";
 import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
 import { hash } from "@/lib/utils/helper-functions";
-import { getToolsForFeatures as getFilteredToolNames } from "./toolDefinitions";
+import { getToolsForFeatures as getFilteredToolNames, getToolDefinition } from "./toolDefinitions";
 
 import createFeatureFlag from "./featureFlags/create";
 import deleteFeatureFlag from "./featureFlags/delete";
@@ -61,7 +61,7 @@ import { hasScopes } from "@/lib/utils/api";
 import getLLMCosts from "./llmObservability/getLLMCosts";
 
 // Map of tool names to tool factory functions
-const TOOL_MAP: Record<string, () => Tool<ZodObjectAny>> = {
+const TOOL_MAP: Record<string, () => ToolBase<ZodObjectAny>> = {
 	// Feature Flags
 	"feature-flag-get-definition": getFeatureFlagDefinition,
 	"feature-flag-get-all": getAllFeatureFlags,
@@ -120,16 +120,27 @@ export const getToolsFromContext = async (
 	features?: string[],
 ): Promise<Tool<ZodObjectAny>[]> => {
 	const allowedToolNames = getFilteredToolNames(features);
-	const tools: Tool<ZodObjectAny>[] = [];
+	const toolBases: ToolBase<ZodObjectAny>[] = [];
 
 	for (const toolName of allowedToolNames) {
 		// Special handling for docs-search which requires API key
 		if (toolName === "docs-search" && context.env.INKEEP_API_KEY) {
-			tools.push(searchDocs());
+			toolBases.push(searchDocs());
 		} else if (TOOL_MAP[toolName]) {
-			tools.push(TOOL_MAP[toolName]());
+			toolBases.push(TOOL_MAP[toolName]());
 		}
 	}
+
+	const tools: Tool<ZodObjectAny>[] = toolBases.map((toolBase) => {
+		const definition = getToolDefinition(toolBase.name);
+		return {
+			...toolBase,
+			title: definition.title,
+			description: definition.description,
+			scopes: definition.required_scopes ?? [],
+			annotations: definition.annotations,
+		};
+	});
 
 	const { scopes } = await context.stateManager.getApiKey();
 

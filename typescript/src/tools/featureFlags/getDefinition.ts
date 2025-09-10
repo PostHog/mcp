@@ -69,12 +69,6 @@ const tool = (): ToolBase<typeof schema> => ({
 	name: "feature-flag-get-definition",
 	schema,
 	handler: getDefinitionHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

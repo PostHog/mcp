@@ -1,6 +1,5 @@
 import { ErrorTrackingDetailsSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = ErrorTrackingDetailsSchema;
@@ -31,20 +30,10 @@ export const errorDetailsHandler = async (context: Context, params: Params) => {
 	};
 };
 
-const definition = getToolDefinition("error-details");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "error-details",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: errorDetailsHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

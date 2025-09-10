@@ -1,6 +1,5 @@
 import { DashboardCreateSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = DashboardCreateSchema;
@@ -24,20 +23,10 @@ export const createHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(dashboardWithUrl) }] };
 };
 
-const definition = getToolDefinition("dashboard-create");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "dashboard-create",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: createHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: false,
-		openWorldHint: true,
-		readOnlyHint: false,
-	},
 });
 
 export default tool;

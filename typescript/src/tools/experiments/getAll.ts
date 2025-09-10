@@ -1,6 +1,5 @@
 import { ExperimentGetAllSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = ExperimentGetAllSchema;
@@ -17,20 +16,10 @@ export const getAllHandler = async (context: Context, _params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(results.data) }] };
 };
 
-const definition = getToolDefinition("experiment-get-all");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "experiment-get-all",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: getAllHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

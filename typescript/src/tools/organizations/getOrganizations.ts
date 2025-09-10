@@ -1,6 +1,5 @@
 import { OrganizationGetAllSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = OrganizationGetAllSchema;
@@ -18,20 +17,10 @@ export const getOrganizationsHandler = async (context: Context, _params: Params)
 	};
 };
 
-const definition = getToolDefinition("organizations-get");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "organizations-get",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: getOrganizationsHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

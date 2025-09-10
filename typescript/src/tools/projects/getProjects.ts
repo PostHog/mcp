@@ -1,6 +1,5 @@
 import { ProjectGetAllSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = ProjectGetAllSchema;
@@ -27,20 +26,10 @@ export const getProjectsHandler = async (context: Context, _params: Params) => {
 	};
 };
 
-const definition = getToolDefinition("projects-get");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "projects-get",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: getProjectsHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

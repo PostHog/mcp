@@ -42,7 +42,7 @@ export type Tool<TSchema extends z.ZodTypeAny = z.ZodTypeAny> = {
 
 export type ToolBase<TSchema extends z.ZodTypeAny = z.ZodTypeAny> = Omit<
 	Tool<TSchema>,
-	"title" | "description" | "scopes"
+	"title" | "description" | "scopes" | "annotations"
 >;
 
 export type ZodObjectAny = z.ZodObject<any, any, any, any, any>;

@@ -1,20 +1,37 @@
+import z from "zod";
 import toolDefinitionsJson from "../../../schema/tool-definitions.json";
 
-export interface ToolDefinition {
-	description: string;
-	category?: string;
-	feature?: string;
-	summary?: string;
-	title: string;
-}
+export const ToolDefinitionSchema = z.object({
+	description: z.string(),
+	category: z.string(),
+	feature: z.string(),
+	summary: z.string(),
+	title: z.string(),
+	required_scopes: z.array(z.string()),
+	annotations: z.object({
+		destructiveHint: z.boolean(),
+		idempotentHint: z.boolean(),
+		openWorldHint: z.boolean(),
+		readOnlyHint: z.boolean(),
+	}),
+});
+
+export type ToolDefinition = z.infer<typeof ToolDefinitionSchema>;
 
 export type ToolDefinitions = Record<string, ToolDefinition>;
 
-const toolDefinitions: ToolDefinitions = toolDefinitionsJson;
+let _toolDefinitions: ToolDefinitions | undefined = undefined;
 
-export default toolDefinitions;
+export function getToolDefinitions(): ToolDefinitions {
+	if (!_toolDefinitions) {
+		_toolDefinitions = z.record(z.string(), ToolDefinitionSchema).parse(toolDefinitionsJson);
+	}
+	return _toolDefinitions;
+}
 
 export function getToolDefinition(toolName: string): ToolDefinition {
+	const toolDefinitions = getToolDefinitions();
+
 	const definition = toolDefinitions[toolName];
 
 	if (!definition) {
@@ -25,6 +42,8 @@ export function getToolDefinition(toolName: string): ToolDefinition {
 }
 
 export function getToolsForFeatures(features?: string[]): string[] {
+	const toolDefinitions = getToolDefinitions();
+
 	if (!features || features.length === 0) {
 		return Object.keys(toolDefinitions);
 	}

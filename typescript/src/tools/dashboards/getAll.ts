@@ -1,6 +1,5 @@
 import { DashboardGetAllSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = DashboardGetAllSchema;
@@ -21,18 +20,10 @@ export const getAllHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(dashboardsResult.data) }] };
 };
 
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "dashboards-get-all",
-	title: getToolDefinition("dashboards-get-all").title,
-	description: getToolDefinition("dashboards-get-all").description,
 	schema,
 	handler: getAllHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

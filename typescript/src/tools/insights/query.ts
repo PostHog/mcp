@@ -1,6 +1,5 @@
 import { InsightQueryInputSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = InsightQueryInputSchema;
@@ -37,20 +36,10 @@ export const queryHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(responseData) }] };
 };
 
-const definition = getToolDefinition("insight-query");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "insight-query",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: queryHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

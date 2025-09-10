@@ -1,6 +1,5 @@
 import { QueryRunInputSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = QueryRunInputSchema;
@@ -23,20 +22,10 @@ export const queryRunHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(queryResult.data.results) }] };
 };
 
-const definition = getToolDefinition("query-run");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "query-run",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: queryRunHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

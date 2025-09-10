@@ -1,6 +1,5 @@
 import { FeatureFlagCreateSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = FeatureFlagCreateSchema;
@@ -29,20 +28,10 @@ export const createHandler = async (context: Context, params: Params) => {
 	};
 };
 
-const definition = getToolDefinition("create-feature-flag");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "create-feature-flag",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: createHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: false,
-		openWorldHint: true,
-		readOnlyHint: false,
-	},
 });
 
 export default tool;

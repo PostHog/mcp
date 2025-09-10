@@ -1,7 +1,6 @@
 import { docsSearch } from "@/inkeepApi";
 import { DocumentationSearchSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = DocumentationSearchSchema;
@@ -26,20 +25,10 @@ export const searchDocsHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: resultText }] };
 };
 
-const definition = getToolDefinition("docs-search");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "docs-search",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: searchDocsHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

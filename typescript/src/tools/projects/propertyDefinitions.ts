@@ -1,7 +1,6 @@
 import { PropertyDefinitionSchema } from "@/schema/properties";
 import { ProjectPropertyDefinitionsInputSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = ProjectPropertyDefinitionsInputSchema;
@@ -38,20 +37,10 @@ export const propertyDefinitionsHandler = async (context: Context, params: Param
 	};
 };
 
-const definition = getToolDefinition("properties-list");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "properties-list",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: propertyDefinitionsHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

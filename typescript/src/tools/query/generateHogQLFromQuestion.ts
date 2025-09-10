@@ -1,6 +1,5 @@
 import { InsightGenerateHogQLFromQuestionSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = InsightGenerateHogQLFromQuestionSchema;
@@ -30,20 +29,10 @@ export const generateHogQLHandler = async (context: Context, params: Params) => 
 	return { content: [{ type: "text", text: JSON.stringify(result.data) }] };
 };
 
-const definition = getToolDefinition("query-generate-hogql-from-question");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "query-generate-hogql-from-question",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: generateHogQLHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: false,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

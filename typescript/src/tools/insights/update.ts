@@ -1,6 +1,5 @@
 import { InsightUpdateSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 import { resolveInsightId } from "./utils";
 
@@ -31,20 +30,10 @@ export const updateHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(insightWithUrl) }] };
 };
 
-const definition = getToolDefinition("insight-update");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "insight-update",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: updateHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: false,
-	},
 });
 
 export default tool;

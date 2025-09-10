@@ -34,7 +34,7 @@ export const withPagination = async <T>(
 };
 
 export const hasScope = (scopes: string[], requiredScope: string) => {
-	if ("*" in scopes) {
+	if (scopes.includes("*")) {
 		return true;
 	}
 

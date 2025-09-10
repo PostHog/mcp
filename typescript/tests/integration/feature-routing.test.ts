@@ -6,7 +6,9 @@ const createMockContext = (): Context => ({
 	api: {} as any,
 	cache: {} as any,
 	env: { INKEEP_API_KEY: undefined },
-	stateManager: {} as any,
+	stateManager: {
+		getApiKey: async () => ({ scopes: ['*'] })
+	} as any,
 });
 
 describe("Feature Routing Integration", () => {

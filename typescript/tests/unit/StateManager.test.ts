@@ -86,7 +86,7 @@ describe("StateManager", () => {
 				scoped_teams: [456],
 			};
 
-			vi.spyOn(stateManager as any, "_getApiKey").mockResolvedValue(teamScopedApiKey);
+			vi.spyOn(stateManager, "getApiKey").mockResolvedValue(teamScopedApiKey);
 			vi.spyOn(stateManager, "getUser").mockResolvedValue(mockUser);
 
 			const result = await stateManager.setDefaultOrganizationAndProject();
@@ -101,7 +101,7 @@ describe("StateManager", () => {
 				scoped_teams: [123, 456],
 			};
 
-			vi.spyOn(stateManager as any, "_getApiKey").mockResolvedValue(multiTeamApiKey);
+			vi.spyOn(stateManager, "getApiKey").mockResolvedValue(multiTeamApiKey);
 			vi.spyOn(stateManager, "getUser").mockResolvedValue(mockUser);
 
 			await expect(stateManager.setDefaultOrganizationAndProject()).rejects.toThrow(
@@ -110,7 +110,7 @@ describe("StateManager", () => {
 		});
 
 		it("should use user's active org and team when no scoped restrictions", async () => {
-			vi.spyOn(stateManager as any, "_getApiKey").mockResolvedValue(mockApiKey);
+			vi.spyOn(stateManager, "getApiKey").mockResolvedValue(mockApiKey);
 			vi.spyOn(stateManager, "getUser").mockResolvedValue(mockUser);
 
 			const result = await stateManager.setDefaultOrganizationAndProject();
@@ -127,7 +127,7 @@ describe("StateManager", () => {
 				scoped_organizations: ["org-2", "org-1"],
 			};
 
-			vi.spyOn(stateManager as any, "_getApiKey").mockResolvedValue(scopedOrgApiKey);
+			vi.spyOn(stateManager, "getApiKey").mockResolvedValue(scopedOrgApiKey);
 			vi.spyOn(stateManager, "getUser").mockResolvedValue(mockUser);
 
 			const result = await stateManager.setDefaultOrganizationAndProject();
@@ -143,7 +143,7 @@ describe("StateManager", () => {
 			};
 
 			const mockApi = stateManager as any;
-			vi.spyOn(mockApi, "_getApiKey").mockResolvedValue(scopedOrgApiKey);
+			vi.spyOn(stateManager, "getApiKey").mockResolvedValue(scopedOrgApiKey);
 			vi.spyOn(stateManager, "getUser").mockResolvedValue(mockUser);
 
 			// Mock the API client organization projects list call
@@ -171,7 +171,7 @@ describe("StateManager", () => {
 			};
 
 			const mockApi = stateManager as any;
-			vi.spyOn(mockApi, "_getApiKey").mockResolvedValue(scopedOrgApiKey);
+			vi.spyOn(stateManager, "getApiKey").mockResolvedValue(scopedOrgApiKey);
 			vi.spyOn(stateManager, "getUser").mockResolvedValue(mockUser);
 
 			// Mock the API client organization projects list call
@@ -198,7 +198,7 @@ describe("StateManager", () => {
 			};
 
 			const mockApi = stateManager as any;
-			vi.spyOn(mockApi, "_getApiKey").mockResolvedValue(scopedOrgApiKey);
+			vi.spyOn(stateManager, "getApiKey").mockResolvedValue(scopedOrgApiKey);
 			vi.spyOn(stateManager, "getUser").mockResolvedValue(mockUser);
 
 			// Mock the API client organization projects list call

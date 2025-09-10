@@ -1,7 +1,9 @@
+import { getToolsFromContext } from "@/tools";
 import { getToolsForFeatures } from "@/tools/toolDefinitions";
+import type { Context } from "@/tools/types";
 import { describe, expect, it } from "vitest";
 
-describe("Tool Filtering", () => {
+describe("Tool Filtering - Features", () => {
 	const featureTests = [
 		{
 			features: undefined,
@@ -93,5 +95,96 @@ describe("Tool Filtering", () => {
 				expect(tools).toContain(tool);
 			}
 		});
+	});
+});
+
+const createMockContext = (scopes: string[]): Context => ({
+	api: {} as any,
+	cache: {} as any,
+	env: { INKEEP_API_KEY: undefined },
+	stateManager: {
+		getApiKey: async () => ({ scopes }),
+	} as any,
+});
+
+describe("Tool Filtering - API Scopes", () => {
+	it("should return all tools when user has * scope", async () => {
+		const context = createMockContext(["*"]);
+		const tools = await getToolsFromContext(context);
+		const toolNames = tools.map((t) => t.name);
+
+		expect(toolNames).toContain("dashboard-create");
+		expect(toolNames).toContain("create-feature-flag");
+		expect(toolNames).toContain("insight-create-from-query");
+		expect(toolNames.length).toBeGreaterThan(25);
+	});
+
+	it("should only return dashboard tools when user has dashboard scopes", async () => {
+		const context = createMockContext(["dashboard:read", "dashboard:write"]);
+		const tools = await getToolsFromContext(context);
+		const toolNames = tools.map((t) => t.name);
+
+		expect(toolNames).toContain("dashboard-create");
+		expect(toolNames).toContain("dashboard-get");
+		expect(toolNames).toContain("dashboards-get-all");
+		expect(toolNames).toContain("add-insight-to-dashboard");
+
+		expect(toolNames).not.toContain("create-feature-flag");
+		expect(toolNames).not.toContain("organizations-get");
+	});
+
+	it("should include read tools when user has write scope", async () => {
+		const context = createMockContext(["feature_flag:write"]);
+		const tools = await getToolsFromContext(context);
+		const toolNames = tools.map((t) => t.name);
+
+		expect(toolNames).toContain("create-feature-flag");
+		expect(toolNames).toContain("feature-flag-get-all");
+		expect(toolNames).toContain("feature-flag-get-definition");
+
+		expect(toolNames).not.toContain("dashboard-create");
+	});
+
+	it("should only return read tools when user has read scope", async () => {
+		const context = createMockContext(["insight:read"]);
+		const tools = await getToolsFromContext(context);
+		const toolNames = tools.map((t) => t.name);
+
+		expect(toolNames).toContain("insights-get-all");
+		expect(toolNames).toContain("insight-get");
+
+		expect(toolNames).not.toContain("insight-create-from-query");
+		expect(toolNames).not.toContain("dashboard-create");
+	});
+
+	it("should return multiple scope tools when user has multiple scopes", async () => {
+		const context = createMockContext([
+			"dashboard:read",
+			"feature_flag:write",
+			"organization:read",
+		]);
+		const tools = await getToolsFromContext(context);
+		const toolNames = tools.map((t) => t.name);
+
+		expect(toolNames).toContain("dashboard-get");
+		expect(toolNames).toContain("create-feature-flag");
+		expect(toolNames).toContain("organization-details-get");
+
+		expect(toolNames).not.toContain("dashboard-create");
+		expect(toolNames).not.toContain("insight-create-from-query");
+	});
+
+	it("should return empty array when user has no matching scopes", async () => {
+		const context = createMockContext(["some:unknown"]);
+		const tools = await getToolsFromContext(context);
+
+		expect(tools).toHaveLength(0);
+	});
+
+	it("should return empty array when user has empty scopes", async () => {
+		const context = createMockContext([]);
+		const tools = await getToolsFromContext(context);
+
+		expect(tools).toHaveLength(0);
 	});
 });

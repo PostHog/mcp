@@ -12,7 +12,7 @@ async function analyzeProductUsage() {
 		posthogApiBaseUrl: process.env.POSTHOG_API_BASE_URL || "https://us.posthog.com",
 	});
 
-	const tools = agentToolkit.getTools();
+	const tools = await agentToolkit.getTools();
 
 	const llm = new ChatOpenAI({
 		model: "gpt-5-mini",

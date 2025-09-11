@@ -1,6 +1,6 @@
 {
 	"name": "@posthog/agent-toolkit",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "PostHog tools for AI agents",
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",

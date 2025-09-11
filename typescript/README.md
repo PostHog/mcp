@@ -26,7 +26,7 @@ const toolkit = new PostHogAgentToolkit({
 
 const result = await generateText({
     model: openai("gpt-4"),
-    tools: toolkit.getTools(),
+    tools: await toolkit.getTools(),
     prompt: "Analyze our product usage by getting the top 5 most interesting insights and summarising the data from them."
 });
 ```
@@ -46,7 +46,7 @@ const toolkit = new PostHogAgentToolkit({
     posthogApiBaseUrl: "https://us.posthog.com" // or https://eu.posthog.com if you are hosting in the EU
 });
 
-const tools = toolkit.getTools();
+const tools = await toolkit.getTools();
 const llm = new ChatOpenAI({ model: "gpt-4" });
 
 const prompt = ChatPromptTemplate.fromMessages([

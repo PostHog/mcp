@@ -17,6 +17,7 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 		featureFlags: [] as number[],
 		insights: [] as number[],
 		dashboards: [] as number[],
+		experiments: [] as number[],
 	};
 
 	beforeAll(async () => {
@@ -71,6 +72,19 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 			}
 		}
 		createdResources.dashboards = [];
+
+		// Clean up created experiments
+		for (const experimentId of createdResources.experiments) {
+			try {
+				await client.experiments({ projectId: testProjectId }).update({
+					experimentId,
+					updateData: { archived: true },
+				});
+			} catch (error) {
+				console.warn(`Failed to cleanup experiment ${experimentId}:`, error);
+			}
+		}
+		createdResources.experiments = [];
 	});
 
 	describe.skip("Organizations API", () => {
@@ -1091,6 +1105,369 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 			if (result.success) {
 				expect(result.data).toHaveProperty("distinct_id");
 				expect(typeof result.data.distinct_id).toBe("string");
+			}
+		});
+	});
+
+	describe("Experiments API", () => {
+		// Helper function to create a test experiment
+		const createTestExperiment = async (
+			options: {
+				name?: string;
+				description?: string;
+				featureFlagKey?: string;
+				type?: "product" | "web";
+				draft?: boolean;
+				metrics?: Array<{
+					name?: string;
+					metric_type: "mean" | "funnel" | "ratio";
+					event_name?: string;
+					funnel_steps?: string[];
+					properties?: Record<string, any>;
+					description?: string;
+				}>;
+			} = {},
+		) => {
+			const timestamp = Date.now();
+			const createResult = await client.experiments({ projectId: testProjectId }).create({
+				name: options.name || `Test Experiment ${timestamp}`,
+				description: options.description || "Integration test experiment",
+				feature_flag_key: options.featureFlagKey || `test-exp-${timestamp}`,
+				type: options.type || "product",
+				draft: options.draft ?? true,
+				primary_metrics: options.metrics || [
+					{
+						name: "Test Metric",
+						metric_type: "mean",
+						event_name: "$pageview",
+						description: "Test metric for integration tests",
+					},
+				],
+				variants: [
+					{ key: "control", rollout_percentage: 50 },
+					{ key: "test", rollout_percentage: 50 },
+				],
+				minimum_detectable_effect: 5,
+				filter_test_accounts: true,
+			});
+
+			expect(createResult.success).toBe(true);
+
+			if (createResult.success) {
+				const experimentId = createResult.data.id;
+				createdResources.experiments.push(experimentId);
+				return createResult.data;
+			}
+
+			throw new Error(
+				`Failed to create test experiment: ${(createResult as any).error?.message}`,
+			);
+		};
+
+		it("should list experiments", async () => {
+			const result = await client.experiments({ projectId: testProjectId }).list();
+
+			expect(result.success).toBe(true);
+
+			if (result.success) {
+				expect(Array.isArray(result.data)).toBe(true);
+				for (const experiment of result.data) {
+					expect(experiment).toHaveProperty("id");
+					expect(experiment).toHaveProperty("name");
+					expect(experiment).toHaveProperty("feature_flag_key");
+					expect(typeof experiment.id).toBe("number");
+					expect(typeof experiment.name).toBe("string");
+					expect(typeof experiment.feature_flag_key).toBe("string");
+				}
+			}
+		});
+
+		it("should create, get, update experiment", async () => {
+			// Create a test experiment
+			const experiment = await createTestExperiment({
+				name: "CRUD Test Experiment",
+				description: "Test experiment for CRUD operations",
+			});
+
+			// Get the created experiment
+			const getResult = await client
+				.experiments({ projectId: testProjectId })
+				.get({ experimentId: experiment.id });
+
+			expect(getResult.success).toBe(true);
+
+			if (getResult.success) {
+				expect(getResult.data.id).toBe(experiment.id);
+				expect(getResult.data.name).toBe("CRUD Test Experiment");
+				expect(getResult.data.description).toBe("Test experiment for CRUD operations");
+				expect(getResult.data.start_date).toBeNull(); // Should be draft
+				expect(getResult.data.archived).toBe(false);
+			}
+
+			// Update the experiment
+			const updateResult = await client.experiments({ projectId: testProjectId }).update({
+				experimentId: experiment.id,
+				updateData: {
+					name: "Updated CRUD Test Experiment",
+					description: "Updated description",
+				},
+			});
+
+			expect(updateResult.success).toBe(true);
+
+			if (updateResult.success) {
+				expect(updateResult.data.name).toBe("Updated CRUD Test Experiment");
+				expect(updateResult.data.description).toBe("Updated description");
+			}
+
+			// Verify update persisted
+			const getUpdatedResult = await client
+				.experiments({ projectId: testProjectId })
+				.get({ experimentId: experiment.id });
+
+			if (getUpdatedResult.success) {
+				expect(getUpdatedResult.data.name).toBe("Updated CRUD Test Experiment");
+				expect(getUpdatedResult.data.description).toBe("Updated description");
+			}
+		});
+
+		it("should create experiment with different metric types", async () => {
+			// Test mean metric
+			const meanExperiment = await createTestExperiment({
+				name: "Mean Metric Test",
+				metrics: [
+					{
+						name: "Page Views",
+						metric_type: "mean",
+						event_name: "$pageview",
+						description: "Average page views per user",
+					},
+				],
+			});
+
+			expect(meanExperiment.metrics).toHaveLength(1);
+			expect(meanExperiment.metrics?.[0]?.metric_type).toBe("mean");
+
+			// Test funnel metric
+			const funnelExperiment = await createTestExperiment({
+				name: "Funnel Metric Test",
+				featureFlagKey: `funnel-test-${Date.now()}`,
+				metrics: [
+					{
+						name: "Signup Funnel",
+						metric_type: "funnel",
+						event_name: "$pageview",
+						funnel_steps: ["$pageview", "sign_up_start", "sign_up_complete"],
+						description: "Signup conversion funnel",
+					},
+				],
+			});
+
+			expect(funnelExperiment.metrics).toHaveLength(1);
+			expect(funnelExperiment.metrics?.[0]?.metric_type).toBe("funnel");
+
+			// Test ratio metric
+			const ratioExperiment = await createTestExperiment({
+				name: "Ratio Metric Test",
+				featureFlagKey: `ratio-test-${Date.now()}`,
+				metrics: [
+					{
+						name: "Click-through Rate",
+						metric_type: "ratio",
+						event_name: "button_click",
+						description: "Button click rate",
+					},
+				],
+			});
+
+			expect(ratioExperiment.metrics).toHaveLength(1);
+			expect(ratioExperiment.metrics?.[0]?.metric_type).toBe("ratio");
+		});
+
+		it("should handle experiment lifecycle - launch and archive", async () => {
+			const experiment = await createTestExperiment({
+				name: "Lifecycle Test Experiment",
+				draft: true,
+			});
+
+			// Initially should be draft
+			expect(experiment.start_date).toBeNull();
+			expect(experiment.archived).toBe(false);
+
+			// Launch experiment
+			const launchResult = await client.experiments({ projectId: testProjectId }).update({
+				experimentId: experiment.id,
+				updateData: {
+					start_date: new Date().toISOString(),
+				},
+			});
+
+			expect(launchResult.success).toBe(true);
+
+			if (launchResult.success) {
+				expect(launchResult.data.start_date).not.toBeNull();
+			}
+
+			// Archive experiment
+			const archiveResult = await client.experiments({ projectId: testProjectId }).update({
+				experimentId: experiment.id,
+				updateData: {
+					archived: true,
+				},
+			});
+
+			expect(archiveResult.success).toBe(true);
+
+			if (archiveResult.success) {
+				expect(archiveResult.data.archived).toBe(true);
+			}
+		});
+
+		it.skip("should get experiment exposures for launched experiment", async () => {
+			// Create and launch experiment
+			const experiment = await createTestExperiment({
+				name: "Exposure Test Experiment",
+				draft: false, // Create as launched
+			});
+
+			// Launch the experiment
+			await client.experiments({ projectId: testProjectId }).update({
+				experimentId: experiment.id,
+				updateData: {
+					start_date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+				},
+			});
+
+			// Try to get exposures (may not have data immediately)
+			const exposureResult = await client
+				.experiments({ projectId: testProjectId })
+				.getExposures({
+					experimentId: experiment.id,
+					refresh: true,
+				});
+
+			// Should succeed even if no exposure data yet
+			expect(exposureResult.success).toBe(true);
+
+			if (exposureResult.success) {
+				expect(exposureResult.data).toHaveProperty("experiment");
+				expect(exposureResult.data).toHaveProperty("exposures");
+				expect(exposureResult.data.experiment.id).toBe(experiment.id);
+			}
+		});
+
+		it("should fail to get exposures for draft experiment", async () => {
+			const experiment = await createTestExperiment({
+				name: "Draft Exposure Test",
+				draft: true,
+			});
+
+			const exposureResult = await client
+				.experiments({ projectId: testProjectId })
+				.getExposures({
+					experimentId: experiment.id,
+					refresh: false,
+				});
+
+			expect(exposureResult.success).toBe(false);
+			expect((exposureResult as any).error.message).toContain("has not started yet");
+		});
+
+		it.skip("should get experiment metric results for launched experiment", async () => {
+			// Create and launch experiment
+			const experiment = await createTestExperiment({
+				name: "Metric Results Test",
+				draft: false,
+			});
+
+			// Launch the experiment
+			await client.experiments({ projectId: testProjectId }).update({
+				experimentId: experiment.id,
+				updateData: {
+					start_date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+				},
+			});
+
+			// Try to get metric results
+			const metricsResult = await client
+				.experiments({ projectId: testProjectId })
+				.getMetricResults({
+					experimentId: experiment.id,
+					refresh: true,
+				});
+
+			expect(metricsResult.success).toBe(true);
+
+			if (metricsResult.success) {
+				expect(metricsResult.data).toHaveProperty("experiment");
+				expect(metricsResult.data).toHaveProperty("primaryMetricsResults");
+				expect(metricsResult.data).toHaveProperty("secondaryMetricsResults");
+				expect(metricsResult.data).toHaveProperty("exposures");
+				expect(metricsResult.data.experiment.id).toBe(experiment.id);
+			}
+		});
+
+		it("should fail to get metric results for draft experiment", async () => {
+			const experiment = await createTestExperiment({
+				name: "Draft Metrics Test",
+				draft: true,
+			});
+
+			const metricsResult = await client
+				.experiments({ projectId: testProjectId })
+				.getMetricResults({
+					experimentId: experiment.id,
+					refresh: false,
+				});
+
+			expect(metricsResult.success).toBe(false);
+			expect((metricsResult as any).error.message).toContain("has not started yet");
+		});
+
+		it("should handle invalid experiment ID", async () => {
+			const nonExistentId = 999999;
+
+			const getResult = await client
+				.experiments({ projectId: testProjectId })
+				.get({ experimentId: nonExistentId });
+
+			expect(getResult.success).toBe(false);
+		});
+
+		it("should create experiment with custom variants", async () => {
+			const experiment = await createTestExperiment({
+				name: "Custom Variants Test",
+			});
+
+			// Verify default variants were created
+			expect(experiment.parameters?.feature_flag_variants).toHaveLength(2);
+
+			// Update with custom variants
+			const updateResult = await client.experiments({ projectId: testProjectId }).update({
+				experimentId: experiment.id,
+				updateData: {
+					parameters: {
+						feature_flag_variants: [
+							{ key: "control", rollout_percentage: 25 },
+							{ key: "variant_a", rollout_percentage: 25 },
+							{ key: "variant_b", rollout_percentage: 25 },
+							{ key: "variant_c", rollout_percentage: 25 },
+						],
+					},
+				},
+			});
+
+			expect(updateResult.success).toBe(true);
+
+			if (updateResult.success) {
+				expect(updateResult.data.parameters?.feature_flag_variants).toHaveLength(4);
+				const variants = updateResult.data.parameters?.feature_flag_variants || [];
+				expect(variants.map((v) => v.key)).toEqual([
+					"control",
+					"variant_a",
+					"variant_b",
+					"variant_c",
+				]);
 			}
 		});
 	});

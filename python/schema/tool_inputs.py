@@ -294,6 +294,9 @@ class Query(BaseModel):
     )
     kind: Kind
     source: Any | None = None
+    """
+    For new insights, use the query from your successful query-run tool call. For updates, the existing query can optionally be reused.
+    """
 
 
 class Data5(BaseModel):
@@ -368,6 +371,9 @@ class Query1(BaseModel):
     )
     kind: Kind
     source: Any | None = None
+    """
+    For new insights, use the query from your successful query-run tool call. For updates, the existing query can optionally be reused
+    """
 
 
 class Data7(BaseModel):

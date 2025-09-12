@@ -1,10 +1,15 @@
 import type { ApiClient } from "@/api/client";
 import type { StateManager } from "@/lib/utils/StateManager";
+import type { SessionManager } from "@/lib/utils/SessionManager";
 import type { ScopedCache } from "@/lib/utils/cache/ScopedCache";
 import type { ApiRedactedPersonalApiKey } from "@/schema/api";
 import type { z } from "zod";
 
 export type CloudRegion = "us" | "eu";
+
+export type SessionState = {
+	uuid: string;
+};
 
 export type State = {
 	projectId: string | undefined;
@@ -12,7 +17,7 @@ export type State = {
 	distinctId: string | undefined;
 	region: CloudRegion | undefined;
 	apiKey: ApiRedactedPersonalApiKey | undefined;
-};
+} & Record<PrefixedString<"session">, SessionState>;
 
 export type Env = {
 	INKEEP_API_KEY: string | undefined;
@@ -23,6 +28,7 @@ export type Context = {
 	cache: ScopedCache<State>;
 	env: Env;
 	stateManager: StateManager;
+	sessionManager: SessionManager;
 };
 
 export type Tool<TSchema extends z.ZodTypeAny = z.ZodTypeAny> = {

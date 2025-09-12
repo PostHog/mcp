@@ -7,6 +7,7 @@ import { getPostHogClient } from "@/integrations/mcp/utils/client";
 import { handleToolError } from "@/integrations/mcp/utils/handleToolError";
 import type { AnalyticsEvent } from "@/lib/analytics";
 import { CUSTOM_BASE_URL, MCP_DOCS_URL } from "@/lib/constants";
+import { SessionManager } from "@/lib/utils/SessionManager";
 import { StateManager } from "@/lib/utils/StateManager";
 import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
 import { hash } from "@/lib/utils/helper-functions";
@@ -22,6 +23,7 @@ const INSTRUCTIONS = `
 type RequestProperties = {
 	userHash: string;
 	apiToken: string;
+	sessionId?: string;
 	features?: string[];
 };
 
@@ -45,6 +47,8 @@ export class MyMCP extends McpAgent<Env> {
 
 	_api: ApiClient | undefined;
 
+	_sessionManager: SessionManager | undefined;
+
 	get requestProperties() {
 		return this.props as RequestProperties;
 	}
@@ -62,6 +66,14 @@ export class MyMCP extends McpAgent<Env> {
 		}
 
 		return this._cache;
+	}
+
+	get sessionManager() {
+		if (!this._sessionManager) {
+			this._sessionManager = new SessionManager(this.cache);
+		}
+
+		return this._sessionManager;
 	}
 
 	async detectRegion(): Promise<CloudRegion | undefined> {
@@ -140,7 +152,20 @@ export class MyMCP extends McpAgent<Env> {
 
 			const client = getPostHogClient();
 
-			client.capture({ distinctId, event, properties });
+			client.capture({
+				distinctId,
+				event,
+				properties: {
+					...(this.requestProperties.sessionId
+						? {
+								$session_id: await this.sessionManager.getSessionUuid(
+									this.requestProperties.sessionId,
+								),
+							}
+						: {}),
+					...properties,
+				},
+			});
 		} catch (error) {
 			//
 		}
@@ -184,7 +209,14 @@ export class MyMCP extends McpAgent<Env> {
 				return result;
 			} catch (error: any) {
 				const distinctId = await this.getDistinctId();
-				return handleToolError(error, tool.name, distinctId);
+				return handleToolError(
+					error,
+					tool.name,
+					distinctId,
+					this.requestProperties.sessionId
+						? await this.sessionManager.getSessionUuid(this.requestProperties.sessionId)
+						: undefined,
+				);
 			}
 		};
 
@@ -207,6 +239,7 @@ export class MyMCP extends McpAgent<Env> {
 			cache: this.cache,
 			env: this.env,
 			stateManager: new StateManager(this.cache, api),
+			sessionManager: this.sessionManager,
 		};
 	}
 
@@ -240,6 +273,13 @@ export default {
 
 		const token = request.headers.get("Authorization")?.split(" ")[1];
 
+		const sessionId = url.searchParams.get("sessionId");
+
+		console.log("url", request.url);
+		console.log("body", request.body);
+
+		console.log("headers", request.headers);
+
 		if (!token) {
 			return new Response(
 				`No token provided, please provide a valid API token. View the documentation for more information: ${MCP_DOCS_URL}`,
@@ -261,6 +301,7 @@ export default {
 		ctx.props = {
 			apiToken: token,
 			userHash: hash(token),
+			sessionId: sessionId || undefined,
 		};
 
 		// Search params are used to build up the list of available tools. If no features are provided, all tools are available.

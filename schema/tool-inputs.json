@@ -523,7 +523,23 @@
             "name": {
               "type": "string"
             },
-            "query": {},
+            "query": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "InsightVizNode",
+                    "DataVisualizationNode"
+                  ]
+                },
+                "source": {}
+              },
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false
+            },
             "description": {
               "type": "string"
             },
@@ -539,6 +555,7 @@
           },
           "required": [
             "name",
+            "query",
             "favorited"
           ],
           "additionalProperties": false
@@ -642,7 +659,23 @@
               "type": "object",
               "additionalProperties": {}
             },
-            "query": {},
+            "query": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "InsightVizNode",
+                    "DataVisualizationNode"
+                  ]
+                },
+                "source": {}
+              },
+              "required": [
+                "kind"
+              ],
+              "additionalProperties": false
+            },
             "favorited": {
               "type": "boolean"
             },
@@ -656,6 +689,9 @@
               }
             }
           },
+          "required": [
+            "query"
+          ],
           "additionalProperties": false
         }
       },

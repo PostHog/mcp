@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { InsightQuerySchema } from "./query";
 
 export const InsightSchema = z.object({
 	id: z.number(),
@@ -7,7 +6,10 @@ export const InsightSchema = z.object({
 	name: z.string().nullish(),
 	description: z.string().nullish(),
 	filters: z.record(z.any()),
-	query: z.any().nullish(),
+	query: z.object({
+		kind: z.union([z.literal("InsightVizNode"), z.literal("DataVisualizationNode")]),
+		source: z.any(),
+	}),
 	result: z.any().optional(),
 	created_at: z.string(),
 	updated_at: z.string(),
@@ -45,7 +47,10 @@ export const SimpleInsightSchema = InsightSchema.pick({
 
 export const CreateInsightInputSchema = z.object({
 	name: z.string(),
-	query: z.any(), // NOTE: This is intentionally z.any() to avoid populating the context with the complicated query schema, but we prompt the LLM to use 'query-run' to check queries, before creating insights.
+	query: z.object({
+		kind: z.union([z.literal("InsightVizNode"), z.literal("DataVisualizationNode")]),
+		source: z.any(), // NOTE: This is intentionally z.any() to avoid populating the context with the complicated query schema, but we prompt the LLM to use 'query-run' to check queries, before creating insights.
+	}),
 	description: z.string().optional(),
 	favorited: z.boolean(),
 	tags: z.array(z.string()).optional(),
@@ -55,7 +60,10 @@ export const UpdateInsightInputSchema = z.object({
 	name: z.string().optional(),
 	description: z.string().optional(),
 	filters: z.record(z.any()).optional(),
-	query: z.any().optional(), // NOTE: This is intentionally z.any() to avoid populating the context with the complicated query schema, and to allow the LLM to make a change to an existing insight whose schema we do not support in our simplified subset of the full insight schema.
+	query: z.object({
+		kind: z.union([z.literal("InsightVizNode"), z.literal("DataVisualizationNode")]),
+		source: z.any(), // NOTE: This is intentionally z.any() to avoid populating the context with the complicated query schema, and to allow the LLM to make a change to an existing insight whose schema we do not support in our simplified subset of the full insight schema.
+	}),
 	favorited: z.boolean().optional(),
 	dashboard: z.number().optional(),
 	tags: z.array(z.string()).optional(),

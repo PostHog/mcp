@@ -90,6 +90,7 @@ const definition = getToolDefinition("experiment-metric-results-get");
 
 const tool = (): Tool<typeof schema> => ({
 	name: "experiment-metric-results-get",
+	title: definition.title,
 	description: definition.description,
 	schema,
 	handler: getMetricResultsHandler,

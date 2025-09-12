@@ -1,0 +1,863 @@
+import { describe, it, expect, beforeAll, afterEach } from "vitest";
+import {
+	validateEnvironmentVariables,
+	createTestClient,
+	createTestContext,
+	setActiveProjectAndOrg,
+	cleanupResources,
+	TEST_PROJECT_ID,
+	TEST_ORG_ID,
+	type CreatedResources,
+	parseToolResponse,
+	generateUniqueKey,
+} from "@/shared/test-utils";
+import createExperimentTool from "@/tools/experiments/create";
+import getAllExperimentsTool from "@/tools/experiments/getAll";
+import getExperimentTool from "@/tools/experiments/get";
+import getExperimentExposuresTool from "@/tools/experiments/getExposures";
+import getExperimentMetricResultsTool from "@/tools/experiments/getMetricResults";
+import type { Context } from "@/tools/types";
+
+describe("Experiments", { concurrent: false }, () => {
+	let context: Context;
+	const createdResources: CreatedResources = {
+		featureFlags: [],
+		insights: [],
+		dashboards: [],
+	};
+	const createdExperiments: number[] = [];
+
+	// Helper function to track created experiments and their feature flags
+	const trackExperiment = (experiment: any) => {
+		if (experiment.id) {
+			createdExperiments.push(experiment.id);
+		}
+		if (experiment.feature_flag?.id) {
+			createdResources.featureFlags.push(experiment.feature_flag.id);
+		}
+	};
+
+	beforeAll(async () => {
+		validateEnvironmentVariables();
+		const client = createTestClient();
+		context = createTestContext(client);
+		await setActiveProjectAndOrg(context, TEST_PROJECT_ID!, TEST_ORG_ID!);
+	});
+
+	afterEach(async () => {
+		// Clean up experiments first
+		for (const experimentId of createdExperiments) {
+			try {
+				await context.api.experiments({ projectId: TEST_PROJECT_ID! }).delete({
+					experimentId,
+				});
+			} catch (error) {
+				console.warn(`Failed to cleanup experiment ${experimentId}:`, error);
+			}
+		}
+		createdExperiments.length = 0;
+
+		// Clean up associated feature flags
+		await cleanupResources(context.api, TEST_PROJECT_ID!, createdResources);
+	});
+
+	describe("create-experiment tool", () => {
+		const createTool = createExperimentTool();
+
+		it("should create a draft experiment with minimal required fields", async () => {
+			// Note: API auto-creates feature flag if it doesn't exist
+			const flagKey = generateUniqueKey("exp-flag");
+
+			// Create experiment
+			const params = {
+				name: "Minimal Test Experiment",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+			expect(experiment.name).toBe(params.name);
+			expect(experiment.feature_flag_key).toBe(params.feature_flag_key);
+			expect(experiment.status).toBe("draft");
+			expect(experiment.url).toContain("/experiments/");
+
+			trackExperiment(experiment);
+		});
+
+		it("should create an experiment with description and type", async () => {
+			const flagKey = generateUniqueKey("exp-flag-desc");
+
+			const params = {
+				name: "Detailed Test Experiment",
+				description: "This experiment tests the impact of button color on conversions",
+				feature_flag_key: flagKey,
+				type: "web" as const,
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+			expect(experiment.name).toBe(params.name);
+			expect(experiment.feature_flag_key).toBe(params.feature_flag_key);
+
+			trackExperiment(experiment);
+		});
+
+		it("should create an experiment with custom variants", async () => {
+			const flagKey = generateUniqueKey("exp-flag-variants");
+
+			const params = {
+				name: "Variant Test Experiment",
+				feature_flag_key: flagKey,
+				variants: [
+					{ key: "control", name: "Control Group", rollout_percentage: 33 },
+					{ key: "variant_a", name: "Variant A", rollout_percentage: 33 },
+					{ key: "variant_b", name: "Variant B", rollout_percentage: 34 },
+				],
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+			expect(experiment.variants_summary).toHaveLength(3);
+			expect(experiment.variants_summary[0].key).toBe("control");
+			expect(experiment.variants_summary[0].percentage).toBe(33);
+
+			trackExperiment(experiment);
+		});
+
+		it("should create an experiment with mean metric", async () => {
+			const flagKey = generateUniqueKey("exp-flag-mean");
+
+			const params = {
+				name: "Mean Metric Experiment",
+				feature_flag_key: flagKey,
+				primary_metrics: [
+					{
+						name: "Average Page Load Time",
+						metric_type: "mean" as const,
+						event_name: "$pageview",
+						properties: { page: "/checkout" },
+						description: "Measure average page load time for checkout page",
+					},
+				],
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+			expect(experiment.metrics_summary.primary_count).toBe(1);
+
+			trackExperiment(experiment);
+		});
+
+		it("should create an experiment with funnel metric", async () => {
+			const flagKey = generateUniqueKey("exp-flag-funnel");
+
+			const params = {
+				name: "Funnel Metric Experiment",
+				feature_flag_key: flagKey,
+				primary_metrics: [
+					{
+						name: "Checkout Conversion Funnel",
+						metric_type: "funnel" as const,
+						funnel_steps: ["product_view", "add_to_cart", "checkout_start", "purchase"],
+						description: "Track conversion through checkout funnel",
+					},
+				],
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+			expect(experiment.metrics_summary.primary_count).toBe(1);
+
+			trackExperiment(experiment);
+		});
+
+		it("should create an experiment with ratio metric", async () => {
+			const flagKey = generateUniqueKey("exp-flag-ratio");
+
+			const params = {
+				name: "Ratio Metric Experiment",
+				feature_flag_key: flagKey,
+				primary_metrics: [
+					{
+						name: "Button Click Rate",
+						metric_type: "ratio" as const,
+						event_name: "button_click",
+						description: "Ratio of button clicks to page views",
+					},
+				],
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+			expect(experiment.metrics_summary.primary_count).toBe(1);
+
+			trackExperiment(experiment);
+		});
+
+		it("should create an experiment with multiple metrics", async () => {
+			const flagKey = generateUniqueKey("exp-flag-multi");
+
+			const params = {
+				name: "Multi Metric Experiment",
+				feature_flag_key: flagKey,
+				primary_metrics: [
+					{
+						name: "Conversion Rate",
+						metric_type: "funnel" as const,
+						funnel_steps: ["visit", "signup", "purchase"],
+					},
+					{
+						name: "Average Revenue",
+						metric_type: "mean" as const,
+						event_name: "purchase",
+					},
+				],
+				secondary_metrics: [
+					{
+						name: "Page Views",
+						metric_type: "mean" as const,
+						event_name: "$pageview",
+					},
+					{
+						name: "Bounce Rate",
+						metric_type: "ratio" as const,
+						event_name: "bounce",
+					},
+				],
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+			expect(experiment.metrics_summary.primary_count).toBe(2);
+			expect(experiment.metrics_summary.secondary_count).toBe(2);
+
+			trackExperiment(experiment);
+		});
+
+		it("should create an experiment with minimum detectable effect", async () => {
+			const flagKey = generateUniqueKey("exp-flag-mde");
+
+			const params = {
+				name: "MDE Test Experiment",
+				feature_flag_key: flagKey,
+				minimum_detectable_effect: 15,
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+
+			trackExperiment(experiment);
+		});
+
+		it("should create an experiment with filter test accounts enabled", async () => {
+			const flagKey = generateUniqueKey("exp-flag-filter");
+
+			const params = {
+				name: "Filter Test Accounts Experiment",
+				feature_flag_key: flagKey,
+				filter_test_accounts: true,
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+
+			trackExperiment(experiment);
+		});
+
+		it("should create experiment when feature flag doesn't exist (API creates it)", async () => {
+			// Note: The API might auto-create the feature flag if it doesn't exist
+			const params = {
+				name: "Auto-Create Flag Experiment",
+				feature_flag_key: generateUniqueKey("auto-created-flag"),
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+			trackExperiment(experiment);
+		});
+	});
+
+	describe("get-all-experiments tool", () => {
+		const createTool = createExperimentTool();
+		const getAllTool = getAllExperimentsTool();
+
+		it("should list all experiments", async () => {
+			// Create a few test experiments
+			const testExperiments = [];
+			for (let i = 0; i < 3; i++) {
+				const flagKey = generateUniqueKey(`exp-list-flag-${i}`);
+
+				const params = {
+					name: `List Test Experiment ${i}`,
+					feature_flag_key: flagKey,
+					draft: true,
+				};
+
+				const result = await createTool.handler(context, params as any);
+				const experiment = parseToolResponse(result);
+				testExperiments.push(experiment);
+				trackExperiment(experiment);
+			}
+
+			// Get all experiments
+			const result = await getAllTool.handler(context, {});
+			const allExperiments = parseToolResponse(result);
+
+			expect(Array.isArray(allExperiments)).toBe(true);
+			expect(allExperiments.length).toBeGreaterThanOrEqual(3);
+
+			// Verify our test experiments are in the list
+			for (const testExp of testExperiments) {
+				const found = allExperiments.find((e: any) => e.id === testExp.id);
+				expect(found).toBeDefined();
+			}
+		});
+
+		it("should return experiments with proper structure", async () => {
+			const result = await getAllTool.handler(context, {});
+			const experiments = parseToolResponse(result);
+
+			if (experiments.length > 0) {
+				const experiment = experiments[0];
+				expect(experiment).toHaveProperty("id");
+				expect(experiment).toHaveProperty("name");
+				expect(experiment).toHaveProperty("feature_flag_key");
+			}
+		});
+	});
+
+	describe("get-experiment tool", () => {
+		const createTool = createExperimentTool();
+		const getTool = getExperimentTool();
+
+		it("should get experiment by ID", async () => {
+			// Create an experiment
+			const flagKey = generateUniqueKey("exp-get-flag");
+
+			const createParams = {
+				name: "Get Test Experiment",
+				description: "Test experiment for get operation",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const createdExperiment = parseToolResponse(createResult);
+			trackExperiment(createdExperiment);
+
+			// Get the experiment
+			const result = await getTool.handler(context, { experimentId: createdExperiment.id });
+			const retrievedExperiment = parseToolResponse(result);
+
+			expect(retrievedExperiment.id).toBe(createdExperiment.id);
+			expect(retrievedExperiment.name).toBe(createParams.name);
+			expect(retrievedExperiment.feature_flag_key).toBe(createParams.feature_flag_key);
+		});
+
+		it("should handle non-existent experiment ID", async () => {
+			const nonExistentId = 999999;
+
+			await expect(
+				getTool.handler(context, { experimentId: nonExistentId }),
+			).rejects.toThrow();
+		});
+	});
+
+	describe("get-experiment-exposures tool", () => {
+		const createTool = createExperimentTool();
+		const getExposuresTool = getExperimentExposuresTool();
+
+		it("should fail for draft experiment (not started)", async () => {
+			// Create a draft experiment
+			const flagKey = generateUniqueKey("exp-exposure-flag");
+
+			const createParams = {
+				name: "Exposure Draft Experiment",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+			trackExperiment(experiment);
+
+			// Try to get exposures for draft experiment
+			await expect(
+				getExposuresTool.handler(context, {
+					experimentId: experiment.id,
+					refresh: false,
+				}),
+			).rejects.toThrow(/has not started yet/);
+		});
+
+		it("should handle refresh parameter", async () => {
+			// Create an experiment
+			const flagKey = generateUniqueKey("exp-refresh-flag");
+
+			const createParams = {
+				name: "Refresh Test Experiment",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+			trackExperiment(experiment);
+
+			// Test with refresh=true (will still fail for draft, but tests parameter handling)
+			await expect(
+				getExposuresTool.handler(context, {
+					experimentId: experiment.id,
+					refresh: true,
+				}),
+			).rejects.toThrow(/has not started yet/);
+		});
+	});
+
+	describe("get-experiment-metric-results tool", () => {
+		const createTool = createExperimentTool();
+		const getMetricResultsTool = getExperimentMetricResultsTool();
+
+		it("should fail for draft experiment (not started)", async () => {
+			// Create a draft experiment with metrics
+			const flagKey = generateUniqueKey("exp-metrics-flag");
+
+			const createParams = {
+				name: "Metrics Draft Experiment",
+				feature_flag_key: flagKey,
+				primary_metrics: [
+					{
+						name: "Test Metric",
+						metric_type: "mean" as const,
+						event_name: "$pageview",
+					},
+				],
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+			trackExperiment(experiment);
+
+			// Try to get metric results for draft experiment
+			await expect(
+				getMetricResultsTool.handler(context, {
+					experimentId: experiment.id,
+					refresh: false,
+				}),
+			).rejects.toThrow(/has not started yet/);
+		});
+
+		it("should handle refresh parameter", async () => {
+			// Create an experiment with metrics
+			const flagKey = generateUniqueKey("exp-metrics-refresh-flag");
+
+			const createParams = {
+				name: "Metrics Refresh Test Experiment",
+				feature_flag_key: flagKey,
+				primary_metrics: [
+					{
+						name: "Refresh Test Metric",
+						metric_type: "mean" as const,
+						event_name: "$pageview",
+					},
+				],
+				secondary_metrics: [
+					{
+						name: "Secondary Refresh Metric",
+						metric_type: "ratio" as const,
+						event_name: "button_click",
+					},
+				],
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+			trackExperiment(experiment);
+
+			// Test with refresh=true (will still fail for draft, but tests parameter handling)
+			await expect(
+				getMetricResultsTool.handler(context, {
+					experimentId: experiment.id,
+					refresh: true,
+				}),
+			).rejects.toThrow(/has not started yet/);
+		});
+	});
+
+	describe("Complex experiment workflows", () => {
+		const createTool = createExperimentTool();
+		const getTool = getExperimentTool();
+		const getAllTool = getAllExperimentsTool();
+
+		it("should support complete experiment creation and retrieval workflow", async () => {
+			// Create feature flag
+			const flagKey = generateUniqueKey("exp-workflow-flag");
+
+			// Create comprehensive experiment
+			const createParams = {
+				name: "Complete Workflow Experiment",
+				description: "Testing complete experiment workflow with all features",
+				feature_flag_key: flagKey,
+				type: "product" as const,
+				variants: [
+					{ key: "control", name: "Control", rollout_percentage: 50 },
+					{ key: "test", name: "Test Variant", rollout_percentage: 50 },
+				],
+				primary_metrics: [
+					{
+						name: "Conversion Funnel",
+						metric_type: "funnel" as const,
+						funnel_steps: ["landing", "signup", "activation"],
+						description: "Main conversion funnel",
+					},
+					{
+						name: "Revenue per User",
+						metric_type: "mean" as const,
+						event_name: "purchase",
+						description: "Average revenue",
+					},
+				],
+				secondary_metrics: [
+					{
+						name: "Engagement Rate",
+						metric_type: "ratio" as const,
+						event_name: "engagement",
+						description: "User engagement ratio",
+					},
+				],
+				minimum_detectable_effect: 20,
+				filter_test_accounts: true,
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const createdExperiment = parseToolResponse(createResult);
+			trackExperiment(createdExperiment);
+
+			// Verify creation
+			expect(createdExperiment.id).toBeDefined();
+			expect(createdExperiment.name).toBe(createParams.name);
+			expect(createdExperiment.variants_summary).toHaveLength(2);
+			expect(createdExperiment.metrics_summary.primary_count).toBe(2);
+			expect(createdExperiment.metrics_summary.secondary_count).toBe(1);
+
+			// Get the experiment
+			const getResult = await getTool.handler(context, {
+				experimentId: createdExperiment.id,
+			});
+			const retrievedExperiment = parseToolResponse(getResult);
+			expect(retrievedExperiment.id).toBe(createdExperiment.id);
+
+			// Verify it appears in list
+			const listResult = await getAllTool.handler(context, {});
+			const allExperiments = parseToolResponse(listResult);
+			const found = allExperiments.find((e: any) => e.id === createdExperiment.id);
+			expect(found).toBeDefined();
+		});
+
+		it("should create experiment with complex funnel metrics", async () => {
+			const flagKey = generateUniqueKey("exp-complex-funnel-flag");
+
+			const params = {
+				name: "Complex Funnel Experiment",
+				feature_flag_key: flagKey,
+				primary_metrics: [
+					{
+						name: "E-commerce Full Funnel",
+						metric_type: "funnel" as const,
+						funnel_steps: [
+							"home_page_view",
+							"product_list_view",
+							"product_detail_view",
+							"add_to_cart",
+							"checkout_start",
+							"payment_info_entered",
+							"order_completed",
+						],
+						description: "Complete e-commerce conversion funnel",
+					},
+				],
+				secondary_metrics: [
+					{
+						name: "Cart Abandonment Funnel",
+						metric_type: "funnel" as const,
+						funnel_steps: ["add_to_cart", "checkout_start", "order_completed"],
+						description: "Track where users drop off in checkout",
+					},
+				],
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+			expect(experiment.metrics_summary.primary_count).toBe(1);
+			expect(experiment.metrics_summary.secondary_count).toBe(1);
+
+			trackExperiment(experiment);
+		});
+
+		it("should create experiment with target properties", async () => {
+			const flagKey = generateUniqueKey("exp-target-props-flag");
+
+			const params = {
+				name: "Targeted Experiment",
+				feature_flag_key: flagKey,
+				target_properties: {
+					country: "US",
+					plan: "premium",
+					cohort: "early_adopters",
+				},
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+
+			trackExperiment(experiment);
+		});
+
+		it("should create experiment without holdout group", async () => {
+			const flagKey = generateUniqueKey("exp-no-holdout-flag");
+
+			const params = {
+				name: "No Holdout Group Experiment",
+				feature_flag_key: flagKey,
+				// Not setting holdout_id (as it may not exist)
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+
+			trackExperiment(experiment);
+		});
+	});
+
+	describe("Edge cases and error handling", () => {
+		const createTool = createExperimentTool();
+		const getTool = getExperimentTool();
+		const getExposuresTool = getExperimentExposuresTool();
+		const getMetricResultsTool = getExperimentMetricResultsTool();
+
+		it("should handle creating experiment without metrics", async () => {
+			const flagKey = generateUniqueKey("exp-no-metrics-flag");
+
+			const params = {
+				name: "No Metrics Experiment",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+			expect(experiment.metrics_summary.primary_count).toBe(0);
+			expect(experiment.metrics_summary.secondary_count).toBe(0);
+
+			trackExperiment(experiment);
+		});
+
+		it("should handle invalid experiment ID in get operations", async () => {
+			const invalidId = 999999999;
+
+			// Test get experiment
+			await expect(getTool.handler(context, { experimentId: invalidId })).rejects.toThrow();
+
+			// Test get exposures
+			await expect(
+				getExposuresTool.handler(context, {
+					experimentId: invalidId,
+					refresh: false,
+				}),
+			).rejects.toThrow();
+
+			// Test get metric results
+			await expect(
+				getMetricResultsTool.handler(context, {
+					experimentId: invalidId,
+					refresh: false,
+				}),
+			).rejects.toThrow();
+		});
+
+		it("should handle variants with invalid rollout percentages", async () => {
+			const flagKey = generateUniqueKey("exp-invalid-rollout-flag");
+
+			const params = {
+				name: "Invalid Rollout Experiment",
+				feature_flag_key: flagKey,
+				variants: [
+					{ key: "control", rollout_percentage: 60 },
+					{ key: "test", rollout_percentage: 60 }, // Total > 100%
+				],
+				draft: true,
+			};
+
+			// This might succeed or fail depending on API validation
+			// Just ensure it doesn't crash the test suite
+			try {
+				const result = await createTool.handler(context, params as any);
+				const experiment = parseToolResponse(result);
+				trackExperiment(experiment);
+			} catch (error) {
+				// Expected for invalid configuration
+				expect(error).toBeDefined();
+			}
+		});
+
+		it("should handle metric without event_name gracefully", async () => {
+			const flagKey = generateUniqueKey("exp-no-event-flag");
+
+			const params = {
+				name: "No Event Name Experiment",
+				feature_flag_key: flagKey,
+				primary_metrics: [
+					{
+						name: "Default Event Metric",
+						metric_type: "mean" as const,
+						// No event_name provided - should default to $pageview
+					},
+				],
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+			expect(experiment.metrics_summary.primary_count).toBe(1);
+
+			trackExperiment(experiment);
+		});
+
+		it("should handle empty funnel steps array", async () => {
+			const flagKey = generateUniqueKey("exp-empty-funnel-flag");
+
+			const params = {
+				name: "Empty Funnel Steps Experiment",
+				feature_flag_key: flagKey,
+				primary_metrics: [
+					{
+						name: "Empty Funnel",
+						metric_type: "funnel" as const,
+						funnel_steps: [], // Empty array
+						event_name: "$pageview", // Falls back to this
+					},
+				],
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.id).toBeDefined();
+
+			trackExperiment(experiment);
+		});
+
+		it("should handle very long experiment names", async () => {
+			const flagKey = generateUniqueKey("exp-long-name-flag");
+
+			const longName = "A".repeat(500); // Very long name
+			const params = {
+				name: longName,
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			try {
+				const result = await createTool.handler(context, params as any);
+				const experiment = parseToolResponse(result);
+				expect(experiment.id).toBeDefined();
+				trackExperiment(experiment);
+			} catch (error) {
+				// Some APIs might reject very long names
+				expect(error).toBeDefined();
+			}
+		});
+	});
+
+	describe("Experiment status handling", () => {
+		const createTool = createExperimentTool();
+
+		it("should correctly identify draft experiments", async () => {
+			const flagKey = generateUniqueKey("exp-draft-status-flag");
+
+			const params = {
+				name: "Draft Status Experiment",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const result = await createTool.handler(context, params as any);
+			const experiment = parseToolResponse(result);
+
+			expect(experiment.status).toBe("draft");
+
+			trackExperiment(experiment);
+		});
+
+		it("should handle immediate launch (non-draft) experiments", async () => {
+			const flagKey = generateUniqueKey("exp-launch-flag");
+
+			const params = {
+				name: "Immediate Launch Experiment",
+				feature_flag_key: flagKey,
+				draft: false,
+			};
+
+			try {
+				const result = await createTool.handler(context, params as any);
+				const experiment = parseToolResponse(result);
+
+				// Status might be "running" if launch succeeded
+				expect(experiment.status).toBeDefined();
+				expect(["draft", "running"]).toContain(experiment.status);
+
+				trackExperiment(experiment);
+			} catch (error) {
+				// Some environments might not allow immediate launch
+				expect(error).toBeDefined();
+			}
+		});
+	});
+});

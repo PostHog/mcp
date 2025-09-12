@@ -885,7 +885,7 @@ describe("Experiments", { concurrent: false }, () => {
 
 			// Delete the experiment twice
 			const deleteParams = { experimentId: experiment.id };
-			
+
 			// First delete should succeed
 			const firstDeleteResult = await deleteTool.handler(context, deleteParams);
 			const firstDeleteResponse = parseToolResponse(firstDeleteResult);

@@ -723,6 +723,37 @@ export class ApiClient {
 					return { success: false, error: new Error(`Update failed: ${error}`) };
 				}
 			},
+
+			delete: async ({
+				experimentId,
+			}: { experimentId: number }): Promise<
+				Result<{ success: boolean; message: string }>
+			> => {
+				try {
+					const deleteResponse = await fetch(
+						`${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`,
+						{
+							method: "PATCH",
+							headers: this.buildHeaders(),
+							body: JSON.stringify({ deleted: true }),
+						},
+					);
+
+					if (deleteResponse.ok) {
+						return {
+							success: true,
+							data: { success: true, message: "Experiment deleted successfully" },
+						};
+					}
+
+					return {
+						success: false,
+						error: new Error(`Delete failed with status: ${deleteResponse.status}`),
+					};
+				} catch (error) {
+					return { success: false, error: new Error(`Delete failed: ${error}`) };
+				}
+			},
 		};
 	}
 

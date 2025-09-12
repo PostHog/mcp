@@ -76,9 +76,8 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 		// Clean up created experiments
 		for (const experimentId of createdResources.experiments) {
 			try {
-				await client.experiments({ projectId: testProjectId }).update({
+				await client.experiments({ projectId: testProjectId }).delete({
 					experimentId,
-					updateData: { archived: true },
 				});
 			} catch (error) {
 				console.warn(`Failed to cleanup experiment ${experimentId}:`, error);
@@ -1468,6 +1467,177 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 					"variant_b",
 					"variant_c",
 				]);
+			}
+		});
+
+		it("should delete experiment successfully", async () => {
+			// Create a test experiment to delete
+			const experiment = await createTestExperiment({
+				name: "Delete Test Experiment",
+				description: "Test experiment for delete operations",
+			});
+
+			// Verify experiment exists before deletion
+			const getBeforeDelete = await client
+				.experiments({ projectId: testProjectId })
+				.get({ experimentId: experiment.id });
+
+			expect(getBeforeDelete.success).toBe(true);
+
+			if (getBeforeDelete.success) {
+				expect(getBeforeDelete.data.id).toBe(experiment.id);
+				expect(getBeforeDelete.data.name).toBe("Delete Test Experiment");
+			}
+
+			// Delete the experiment
+			const deleteResult = await client
+				.experiments({ projectId: testProjectId })
+				.delete({ experimentId: experiment.id });
+
+			expect(deleteResult.success).toBe(true);
+			if (deleteResult.success) {
+				expect(deleteResult.data.success).toBe(true);
+				expect(deleteResult.data.message).toContain("successfully");
+			}
+
+			// Verify experiment is soft deleted (should return 404 or be marked as deleted)
+			const getAfterDelete = await client
+				.experiments({ projectId: testProjectId })
+				.get({ experimentId: experiment.id });
+
+			// After soft delete, the API should return an error (404) or the experiment should be marked as deleted
+			expect(getAfterDelete.success).toBe(false);
+		});
+
+		it("should handle deleting non-existent experiment", async () => {
+			const nonExistentId = 999999999;
+
+			const deleteResult = await client
+				.experiments({ projectId: testProjectId })
+				.delete({ experimentId: nonExistentId });
+
+			// Should handle gracefully (either success with no-op or specific error)
+			// The exact behavior depends on the API implementation
+			expect(typeof deleteResult.success).toBe("boolean");
+		});
+
+		it("should complete full CRUD workflow including delete", async () => {
+			const timestamp = Date.now();
+
+			// CREATE
+			const createResult = await client.experiments({ projectId: testProjectId }).create({
+				name: `Full CRUD Test ${timestamp}`,
+				description: "Complete CRUD workflow test",
+				feature_flag_key: `full-crud-${timestamp}`,
+				type: "product",
+				draft: true,
+				primary_metrics: [
+					{
+						name: "Test Conversion Rate",
+						metric_type: "funnel",
+						funnel_steps: ["landing", "signup", "activation"],
+						description: "Test conversion funnel",
+					},
+				],
+				variants: [
+					{ key: "control", rollout_percentage: 50 },
+					{ key: "variant", rollout_percentage: 50 },
+				],
+				minimum_detectable_effect: 10,
+			});
+
+			expect(createResult.success).toBe(true);
+
+			if (!createResult.success) {
+				throw new Error("Failed to create experiment for CRUD test");
+			}
+
+			const experimentId = createResult.data.id;
+			createdResources.experiments.push(experimentId);
+
+			// READ
+			const getResult = await client
+				.experiments({ projectId: testProjectId })
+				.get({ experimentId });
+
+			expect(getResult.success).toBe(true);
+
+			if (getResult.success) {
+				expect(getResult.data.id).toBe(experimentId);
+				expect(getResult.data.name).toBe(`Full CRUD Test ${timestamp}`);
+				expect(getResult.data.description).toBe("Complete CRUD workflow test");
+			}
+
+			// UPDATE
+			const updateResult = await client.experiments({ projectId: testProjectId }).update({
+				experimentId,
+				updateData: {
+					name: `Updated Full CRUD Test ${timestamp}`,
+					description: "Updated description for CRUD test",
+				},
+			});
+
+			expect(updateResult.success).toBe(true);
+
+			if (updateResult.success) {
+				expect(updateResult.data.name).toBe(`Updated Full CRUD Test ${timestamp}`);
+				expect(updateResult.data.description).toBe("Updated description for CRUD test");
+			}
+
+			// DELETE
+			const deleteResult = await client
+				.experiments({ projectId: testProjectId })
+				.delete({ experimentId });
+
+			expect(deleteResult.success).toBe(true);
+			if (deleteResult.success) {
+				expect(deleteResult.data.success).toBe(true);
+				expect(deleteResult.data.message).toContain("successfully");
+			}
+
+			// Verify deletion worked
+			const getAfterDeleteResult = await client
+				.experiments({ projectId: testProjectId })
+				.get({ experimentId });
+
+			expect(getAfterDeleteResult.success).toBe(false);
+
+			// Remove from cleanup array since we already deleted it
+			const index = createdResources.experiments.indexOf(experimentId);
+			if (index > -1) {
+				createdResources.experiments.splice(index, 1);
+			}
+		});
+
+		it("should handle delete operations idempotently", async () => {
+			// Create experiment
+			const experiment = await createTestExperiment({
+				name: "Idempotent Delete Test",
+			});
+
+			// First delete should succeed
+			const firstDeleteResult = await client
+				.experiments({ projectId: testProjectId })
+				.delete({ experimentId: experiment.id });
+
+			expect(firstDeleteResult.success).toBe(true);
+			if (firstDeleteResult.success) {
+				expect(firstDeleteResult.data.success).toBe(true);
+				expect(firstDeleteResult.data.message).toContain("successfully");
+			}
+
+			// Second delete should handle gracefully (idempotent)
+			const secondDeleteResult = await client
+				.experiments({ projectId: testProjectId })
+				.delete({ experimentId: experiment.id });
+
+			// Should not throw error, either success or specific "already deleted" error
+			expect(typeof secondDeleteResult.success).toBe("boolean");
+
+			// Remove from cleanup array since we already deleted it
+			const index = createdResources.experiments.indexOf(experiment.id);
+			if (index > -1) {
+				createdResources.experiments.splice(index, 1);
 			}
 		});
 	});

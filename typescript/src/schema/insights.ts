@@ -6,10 +6,7 @@ export const InsightSchema = z.object({
 	name: z.string().nullish(),
 	description: z.string().nullish(),
 	filters: z.record(z.any()),
-	query: z.object({
-		kind: z.union([z.literal("InsightVizNode"), z.literal("DataVisualizationNode")]),
-		source: z.any(),
-	}),
+	query: z.any(),
 	result: z.any().optional(),
 	created_at: z.string(),
 	updated_at: z.string(),

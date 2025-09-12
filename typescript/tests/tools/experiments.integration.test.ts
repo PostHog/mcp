@@ -12,6 +12,7 @@ import {
 	generateUniqueKey,
 } from "@/shared/test-utils";
 import createExperimentTool from "@/tools/experiments/create";
+import deleteExperimentTool from "@/tools/experiments/delete";
 import getAllExperimentsTool from "@/tools/experiments/getAll";
 import getExperimentTool from "@/tools/experiments/get";
 import getExperimentExposuresTool from "@/tools/experiments/getExposures";
@@ -811,6 +812,112 @@ describe("Experiments", { concurrent: false }, () => {
 				trackExperiment(experiment);
 			} catch (error) {
 				// Some APIs might reject very long names
+				expect(error).toBeDefined();
+			}
+		});
+	});
+
+	describe("delete-experiment tool", () => {
+		const createTool = createExperimentTool();
+		const deleteTool = deleteExperimentTool();
+
+		it("should delete an existing experiment", async () => {
+			// Create experiment first
+			const flagKey = generateUniqueKey("exp-delete-flag");
+
+			const createParams = {
+				name: "Experiment to Delete",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+			expect(experiment.id).toBeDefined();
+
+			// Delete the experiment
+			const deleteParams = { experimentId: experiment.id };
+			const deleteResult = await deleteTool.handler(context, deleteParams);
+			const deleteResponse = parseToolResponse(deleteResult);
+
+			expect(deleteResponse.success).toBe(true);
+			expect(deleteResponse.message).toBe("Experiment deleted successfully");
+
+			// Remove from tracking since we deleted it manually
+			const index = createdExperiments.indexOf(experiment.id);
+			if (index > -1) {
+				createdExperiments.splice(index, 1);
+			}
+
+			// Clean up the feature flag that was auto-created
+			if (experiment.feature_flag?.id) {
+				createdResources.featureFlags.push(experiment.feature_flag.id);
+			}
+		});
+
+		it("should handle invalid experiment ID", async () => {
+			const invalidId = 999999;
+
+			const deleteParams = { experimentId: invalidId };
+
+			try {
+				await deleteTool.handler(context, deleteParams);
+				expect.fail("Should have thrown an error for invalid experiment ID");
+			} catch (error) {
+				expect(error).toBeDefined();
+				expect(error.message).toContain("Failed to delete experiment");
+			}
+		});
+
+		it("should handle already deleted experiment gracefully", async () => {
+			// Create experiment first
+			const flagKey = generateUniqueKey("exp-already-deleted-flag");
+
+			const createParams = {
+				name: "Experiment Already Deleted",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+			expect(experiment.id).toBeDefined();
+
+			// Delete the experiment twice
+			const deleteParams = { experimentId: experiment.id };
+			
+			// First delete should succeed
+			const firstDeleteResult = await deleteTool.handler(context, deleteParams);
+			const firstDeleteResponse = parseToolResponse(firstDeleteResult);
+			expect(firstDeleteResponse.success).toBe(true);
+
+			// Second delete should throw error (API returns 404 for already deleted)
+			try {
+				await deleteTool.handler(context, deleteParams);
+				expect.fail("Should have thrown an error for already deleted experiment");
+			} catch (error) {
+				expect(error).toBeDefined();
+				expect(error.message).toContain("Failed to delete experiment");
+				expect(error.message).toContain("404");
+			}
+
+			// Remove from tracking since we deleted it manually
+			const index = createdExperiments.indexOf(experiment.id);
+			if (index > -1) {
+				createdExperiments.splice(index, 1);
+			}
+
+			// Clean up the feature flag that was auto-created
+			if (experiment.feature_flag?.id) {
+				createdResources.featureFlags.push(experiment.feature_flag.id);
+			}
+		});
+
+		it("should validate required experimentId parameter", async () => {
+			try {
+				await deleteTool.handler(context, {} as any);
+				expect.fail("Should have thrown validation error for missing experimentId");
+			} catch (error) {
 				expect(error).toBeDefined();
 			}
 		});

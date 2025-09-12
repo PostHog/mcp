@@ -215,6 +215,12 @@
 		"summary": "Create A/B test experiment with guided metric and feature flag setup",
 		"title": "Create experiment"
 	},
+	"experiment-delete": {
+		"description": "Delete an experiment by ID (soft delete - marks as deleted).",
+		"category": "Experiments",
+		"summary": "Delete an experiment by ID.",
+		"title": "Delete experiment"
+	},
 	"experiment-get": {
 		"description": "Get details of a specific experiment by ID.",
 		"category": "Experiments",

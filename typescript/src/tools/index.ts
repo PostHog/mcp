@@ -33,7 +33,6 @@ import errorDetails from "./errorTracking/errorDetails";
 import listErrors from "./errorTracking/listErrors";
 
 // Experiments
-import createExperiment from "./experiments/create";
 import getExperiment from "./experiments/get";
 import getAllExperiments from "./experiments/getAll";
 

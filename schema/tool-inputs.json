@@ -397,6 +397,19 @@
       ],
       "additionalProperties": false
     },
+    "ExperimentDeleteSchema": {
+      "type": "object",
+      "properties": {
+        "experimentId": {
+          "type": "number",
+          "description": "The ID of the experiment to delete"
+        }
+      },
+      "required": [
+        "experimentId"
+      ],
+      "additionalProperties": false
+    },
     "ExperimentExposureQueryToolSchema": {
       "type": "object",
       "properties": {

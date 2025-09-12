@@ -66,6 +66,10 @@ export const ExperimentExposureQueryToolSchema = z.object({
 	refresh: z.boolean().describe("Force refresh of results instead of using cached values"),
 });
 
+export const ExperimentDeleteSchema = z.object({
+	experimentId: z.number().describe("The ID of the experiment to delete"),
+});
+
 export const ExperimentCreateSchema = z.object({
 	name: z
 		.string()

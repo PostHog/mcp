@@ -126,6 +126,7 @@ describe("Insights", { concurrent: false }, () => {
 				data: {
 					name: "Updated Insight Name",
 					description: "Updated description",
+					query: SAMPLE_HOGQL_QUERIES.pageviews,
 				},
 			};
 
@@ -297,6 +298,7 @@ describe("Insights", { concurrent: false }, () => {
 				data: {
 					name: "Updated Workflow Insight",
 					description: "Updated workflow description",
+					query: SAMPLE_HOGQL_QUERIES.pageviews,
 				},
 			};
 

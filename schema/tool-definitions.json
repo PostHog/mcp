@@ -212,7 +212,8 @@
 	"experiment-create": {
 		"description": "Create a comprehensive A/B test experiment. CRITICAL: Metrics MUST have event_name to work - experiments without proper event tracking will fail. PROCESS: 1) Understand experiment goal and hypothesis 2) Search existing feature flags with 'feature-flags-get-all' tool first and suggest reuse or new key 3) Help user define success metrics by asking what they want to optimize 4) MOST IMPORTANT: Use 'project-property-definitions' tool to find available events in their project, or suggest common events like '$pageview', 'button_click', 'add_to_cart', 'purchase' 5) For funnel metrics, ask for specific event sequence (e.g., ['product_view', 'add_to_cart', 'purchase']) and use funnel_steps parameter 6) Configure variants (default 50/50 control/test unless they specify otherwise) 7) Set targeting criteria if needed 8) Recommend creating as draft first. NEVER create metrics without event_name - ask user about their tracking setup first.",
 		"category": "Experiments",
-		"summary": "Create A/B test experiment with guided metric and feature flag setup"
+		"summary": "Create A/B test experiment with guided metric and feature flag setup",
+		"title": "Create experiment"
 	},
 	"experiment-get": {
 		"description": "Get details of a specific experiment by ID.",
@@ -231,12 +232,14 @@
 	"experiment-metric-results-get": {
 		"description": "Get experiment results including metrics data (primary and secondary) and exposure data. This tool fetches the experiment details and executes the necessary queries to get complete experiment results. Only works with new experiments (not legacy experiments).",
 		"category": "Experiments",
-		"summary": "Get experiment results including metrics and exposure data."
+		"summary": "Get experiment results including metrics and exposure data.",
+		"title": "Get experiment results"
 	},
 	"experiment-exposure-query": {
 		"description": "Get exposure data for a specific experiment including daily timeseries and total exposures per variant. Only works with started experiments (experiments with a start_date).",
 		"category": "Experiments",
-		"summary": "Get experiment exposure data for started experiments."
+		"summary": "Get experiment exposure data for started experiments.",
+		"title": "Get experiment exposures"
 	},
 	"insight-create-from-query": {
 		"description": "Create an insight from a query that you have previously tested with 'query-run'. You should check the query runs, before creating an insight. Do not create an insight before running the query, unless you know already that it is correct (e.g. you are making a minor modification to an existing query you have seen).",

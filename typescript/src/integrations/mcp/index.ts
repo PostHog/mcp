@@ -157,6 +157,7 @@ export class MyMCP extends McpAgent<Env> {
 				await this.trackEvent("mcp tool call", {
 					tool: tool.name,
 					valid_input: false,
+					input: params,
 				});
 				return [
 					{
@@ -169,10 +170,18 @@ export class MyMCP extends McpAgent<Env> {
 			await this.trackEvent("mcp tool call", {
 				tool: tool.name,
 				valid_input: true,
+				input: params,
 			});
 
 			try {
-				return await handler(params);
+				const result = await handler(params);
+				await this.trackEvent("mcp tool response", {
+					tool: tool.name,
+					valid_input: true,
+					input: params,
+					output: result,
+				});
+				return result;
 			} catch (error: any) {
 				const distinctId = await this.getDistinctId();
 				return handleToolError(error, tool.name, distinctId);

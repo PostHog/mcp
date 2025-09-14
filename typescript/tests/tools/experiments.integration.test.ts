@@ -15,7 +15,6 @@ import createExperimentTool from "@/tools/experiments/create";
 import deleteExperimentTool from "@/tools/experiments/delete";
 import getAllExperimentsTool from "@/tools/experiments/getAll";
 import getExperimentTool from "@/tools/experiments/get";
-import getExperimentExposuresTool from "@/tools/experiments/getExposures";
 import getExperimentMetricResultsTool from "@/tools/experiments/getMetricResults";
 import updateExperimentTool from "@/tools/experiments/update";
 import type { Context } from "@/tools/types";
@@ -395,57 +394,6 @@ describe("Experiments", { concurrent: false }, () => {
 		});
 	});
 
-	describe("get-experiment-exposures tool", () => {
-		const createTool = createExperimentTool();
-		const getExposuresTool = getExperimentExposuresTool();
-
-		it("should fail for draft experiment (not started)", async () => {
-			// Create a draft experiment
-			const flagKey = generateUniqueKey("exp-exposure-flag");
-
-			const createParams = {
-				name: "Exposure Draft Experiment",
-				feature_flag_key: flagKey,
-				draft: true,
-			};
-
-			const createResult = await createTool.handler(context, createParams as any);
-			const experiment = parseToolResponse(createResult);
-			trackExperiment(experiment);
-
-			// Try to get exposures for draft experiment
-			await expect(
-				getExposuresTool.handler(context, {
-					experimentId: experiment.id,
-					refresh: false,
-				}),
-			).rejects.toThrow(/has not started yet/);
-		});
-
-		it("should handle refresh parameter", async () => {
-			// Create an experiment
-			const flagKey = generateUniqueKey("exp-refresh-flag");
-
-			const createParams = {
-				name: "Refresh Test Experiment",
-				feature_flag_key: flagKey,
-				draft: true,
-			};
-
-			const createResult = await createTool.handler(context, createParams as any);
-			const experiment = parseToolResponse(createResult);
-			trackExperiment(experiment);
-
-			// Test with refresh=true (will still fail for draft, but tests parameter handling)
-			await expect(
-				getExposuresTool.handler(context, {
-					experimentId: experiment.id,
-					refresh: true,
-				}),
-			).rejects.toThrow(/has not started yet/);
-		});
-	});
-
 	describe("get-experiment-metric-results tool", () => {
 		const createTool = createExperimentTool();
 		const getMetricResultsTool = getExperimentMetricResultsTool();
@@ -676,7 +624,6 @@ describe("Experiments", { concurrent: false }, () => {
 	describe("Edge cases and error handling", () => {
 		const createTool = createExperimentTool();
 		const getTool = getExperimentTool();
-		const getExposuresTool = getExperimentExposuresTool();
 		const getMetricResultsTool = getExperimentMetricResultsTool();
 
 		it("should handle creating experiment without metrics", async () => {
@@ -703,14 +650,6 @@ describe("Experiments", { concurrent: false }, () => {
 
 			// Test get experiment
 			await expect(getTool.handler(context, { experimentId: invalidId })).rejects.toThrow();
-
-			// Test get exposures
-			await expect(
-				getExposuresTool.handler(context, {
-					experimentId: invalidId,
-					refresh: false,
-				}),
-			).rejects.toThrow();
 
 			// Test get metric results
 			await expect(

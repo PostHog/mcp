@@ -132,15 +132,15 @@ export const ExperimentSchema = z.object({
 	type: z.enum(ExperimentType).nullish(),
 	description: z.string().nullish(),
 	feature_flag_key: z.string(),
-	feature_flag: FeatureFlagSchema.optional(),
+	feature_flag: FeatureFlagSchema.nullish(),
 	exposure_cohort: z.number().nullish(),
-	exposure_criteria: ExperimentExposureCriteriaSchema.optional(),
+	exposure_criteria: ExperimentExposureCriteriaSchema.nullish(),
 	/**
 	 * We only type ExperimentMetrics. Legacy metric formats are not validated.
 	 */
-	metrics: z.array(z.union([ExperimentMetricSchema, z.any()])).optional(),
-	metrics_secondary: z.array(z.union([ExperimentMetricSchema, z.any()])).optional(),
-	saved_metrics: z.array(z.any()).optional(),
+	metrics: z.array(z.union([ExperimentMetricSchema, z.any()])).nullish(),
+	metrics_secondary: z.array(z.union([ExperimentMetricSchema, z.any()])).nullish(),
+	saved_metrics: z.array(z.any()).nullish(),
 	saved_metrics_ids: z.array(z.any()).nullable(),
 	parameters: z
 		.object({
@@ -162,7 +162,7 @@ export const ExperimentSchema = z.object({
 	deleted: z.boolean(),
 	created_at: z.string(),
 	updated_at: z.string(),
-	holdout: z.any().optional(),
+	holdout: z.any().nullish(),
 	holdout_id: z.number().nullish(),
 	stats_config: z.any().optional(),
 	conclusion: z.enum(ExperimentConclusion).nullish(),
@@ -178,7 +178,7 @@ export const ExperimentExposureQuerySchema = z.object({
 	kind: z.literal("ExperimentExposureQuery"),
 	experiment_id: z.number(),
 	experiment_name: z.string(),
-	exposure_criteria: ExperimentExposureCriteriaSchema.optional(),
+	exposure_criteria: ExperimentExposureCriteriaSchema.nullish(),
 	feature_flag: FeatureFlagSchema.optional(),
 	start_date: z.string().nullish(),
 	end_date: z.string().nullish(),

@@ -5,41 +5,6 @@ import type { z } from "zod";
 
 const schema = ExperimentCreateSchema;
 
-// Define a more permissive type that matches the actual input requirements
-// The schema has .default() values which make these fields optional at input time
-type Params = {
-	name: string;
-	description?: string;
-	feature_flag_key: string;
-	type?: "product" | "web";
-	primary_metrics?: Array<{
-		name?: string;
-		metric_type: "mean" | "funnel" | "ratio";
-		event_name?: string;
-		funnel_steps?: string[];
-		properties?: Record<string, any>;
-		description?: string;
-	}>;
-	secondary_metrics?: Array<{
-		name?: string;
-		metric_type: "mean" | "funnel" | "ratio";
-		event_name?: string;
-		funnel_steps?: string[];
-		properties?: Record<string, any>;
-		description?: string;
-	}>;
-	variants?: Array<{
-		key: string;
-		name?: string;
-		rollout_percentage: number;
-	}>;
-	minimum_detectable_effect?: number;
-	filter_test_accounts?: boolean;
-	target_properties?: Record<string, any>;
-	draft?: boolean;
-	holdout_id?: number;
-};
-
 /**
  * Create a comprehensive A/B test experiment with guided setup
  * This tool helps users create well-configured experiments through conversation

@@ -286,7 +286,8 @@
               }
             },
             "required": [
-              "metric_type"
+              "metric_type",
+              "event_name"
             ],
             "additionalProperties": false
           },
@@ -332,7 +333,8 @@
               }
             },
             "required": [
-              "metric_type"
+              "metric_type",
+              "event_name"
             ],
             "additionalProperties": false
           },

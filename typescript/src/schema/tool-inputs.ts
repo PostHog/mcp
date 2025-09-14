@@ -111,7 +111,6 @@ export const ExperimentCreateSchema = z.object({
 					),
 				event_name: z
 					.string()
-					.optional()
 					.describe(
 						"REQUIRED for metrics to work: PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase'). For funnels, this is the first step. Use '$pageview' if unsure. Search project-property-definitions tool for available events.",
 					),
@@ -147,7 +146,6 @@ export const ExperimentCreateSchema = z.object({
 					),
 				event_name: z
 					.string()
-					.optional()
 					.describe("REQUIRED: PostHog event name. Use '$pageview' if unsure."),
 				funnel_steps: z
 					.array(z.string())

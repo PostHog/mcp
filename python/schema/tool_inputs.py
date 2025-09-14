@@ -174,7 +174,7 @@ class PrimaryMetric(BaseModel):
     """
     Metric type: 'mean' for average values (revenue, time spent), 'funnel' for conversion flows, 'ratio' for comparing two metrics
     """
-    event_name: str | None = None
+    event_name: str
     """
     REQUIRED for metrics to work: PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase'). For funnels, this is the first step. Use '$pageview' if unsure. Search project-property-definitions tool for available events.
     """
@@ -214,7 +214,7 @@ class SecondaryMetric(BaseModel):
     """
     Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics
     """
-    event_name: str | None = None
+    event_name: str
     """
     REQUIRED: PostHog event name. Use '$pageview' if unsure.
     """
@@ -304,17 +304,13 @@ class ExperimentCreateSchema(BaseModel):
     """
 
 
-class ExperimentExposureQueryToolSchema(BaseModel):
+class ExperimentDeleteSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     experimentId: float
     """
-    The ID of the experiment to get exposure data for
-    """
-    refresh: bool
-    """
-    Force refresh of results instead of using cached values
+    The ID of the experiment to delete
     """
 
 
@@ -335,17 +331,193 @@ class ExperimentGetSchema(BaseModel):
     """
 
 
-class ExperimentMetricResultsGetSchema(BaseModel):
+class ExperimentResultsGetSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     experimentId: float
     """
-    The ID of the experiment to get results for
+    The ID of the experiment to get comprehensive results for
     """
     refresh: bool
     """
     Force refresh of results instead of using cached values
+    """
+
+
+class FeatureFlagVariant(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    key: str
+    name: str | None = None
+    rollout_percentage: float
+
+
+class Parameters(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    feature_flag_variants: list[FeatureFlagVariant] | None = None
+    minimum_detectable_effect: float | None = None
+    recommended_running_time: float | None = None
+    recommended_sample_size: float | None = None
+    variant_screenshot_media_ids: dict[str, list[str]] | None = None
+
+
+class Metrics(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    metric_type: Literal["mean"] = "mean"
+    source: Any | None = None
+    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
+    uuid: str | None = None
+    name: str | None = None
+    conversion_window: float | None = None
+    conversion_window_unit: Any | None = None
+    lower_bound_percentile: float | None = None
+    upper_bound_percentile: float | None = None
+
+
+class Metrics1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    metric_type: Literal["funnel"] = "funnel"
+    series: list
+    funnel_order_type: Any | None = None
+    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
+    uuid: str | None = None
+    name: str | None = None
+    conversion_window: float | None = None
+    conversion_window_unit: Any | None = None
+
+
+class Metrics2(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    metric_type: Literal["ratio"] = "ratio"
+    numerator: Any | None = None
+    denominator: Any | None = None
+    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
+    uuid: str | None = None
+    name: str | None = None
+    conversion_window: float | None = None
+    conversion_window_unit: Any | None = None
+
+
+class MetricsSecondary(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    metric_type: Literal["mean"] = "mean"
+    source: Any | None = None
+    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
+    uuid: str | None = None
+    name: str | None = None
+    conversion_window: float | None = None
+    conversion_window_unit: Any | None = None
+    lower_bound_percentile: float | None = None
+    upper_bound_percentile: float | None = None
+
+
+class MetricsSecondary1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    metric_type: Literal["funnel"] = "funnel"
+    series: list
+    funnel_order_type: Any | None = None
+    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
+    uuid: str | None = None
+    name: str | None = None
+    conversion_window: float | None = None
+    conversion_window_unit: Any | None = None
+
+
+class MetricsSecondary2(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    metric_type: Literal["ratio"] = "ratio"
+    numerator: Any | None = None
+    denominator: Any | None = None
+    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
+    uuid: str | None = None
+    name: str | None = None
+    conversion_window: float | None = None
+    conversion_window_unit: Any | None = None
+
+
+class Conclusion(StrEnum):
+    WON = "won"
+    LOST = "lost"
+    INCONCLUSIVE = "inconclusive"
+    STOPPED_EARLY = "stopped_early"
+    INVALID = "invalid"
+
+
+class ExposureConfig(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["ExperimentEventExposureConfig"] = "ExperimentEventExposureConfig"
+    event: str
+    properties: list
+
+
+class MultipleVariantHandling(StrEnum):
+    EXCLUDE = "exclude"
+    FIRST_SEEN = "first_seen"
+
+
+class ExposureCriteria(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    filterTestAccounts: bool | None = None
+    exposure_config: ExposureConfig | None = None
+    multiple_variant_handling: MultipleVariantHandling | None = None
+
+
+class Data4(BaseModel):
+    """
+    The experiment data to update. To restart a concluded experiment: set end_date=null, conclusion=null, conclusion_comment=null, and optionally set a new start_date. To make it draft again, also set start_date=null.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: str | None = None
+    description: str | None = None
+    start_date: str | None = None
+    end_date: str | None = None
+    parameters: Parameters | None = None
+    metrics: list[Metrics | Metrics1 | Metrics2] | None = None
+    metrics_secondary: list[MetricsSecondary | MetricsSecondary1 | MetricsSecondary2] | None = None
+    primary_metrics_ordered_uuids: list[str] | None = None
+    secondary_metrics_ordered_uuids: list[str] | None = None
+    archived: bool | None = None
+    conclusion: Conclusion | None = None
+    conclusion_comment: str | None = None
+    exposure_criteria: ExposureCriteria | None = None
+    saved_metrics_ids: list | None = None
+    stats_config: Any | None = None
+
+
+class ExperimentUpdateSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    experimentId: float
+    """
+    The ID of the experiment to update
+    """
+    data: Data4
+    """
+    The experiment data to update. To restart a concluded experiment: set end_date=null, conclusion=null, conclusion_comment=null, and optionally set a new start_date. To make it draft again, also set start_date=null.
     """
 
 
@@ -459,7 +631,7 @@ class Filters1(BaseModel):
     groups: list[Group1]
 
 
-class Data4(BaseModel):
+class Data5(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -475,7 +647,7 @@ class FeatureFlagUpdateSchema(BaseModel):
         extra="forbid",
     )
     flagKey: str
-    data: Data4
+    data: Data5
 
 
 class Kind(StrEnum):
@@ -494,7 +666,7 @@ class Query(BaseModel):
     """
 
 
-class Data5(BaseModel):
+class Data6(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -509,7 +681,7 @@ class InsightCreateSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    data: Data5
+    data: Data6
 
 
 class InsightDeleteSchema(BaseModel):
@@ -543,7 +715,7 @@ class InsightGetAllSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    data: Data6 | None = None
+    data: Data7 | None = None
 
 
 class InsightGetSchema(BaseModel):
@@ -589,7 +761,7 @@ class InsightUpdateSchema(BaseModel):
         extra="forbid",
     )
     insightId: str
-    data: Data7
+    data: Data8
 
 
 class LLMAnalyticsGetCostsSchema(BaseModel):

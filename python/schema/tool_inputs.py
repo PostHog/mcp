@@ -701,7 +701,7 @@ class InsightGenerateHogQLFromQuestionSchema(BaseModel):
     """
 
 
-class Data6(BaseModel):
+class Data7(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -743,7 +743,7 @@ class Query1(BaseModel):
     """
 
 
-class Data7(BaseModel):
+class Data8(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -810,7 +810,7 @@ class ProjectGetAllSchema(BaseModel):
     )
 
 
-class Type(StrEnum):
+class Type1(StrEnum):
     """
     Type of properties to get
     """
@@ -823,7 +823,7 @@ class ProjectPropertyDefinitionsInputSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type
+    type: Type1
     """
     Type of properties to get
     """
@@ -863,7 +863,7 @@ class Properties(BaseModel):
     type: str | None = None
 
 
-class Type1(StrEnum):
+class Type2(StrEnum):
     AND_ = "AND"
     OR_ = "OR"
 
@@ -882,7 +882,7 @@ class Properties1(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type1
+    type: Type2
     values: list[Value]
 
 
@@ -890,7 +890,7 @@ class Properties2(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type1
+    type: Type2
     values: list[Value]
 
 
@@ -934,7 +934,7 @@ class Properties4(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type1
+    type: Type2
     values: list[Value]
 
 
@@ -942,7 +942,7 @@ class Properties5(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type1
+    type: Type2
     values: list[Value]
 
 
@@ -1032,7 +1032,7 @@ class Properties7(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type1
+    type: Type2
     values: list[Value]
 
 
@@ -1040,7 +1040,7 @@ class Properties8(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type1
+    type: Type2
     values: list[Value]
 
 
@@ -1058,7 +1058,7 @@ class Properties10(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type1
+    type: Type2
     values: list[Value]
 
 
@@ -1066,7 +1066,7 @@ class Properties11(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type1
+    type: Type2
     values: list[Value]
 
 
@@ -1183,7 +1183,7 @@ class Properties13(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    type: Type1
+    type: Type2
     values: list[Value]
 
 

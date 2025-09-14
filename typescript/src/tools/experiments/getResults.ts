@@ -94,6 +94,7 @@ const tool = (): Tool<typeof schema> => ({
 	description: definition.description,
 	schema,
 	handler: getResultsHandler,
+	scopes: ["experiments:read"],
 	annotations: {
 		destructiveHint: false,
 		idempotentHint: true,

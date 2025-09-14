@@ -33,8 +33,12 @@ import errorDetails from "./errorTracking/errorDetails";
 import listErrors from "./errorTracking/listErrors";
 
 // Experiments
+import createExperiment from "./experiments/create";
+import deleteExperiment from "./experiments/delete";
 import getExperiment from "./experiments/get";
 import getAllExperiments from "./experiments/getAll";
+import getExperimentResults from "./experiments/getResults";
+import updateExperiment from "./experiments/update";
 
 import createInsight from "./insights/create";
 import deleteInsight from "./insights/delete";
@@ -100,6 +104,10 @@ const TOOL_MAP: Record<string, () => ToolBase<ZodObjectAny>> = {
 	// Experiments
 	"experiment-get-all": getAllExperiments,
 	"experiment-get": getExperiment,
+	"experiment-results-get": getExperimentResults,
+	"experiment-create": createExperiment,
+	"experiment-delete": deleteExperiment,
+	"experiment-update": updateExperiment,
 
 	// Insights
 	"insights-get-all": getAllInsights,

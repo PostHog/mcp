@@ -58,6 +58,7 @@ const tool = (): Tool<typeof schema> => ({
 	description: definition.description,
 	schema,
 	handler: createExperimentHandler, // Now accepts any params and validates internally
+	scopes: ["experiments:write"],
 	annotations: {
 		destructiveHint: false,
 		idempotentHint: false,

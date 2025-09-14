@@ -39,6 +39,7 @@ const tool = (): Tool<typeof schema> => ({
 	description: definition.description,
 	schema,
 	handler: updateHandler,
+	scopes: ["experiments:write"],
 	annotations: {
 		destructiveHint: false,
 		idempotentHint: true,

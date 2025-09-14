@@ -17,6 +17,7 @@ import getAllExperimentsTool from "@/tools/experiments/getAll";
 import getExperimentTool from "@/tools/experiments/get";
 import getExperimentExposuresTool from "@/tools/experiments/getExposures";
 import getExperimentMetricResultsTool from "@/tools/experiments/getMetricResults";
+import updateExperimentTool from "@/tools/experiments/update";
 import type { Context } from "@/tools/types";
 
 describe("Experiments", { concurrent: false }, () => {
@@ -920,6 +921,350 @@ describe("Experiments", { concurrent: false }, () => {
 			} catch (error) {
 				expect(error).toBeDefined();
 			}
+		});
+	});
+
+	describe("update-experiment tool", () => {
+		const createTool = createExperimentTool();
+		const updateTool = updateExperimentTool();
+
+		it("should update basic experiment fields", async () => {
+			// Create experiment first
+			const flagKey = generateUniqueKey("exp-update-basic-flag");
+
+			const createParams = {
+				name: "Original Name",
+				description: "Original description",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+			expect(experiment.id).toBeDefined();
+
+			// Update basic fields
+			const updateParams = {
+				experimentId: experiment.id,
+				data: {
+					name: "Updated Name",
+					description: "Updated description with new hypothesis",
+				},
+			};
+
+			const updateResult = await updateTool.handler(context, updateParams);
+			const updatedExperiment = parseToolResponse(updateResult);
+
+			expect(updatedExperiment.name).toBe("Updated Name");
+			expect(updatedExperiment.description).toBe("Updated description with new hypothesis");
+			expect(updatedExperiment.url).toContain("/experiments/");
+			expect(updatedExperiment.status).toBe("draft");
+
+			trackExperiment(experiment);
+		});
+
+		it("should launch a draft experiment (draft → running)", async () => {
+			// Create draft experiment
+			const flagKey = generateUniqueKey("exp-launch-flag");
+
+			const createParams = {
+				name: "Launch Test Experiment",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+			expect(experiment.status).toBe("draft");
+
+			// Launch the experiment
+			const launchParams = {
+				experimentId: experiment.id,
+				data: {
+					start_date: new Date().toISOString(),
+				},
+			};
+
+			const updateResult = await updateTool.handler(context, launchParams);
+			const launchedExperiment = parseToolResponse(updateResult);
+
+			expect(launchedExperiment.start_date).toBeDefined();
+			expect(launchedExperiment.status).toBe("running");
+
+			trackExperiment(experiment);
+		});
+
+		it("should stop a running experiment", async () => {
+			// Create and launch experiment
+			const flagKey = generateUniqueKey("exp-stop-flag");
+
+			const createParams = {
+				name: "Stop Test Experiment",
+				feature_flag_key: flagKey,
+				draft: false, // Create as launched
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+
+			// Stop the experiment
+			const stopParams = {
+				experimentId: experiment.id,
+				data: {
+					end_date: new Date().toISOString(),
+					conclusion: "stopped_early" as const,
+					conclusion_comment: "Test completed successfully",
+				},
+			};
+
+			const updateResult = await updateTool.handler(context, stopParams);
+			const stoppedExperiment = parseToolResponse(updateResult);
+
+			expect(stoppedExperiment.end_date).toBeDefined();
+			expect(stoppedExperiment.conclusion).toBe("stopped_early");
+			expect(stoppedExperiment.conclusion_comment).toBe("Test completed successfully");
+
+			trackExperiment(experiment);
+		});
+
+		it("should restart a concluded experiment", async () => {
+			// Create and conclude experiment
+			const flagKey = generateUniqueKey("exp-restart-flag");
+
+			const createParams = {
+				name: "Restart Test Experiment",
+				feature_flag_key: flagKey,
+				draft: false,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+
+			// First stop it
+			const stopParams = {
+				experimentId: experiment.id,
+				data: {
+					end_date: new Date().toISOString(),
+					conclusion: "inconclusive" as const,
+					conclusion_comment: "Need more data",
+				},
+			};
+
+			await updateTool.handler(context, stopParams);
+
+			// Now restart it (following restart workflow)
+			const restartParams = {
+				experimentId: experiment.id,
+				data: {
+					end_date: null,
+					conclusion: null,
+					conclusion_comment: null,
+					start_date: new Date().toISOString(),
+				},
+			};
+
+			const restartResult = await updateTool.handler(context, restartParams);
+			const restartedExperiment = parseToolResponse(restartResult);
+
+			expect(restartedExperiment.end_date).toBeNull();
+			expect(restartedExperiment.conclusion).toBeNull();
+			expect(restartedExperiment.conclusion_comment).toBeNull();
+			expect(restartedExperiment.start_date).toBeDefined();
+			expect(restartedExperiment.status).toBe("running");
+
+			trackExperiment(experiment);
+		});
+
+		it("should restart experiment as draft", async () => {
+			// Create and conclude experiment
+			const flagKey = generateUniqueKey("exp-restart-draft-flag");
+
+			const createParams = {
+				name: "Restart as Draft Test",
+				feature_flag_key: flagKey,
+				draft: false,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+
+			// First conclude it
+			const concludeParams = {
+				experimentId: experiment.id,
+				data: {
+					end_date: new Date().toISOString(),
+					conclusion: "won" as const,
+				},
+			};
+
+			await updateTool.handler(context, concludeParams);
+
+			// Restart as draft (clear all completion fields including start_date)
+			const restartAsDraftParams = {
+				experimentId: experiment.id,
+				data: {
+					end_date: null,
+					conclusion: null,
+					conclusion_comment: null,
+					start_date: null,
+				},
+			};
+
+			const restartResult = await updateTool.handler(context, restartAsDraftParams);
+			const restartedExperiment = parseToolResponse(restartResult);
+
+			expect(restartedExperiment.end_date).toBeNull();
+			expect(restartedExperiment.conclusion).toBeNull();
+			expect(restartedExperiment.start_date).toBeNull();
+			expect(restartedExperiment.status).toBe("draft");
+
+			trackExperiment(experiment);
+		});
+
+		it("should archive and unarchive experiment", async () => {
+			// Create experiment
+			const flagKey = generateUniqueKey("exp-archive-flag");
+
+			const createParams = {
+				name: "Archive Test Experiment",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+
+			// Archive the experiment
+			const archiveParams = {
+				experimentId: experiment.id,
+				data: {
+					archived: true,
+				},
+			};
+
+			const archiveResult = await updateTool.handler(context, archiveParams);
+			const archivedExperiment = parseToolResponse(archiveResult);
+
+			expect(archivedExperiment.archived).toBe(true);
+
+			// Unarchive the experiment
+			const unarchiveParams = {
+				experimentId: experiment.id,
+				data: {
+					archived: false,
+				},
+			};
+
+			const unarchiveResult = await updateTool.handler(context, unarchiveParams);
+			const unarchivedExperiment = parseToolResponse(unarchiveResult);
+
+			expect(unarchivedExperiment.archived).toBe(false);
+
+			trackExperiment(experiment);
+		});
+
+		it("should update experiment variants", async () => {
+			// Create experiment with default variants
+			const flagKey = generateUniqueKey("exp-variants-flag");
+
+			const createParams = {
+				name: "Variants Update Test",
+				feature_flag_key: flagKey,
+				draft: true,
+				variants: [
+					{ key: "control", rollout_percentage: 50 },
+					{ key: "test", rollout_percentage: 50 },
+				],
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+
+			// Update variants
+			const updateVariantsParams = {
+				experimentId: experiment.id,
+				data: {
+					parameters: {
+						feature_flag_variants: [
+							{ key: "control", name: "Control Group", rollout_percentage: 30 },
+							{ key: "variant_a", name: "Variant A", rollout_percentage: 35 },
+							{ key: "variant_b", name: "Variant B", rollout_percentage: 35 },
+						],
+					},
+				},
+			};
+
+			const updateResult = await updateTool.handler(context, updateVariantsParams);
+			const updatedExperiment = parseToolResponse(updateResult);
+
+			expect(updatedExperiment.parameters?.feature_flag_variants).toHaveLength(3);
+			expect(updatedExperiment.parameters.feature_flag_variants[0]).toMatchObject({
+				key: "control",
+				name: "Control Group",
+				rollout_percentage: 30,
+			});
+
+			trackExperiment(experiment);
+		});
+
+		it("should handle invalid experiment ID", async () => {
+			const invalidId = 999999;
+
+			const updateParams = {
+				experimentId: invalidId,
+				data: {
+					name: "This should fail",
+				},
+			};
+
+			try {
+				await updateTool.handler(context, updateParams);
+				expect.fail("Should have thrown an error for invalid experiment ID");
+			} catch (error) {
+				expect(error).toBeDefined();
+				expect(error.message).toContain("Failed to update experiment");
+			}
+		});
+
+		it("should validate required experimentId parameter", async () => {
+			try {
+				await updateTool.handler(context, { data: { name: "Test" } } as any);
+				expect.fail("Should have thrown validation error for missing experimentId");
+			} catch (error) {
+				expect(error).toBeDefined();
+			}
+		});
+
+		it("should handle partial updates correctly", async () => {
+			// Create experiment
+			const flagKey = generateUniqueKey("exp-partial-flag");
+
+			const createParams = {
+				name: "Partial Update Test",
+				description: "Original description",
+				feature_flag_key: flagKey,
+				draft: true,
+			};
+
+			const createResult = await createTool.handler(context, createParams as any);
+			const experiment = parseToolResponse(createResult);
+
+			// Update only name, leaving description unchanged
+			const updateParams = {
+				experimentId: experiment.id,
+				data: {
+					name: "Updated Name Only",
+				},
+			};
+
+			const updateResult = await updateTool.handler(context, updateParams);
+			const updatedExperiment = parseToolResponse(updateResult);
+
+			expect(updatedExperiment.name).toBe("Updated Name Only");
+			// Description should remain unchanged
+			expect(updatedExperiment.description).toBe("Original description");
+
+			trackExperiment(experiment);
 		});
 	});
 

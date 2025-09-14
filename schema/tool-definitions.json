@@ -221,6 +221,12 @@
 		"summary": "Delete an experiment by ID.",
 		"title": "Delete experiment"
 	},
+	"experiment-update": {
+		"description": "Update an existing experiment by ID. Can update name, description, lifecycle state, variants, metrics, and other properties. RESTART WORKFLOW: To restart a concluded experiment, set end_date=null, conclusion=null, conclusion_comment=null, and optionally set a new start_date. To make it draft again, also set start_date=null. COMMON PATTERNS: Launch draft (set start_date), stop running (set end_date + conclusion), archive (set archived=true), modify variants (update parameters.feature_flag_variants). NOTE: feature_flag_key cannot be changed after creation.",
+		"category": "Experiments",
+		"summary": "Update an existing experiment with lifecycle management and restart capability.",
+		"title": "Update experiment"
+	},
 	"experiment-get": {
 		"description": "Get details of a specific experiment by ID.",
 		"category": "Experiments",

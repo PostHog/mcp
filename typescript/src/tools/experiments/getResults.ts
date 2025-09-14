@@ -1,9 +1,9 @@
-import { ExperimentMetricResultsGetSchema } from "@/schema/tool-inputs";
+import { ExperimentResultsGetSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
 import type { z } from "zod";
 
-const schema = ExperimentMetricResultsGetSchema;
+const schema = ExperimentResultsGetSchema;
 
 type Params = z.infer<typeof schema>;
 
@@ -12,7 +12,7 @@ type Params = z.infer<typeof schema>;
  * This tool fetches the experiment details and executes the necessary queries
  * to get metrics results (both primary and secondary) and exposure data
  */
-export const getMetricResultsHandler = async (context: Context, params: Params) => {
+export const getResultsHandler = async (context: Context, params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
 	const result = await context.api.experiments({ projectId }).getMetricResults({
@@ -86,14 +86,14 @@ export const getMetricResultsHandler = async (context: Context, params: Params) 
 	};
 };
 
-const definition = getToolDefinition("experiment-metric-results-get");
+const definition = getToolDefinition("experiment-results-get");
 
 const tool = (): Tool<typeof schema> => ({
-	name: "experiment-metric-results-get",
+	name: "experiment-results-get",
 	title: definition.title,
 	description: definition.description,
 	schema,
-	handler: getMetricResultsHandler,
+	handler: getResultsHandler,
 	annotations: {
 		destructiveHint: false,
 		idempotentHint: true,

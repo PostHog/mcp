@@ -15,7 +15,7 @@ import createExperimentTool from "@/tools/experiments/create";
 import deleteExperimentTool from "@/tools/experiments/delete";
 import getAllExperimentsTool from "@/tools/experiments/getAll";
 import getExperimentTool from "@/tools/experiments/get";
-import getExperimentMetricResultsTool from "@/tools/experiments/getMetricResults";
+import getExperimentResultsTool from "@/tools/experiments/getResults";
 import updateExperimentTool from "@/tools/experiments/update";
 import type { Context } from "@/tools/types";
 
@@ -394,9 +394,9 @@ describe("Experiments", { concurrent: false }, () => {
 		});
 	});
 
-	describe("get-experiment-metric-results tool", () => {
+	describe("get-experiment-results tool", () => {
 		const createTool = createExperimentTool();
-		const getMetricResultsTool = getExperimentMetricResultsTool();
+		const getResultsTool = getExperimentResultsTool();
 
 		it("should fail for draft experiment (not started)", async () => {
 			// Create a draft experiment with metrics
@@ -421,7 +421,7 @@ describe("Experiments", { concurrent: false }, () => {
 
 			// Try to get metric results for draft experiment
 			await expect(
-				getMetricResultsTool.handler(context, {
+				getResultsTool.handler(context, {
 					experimentId: experiment.id,
 					refresh: false,
 				}),
@@ -458,7 +458,7 @@ describe("Experiments", { concurrent: false }, () => {
 
 			// Test with refresh=true (will still fail for draft, but tests parameter handling)
 			await expect(
-				getMetricResultsTool.handler(context, {
+				getResultsTool.handler(context, {
 					experimentId: experiment.id,
 					refresh: true,
 				}),
@@ -624,7 +624,7 @@ describe("Experiments", { concurrent: false }, () => {
 	describe("Edge cases and error handling", () => {
 		const createTool = createExperimentTool();
 		const getTool = getExperimentTool();
-		const getMetricResultsTool = getExperimentMetricResultsTool();
+		const getResultsTool = getExperimentResultsTool();
 
 		it("should handle creating experiment without metrics", async () => {
 			const flagKey = generateUniqueKey("exp-no-metrics-flag");
@@ -653,7 +653,7 @@ describe("Experiments", { concurrent: false }, () => {
 
 			// Test get metric results
 			await expect(
-				getMetricResultsTool.handler(context, {
+				getResultsTool.handler(context, {
 					experimentId: invalidId,
 					refresh: false,
 				}),

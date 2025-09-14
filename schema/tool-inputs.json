@@ -428,12 +428,12 @@
       ],
       "additionalProperties": false
     },
-    "ExperimentMetricResultsGetSchema": {
+    "ExperimentResultsGetSchema": {
       "type": "object",
       "properties": {
         "experimentId": {
           "type": "number",
-          "description": "The ID of the experiment to get results for"
+          "description": "The ID of the experiment to get comprehensive results for"
         },
         "refresh": {
           "type": "boolean",

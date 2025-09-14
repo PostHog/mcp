@@ -57,8 +57,8 @@ export const ExperimentGetSchema = z.object({
 	experimentId: z.number().describe("The ID of the experiment to retrieve"),
 });
 
-export const ExperimentMetricResultsGetSchema = z.object({
-	experimentId: z.number().describe("The ID of the experiment to get results for"),
+export const ExperimentResultsGetSchema = z.object({
+	experimentId: z.number().describe("The ID of the experiment to get comprehensive results for"),
 	refresh: z.boolean().describe("Force refresh of results instead of using cached values"),
 });
 

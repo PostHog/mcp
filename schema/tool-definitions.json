@@ -241,10 +241,10 @@
 			"readOnlyHint": true
 		}
 	},
-	"experiment-metric-results-get": {
-		"description": "Get experiment results including metrics data (primary and secondary) and exposure data. This tool fetches the experiment details and executes the necessary queries to get complete experiment results. Only works with new experiments (not legacy experiments).",
+	"experiment-results-get": {
+		"description": "Get comprehensive experiment results including all metrics data (primary and secondary) and exposure data. This tool fetches the experiment details and executes the necessary queries to get complete experiment results. Only works with new experiments (not legacy experiments).",
 		"category": "Experiments",
-		"summary": "Get experiment results including metrics and exposure data.",
+		"summary": "Get comprehensive experiment results including metrics and exposure data.",
 		"title": "Get experiment results"
 	},
 	"insight-create-from-query": {

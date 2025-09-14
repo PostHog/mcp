@@ -73,7 +73,9 @@ export const ExperimentDeleteSchema = z.object({
 
 export const ExperimentUpdateSchema = z.object({
 	experimentId: z.number().describe("The ID of the experiment to update"),
-	data: ExperimentUpdatePayloadSchema.describe("The experiment data to update. To restart a concluded experiment: set end_date=null, conclusion=null, conclusion_comment=null, and optionally set a new start_date. To make it draft again, also set start_date=null."),
+	data: ExperimentUpdatePayloadSchema.describe(
+		"The experiment data to update. To restart a concluded experiment: set end_date=null, conclusion=null, conclusion_comment=null, and optionally set a new start_date. To make it draft again, also set start_date=null.",
+	),
 });
 
 export const ExperimentCreateSchema = z.object({

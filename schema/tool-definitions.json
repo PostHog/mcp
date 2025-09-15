@@ -464,36 +464,85 @@
 	"survey-create": {
 		"description": "Creates a new survey in the project. Surveys can be popover or API-based and support various question types including open-ended, multiple choice, rating, and link questions. Once created, you should ask the user if they want to add the survey to their application code.",
 		"category": "Surveys",
-		"summary": "Creates a new survey in the project."
+		"summary": "Creates a new survey in the project.",
+		"required_scopes": ["survey:write"],
+		"annotations": {
+			"destructiveHint": false,
+			"idempotentHint": false,
+			"openWorldHint": true,
+			"readOnlyHint": false
+		}
 	},
 	"survey-get": {
 		"description": "Get a specific survey by ID. Returns the survey configuration including questions, targeting, and scheduling details.",
 		"category": "Surveys",
-		"summary": "Get a specific survey by ID."
+		"summary": "Get a specific survey by ID.",
+		"required_scopes": ["survey:read"],
+		"annotations": {
+			"destructiveHint": false,
+			"idempotentHint": true,
+			"openWorldHint": true,
+			"readOnlyHint": true
+		}
 	},
 	"surveys-get-all": {
 		"description": "Get all surveys in the project with optional filtering. Can filter by search term or use pagination.",
 		"category": "Surveys",
-		"summary": "Get all surveys in the project with optional filtering."
+		"summary": "Get all surveys in the project with optional filtering.",
+		"required_scopes": ["survey:read"],
+		"annotations": {
+			"destructiveHint": false,
+			"idempotentHint": true,
+			"openWorldHint": true,
+			"readOnlyHint": true
+		}
 	},
 	"survey-update": {
 		"description": "Update an existing survey by ID. Can update name, description, questions, scheduling, and other survey properties.",
 		"category": "Surveys",
-		"summary": "Update an existing survey by ID."
+		"summary": "Update an existing survey by ID.",
+		"required_scopes": ["survey:write"],
+		"annotations": {
+			"destructiveHint": false,
+			"idempotentHint": true,
+			"openWorldHint": true,
+			"readOnlyHint": false
+		}
 	},
 	"survey-delete": {
 		"description": "Delete a survey by ID (soft delete - marks as archived).",
 		"category": "Surveys",
-		"summary": "Delete a survey by ID."
+		"summary": "Delete a survey by ID.",
+		"required_scopes": ["survey:write"],
+		"annotations": {
+			"destructiveHint": true,
+			"idempotentHint": true,
+			"openWorldHint": true,
+			"readOnlyHint": false
+		}
 	},
 	"surveys-global-stats": {
 		"description": "Get aggregated response statistics across all surveys in the project. Includes event counts (shown, dismissed, sent), unique respondents, conversion rates, and timing data. Supports optional date filtering.",
 		"category": "Surveys",
-		"summary": "Get aggregated response statistics across all surveys."
+		"summary": "Get aggregated response statistics across all surveys.",
+		"required_scopes": ["survey:read"],
+		"annotations": {
+			"destructiveHint": false,
+			"idempotentHint": true,
+			"openWorldHint": true,
+			"readOnlyHint": true
+		}
 	},
 	"survey-stats": {
 		"description": "Get response statistics for a specific survey. Includes detailed event counts (shown, dismissed, sent), unique respondents, conversion rates, and timing data. Supports optional date filtering.",
 		"category": "Surveys",
-		"summary": "Get response statistics for a specific survey."
+		"summary": "Get response statistics for a specific survey.",
+		"required_scopes": ["survey:read"],
+		"annotations": {
+			"destructiveHint": false,
+			"idempotentHint": true,
+			"openWorldHint": true,
+			"readOnlyHint": true
+		}
 	}
 }

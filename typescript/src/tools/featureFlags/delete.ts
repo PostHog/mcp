@@ -1,6 +1,5 @@
 import { FeatureFlagDeleteSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = FeatureFlagDeleteSchema;
@@ -34,19 +33,10 @@ export const deleteHandler = async (context: Context, params: Params) => {
 	};
 };
 
-const definition = getToolDefinition("delete-feature-flag");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "delete-feature-flag",
-	description: definition.description,
 	schema,
 	handler: deleteHandler,
-	annotations: {
-		destructiveHint: true,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: false,
-	},
 });
 
 export default tool;

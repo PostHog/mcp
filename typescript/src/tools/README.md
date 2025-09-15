@@ -41,8 +41,7 @@ export const FeatureFlagCreateSchema = z.object({
 
 ```typescript
 import { FeatureFlagCreateSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = FeatureFlagCreateSchema;
@@ -72,19 +71,10 @@ export const createHandler = async (context: Context, params: Params) => {
     };
 };
 
-const definition = getToolDefinition("create-feature-flag");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
     name: "create-feature-flag",
-    description: definition.description,
     schema,
     handler: createHandler,
-    annotations: {
-        destructiveHint: false,  // Tool doesn't delete existing data
-        idempotentHint: false,   // Creating flags isn't idempotent (creates new each time)
-        openWorldHint: true,     // Tool creates new resources in the world
-        readOnlyHint: false,     // Tool modifies state (creates new flags)
-    },
 });
 
 export default tool;
@@ -95,25 +85,51 @@ export default tool;
 - Use `context.api` to make API calls
 - Add helpful information like URLs to responses
 - Handle errors gracefully with descriptive messages
-- Include annotations to hint at tool behavior (see below)
+- Return `ToolBase` type - title, description, scopes and annotations are injected from JSON
 
 ### 3. Add Tool Definition (`schema/tool-definitions.json`)
 
-Add a clear, actionable description for your tool:
+Add a clear, actionable description for your tool, assign it to a feature, specify required API scopes, and include behavioral annotations:
 
 ```json
 {
     "create-feature-flag": {
-        "description": "Creates a new feature flag in the project. Once you have created a feature flag, you should: Ask the user if they want to add it to their codebase, Use the \"search-docs\" tool to find documentation on how to add feature flags to the codebase (search for the right language / framework), Clarify where it should be added and then add it."
+        "title": "Create Feature Flag",
+        "description": "Creates a new feature flag in the project. Once you have created a feature flag, you should: Ask the user if they want to add it to their codebase, Use the \"search-docs\" tool to find documentation on how to add feature flags to the codebase (search for the right language / framework), Clarify where it should be added and then add it.",
+        "category": "Feature flags", // This will be displayed in the docs, but not readable by the MCP client
+        "feature": "flags",
+        "summary": "Creates a new feature flag in the project.", // This will be displayed in the docs, but not readable by the MCP client.
+        "required_scopes": ["feature_flag:write"], // You can find a list of available scopes here: https://github.com/PostHog/posthog/blob/31082f4bcc4c45a0ac830777b8a3048e7752a1bc/frontend/src/lib/scopes.tsx
+        "annotations": {
+            "destructiveHint": false,  // Does the tool delete or destructively modify data?
+            "idempotentHint": false,   // Can the tool be safely called multiple times with same result?
+            "openWorldHint": true,     // Does the tool interact with external systems or create new resources?
+            "readOnlyHint": false      // Is the tool read-only (doesn't modify any state)?
+        }
     }
 }
 ```
 
-**Description Tips:**
-- Be specific about what the tool does
-- Include follow-up actions if relevant
-- Mention any prerequisites or limitations
-- Use clear, concise language
+**Available Features:**
+- `flags` - [Feature flag management](https://posthog.com/docs/feature-flags)
+- `workspace` - [Organization and project management](https://posthog.com/docs/getting-started/cloud)
+- `error-tracking` - [Error monitoring and debugging](https://posthog.com/docs/errors)
+- `dashboards` - [Dashboard creation and management](https://posthog.com/docs/product-analytics/dashboards)
+- `insights` - [Analytics insights and SQL queries](https://posthog.com/docs/product-analytics/insights)
+- `experiments` - [A/B testing experiments](https://posthog.com/docs/experiments)
+- `llm-analytics` - [LLM usage and cost tracking](https://posthog.com/docs/llm-analytics)
+- `docs` - PostHog documentation search
+
+If your tool doesn't fit any of these features, you can create a new feature category yourself.
+If you do add a new feature, make sure to update the `README.md` in the root of the repository to list the new feature and include it in the tests at `typescript/tests/unit/tool-filtering.test.ts`. You'll also need to update the `AVAILABLE_FEATURES` list in `https://github.com/posthog/wizard/` so it shows up during feature selection when running `wizard mcp add`.
+
+**Tool Definition Tips:**
+- **Title**: Human-readable name shown in UI
+- **Description**: Be specific about what the tool does, include follow-up actions if relevant
+- **Required Scopes**: Use highest required scope (write if creates/modifies, read if only reads)
+- **Annotations**: Provide hints about tool behavior for MCP clients
+- **Feature**: Assign to appropriate feature category for filtering
+- **Category**: Groups the tools for display in the docs
 
 ### 4. Write Integration Tests (`tests/tools/featureFlags.integration.test.ts`)
 
@@ -227,16 +243,3 @@ public featureFlags(params: { projectId: number }) {
 - **Be comprehensive**: Include useful information in responses, but don't stuff the context window with unnecessary information
 - **Add context**: Include helpful URLs, descriptions, or related data
 - **Be consistent**: Use similar patterns across tools
-
-## Tool Annotations
-
-Tools should include annotations that provide hints about their behavior to MCP clients. These help clients understand what a tool does and how it might affect the system:
-
-```typescript
-annotations: {
-    destructiveHint: boolean,  // Does the tool delete or destructively modify data?
-    idempotentHint: boolean,   // Can the tool be safely called multiple times with same result?
-    openWorldHint: boolean,    // Does the tool interact with external systems or create new resources?
-    readOnlyHint: boolean,     // Is the tool read-only (doesn't modify any state)?
-}
-```

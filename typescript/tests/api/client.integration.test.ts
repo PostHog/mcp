@@ -1,4 +1,5 @@
 import { ApiClient } from "@/api/client";
+import type { CreateInsightInput } from "@/schema/insights";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
 const API_BASE_URL = process.env.TEST_POSTHOG_API_BASE_URL || "http://localhost:8010";
@@ -149,20 +150,76 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 			}
 		});
 
-		it("should get property definitions", async () => {
-			const result = await client
-				.projects()
-				.propertyDefinitions({ projectId: testProjectId });
+		it.each(["event", "person"] as const)(
+			"should get property definitions for %s type",
+			async (type) => {
+				const result = await client.projects().propertyDefinitions({
+					projectId: testProjectId,
+					type,
+					eventNames: type === "event" ? ["$pageview"] : undefined,
+					excludeCoreProperties: false,
+					filterByEventNames: type === "event",
+					isFeatureFlag: false,
+					limit: 100,
+				});
+
+				expect(result.success).toBe(true);
+
+				if (result.success) {
+					expect(Array.isArray(result.data)).toBe(true);
+					if (result.data.length > 0) {
+						const propDef = result.data[0];
+						expect(propDef).toHaveProperty("id");
+						expect(propDef).toHaveProperty("name");
+					}
+				}
+			},
+		);
+
+		it("should get event definitions", async () => {
+			const result = await client.projects().eventDefinitions({ projectId: testProjectId });
 
 			expect(result.success).toBe(true);
 
 			if (result.success) {
 				expect(Array.isArray(result.data)).toBe(true);
 				if (result.data.length > 0) {
-					const propDef = result.data[0];
-					expect(propDef).toHaveProperty("id");
-					expect(propDef).toHaveProperty("name");
+					const eventDef = result.data[0];
+					expect(eventDef).toHaveProperty("id");
+					expect(eventDef).toHaveProperty("name");
+					expect(eventDef).toHaveProperty("last_seen_at");
 				}
+			}
+		});
+
+		it("should get event definitions with search parameter", async () => {
+			const result = await client.projects().eventDefinitions({
+				projectId: testProjectId,
+				search: "pageview",
+			});
+
+			expect(result.success).toBe(true);
+
+			if (result.success) {
+				expect(Array.isArray(result.data)).toBe(true);
+				// All returned events should contain "pageview" in their name
+				for (const eventDef of result.data) {
+					expect(eventDef.name.toLowerCase()).toContain("pageview");
+				}
+			}
+		});
+
+		it("should return empty array when searching for non-existent events", async () => {
+			const result = await client.projects().eventDefinitions({
+				projectId: testProjectId,
+				search: "non-existent-event-xyz123",
+			});
+
+			expect(result.success).toBe(true);
+
+			if (result.success) {
+				expect(Array.isArray(result.data)).toBe(true);
+				expect(result.data.length).toBe(0);
 			}
 		});
 	});
@@ -311,7 +368,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 							},
 						},
 					},
-					saved: true,
 					favorited: false,
 				},
 			});
@@ -352,6 +408,554 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 
 				// Delete will be handled by afterEach cleanup
 			}
+		});
+
+		describe("Trends Query Tests", () => {
+			it("should create trends insight with minimal parameters", async () => {
+				const insightData: CreateInsightInput = {
+					name: "Basic Trends Test",
+					query: {
+						kind: "InsightVizNode",
+						source: {
+							kind: "TrendsQuery",
+							series: [
+								{
+									kind: "EventsNode",
+									event: "$pageview",
+									math: "total",
+								},
+							],
+							properties: [],
+							filterTestAccounts: false,
+							interval: "day",
+						},
+					},
+					favorited: false,
+				};
+
+				const result = await client.insights({ projectId: testProjectId }).create({
+					data: insightData,
+				});
+
+				expect(result.success).toBe(true);
+				if (result.success) {
+					createdResources.insights.push(result.data.id);
+				}
+			});
+
+			it("should create trends insight with all display types", async () => {
+				const displayTypes = [
+					"ActionsLineGraph",
+					"ActionsTable",
+					"ActionsPie",
+					"ActionsBar",
+					"ActionsBarValue",
+					"WorldMap",
+					"BoldNumber",
+				] as const;
+
+				for (const display of displayTypes) {
+					const insightData: CreateInsightInput = {
+						name: `Trends Display - ${display}`,
+						query: {
+							kind: "InsightVizNode",
+							source: {
+								kind: "TrendsQuery",
+								series: [
+									{
+										kind: "EventsNode",
+										event: "$pageview",
+										math: "total",
+									},
+								],
+								trendsFilter: {
+									display,
+									showLegend: true,
+								},
+								properties: [],
+								filterTestAccounts: true,
+								interval: "day",
+							},
+						},
+						favorited: false,
+					};
+
+					const result = await client.insights({ projectId: testProjectId }).create({
+						data: insightData,
+					});
+
+					expect(result.success).toBe(true);
+					if (result.success) {
+						createdResources.insights.push(result.data.id);
+					}
+				}
+			});
+
+			it("should create trends insight with breakdowns", async () => {
+				const breakdownTypes = ["event", "person"] as const;
+
+				for (const breakdownType of breakdownTypes) {
+					const insightData: CreateInsightInput = {
+						name: `Trends Breakdown - ${breakdownType}`,
+						query: {
+							kind: "InsightVizNode",
+							source: {
+								kind: "TrendsQuery",
+								series: [
+									{
+										kind: "EventsNode",
+										event: "$pageview",
+										math: "total",
+									},
+								],
+								breakdownFilter: {
+									breakdown_type: breakdownType,
+									breakdown:
+										breakdownType === "event" ? "$current_url" : "$browser",
+									breakdown_limit: 10,
+								},
+								properties: [],
+								filterTestAccounts: true,
+								interval: "day",
+							},
+						},
+						favorited: false,
+					};
+
+					const result = await client.insights({ projectId: testProjectId }).create({
+						data: insightData,
+					});
+
+					expect(result.success).toBe(true);
+					if (result.success) {
+						createdResources.insights.push(result.data.id);
+					}
+				}
+			});
+
+			it("should create trends insight with different intervals", async () => {
+				const intervals = ["hour", "day", "week", "month"] as const;
+
+				for (const interval of intervals) {
+					const insightData: CreateInsightInput = {
+						name: `Trends Interval - ${interval}`,
+						query: {
+							kind: "InsightVizNode",
+							source: {
+								kind: "TrendsQuery",
+								dateRange: {
+									date_from: "-30d",
+									date_to: null,
+								},
+								interval,
+								series: [
+									{
+										kind: "EventsNode",
+										event: "$pageview",
+										math: "total",
+									},
+								],
+								properties: [],
+								filterTestAccounts: true,
+							},
+						},
+						favorited: false,
+					};
+
+					const result = await client.insights({ projectId: testProjectId }).create({
+						data: insightData,
+					});
+
+					expect(result.success).toBe(true);
+					if (result.success) {
+						createdResources.insights.push(result.data.id);
+					}
+				}
+			});
+
+			it("should create trends insight with compare filter", async () => {
+				const insightData: CreateInsightInput = {
+					name: "Trends Compare Test",
+					query: {
+						kind: "InsightVizNode",
+						source: {
+							kind: "TrendsQuery",
+							series: [
+								{
+									kind: "EventsNode",
+									event: "$pageview",
+									math: "total",
+								},
+							],
+							compareFilter: {
+								compare: true,
+								compare_to: "-1w",
+							},
+							properties: [],
+							filterTestAccounts: false,
+							interval: "day",
+						},
+					},
+					favorited: false,
+				};
+
+				const result = await client.insights({ projectId: testProjectId }).create({
+					data: insightData,
+				});
+
+				expect(result.success).toBe(true);
+				if (result.success) {
+					createdResources.insights.push(result.data.id);
+				}
+			});
+
+			it("should create trends insight with property filters", async () => {
+				const insightData: CreateInsightInput = {
+					name: "Trends Property Filters",
+					query: {
+						kind: "InsightVizNode",
+						source: {
+							kind: "TrendsQuery",
+							series: [
+								{
+									kind: "EventsNode",
+									event: "$pageview",
+									math: "total",
+									properties: [
+										{
+											key: "$browser",
+											value: ["Chrome", "Safari"],
+											operator: "exact",
+											type: "event",
+										},
+									],
+								},
+							],
+							properties: [
+								{
+									key: "$current_url",
+									value: "/dashboard",
+									operator: "icontains",
+									type: "event",
+								},
+							],
+							filterTestAccounts: false,
+							interval: "day",
+						},
+					},
+					favorited: false,
+				};
+
+				const result = await client.insights({ projectId: testProjectId }).create({
+					data: insightData,
+				});
+
+				expect(result.success).toBe(true);
+				if (result.success) {
+					createdResources.insights.push(result.data.id);
+				}
+			});
+		});
+
+		describe("Funnels Query Tests", () => {
+			it("should create funnel insight with minimal parameters", async () => {
+				const insightData: CreateInsightInput = {
+					name: "Basic Funnel Test",
+					query: {
+						kind: "InsightVizNode",
+						source: {
+							kind: "FunnelsQuery",
+							series: [
+								{
+									kind: "EventsNode",
+									event: "$pageview",
+									math: "total",
+								},
+								{
+									kind: "EventsNode",
+									event: "button_clicked",
+									math: "total",
+								},
+							],
+							properties: [],
+							filterTestAccounts: false,
+						},
+					},
+					favorited: false,
+				};
+
+				const result = await client.insights({ projectId: testProjectId }).create({
+					data: insightData,
+				});
+
+				expect(result.success).toBe(true);
+				if (result.success) {
+					createdResources.insights.push(result.data.id);
+				}
+			});
+
+			it("should create funnel insight with different layouts and order types", async () => {
+				const configs = [
+					{ layout: "horizontal" as const, orderType: "ordered" as const },
+					{ layout: "vertical" as const, orderType: "unordered" as const },
+					{ layout: "vertical" as const, orderType: "strict" as const },
+				];
+
+				for (const config of configs) {
+					const insightData: CreateInsightInput = {
+						name: `Funnel ${config.layout} ${config.orderType}`,
+						query: {
+							kind: "InsightVizNode",
+							source: {
+								kind: "FunnelsQuery",
+								series: [
+									{
+										kind: "EventsNode",
+										event: "$pageview",
+										math: "total",
+									},
+									{
+										kind: "EventsNode",
+										event: "button_clicked",
+										math: "total",
+									},
+								],
+								funnelsFilter: {
+									layout: config.layout,
+									funnelOrderType: config.orderType,
+									funnelWindowInterval: 7,
+									funnelWindowIntervalUnit: "day",
+								},
+								properties: [],
+								filterTestAccounts: false,
+							},
+						},
+						favorited: false,
+					};
+
+					const result = await client.insights({ projectId: testProjectId }).create({
+						data: insightData,
+					});
+
+					expect(result.success).toBe(true);
+					if (result.success) {
+						createdResources.insights.push(result.data.id);
+					}
+				}
+			});
+
+			it("should create funnel insight with breakdown attribution", async () => {
+				const attributionTypes = ["first_touch", "last_touch", "all_events"] as const;
+
+				for (const attribution of attributionTypes) {
+					const insightData: CreateInsightInput = {
+						name: `Funnel Attribution - ${attribution}`,
+						query: {
+							kind: "InsightVizNode",
+							source: {
+								kind: "FunnelsQuery",
+								series: [
+									{
+										kind: "EventsNode",
+										event: "$pageview",
+										math: "total",
+									},
+									{
+										kind: "EventsNode",
+										event: "button_clicked",
+										math: "total",
+									},
+								],
+								breakdownFilter: {
+									breakdown_type: "event",
+									breakdown: "$browser",
+									breakdown_limit: 5,
+								},
+								funnelsFilter: {
+									breakdownAttributionType: attribution,
+								},
+								properties: [],
+								filterTestAccounts: false,
+							},
+						},
+						favorited: false,
+					};
+
+					const result = await client.insights({ projectId: testProjectId }).create({
+						data: insightData,
+					});
+
+					expect(result.success).toBe(true);
+					if (result.success) {
+						createdResources.insights.push(result.data.id);
+					}
+				}
+			});
+
+			it("should create funnel insight with conversion window", async () => {
+				const windowUnits = ["minute", "hour", "day", "week", "month"] as const;
+
+				for (const unit of windowUnits) {
+					const insightData: CreateInsightInput = {
+						name: `Funnel Window - ${unit}`,
+						query: {
+							kind: "InsightVizNode",
+							source: {
+								kind: "FunnelsQuery",
+								series: [
+									{
+										kind: "EventsNode",
+										event: "$pageview",
+										math: "total",
+									},
+									{
+										kind: "EventsNode",
+										event: "button_clicked",
+										math: "total",
+									},
+								],
+								funnelsFilter: {
+									funnelWindowInterval:
+										unit === "minute" ? 30 : unit === "hour" ? 2 : 7,
+									funnelWindowIntervalUnit: unit,
+								},
+								properties: [],
+								filterTestAccounts: false,
+							},
+						},
+						favorited: false,
+					};
+
+					const result = await client.insights({ projectId: testProjectId }).create({
+						data: insightData,
+					});
+
+					expect(result.success).toBe(true);
+					if (result.success) {
+						createdResources.insights.push(result.data.id);
+					}
+				}
+			});
+		});
+
+		describe("HogQL Query Tests", () => {
+			it("should create HogQL insight with basic query", async () => {
+				const insightData: CreateInsightInput = {
+					name: "Basic HogQL Test",
+					query: {
+						kind: "DataVisualizationNode" as const,
+						source: {
+							kind: "HogQLQuery" as const,
+							query: "SELECT count() as total_events FROM events WHERE event = '$pageview'",
+							filters: {
+								dateRange: {
+									date_from: "-7d",
+									date_to: null,
+								},
+								filterTestAccounts: true,
+							},
+						},
+					},
+					favorited: false,
+				};
+
+				const result = await client.insights({ projectId: testProjectId }).create({
+					data: insightData,
+				});
+
+				expect(result.success).toBe(true);
+				if (result.success) {
+					createdResources.insights.push(result.data.id);
+				}
+			});
+
+			it("should create HogQL insight with aggregation query", async () => {
+				const insightData: CreateInsightInput = {
+					name: "HogQL Aggregation Test",
+					query: {
+						kind: "DataVisualizationNode" as const,
+						source: {
+							kind: "HogQLQuery" as const,
+							query: `
+								SELECT 
+									toDate(timestamp) as date,
+									count() as events,
+									uniq(distinct_id) as unique_users,
+									avg(toFloat(JSONExtractString(properties, '$screen_width'))) as avg_screen_width
+								FROM events 
+								WHERE event = '$pageview' 
+									AND timestamp >= now() - INTERVAL 30 DAY
+								GROUP BY date 
+								ORDER BY date
+							`,
+							filters: {
+								dateRange: {
+									date_from: "-30d",
+									date_to: null,
+								},
+								filterTestAccounts: true,
+							},
+						},
+					},
+					favorited: false,
+				};
+
+				const result = await client.insights({ projectId: testProjectId }).create({
+					data: insightData,
+				});
+
+				expect(result.success).toBe(true);
+				if (result.success) {
+					createdResources.insights.push(result.data.id);
+				}
+			});
+
+			it("should create HogQL insight with property filters", async () => {
+				const insightData: CreateInsightInput = {
+					name: "HogQL Property Filter Test",
+					query: {
+						kind: "DataVisualizationNode" as const,
+						source: {
+							kind: "HogQLQuery" as const,
+							query: `
+								SELECT 
+									JSONExtractString(properties, '$browser') as browser,
+									count() as pageviews
+								FROM events 
+								WHERE event = '$pageview'
+								GROUP BY browser
+								ORDER BY pageviews DESC
+								LIMIT 10
+							`,
+							filters: {
+								dateRange: {
+									date_from: "-30d",
+									date_to: null,
+								},
+								filterTestAccounts: true,
+								properties: [
+									{
+										key: "$browser",
+										value: "Chrome",
+										operator: "exact",
+										type: "event",
+									},
+								],
+							},
+						},
+					},
+					favorited: false,
+				};
+
+				const result = await client.insights({ projectId: testProjectId }).create({
+					data: insightData,
+				});
+
+				expect(result.success).toBe(true);
+				if (result.success) {
+					createdResources.insights.push(result.data.id);
+				}
+			});
 		});
 	});
 
@@ -486,7 +1090,7 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 
 			if (result.success) {
 				expect(result.data).toHaveProperty("distinctId");
-				expect(typeof result.data.distinctId).toBe("string");
+				expect(typeof result.data.distinct_id).toBe("string");
 			}
 		});
 	});

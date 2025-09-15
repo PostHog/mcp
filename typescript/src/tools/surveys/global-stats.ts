@@ -1,6 +1,5 @@
 import { SurveyGlobalStatsSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = SurveyGlobalStatsSchema;
@@ -20,19 +19,10 @@ export const globalStatsHandler = async (context: Context, params: Params) => {
 	};
 };
 
-const definition = getToolDefinition("surveys-global-stats");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "surveys-global-stats",
-	description: definition.description,
 	schema,
 	handler: globalStatsHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: false,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

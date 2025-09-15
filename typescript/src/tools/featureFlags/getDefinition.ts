@@ -1,6 +1,5 @@
 import { FeatureFlagGetDefinitionSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = FeatureFlagGetDefinitionSchema;
@@ -66,19 +65,10 @@ export const getDefinitionHandler = async (context: Context, { flagId, flagKey }
 	};
 };
 
-const definition = getToolDefinition("feature-flag-get-definition");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "feature-flag-get-definition",
-	description: definition.description,
 	schema,
 	handler: getDefinitionHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

@@ -1,6 +1,6 @@
 {
 	"name": "@posthog/agent-toolkit",
-	"version": "0.1.0",
+	"version": "0.2.2",
 	"description": "PostHog tools for AI agents",
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",
@@ -42,27 +42,28 @@
 	"author": "PostHog Inc.",
 	"license": "MIT",
 	"peerDependencies": {
-		"ai": "^5.0.0",
 		"@langchain/core": "^0.3.72",
 		"@langchain/openai": "^0.6.9",
+		"ai": "^5.0.0",
 		"langchain": "^0.3.31"
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "^1.17.3",
-		"ai": "^5.0.18",
 		"agents": "^0.0.113",
+		"ai": "^5.0.18",
 		"posthog-node": "^4.18.0",
 		"zod": "^3.24.4"
 	},
 	"devDependencies": {
 		"@langchain/core": "^0.3.72",
 		"@langchain/openai": "^0.6.9",
-		"@types/node": "^22.15.34",
 		"@types/dotenv": "^6.1.1",
+		"@types/node": "^22.15.34",
 		"dotenv": "^16.4.7",
 		"langchain": "^0.3.31",
 		"tsup": "^8.5.0",
 		"typescript": "^5.8.3",
+		"uuid": "^11.1.0",
 		"vite": "^5.0.0",
 		"vite-tsconfig-paths": "^5.1.4",
 		"vitest": "^3.2.4",

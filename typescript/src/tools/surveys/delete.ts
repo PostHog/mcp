@@ -1,6 +1,5 @@
 import { SurveyDeleteSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, Tool, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = SurveyDeleteSchema;
@@ -23,19 +22,10 @@ export const deleteHandler = async (context: Context, params: Params) => {
 	};
 };
 
-const definition = getToolDefinition("survey-delete");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "survey-delete",
-	description: definition.description,
 	schema,
 	handler: deleteHandler,
-	annotations: {
-		destructiveHint: true,
-		idempotentHint: false,
-		openWorldHint: false,
-		readOnlyHint: false,
-	},
 });
 
 export default tool;

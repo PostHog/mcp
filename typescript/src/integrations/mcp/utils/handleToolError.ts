@@ -41,9 +41,15 @@ export class MCPToolError extends Error {
  * @param error - The error object.
  * @param tool - Tool that caused the error.
  * @param distinctId - User's distinct ID for tracking.
+ * @param sessionId - Session UUID for tracking.
  * @returns A structured error message.
  */
-export function handleToolError(error: any, tool?: string, distinctId?: string): CallToolResult {
+export function handleToolError(
+	error: any,
+	tool?: string,
+	distinctId?: string,
+	sessionUuid?: string,
+): CallToolResult {
 	const mcpError =
 		error instanceof MCPToolError
 			? error
@@ -53,13 +59,17 @@ export function handleToolError(error: any, tool?: string, distinctId?: string):
 					error,
 				);
 
-	console.error(`[MCP Error][${mcpError.tool}]`, mcpError.getTrackingData());
-
-	getPostHogClient().captureException(mcpError, distinctId, {
+	const properties: Record<string, any> = {
 		team: "growth",
 		tool: mcpError.tool,
 		$exception_fingerprint: `${mcpError.tool}-${mcpError.message}`,
-	});
+	};
+
+	if (sessionUuid) {
+		properties.$session_id = sessionUuid;
+	}
+
+	getPostHogClient().captureException(mcpError, distinctId, properties);
 
 	return {
 		content: [

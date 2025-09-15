@@ -7,12 +7,12 @@
 		"dev": "tsx src/index.ts"
 	},
 	"dependencies": {
-		"@posthog/agent-toolkit": "file:../../typescript",
 		"@langchain/core": "^0.3.72",
 		"@langchain/openai": "^0.6.9",
+		"@posthog/agent-toolkit": "^0.2.1",
+		"dotenv": "^16.4.7",
 		"langchain": "^0.3.31",
-		"zod": "^3.24.4",
-		"dotenv": "^16.4.7"
+		"zod": "^3.24.4"
 	},
 	"devDependencies": {
 		"@types/node": "^22.15.34",

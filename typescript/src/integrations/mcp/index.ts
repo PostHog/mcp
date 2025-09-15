@@ -5,7 +5,9 @@ import type { z } from "zod";
 import { ApiClient } from "@/api/client";
 import { getPostHogClient } from "@/integrations/mcp/utils/client";
 import { handleToolError } from "@/integrations/mcp/utils/handleToolError";
+import type { AnalyticsEvent } from "@/lib/analytics";
 import { CUSTOM_BASE_URL, MCP_DOCS_URL } from "@/lib/constants";
+import { SessionManager } from "@/lib/utils/SessionManager";
 import { StateManager } from "@/lib/utils/StateManager";
 import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
 import { hash } from "@/lib/utils/helper-functions";
@@ -14,19 +16,21 @@ import type { CloudRegion, Context, State, Tool } from "@/tools/types";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
-- If some resource from another tool is not found, ask the user if they want to try finding it in another project.
+- If you get errors due to permissions being denied, check that you have the correct active project and that the user has access to the required project.
 - If you cannot answer the user's PostHog related request or question using other available tools in this MCP, use the 'docs-search' tool to provide information from the documentation to guide user how they can do it themselves - when doing so provide condensed instructions with links to sources.
 `;
 
 type RequestProperties = {
 	userHash: string;
 	apiToken: string;
+	sessionId?: string;
+	features?: string[];
 };
 
 // Define our MCP agent with tools
 export class MyMCP extends McpAgent<Env> {
 	server = new McpServer({
-		name: "PostHog MCP",
+		name: "PostHog",
 		version: "1.0.0",
 		instructions: INSTRUCTIONS,
 	});
@@ -36,11 +40,14 @@ export class MyMCP extends McpAgent<Env> {
 		orgId: undefined,
 		distinctId: undefined,
 		region: undefined,
+		apiKey: undefined,
 	};
 
 	_cache: DurableObjectCache<State> | undefined;
 
 	_api: ApiClient | undefined;
+
+	_sessionManager: SessionManager | undefined;
 
 	get requestProperties() {
 		return this.props as RequestProperties;
@@ -59,6 +66,14 @@ export class MyMCP extends McpAgent<Env> {
 		}
 
 		return this._cache;
+	}
+
+	get sessionManager() {
+		if (!this._sessionManager) {
+			this._sessionManager = new SessionManager(this.cache);
+		}
+
+		return this._sessionManager;
 	}
 
 	async detectRegion(): Promise<CloudRegion | undefined> {
@@ -124,20 +139,33 @@ export class MyMCP extends McpAgent<Env> {
 			if (!userResult.success) {
 				throw new Error(`Failed to get user: ${userResult.error.message}`);
 			}
-			await this.cache.set("distinctId", userResult.data.distinctId);
-			_distinctId = userResult.data.distinctId;
+			await this.cache.set("distinctId", userResult.data.distinct_id);
+			_distinctId = userResult.data.distinct_id;
 		}
 
 		return _distinctId;
 	}
 
-	async trackEvent(event: string, properties: Record<string, any> = {}) {
+	async trackEvent(event: AnalyticsEvent, properties: Record<string, any> = {}) {
 		try {
 			const distinctId = await this.getDistinctId();
 
 			const client = getPostHogClient();
 
-			client.capture({ distinctId, event, properties });
+			client.capture({
+				distinctId,
+				event,
+				properties: {
+					...(this.requestProperties.sessionId
+						? {
+								$session_id: await this.sessionManager.getSessionUuid(
+									this.requestProperties.sessionId,
+								),
+							}
+						: {}),
+					...properties,
+				},
+			});
 		} catch (error) {
 			//
 		}
@@ -148,25 +176,57 @@ export class MyMCP extends McpAgent<Env> {
 		handler: (params: z.infer<z.ZodObject<TSchema>>) => Promise<any>,
 	): void {
 		const wrappedHandler = async (params: z.infer<z.ZodObject<TSchema>>) => {
+			const validation = tool.schema.safeParse(params);
+
+			if (!validation.success) {
+				await this.trackEvent("mcp tool call", {
+					tool: tool.name,
+					valid_input: false,
+					input: params,
+				});
+				return [
+					{
+						type: "text",
+						text: `Invalid input: ${validation.error.message}`,
+					},
+				];
+			}
+
 			await this.trackEvent("mcp tool call", {
 				tool: tool.name,
+				valid_input: true,
+				input: params,
 			});
 
 			try {
-				return await handler(params);
+				const result = await handler(params);
+				await this.trackEvent("mcp tool response", {
+					tool: tool.name,
+					valid_input: true,
+					input: params,
+					output: result,
+				});
+				return result;
 			} catch (error: any) {
 				const distinctId = await this.getDistinctId();
-				return handleToolError(error, tool.name, distinctId);
+				return handleToolError(
+					error,
+					tool.name,
+					distinctId,
+					this.requestProperties.sessionId
+						? await this.sessionManager.getSessionUuid(this.requestProperties.sessionId)
+						: undefined,
+				);
 			}
 		};
 
-		this.server.tool(
+		this.server.registerTool(
 			tool.name,
-			tool.description,
-			tool.schema.shape,
 			{
-				...tool.annotations,
-				title: tool.name,
+				title: tool.title,
+				description: tool.description,
+				inputSchema: tool.schema.shape,
+				annotations: tool.annotations,
 			},
 			wrappedHandler as unknown as ToolCallback<TSchema>,
 		);
@@ -179,12 +239,16 @@ export class MyMCP extends McpAgent<Env> {
 			cache: this.cache,
 			env: this.env,
 			stateManager: new StateManager(this.cache, api),
+			sessionManager: this.sessionManager,
 		};
 	}
 
 	async init() {
 		const context = await this.getContext();
-		const allTools = getToolsFromContext(context);
+
+		// Get features from request properties if available
+		const features = this.requestProperties.features;
+		const allTools = await getToolsFromContext(context, features);
 
 		for (const tool of allTools) {
 			this.registerTool(tool, async (params) => tool.handler(context, params));
@@ -209,6 +273,8 @@ export default {
 
 		const token = request.headers.get("Authorization")?.split(" ")[1];
 
+		const sessionId = url.searchParams.get("sessionId");
+
 		if (!token) {
 			return new Response(
 				`No token provided, please provide a valid API token. View the documentation for more information: ${MCP_DOCS_URL}`,
@@ -230,14 +296,23 @@ export default {
 		ctx.props = {
 			apiToken: token,
 			userHash: hash(token),
+			sessionId: sessionId || undefined,
 		};
 
-		if (url.pathname === "/sse" || url.pathname === "/sse/message") {
-			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
+		// Search params are used to build up the list of available tools. If no features are provided, all tools are available.
+		// If features are provided, only tools matching those features will be available.
+		// Features are provided as a comma-separated list in the "features" query parameter.
+		// Example: ?features=org,insights
+		const featuresParam = url.searchParams.get("features");
+		const features = featuresParam ? featuresParam.split(",").filter(Boolean) : undefined;
+		ctx.props = { ...ctx.props, features };
+
+		if (url.pathname.startsWith("/mcp")) {
+			return MyMCP.serve("/mcp").fetch(request, env, ctx);
 		}
 
-		if (url.pathname === "/mcp") {
-			return MyMCP.serve("/mcp").fetch(request, env, ctx);
+		if (url.pathname.startsWith("/sse")) {
+			return MyMCP.serveSSE("/sse").fetch(request, env, ctx);
 		}
 
 		return new Response("Not found", { status: 404 });

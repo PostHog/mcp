@@ -11,5 +11,17 @@
 		{ "type": "fix", "section": "Bug Fixes" },
 		{ "type": "docs", "section": "Documentation" },
 		{ "type": "chore", "section": "Miscellaneous" }
-	]
+	],
+	"packages": {
+		"typescript": {
+			"release-type": "node",
+			"package-name": "@posthog/agent-toolkit",
+			"changelog-path": "typescript/CHANGELOG.md"
+		},
+		"python": {
+			"release-type": "python",
+			"package-name": "posthog-agent-toolkit",
+			"changelog-path": "python/CHANGELOG.md"
+		}
+	}
 }

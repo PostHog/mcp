@@ -35,7 +35,7 @@ class Data1(BaseModel):
     )
     name: Annotated[str, Field(min_length=1)]
     description: str | None = None
-    pinned: bool | None = False
+    pinned: bool | None = None
     tags: list[str] | None = None
 
 
@@ -289,43 +289,20 @@ class FeatureFlagUpdateSchema(BaseModel):
     data: Data4
 
 
-class DateRange(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    date_from: str
-    """
-    The start date of the date range. Could be a date string or a relative date string like '-7d'
-    """
-    date_to: str
-    """
-    The end date of the date range. Could be a date string or a relative date string like '-1d'
-    """
-
-
-class Filters2(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    dateRange: DateRange | None = None
-
-
-class Source(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    kind: Literal["HogQLQuery"] = "HogQLQuery"
-    query: str
-    explain: bool | None = None
-    filters: Filters2 | None = None
+class Kind(StrEnum):
+    INSIGHT_VIZ_NODE = "InsightVizNode"
+    DATA_VISUALIZATION_NODE = "DataVisualizationNode"
 
 
 class Query(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    kind: Literal["DataVisualizationNode"] = "DataVisualizationNode"
-    source: Source
+    kind: Kind
+    source: Any | None = None
+    """
+    For new insights, use the query from your successful query-run tool call. For updates, the existing query can optionally be reused.
+    """
 
 
 class Data5(BaseModel):
@@ -335,8 +312,7 @@ class Data5(BaseModel):
     name: str
     query: Query
     description: str | None = None
-    saved: bool | None = True
-    favorited: bool | None = False
+    favorited: bool
     tags: list[str] | None = None
 
 
@@ -354,13 +330,22 @@ class InsightDeleteSchema(BaseModel):
     insightId: str
 
 
+class InsightGenerateHogQLFromQuestionSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    question: Annotated[str, Field(max_length=1000)]
+    """
+    Your natural language query describing the SQL insight (max 1000 characters).
+    """
+
+
 class Data6(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     limit: float | None = None
     offset: float | None = None
-    saved: bool | None = None
     favorited: bool | None = None
     search: str | None = None
 
@@ -379,21 +364,22 @@ class InsightGetSchema(BaseModel):
     insightId: str
 
 
-class InsightGetSqlSchema(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    query: Annotated[str, Field(max_length=1000)]
-    """
-    Your natural language query describing the SQL insight (max 1000 characters).
-    """
-
-
-class InsightQuerySchema(BaseModel):
+class InsightQueryInputSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     insightId: str
+
+
+class Query1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Kind
+    source: Any | None = None
+    """
+    For new insights, use the query from your successful query-run tool call. For updates, the existing query can optionally be reused
+    """
 
 
 class Data7(BaseModel):
@@ -403,8 +389,7 @@ class Data7(BaseModel):
     name: str | None = None
     description: str | None = None
     filters: dict[str, Any] | None = None
-    query: dict[str, Any] | None = None
-    saved: bool | None = None
+    query: Query1
     favorited: bool | None = None
     dashboard: float | None = None
     tags: list[str] | None = None
@@ -418,7 +403,7 @@ class InsightUpdateSchema(BaseModel):
     data: Data7
 
 
-class LLMObservabilityGetCostsSchema(BaseModel):
+class LLMAnalyticsGetCostsSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -447,6 +432,16 @@ class OrganizationSetActiveSchema(BaseModel):
     orgId: UUID
 
 
+class ProjectEventDefinitionsSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    q: str | None = None
+    """
+    Search query to filter event names. Only use if there are lots of events.
+    """
+
+
 class ProjectGetAllSchema(BaseModel):
     pass
     model_config = ConfigDict(
@@ -454,11 +449,31 @@ class ProjectGetAllSchema(BaseModel):
     )
 
 
-class ProjectPropertyDefinitionsSchema(BaseModel):
-    pass
+class Type(StrEnum):
+    """
+    Type of properties to get
+    """
+
+    EVENT = "event"
+    PERSON = "person"
+
+
+class ProjectPropertyDefinitionsInputSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
+    type: Type
+    """
+    Type of properties to get
+    """
+    eventName: str | None = None
+    """
+    Event name to filter properties by, required for event type
+    """
+    includePredefinedProperties: bool | None = None
+    """
+    Whether to include predefined properties
+    """
 
 
 class ProjectSetActiveSchema(BaseModel):
@@ -468,7 +483,383 @@ class ProjectSetActiveSchema(BaseModel):
     projectId: Annotated[int, Field(gt=0)]
 
 
-class Type(StrEnum):
+class DateRange(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    date_from: str | None = None
+    date_to: str | None = None
+    explicitDate: bool | None = None
+
+
+class Properties(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    key: str
+    value: str | float | list[str] | list[float] | None = None
+    operator: str | None = None
+    type: str | None = None
+
+
+class Type1(StrEnum):
+    AND_ = "AND"
+    OR_ = "OR"
+
+
+class Value(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    key: str
+    value: str | float | list[str] | list[float] | None = None
+    operator: str | None = None
+    type: str | None = None
+
+
+class Properties1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Type1
+    values: list[Value]
+
+
+class Properties2(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Type1
+    values: list[Value]
+
+
+class Interval(StrEnum):
+    HOUR = "hour"
+    DAY = "day"
+    WEEK = "week"
+    MONTH = "month"
+
+
+class Math(StrEnum):
+    TOTAL = "total"
+    DAU = "dau"
+    WEEKLY_ACTIVE = "weekly_active"
+    MONTHLY_ACTIVE = "monthly_active"
+    UNIQUE_SESSION = "unique_session"
+    FIRST_TIME_FOR_USER = "first_time_for_user"
+    FIRST_MATCHING_EVENT_FOR_USER = "first_matching_event_for_user"
+    AVG = "avg"
+    SUM = "sum"
+    MIN = "min"
+    MAX = "max"
+    MEDIAN = "median"
+    P75 = "p75"
+    P90 = "p90"
+    P95 = "p95"
+    P99 = "p99"
+
+
+class Properties3(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    key: str
+    value: str | float | list[str] | list[float] | None = None
+    operator: str | None = None
+    type: str | None = None
+
+
+class Properties4(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Type1
+    values: list[Value]
+
+
+class Properties5(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Type1
+    values: list[Value]
+
+
+class Series(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    custom_name: str
+    """
+    A display name
+    """
+    math: Math | None = None
+    math_property: str | None = None
+    properties: list[Properties3 | Properties4] | Properties5 | None = None
+    kind: Literal["EventsNode"] = "EventsNode"
+    event: str | None = None
+    limit: float | None = None
+
+
+class Display(StrEnum):
+    ACTIONS_LINE_GRAPH = "ActionsLineGraph"
+    ACTIONS_TABLE = "ActionsTable"
+    ACTIONS_PIE = "ActionsPie"
+    ACTIONS_BAR = "ActionsBar"
+    ACTIONS_BAR_VALUE = "ActionsBarValue"
+    WORLD_MAP = "WorldMap"
+    BOLD_NUMBER = "BoldNumber"
+
+
+class TrendsFilter(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    display: Display | None = Display.ACTIONS_LINE_GRAPH
+    showLegend: bool | None = False
+
+
+class BreakdownType(StrEnum):
+    PERSON = "person"
+    EVENT = "event"
+
+
+class BreakdownFilter(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    breakdown_type: BreakdownType | None = BreakdownType.EVENT
+    breakdown_limit: float | None = None
+    breakdown: str | float | list[str | float] | None = None
+
+
+class CompareFilter(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    compare: bool | None = False
+    compare_to: str | None = None
+
+
+class Source(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    dateRange: DateRange | None = None
+    filterTestAccounts: bool | None = False
+    properties: list[Properties | Properties1] | Properties2 | None = []
+    kind: Literal["TrendsQuery"] = "TrendsQuery"
+    interval: Interval | None = Interval.DAY
+    series: list[Series]
+    trendsFilter: TrendsFilter | None = None
+    breakdownFilter: BreakdownFilter | None = None
+    compareFilter: CompareFilter | None = None
+    conversionGoal: Any = None
+
+
+class Properties6(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    key: str
+    value: str | float | list[str] | list[float] | None = None
+    operator: str | None = None
+    type: str | None = None
+
+
+class Properties7(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Type1
+    values: list[Value]
+
+
+class Properties8(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Type1
+    values: list[Value]
+
+
+class Properties9(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    key: str
+    value: str | float | list[str] | list[float] | None = None
+    operator: str | None = None
+    type: str | None = None
+
+
+class Properties10(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Type1
+    values: list[Value]
+
+
+class Properties11(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Type1
+    values: list[Value]
+
+
+class Series1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    custom_name: str
+    """
+    A display name
+    """
+    math: Math | None = None
+    math_property: str | None = None
+    properties: list[Properties9 | Properties10] | Properties11 | None = None
+    kind: Literal["EventsNode"] = "EventsNode"
+    event: str | None = None
+    limit: float | None = None
+
+
+class Layout(StrEnum):
+    HORIZONTAL = "horizontal"
+    VERTICAL = "vertical"
+
+
+class BreakdownAttributionType(StrEnum):
+    FIRST_TOUCH = "first_touch"
+    LAST_TOUCH = "last_touch"
+    ALL_EVENTS = "all_events"
+
+
+class FunnelOrderType(StrEnum):
+    ORDERED = "ordered"
+    UNORDERED = "unordered"
+    STRICT = "strict"
+
+
+class FunnelVizType(StrEnum):
+    STEPS = "steps"
+    TIME_TO_CONVERT = "time_to_convert"
+    TRENDS = "trends"
+
+
+class FunnelWindowIntervalUnit(StrEnum):
+    MINUTE = "minute"
+    HOUR = "hour"
+    DAY = "day"
+    WEEK = "week"
+    MONTH = "month"
+
+
+class FunnelStepReference(StrEnum):
+    TOTAL = "total"
+    PREVIOUS = "previous"
+
+
+class FunnelsFilter(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    layout: Layout | None = None
+    breakdownAttributionType: BreakdownAttributionType | None = None
+    breakdownAttributionValue: float | None = None
+    funnelToStep: float | None = None
+    funnelFromStep: float | None = None
+    funnelOrderType: FunnelOrderType | None = None
+    funnelVizType: FunnelVizType | None = None
+    funnelWindowInterval: float | None = 14
+    funnelWindowIntervalUnit: FunnelWindowIntervalUnit | None = FunnelWindowIntervalUnit.DAY
+    funnelStepReference: FunnelStepReference | None = None
+
+
+class BreakdownFilter1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    breakdown_type: BreakdownType | None = BreakdownType.EVENT
+    breakdown_limit: float | None = None
+    breakdown: str | float | list[str | float] | None = None
+
+
+class Source1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    dateRange: DateRange | None = None
+    filterTestAccounts: bool | None = False
+    properties: list[Properties6 | Properties7] | Properties8 | None = []
+    kind: Literal["FunnelsQuery"] = "FunnelsQuery"
+    interval: Interval | None = Interval.DAY
+    series: Annotated[list[Series1], Field(min_length=2)]
+    funnelsFilter: FunnelsFilter | None = None
+    breakdownFilter: BreakdownFilter1 | None = None
+
+
+class Query2(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["InsightVizNode"] = "InsightVizNode"
+    source: Source | Source1
+
+
+class Properties12(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    key: str
+    value: str | float | list[str] | list[float] | None = None
+    operator: str | None = None
+    type: str | None = None
+
+
+class Properties13(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Type1
+    values: list[Value]
+
+
+class Filters2(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    properties: list[Properties12 | Properties13] | None = None
+    dateRange: DateRange | None = None
+    filterTestAccounts: bool | None = None
+
+
+class Source2(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["HogQLQuery"] = "HogQLQuery"
+    query: str
+    filters: Filters2 | None = None
+
+
+class Query3(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["DataVisualizationNode"] = "DataVisualizationNode"
+    source: Source2
+
+
+class QueryRunInputSchema(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    query: Query2 | Query3
+
+
+class Type10(StrEnum):
     POPOVER = "popover"
     API = "api"
     WIDGET = "widget"
@@ -505,7 +896,7 @@ class Questions1(BaseModel):
     link: AnyUrl
 
 
-class Display(StrEnum):
+class Display1(StrEnum):
     """
     Display format: 'number' shows numeric scale, 'emoji' shows emoji scale
     """
@@ -571,7 +962,7 @@ class Questions2(BaseModel):
     optional: bool | None = None
     buttonText: str | None = None
     type: Literal["rating"] = "rating"
-    display: Display | None = None
+    display: Display1 | None = None
     """
     Display format: 'number' shows numeric scale, 'emoji' shows emoji scale
     """
@@ -861,7 +1252,7 @@ class SurveyCreateSchema(BaseModel):
     )
     name: Annotated[str, Field(min_length=1)]
     description: str | None = None
-    type: Type | None = None
+    type: Type10 | None = None
     questions: Annotated[
         list[Questions | Questions1 | Questions2 | Questions3 | Questions4 | Questions5],
         Field(min_length=1),
@@ -1028,7 +1419,7 @@ class Questions8(BaseModel):
     optional: bool | None = None
     buttonText: str | None = None
     type: Literal["rating"] = "rating"
-    display: Display | None = None
+    display: Display1 | None = None
     """
     Display format: 'number' shows numeric scale, 'emoji' shows emoji scale
     """
@@ -1212,7 +1603,7 @@ class UrlMatchType(StrEnum):
     NOT_ICONTAINS = "not_icontains"
 
 
-class Value(BaseModel):
+class Value9(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -1227,7 +1618,7 @@ class Events(BaseModel):
     """
     Whether to show the survey every time one of the events is triggered (true), or just once (false)
     """
-    values: list[Value] | None = None
+    values: list[Value9] | None = None
     """
     Array of event names that trigger the survey
     """
@@ -1358,7 +1749,7 @@ class SurveyUpdateSchema(BaseModel):
     )
     name: Annotated[str | None, Field(min_length=1)] = None
     description: str | None = None
-    type: Type | None = None
+    type: Type10 | None = None
     questions: Annotated[
         list[Questions6 | Questions7 | Questions8 | Questions9 | Questions10 | Questions11] | None,
         Field(min_length=1),

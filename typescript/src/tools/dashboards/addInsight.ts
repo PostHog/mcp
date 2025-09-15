@@ -1,7 +1,6 @@
 import { DashboardAddInsightSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
 import { resolveInsightId } from "@/tools/insights/utils";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = DashboardAddInsightSchema;
@@ -42,19 +41,10 @@ export const addInsightHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(resultWithUrls) }] };
 };
 
-const definition = getToolDefinition("add-insight-to-dashboard");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "add-insight-to-dashboard",
-	description: definition.description,
 	schema,
 	handler: addInsightHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: false,
-	},
 });
 
 export default tool;

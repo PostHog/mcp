@@ -1,6 +1,5 @@
 import { InsightGetAllSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = InsightGetAllSchema;
@@ -24,19 +23,10 @@ export const getAllHandler = async (context: Context, params: Params) => {
 	return { content: [{ type: "text", text: JSON.stringify(insightsWithUrls) }] };
 };
 
-const definition = getToolDefinition("insights-get-all");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "insights-get-all",
-	description: definition.description,
 	schema,
 	handler: getAllHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

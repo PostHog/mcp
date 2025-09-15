@@ -1,6 +1,5 @@
 import { ProjectSetActiveSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = ProjectSetActiveSchema;
@@ -17,19 +16,10 @@ export const setActiveHandler = async (context: Context, params: Params) => {
 	};
 };
 
-const definition = getToolDefinition("switch-project");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "switch-project",
-	description: definition.description,
 	schema,
 	handler: setActiveHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: false,
-	},
 });
 
 export default tool;

@@ -1,85 +1,145 @@
 import type { ApiClient } from "@/api/client";
+import type { ApiUser } from "@/schema/api";
 import type { State } from "@/tools/types";
 import type { ScopedCache } from "./cache/ScopedCache";
 
 export class StateManager {
 	private _cache: ScopedCache<State>;
 	private _api: ApiClient;
+	private _user?: ApiUser;
 
 	constructor(cache: ScopedCache<State>, api: ApiClient) {
 		this._cache = cache;
 		this._api = api;
 	}
 
-	async getProjectId(): Promise<string> {
-		const projectId = await this._cache.get("projectId");
+	private async _fetchUser() {
+		const userResult = await this._api.users().me();
+		if (!userResult.success) {
+			throw new Error(`Failed to get user: ${userResult.error.message}`);
+		}
+		return userResult.data;
+	}
 
-		if (!projectId) {
-			const orgId = await this.getOrgID();
-			const projectsResult = await this._api.organizations().projects({ orgId }).list();
-			if (!projectsResult.success) {
-				throw new Error(`Failed to get projects: ${projectsResult.error.message}`);
-			}
-
-			// If there is only one project, set it as the active project
-			if (projectsResult.data.length === 1) {
-				await this._cache.set("projectId", projectsResult.data[0]!.id.toString());
-				return projectsResult.data[0]!.id.toString();
-			}
-
-			const currentProject = await this._api.projects().get({ projectId: "@current" });
-
-			if (!currentProject.success) {
-				throw new Error(`Failed to get current project: ${currentProject.error.message}`);
-			}
-
-			await this._cache.set("projectId", currentProject.data.id.toString());
-			return currentProject.data.id.toString();
+	async getUser() {
+		if (!this._user) {
+			this._user = await this._fetchUser();
 		}
 
-		return projectId;
+		return this._user;
+	}
+
+	private async _fetchApiKey() {
+		const apiKeyResult = await this._api.apiKeys().current();
+		if (!apiKeyResult.success) {
+			throw new Error(`Failed to get API key: ${apiKeyResult.error.message}`);
+		}
+		return apiKeyResult.data;
+	}
+
+	async getApiKey() {
+		let _apiKey = await this._cache.get("apiKey");
+
+		if (!_apiKey) {
+			_apiKey = await this._fetchApiKey();
+			await this._cache.set("apiKey", _apiKey);
+		}
+
+		return _apiKey;
 	}
 
 	async getDistinctId() {
 		let _distinctId = await this._cache.get("distinctId");
 
 		if (!_distinctId) {
-			const userResult = await this._api.users().me();
-			if (!userResult.success) {
-				throw new Error(`Failed to get user: ${userResult.error.message}`);
-			}
-			await this._cache.set("distinctId", userResult.data.distinctId);
-			_distinctId = userResult.data.distinctId;
+			const user = await this.getUser();
+
+			await this._cache.set("distinctId", user.distinct_id);
+			_distinctId = user.distinct_id;
 		}
 
 		return _distinctId;
 	}
 
-	async getOrgID(): Promise<string> {
+	private async _getDefaultOrganizationAndProject(): Promise<{
+		organizationId?: string;
+		projectId: number;
+	}> {
+		const { scoped_organizations, scoped_teams } = await this.getApiKey();
+		const { organization: activeOrganization, team: activeTeam } = await this.getUser();
+
+		if (scoped_teams.length > 0) {
+			// Keys scoped to projects should only be scoped to one project
+			if (scoped_teams.length > 1) {
+				throw new Error(
+					"API key has access to multiple projects, please specify a single project ID or change the API key to have access to an organization to include the projects within it.",
+				);
+			}
+
+			const projectId = scoped_teams[0]!;
+
+			return { projectId };
+		}
+
+		if (
+			scoped_organizations.length === 0 ||
+			scoped_organizations.includes(activeOrganization.id)
+		) {
+			return { organizationId: activeOrganization.id, projectId: activeTeam.id };
+		}
+
+		const organizationId = scoped_organizations[0]!;
+
+		const projectsResult = await this._api
+			.organizations()
+			.projects({ orgId: organizationId })
+			.list();
+
+		if (!projectsResult.success) {
+			throw projectsResult.error;
+		}
+
+		if (projectsResult.data.length === 0) {
+			throw new Error("API key does not have access to any projects");
+		}
+
+		const projectId = projectsResult.data[0]!;
+
+		return { organizationId, projectId: Number(projectId) };
+	}
+
+	async setDefaultOrganizationAndProject() {
+		const { organizationId, projectId } = await this._getDefaultOrganizationAndProject();
+
+		if (organizationId) {
+			await this._cache.set("orgId", organizationId);
+		}
+
+		await this._cache.set("projectId", projectId.toString());
+
+		return { organizationId, projectId };
+	}
+
+	async getOrgID(): Promise<string | undefined> {
 		const orgId = await this._cache.get("orgId");
 
 		if (!orgId) {
-			const orgsResult = await this._api.organizations().list();
-			if (!orgsResult.success) {
-				throw new Error(`Failed to get organizations: ${orgsResult.error.message}`);
-			}
+			const { organizationId } = await this.setDefaultOrganizationAndProject();
 
-			// If there is only one org, set it as the active org
-			if (orgsResult.data.length === 1) {
-				await this._cache.set("orgId", orgsResult.data[0]!.id.toString());
-				return orgsResult.data[0]!.id.toString();
-			}
-
-			const currentOrg = await this._api.organizations().get({ orgId: "@current" });
-
-			if (!currentOrg.success) {
-				throw new Error(`Failed to get current organization: ${currentOrg.error.message}`);
-			}
-
-			await this._cache.set("orgId", currentOrg.data.id.toString());
-			return currentOrg.data.id.toString();
+			return organizationId;
 		}
 
 		return orgId;
+	}
+
+	async getProjectId(): Promise<string> {
+		const projectId = await this._cache.get("projectId");
+
+		if (!projectId) {
+			const { projectId } = await this.setDefaultOrganizationAndProject();
+			return projectId.toString();
+		}
+
+		return projectId;
 	}
 }

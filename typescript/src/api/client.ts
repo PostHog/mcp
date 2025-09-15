@@ -1,6 +1,16 @@
 import { ErrorCode } from "@/lib/errors";
 import { withPagination } from "@/lib/utils/api";
-import { ApiPropertyDefinitionSchema } from "@/schema/api";
+import { getSearchParamsFromRecord } from "@/lib/utils/helper-functions";
+import {
+	type ApiEventDefinition,
+	ApiEventDefinitionSchema,
+	type ApiRedactedPersonalApiKey,
+	ApiRedactedPersonalApiKeySchema,
+	type ApiPropertyDefinition,
+	ApiPropertyDefinitionSchema,
+	type ApiUser,
+	ApiUserSchema,
+} from "@/schema/api";
 import {
 	type CreateDashboardInput,
 	CreateDashboardInputSchema,
@@ -23,6 +33,8 @@ import {
 	CreateInsightInputSchema,
 	type ListInsightsData,
 	ListInsightsSchema,
+	type SimpleInsight,
+	SimpleInsightSchema,
 } from "@/schema/insights";
 import { type Organization, OrganizationSchema } from "@/schema/orgs";
 import { type Project, ProjectSchema } from "@/schema/projects";
@@ -98,12 +110,22 @@ export class ApiClient {
 					throw new Error(ErrorCode.INVALID_API_KEY);
 				}
 
-				const errorData = (await response.json()) as any;
+				const errorText = await response.text();
+
+				let errorData: any;
+				try {
+					errorData = JSON.parse(errorText);
+				} catch {
+					errorData = { detail: errorText };
+				}
+
 				if (errorData.type === "validation_error" && errorData.code) {
 					throw new Error(`Validation error: ${errorData.code}`);
 				}
 
-				throw new Error(`Request failed: ${response.statusText}`);
+				throw new Error(
+					`Request failed:\nStatus Code: ${response.status} (${response.statusText})\nError Message: ${errorText}`,
+				);
 			}
 
 			const rawData = await response.json();
@@ -166,6 +188,17 @@ export class ApiClient {
 		};
 	}
 
+	apiKeys() {
+		return {
+			current: async (): Promise<Result<ApiRedactedPersonalApiKey>> => {
+				return this.fetchWithSchema(
+					`${this.baseUrl}/api/personal_api_keys/@current`,
+					ApiRedactedPersonalApiKeySchema,
+				);
+			},
+		};
+	}
+
 	projects() {
 		return {
 			get: async ({ projectId }: { projectId: string }): Promise<Result<Project>> => {
@@ -177,10 +210,43 @@ export class ApiClient {
 
 			propertyDefinitions: async ({
 				projectId,
-			}: { projectId: string }): Promise<Result<any[]>> => {
+				eventNames,
+				excludeCoreProperties,
+				filterByEventNames,
+				isFeatureFlag,
+				limit,
+				offset,
+				type,
+			}: {
+				projectId: string;
+				eventNames?: string[] | undefined;
+				excludeCoreProperties?: boolean;
+				filterByEventNames?: boolean;
+				isFeatureFlag?: boolean;
+				limit?: number;
+				offset?: number;
+				type?: "event" | "person";
+			}): Promise<Result<ApiPropertyDefinition[]>> => {
 				try {
+					const params = {
+						event_names: eventNames?.length ? JSON.stringify(eventNames) : undefined,
+						exclude_core_properties: excludeCoreProperties,
+						filter_by_event_names: filterByEventNames,
+						is_feature_flag: isFeatureFlag,
+						limit: limit ?? 100,
+						offset: offset ?? 0,
+						type: type ?? "event",
+						exclude_hidden: true,
+					};
+
+					const searchParams = getSearchParamsFromRecord(params);
+
+					const url = `${this.baseUrl}/api/projects/${projectId}/property_definitions/${
+						searchParams.toString() ? `?${searchParams}` : ""
+					}`;
+
 					const propertyDefinitions = await withPagination(
-						`${this.baseUrl}/api/projects/${projectId}/property_definitions/`,
+						url,
 						this.config.apiToken,
 						ApiPropertyDefinitionSchema,
 					);
@@ -189,11 +255,30 @@ export class ApiClient {
 						(def) => !def.hidden,
 					);
 
-					const validated = propertyDefinitionsWithoutHidden.map((def) =>
-						PropertyDefinitionSchema.parse(def),
+					return { success: true, data: propertyDefinitionsWithoutHidden };
+				} catch (error) {
+					return { success: false, error: error as Error };
+				}
+			},
+
+			eventDefinitions: async ({
+				projectId,
+				search,
+			}: { projectId: string; search?: string | undefined }): Promise<
+				Result<ApiEventDefinition[]>
+			> => {
+				try {
+					const searchParams = getSearchParamsFromRecord({ search });
+
+					const requestUrl = `${this.baseUrl}/api/projects/${projectId}/event_definitions/${searchParams.toString() ? `?${searchParams}` : ""}`;
+
+					const eventDefinitions = await withPagination(
+						requestUrl,
+						this.config.apiToken,
+						ApiEventDefinitionSchema,
 					);
 
-					return { success: true, data: validated };
+					return { success: true, data: eventDefinitions };
 				} catch (error) {
 					return { success: false, error: error as Error };
 				}
@@ -402,16 +487,7 @@ export class ApiClient {
 		return {
 			list: async ({
 				params,
-			}: { params?: ListInsightsData } = {}): Promise<
-				Result<
-					Array<{
-						id: number;
-						name?: string | null | undefined;
-						short_id: string;
-						description?: string | null | undefined;
-					}>
-				>
-			> => {
+			}: { params?: ListInsightsData } = {}): Promise<Result<Array<SimpleInsight>>> => {
 				const validatedParams = params ? ListInsightsSchema.parse(params) : undefined;
 				const searchParams = new URLSearchParams();
 
@@ -419,21 +495,12 @@ export class ApiClient {
 					searchParams.append("limit", String(validatedParams.limit));
 				if (validatedParams?.offset)
 					searchParams.append("offset", String(validatedParams.offset));
-				if (validatedParams?.saved !== undefined)
-					searchParams.append("saved", String(validatedParams.saved));
 				if (validatedParams?.search) searchParams.append("search", validatedParams.search);
 
 				const url = `${this.baseUrl}/api/projects/${projectId}/insights/${searchParams.toString() ? `?${searchParams}` : ""}`;
 
-				const simpleInsightSchema = z.object({
-					id: z.number(),
-					name: z.string().nullish(),
-					short_id: z.string(),
-					description: z.string().nullish(),
-				});
-
 				const responseSchema = z.object({
-					results: z.array(simpleInsightSchema),
+					results: z.array(SimpleInsightSchema),
 				});
 
 				const result = await this.fetchWithSchema(url, responseSchema);
@@ -445,20 +512,12 @@ export class ApiClient {
 
 			create: async ({
 				data,
-			}: { data: CreateInsightInput }): Promise<
-				Result<{ id: number; name: string; short_id: string }>
-			> => {
+			}: { data: CreateInsightInput }): Promise<Result<SimpleInsight>> => {
 				const validatedInput = CreateInsightInputSchema.parse(data);
-
-				const createResponseSchema = z.object({
-					id: z.number(),
-					name: z.string(),
-					short_id: z.string(),
-				});
 
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/insights/`,
-					createResponseSchema,
+					SimpleInsightSchema,
 					{
 						method: "POST",
 						body: JSON.stringify(validatedInput),
@@ -470,25 +529,7 @@ export class ApiClient {
 				insightId,
 			}: {
 				insightId: string;
-			}): Promise<
-				Result<{
-					id: number;
-					name?: string | null | undefined;
-					short_id: string;
-					description?: string | null | undefined;
-					query?: any;
-					filters?: any;
-				}>
-			> => {
-				const simpleInsightSchema = z.object({
-					id: z.number(),
-					name: z.string().nullish(),
-					short_id: z.string(),
-					description: z.string().nullish(),
-					query: z.any(),
-					filters: z.any(),
-				});
-
+			}): Promise<Result<SimpleInsight>> => {
 				// Check if insightId is a short_id (8 character alphanumeric string)
 				// Note: This won't work when we start creating insight id's with 8 digits. (We're at 7 currently)
 				if (isShortId(insightId)) {
@@ -496,7 +537,7 @@ export class ApiClient {
 					const url = `${this.baseUrl}/api/projects/${projectId}/insights/?${searchParams}`;
 
 					const responseSchema = z.object({
-						results: z.array(simpleInsightSchema),
+						results: z.array(SimpleInsightSchema),
 					});
 
 					const result = await this.fetchWithSchema(url, responseSchema);
@@ -520,25 +561,17 @@ export class ApiClient {
 
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
-					simpleInsightSchema,
+					SimpleInsightSchema,
 				);
 			},
 
 			update: async ({
 				insightId,
 				data,
-			}: { insightId: number; data: any }): Promise<
-				Result<{ id: number; name: string; short_id: string }>
-			> => {
-				const updateResponseSchema = z.object({
-					id: z.number(),
-					name: z.string(),
-					short_id: z.string(),
-				});
-
+			}: { insightId: number; data: any }): Promise<Result<SimpleInsight>> => {
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/insights/${insightId}/`,
-					updateResponseSchema,
+					SimpleInsightSchema,
 					{
 						method: "PATCH",
 						body: JSON.stringify(data),
@@ -786,10 +819,10 @@ export class ApiClient {
 
 	users() {
 		return {
-			me: async (): Promise<Result<{ distinctId: string }>> => {
+			me: async (): Promise<Result<ApiUser>> => {
 				const result = await this.fetchWithSchema(
 					`${this.baseUrl}/api/users/@me/`,
-					z.object({ distinct_id: z.string() }),
+					ApiUserSchema,
 				);
 
 				if (!result.success) {
@@ -798,7 +831,7 @@ export class ApiClient {
 
 				return {
 					success: true,
-					data: { distinctId: result.data.distinct_id },
+					data: result.data,
 				};
 			},
 		};

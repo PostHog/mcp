@@ -1,7 +1,6 @@
 import { SurveyGetSchema } from "@/schema/tool-inputs";
 import { formatSurvey } from "@/tools/surveys/utils/survey-utils";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = SurveyGetSchema;
@@ -26,19 +25,10 @@ export const getHandler = async (context: Context, params: Params) => {
 	};
 };
 
-const definition = getToolDefinition("survey-get");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "survey-get",
-	description: definition.description,
 	schema,
 	handler: getHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

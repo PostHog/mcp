@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { QuerySchema } from "./query";
 
 export const DashboardTileSchema = z.object({
 	insight: z.object({
@@ -7,11 +6,17 @@ export const DashboardTileSchema = z.object({
 		name: z.string(),
 		derived_name: z.string().nullable(),
 		description: z.string().nullable(),
-		query: QuerySchema,
+		query: z.object({
+			kind: z.union([z.literal("InsightVizNode"), z.literal("DataVisualizationNode")]),
+			source: z
+				.any()
+				.describe(
+					"For new insights, use the query from your successful query-run tool call. For updates, the existing query can optionally be reused.",
+				), // NOTE: This is intentionally z.any() to avoid populating the context with the complicated query schema, but we prompt the LLM to use 'query-run' to check queries, before creating insights.
+		}),
 		created_at: z.string().nullish(),
 		updated_at: z.string().nullish(),
 		favorited: z.boolean().nullish(),
-		saved: z.boolean().nullish(),
 		tags: z.array(z.string()).nullish(),
 	}),
 	order: z.number(),
@@ -39,7 +44,7 @@ export const DashboardSchema = z.object({
 	filters: z.record(z.any()).nullish(),
 	variables: z.record(z.any()).nullish(),
 	tags: z.array(z.string()).nullish(),
-	tiles: z.array(DashboardTileSchema).nullish(),
+	tiles: z.array(DashboardTileSchema.nullish()).nullish(),
 });
 
 export const SimpleDashboardSchema = DashboardSchema.pick({
@@ -53,7 +58,7 @@ export const SimpleDashboardSchema = DashboardSchema.pick({
 export const CreateDashboardInputSchema = z.object({
 	name: z.string().min(1, "Dashboard name is required"),
 	description: z.string().optional(),
-	pinned: z.boolean().optional().default(false),
+	pinned: z.boolean().optional(),
 	tags: z.array(z.string()).optional(),
 });
 

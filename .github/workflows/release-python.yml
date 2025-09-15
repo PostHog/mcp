@@ -1,0 +1,62 @@
+name: "Python Package Release"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "python/pyproject.toml"
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Publish Python package
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    env:
+      TWINE_USERNAME: __token__
+      TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
+        with:
+          python-version: 3.11.11
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@0c5e2b8115b80b4c7c5ddf6ffdd634974642d182 # v5.4.1
+        with:
+            enable-cache: true
+            pyproject-file: 'python/pyproject.toml'
+            
+      - name: Detect version
+        working-directory: python
+        run: |
+          VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          echo "REPO_VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Prepare for building release
+        run: uv sync --group dev
+        working-directory: python
+
+      - name: Build package
+        run: uv run python -m build
+        working-directory: python
+
+      - name: Publish to PyPI
+        run: uv run python -m twine upload dist/*
+        working-directory: python
+
+      - name: Create GitHub release
+        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
+        with:
+          tag_name: posthog_agent_toolkit-v${{ env.REPO_VERSION }}
+          release_name: posthog_agent_toolkit ${{ env.REPO_VERSION }}

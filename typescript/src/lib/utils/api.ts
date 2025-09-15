@@ -32,3 +32,23 @@ export const withPagination = async <T>(
 
 	return results;
 };
+
+export const hasScope = (scopes: string[], requiredScope: string) => {
+	if (scopes.includes("*")) {
+		return true;
+	}
+
+	// if read scoped required, and write present, return true
+	if (
+		requiredScope.endsWith(":read") &&
+		scopes.includes(requiredScope.replace(":read", ":write"))
+	) {
+		return true;
+	}
+
+	return scopes.includes(requiredScope);
+};
+
+export const hasScopes = (scopes: string[], requiredScopes: string[]) => {
+	return requiredScopes.every((scope) => hasScope(scopes, scope));
+};

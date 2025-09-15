@@ -15,17 +15,17 @@ export const ExperimentSchema = z.object({
 			feature_flag_variants: z.array(
 				z.object({
 					key: z.string(),
-					name: z.string().optional(),
-					rollout_percentage: z.number(),
+					name: z.string().nullish(),
+					rollout_percentage: z.number().nullish(),
 				}),
 			),
-			minimum_detectable_effect: z.number().optional(),
-			recommended_running_time: z.number().optional(),
-			recommended_sample_size: z.number().optional(),
+			minimum_detectable_effect: z.number().nullish(),
+			recommended_running_time: z.number().nullish(),
+			recommended_sample_size: z.number().nullish(),
 		})
-		.optional(),
-	metrics: z.array(z.any()).optional(),
-	secondary_metrics: z.array(z.any()).optional(),
+		.nullish(),
+	metrics: z.array(z.any()).nullish(),
+	secondary_metrics: z.array(z.any()).nullish(),
 });
 
 export type Experiment = z.infer<typeof ExperimentSchema>;

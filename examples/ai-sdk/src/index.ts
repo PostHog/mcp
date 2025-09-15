@@ -13,8 +13,8 @@ async function analyzeProductUsage() {
 
 	const result = await generateText({
 		model: openai("gpt-5-mini"),
-		tools: agentToolkit.getTools(),
-		stopWhen: stepCountIs(5),
+		tools: await agentToolkit.getTools(),
+		stopWhen: stepCountIs(30),
 		system: `You are a data analyst. Your task is to do a deep dive into what's happening in our product.`,
 		prompt: `Please analyze our product usage:
         

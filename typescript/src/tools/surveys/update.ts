@@ -1,7 +1,6 @@
 import { SurveyUpdateSchema } from "@/schema/tool-inputs";
 import { formatSurvey } from "@/tools/surveys/utils/survey-utils";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, Tool, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = SurveyUpdateSchema;
@@ -45,19 +44,10 @@ export const updateHandler = async (context: Context, params: Params) => {
 	};
 };
 
-const definition = getToolDefinition("survey-update");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "survey-update",
-	description: definition.description,
 	schema,
 	handler: updateHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: false,
-		openWorldHint: true,
-		readOnlyHint: false,
-	},
 });
 
 export default tool;

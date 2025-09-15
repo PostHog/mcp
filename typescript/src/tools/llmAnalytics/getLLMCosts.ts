@@ -1,9 +1,8 @@
-import { LLMObservabilityGetCostsSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import { LLMAnalyticsGetCostsSchema } from "@/schema/tool-inputs";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
-const schema = LLMObservabilityGetCostsSchema;
+const schema = LLMAnalyticsGetCostsSchema;
 
 type Params = z.infer<typeof schema>;
 
@@ -43,19 +42,10 @@ export const getLLMCostsHandler = async (context: Context, params: Params) => {
 	};
 };
 
-const definition = getToolDefinition("get-llm-total-costs-for-project");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "get-llm-total-costs-for-project",
-	description: definition.description,
 	schema,
 	handler: getLLMCostsHandler,
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

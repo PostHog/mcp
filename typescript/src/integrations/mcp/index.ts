@@ -275,10 +275,6 @@ export default {
 
 		const sessionId = url.searchParams.get("sessionId");
 
-		console.log("url", request.url);
-		console.log("body", request.body);
-
-		console.log("headers", request.headers);
 
 		if (!token) {
 			return new Response(

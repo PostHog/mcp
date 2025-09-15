@@ -467,7 +467,7 @@ describe("Surveys", { concurrent: false }, () => {
 			const deleteTool = deleteSurveyTool();
 			try {
 				await deleteTool.handler(context, { surveyId: "non-existent-id" });
-				expect(true).toBe(false); // Should not reach here
+				expect.fail("Should not reach here");
 			} catch (error) {
 				expect(error).toBeInstanceOf(Error);
 				expect((error as Error).message).toContain("Failed to delete survey");

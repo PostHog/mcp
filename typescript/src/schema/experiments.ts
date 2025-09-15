@@ -144,13 +144,15 @@ export const ExperimentSchema = z.object({
 	saved_metrics_ids: z.array(z.any()).nullable(),
 	parameters: z
 		.object({
-			feature_flag_variants: z.array(
-				z.object({
-					key: z.string(),
-					name: z.string().nullish(),
-					rollout_percentage: z.number().nullish(),
-				}),
-			),
+			feature_flag_variants: z
+				.array(
+					z.object({
+						key: z.string(),
+						name: z.string().nullish(),
+						rollout_percentage: z.number().nullish(),
+					}),
+				)
+				.nullish(),
 			minimum_detectable_effect: z.number().nullish(),
 			recommended_running_time: z.number().nullish(),
 			recommended_sample_size: z.number().nullish(),

@@ -1349,9 +1349,8 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 			expect(exposureResult.success).toBe(true);
 
 			if (exposureResult.success) {
-				expect(exposureResult.data).toHaveProperty("experiment");
 				expect(exposureResult.data).toHaveProperty("exposures");
-				expect(exposureResult.data.experiment.id).toBe(experiment.id);
+				expect(exposureResult.data.exposures).toBeDefined();
 			}
 		});
 

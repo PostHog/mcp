@@ -810,7 +810,7 @@ describe("Experiments", { concurrent: false }, () => {
 				expect.fail("Should have thrown an error for invalid experiment ID");
 			} catch (error) {
 				expect(error).toBeDefined();
-				expect(error.message).toContain("Failed to delete experiment");
+				expect((error as Error).message).toContain("Failed to delete experiment");
 			}
 		});
 
@@ -842,8 +842,8 @@ describe("Experiments", { concurrent: false }, () => {
 				expect.fail("Should have thrown an error for already deleted experiment");
 			} catch (error) {
 				expect(error).toBeDefined();
-				expect(error.message).toContain("Failed to delete experiment");
-				expect(error.message).toContain("404");
+				expect((error as Error).message).toContain("Failed to delete experiment");
+				expect((error as Error).message).toContain("404");
 			}
 
 			// Remove from tracking since we deleted it manually
@@ -1166,7 +1166,7 @@ describe("Experiments", { concurrent: false }, () => {
 				expect.fail("Should have thrown an error for invalid experiment ID");
 			} catch (error) {
 				expect(error).toBeDefined();
-				expect(error.message).toContain("Failed to update experiment");
+				expect((error as Error).message).toContain("Failed to update experiment");
 			}
 		});
 

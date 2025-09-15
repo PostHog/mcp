@@ -66,14 +66,7 @@ export const getResultsHandler = async (context: Context, params: Params) => {
 					.filter((item) => item.data !== null),
 			},
 		},
-		exposures: exposures
-			? {
-					total_exposures: exposures.total_exposures,
-					daily_exposures_count: exposures.daily_exposures?.length || 0,
-					// Include first few days as sample
-					sample_daily_exposures: exposures.daily_exposures?.slice(0, 5),
-				}
-			: null,
+		exposures: exposures,
 	};
 
 	return {

@@ -21,7 +21,7 @@ import {
 	type SimpleDashboard,
 	SimpleDashboardSchema,
 } from "@/schema/dashboards";
-import type { Experiment } from "@/schema/experiments";
+import type { Experiment, ExperimentExposureQueryResponse } from "@/schema/experiments";
 import {
 	ExperimentCreatePayloadSchema,
 	ExperimentExposureQueryResponseSchema,
@@ -332,8 +332,7 @@ export class ApiClient {
 				refresh: boolean;
 			}): Promise<
 				Result<{
-					experiment: Experiment;
-					exposures: any;
+					exposures: ExperimentExposureQueryResponse;
 				}>
 			> => {
 				/**
@@ -395,7 +394,6 @@ export class ApiClient {
 				return {
 					success: true,
 					data: {
-						experiment,
 						exposures: result.data,
 					},
 				};

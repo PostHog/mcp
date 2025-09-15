@@ -503,7 +503,7 @@ export class ApiClient {
 								? {
 										limit: params.limit,
 										offset: params.offset,
-										//@ts-ignore search is not implemented as a query parameter
+										//@ts-expect-error search is not implemented as a query parameter
 										search: params.search,
 									}
 								: {},

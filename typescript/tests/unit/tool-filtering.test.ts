@@ -1,3 +1,4 @@
+import { SessionManager } from "@/lib/utils/SessionManager";
 import { getToolsFromContext } from "@/tools";
 import { getToolsForFeatures } from "@/tools/toolDefinitions";
 import type { Context } from "@/tools/types";
@@ -105,6 +106,7 @@ const createMockContext = (scopes: string[]): Context => ({
 	stateManager: {
 		getApiKey: async () => ({ scopes }),
 	} as any,
+	sessionManager: new SessionManager({} as any),
 });
 
 describe("Tool Filtering - API Scopes", () => {

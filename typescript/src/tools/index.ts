@@ -1,6 +1,7 @@
 import type { Context, Tool, ToolBase, ZodObjectAny } from "./types";
 
 import { ApiClient } from "@/api/client";
+import { SessionManager } from "@/lib/utils/SessionManager";
 import { StateManager } from "@/lib/utils/StateManager";
 import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
 import { hash } from "@/lib/utils/helper-functions";
@@ -179,6 +180,7 @@ export class PostHogAgentToolkit {
 				INKEEP_API_KEY: this.options.inkeepApiKey,
 			},
 			stateManager: new StateManager(cache, api),
+			sessionManager: new SessionManager(cache),
 		};
 	}
 	async getTools(): Promise<Tool<ZodObjectAny>[]> {

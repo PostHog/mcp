@@ -1,4 +1,5 @@
 import { ApiClient } from "@/api/client";
+import { SessionManager } from "@/lib/utils/SessionManager";
 import { StateManager } from "@/lib/utils/StateManager";
 import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
 import type { InsightQuery } from "@/schema/query";
@@ -46,6 +47,7 @@ export function createTestContext(client: ApiClient): Context {
 		cache,
 		env: {} as any,
 		stateManager,
+		sessionManager: new SessionManager(cache),
 	};
 
 	return context;

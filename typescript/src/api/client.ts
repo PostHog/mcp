@@ -4,10 +4,10 @@ import { getSearchParamsFromRecord } from "@/lib/utils/helper-functions";
 import {
 	type ApiEventDefinition,
 	ApiEventDefinitionSchema,
-	type ApiRedactedPersonalApiKey,
-	ApiRedactedPersonalApiKeySchema,
 	type ApiPropertyDefinition,
 	ApiPropertyDefinitionSchema,
+	type ApiRedactedPersonalApiKey,
+	ApiRedactedPersonalApiKeySchema,
 	type ApiUser,
 	ApiUserSchema,
 } from "@/schema/api";
@@ -950,15 +950,9 @@ export class ApiClient {
 			}: { params?: GetSurveyStatsInput } = {}): Promise<
 				Result<SurveyResponseStatsOutput>
 			> => {
-				const validatedParams = params
-					? GetSurveyStatsInputSchema.parse(params)
-					: undefined;
-				const searchParams = new URLSearchParams();
+				const validatedParams = GetSurveyStatsInputSchema.parse(params);
 
-				if (validatedParams?.date_from)
-					searchParams.append("date_from", validatedParams.date_from);
-				if (validatedParams?.date_to)
-					searchParams.append("date_to", validatedParams.date_to);
+				const searchParams = getSearchParamsFromRecord(validatedParams);
 
 				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/stats/${searchParams.toString() ? `?${searchParams}` : ""}`;
 
@@ -969,12 +963,8 @@ export class ApiClient {
 				params: GetSurveySpecificStatsInput,
 			): Promise<Result<SurveyResponseStatsOutput>> => {
 				const validatedParams = GetSurveySpecificStatsInputSchema.parse(params);
-				const searchParams = new URLSearchParams();
 
-				if (validatedParams?.date_from)
-					searchParams.append("date_from", validatedParams.date_from);
-				if (validatedParams?.date_to)
-					searchParams.append("date_to", validatedParams.date_to);
+				const searchParams = getSearchParamsFromRecord(validatedParams);
 
 				const url = `${this.baseUrl}/api/projects/${projectId}/surveys/${validatedParams.survey_id}/stats/${searchParams.toString() ? `?${searchParams}` : ""}`;
 

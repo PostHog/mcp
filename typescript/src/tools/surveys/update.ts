@@ -8,6 +8,7 @@ type Params = z.infer<typeof schema>;
 
 export const updateHandler = async (context: Context, params: Params) => {
 	const { surveyId, ...data } = params;
+
 	const projectId = await context.stateManager.getProjectId();
 
 	if (data.questions) {

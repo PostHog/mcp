@@ -383,20 +383,6 @@ const SurveyAppearance = z.object({
 	thankYouMessageDescriptionContentType: z.enum(["html", "text"]).optional(),
 	thankYouMessageCloseButtonText: z.string().optional(),
 	borderColor: z.string().optional(),
-	position: z
-		.enum([
-			"top_left",
-			"top_center",
-			"top_right",
-			"middle_left",
-			"middle_center",
-			"middle_right",
-			"left",
-			"right",
-			"center",
-			"next_to_trigger",
-		])
-		.optional(),
 	placeholder: z.string().optional(),
 	shuffleQuestions: z.boolean().optional(),
 	surveyPopupDelaySeconds: z.number().optional(),
@@ -628,13 +614,19 @@ export const SurveyResponseStatsOutputSchema = z.object({
 	survey_id: z.string().nullish(),
 	start_date: z.string().nullish(),
 	end_date: z.string().nullish(),
-	survey_shown: SurveyEventStatsOutputSchema.nullish(),
-	survey_dismissed: SurveyEventStatsOutputSchema.nullish(),
-	survey_sent: SurveyEventStatsOutputSchema.nullish(),
-	response_rate: z.number().nullish(),
-	dismissal_rate: z.number().nullish(),
-	unique_users_response_rate: z.number().nullish(),
-	unique_users_dismissal_rate: z.number().nullish(),
+	stats: z
+		.object({
+			"survey shown": SurveyEventStatsOutputSchema.nullish(),
+			"survey dismissed": SurveyEventStatsOutputSchema.nullish(),
+			"survey sent": SurveyEventStatsOutputSchema.nullish(),
+		})
+		.nullish(),
+	rates: z.object({
+		response_rate: z.number().nullish(),
+		dismissal_rate: z.number().nullish(),
+		unique_users_response_rate: z.number().nullish(),
+		unique_users_dismissal_rate: z.number().nullish(),
+	}),
 });
 
 export const GetSurveyStatsInputSchema = z.object({
@@ -662,19 +654,6 @@ export const GetSurveySpecificStatsInputSchema = z.object({
 		.datetime()
 		.optional()
 		.describe("Optional ISO timestamp for end date (e.g. 2024-01-31T23:59:59Z)"),
-});
-
-// Wrapper schemas to convert ZodEffects to ZodObject for TypeScript compatibility
-export const CreateSurveyInputObjectSchema = z.object({
-	data: CreateSurveyInputSchema,
-});
-
-export const UpdateSurveyInputObjectSchema = z.object({
-	data: UpdateSurveyInputSchema,
-});
-
-export const SurveyQuestionInputObjectSchema = z.object({
-	data: SurveyQuestionInputSchema,
 });
 
 // Input types

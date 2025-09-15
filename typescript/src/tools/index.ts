@@ -125,13 +125,13 @@ const TOOL_MAP: Record<string, () => ToolBase<ZodObjectAny>> = {
 	"get-llm-total-costs-for-project": getLLMCosts,
 
 	// Surveys
-	"surveys-get-all": getAllSurveys(),
-	"survey-get": getSurvey(),
-	"survey-create": createSurvey(),
-	"survey-update": updateSurvey(),
-	"survey-delete": deleteSurvey(),
-	"surveys-global-stats": surveysGlobalStats(),
-	"survey-stats": surveyStats(),
+	"surveys-get-all": getAllSurveys,
+	"survey-get": getSurvey,
+	"survey-create": createSurvey,
+	"survey-update": updateSurvey,
+	"survey-delete": deleteSurvey,
+	"surveys-global-stats": surveysGlobalStats,
+	"survey-stats": surveyStats,
 };
 
 export const getToolsFromContext = async (

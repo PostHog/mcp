@@ -466,6 +466,8 @@
 		"category": "Surveys",
 		"summary": "Creates a new survey in the project.",
 		"required_scopes": ["survey:write"],
+		"feature": "surveys",
+		"title": "Create survey",
 		"annotations": {
 			"destructiveHint": false,
 			"idempotentHint": false,
@@ -478,6 +480,8 @@
 		"category": "Surveys",
 		"summary": "Get a specific survey by ID.",
 		"required_scopes": ["survey:read"],
+		"feature": "surveys",
+		"title": "Get survey",
 		"annotations": {
 			"destructiveHint": false,
 			"idempotentHint": true,
@@ -490,6 +494,8 @@
 		"category": "Surveys",
 		"summary": "Get all surveys in the project with optional filtering.",
 		"required_scopes": ["survey:read"],
+		"feature": "surveys",
+		"title": "Get all surveys",
 		"annotations": {
 			"destructiveHint": false,
 			"idempotentHint": true,
@@ -502,6 +508,8 @@
 		"category": "Surveys",
 		"summary": "Update an existing survey by ID.",
 		"required_scopes": ["survey:write"],
+		"feature": "surveys",
+		"title": "Update survey",
 		"annotations": {
 			"destructiveHint": false,
 			"idempotentHint": true,
@@ -514,6 +522,8 @@
 		"category": "Surveys",
 		"summary": "Delete a survey by ID.",
 		"required_scopes": ["survey:write"],
+		"feature": "surveys",
+		"title": "Delete survey",
 		"annotations": {
 			"destructiveHint": true,
 			"idempotentHint": true,
@@ -526,6 +536,8 @@
 		"category": "Surveys",
 		"summary": "Get aggregated response statistics across all surveys.",
 		"required_scopes": ["survey:read"],
+		"feature": "surveys",
+		"title": "Get all survey response stats",
 		"annotations": {
 			"destructiveHint": false,
 			"idempotentHint": true,
@@ -538,6 +550,8 @@
 		"category": "Surveys",
 		"summary": "Get response statistics for a specific survey.",
 		"required_scopes": ["survey:read"],
+		"feature": "surveys",
+		"title": "Get survey response stats",
 		"annotations": {
 			"destructiveHint": false,
 			"idempotentHint": true,

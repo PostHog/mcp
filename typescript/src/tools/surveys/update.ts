@@ -1,6 +1,6 @@
 import { SurveyUpdateSchema } from "@/schema/tool-inputs";
 import { formatSurvey } from "@/tools/surveys/utils/survey-utils";
-import type { Context, Tool, ToolBase } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = SurveyUpdateSchema;

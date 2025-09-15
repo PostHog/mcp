@@ -495,8 +495,7 @@ export class ApiClient {
 				params,
 			}: { params?: ListInsightsData } = {}): Promise<Result<Array<Schemas.Insight>>> => {
 				try {
-					const response = await this.generated.request(
-						"get",
+					const response = await this.generated.get(
 						"/api/projects/{project_id}/insights/",
 						{
 							path: { project_id: projectId },
@@ -512,7 +511,7 @@ export class ApiClient {
 					);
 
 					return { success: true, data: response.results };
-				} catch (error: any) {
+				} catch (error) {
 					return { success: false, error: error as Error };
 				}
 			},

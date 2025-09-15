@@ -39,6 +39,13 @@ export const buildApiFetcher: (config: ApiConfig) => Parameters<typeof createApi
 				...input.overrides,
 			});
 
+			if (!response.ok) {
+				const errorResponse = await response.json();
+				throw new Error(
+					`Failed request: [${response.status}] ${JSON.stringify(errorResponse)}`,
+				);
+			}
+
 			return response;
 		},
 	};

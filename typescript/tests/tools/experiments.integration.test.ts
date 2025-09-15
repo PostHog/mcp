@@ -171,6 +171,7 @@ describe("Experiments", { concurrent: false }, () => {
 					{
 						name: "Checkout Conversion Funnel",
 						metric_type: "funnel" as const,
+						event_name: "product_view",
 						funnel_steps: ["product_view", "add_to_cart", "checkout_start", "purchase"],
 						description: "Track conversion through checkout funnel",
 					},
@@ -223,6 +224,7 @@ describe("Experiments", { concurrent: false }, () => {
 					{
 						name: "Conversion Rate",
 						metric_type: "funnel" as const,
+						event_name: "visit",
 						funnel_steps: ["visit", "signup", "purchase"],
 					},
 					{
@@ -489,6 +491,7 @@ describe("Experiments", { concurrent: false }, () => {
 					{
 						name: "Conversion Funnel",
 						metric_type: "funnel" as const,
+						event_name: "landing",
 						funnel_steps: ["landing", "signup", "activation"],
 						description: "Main conversion funnel",
 					},
@@ -547,6 +550,7 @@ describe("Experiments", { concurrent: false }, () => {
 					{
 						name: "E-commerce Full Funnel",
 						metric_type: "funnel" as const,
+						event_name: "home_page_view",
 						funnel_steps: [
 							"home_page_view",
 							"product_list_view",
@@ -563,6 +567,7 @@ describe("Experiments", { concurrent: false }, () => {
 					{
 						name: "Cart Abandonment Funnel",
 						metric_type: "funnel" as const,
+						event_name: "add_to_cart",
 						funnel_steps: ["add_to_cart", "checkout_start", "order_completed"],
 						description: "Track where users drop off in checkout",
 					},
@@ -685,17 +690,17 @@ describe("Experiments", { concurrent: false }, () => {
 			}
 		});
 
-		it("should handle metric without event_name gracefully", async () => {
-			const flagKey = generateUniqueKey("exp-no-event-flag");
+		it("should handle metric with explicit event_name", async () => {
+			const flagKey = generateUniqueKey("exp-explicit-event-flag");
 
 			const params = {
-				name: "No Event Name Experiment",
+				name: "Explicit Event Name Experiment",
 				feature_flag_key: flagKey,
 				primary_metrics: [
 					{
 						name: "Default Event Metric",
 						metric_type: "mean" as const,
-						// No event_name provided - should default to $pageview
+						event_name: "$pageview", // Explicit event_name since it's now required
 					},
 				],
 				draft: true,

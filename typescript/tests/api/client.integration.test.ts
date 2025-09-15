@@ -1089,7 +1089,6 @@ describe("API Client Integration Tests", { concurrent: false }, () => {
 			expect(result.success).toBe(true);
 
 			if (result.success) {
-				console.log("result", result.data);
 				expect(result.data).toHaveProperty("distinct_id");
 				expect(typeof result.data.distinct_id).toBe("string");
 			}

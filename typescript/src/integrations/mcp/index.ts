@@ -275,7 +275,6 @@ export default {
 
 		const sessionId = url.searchParams.get("sessionId");
 
-
 		if (!token) {
 			return new Response(
 				`No token provided, please provide a valid API token. View the documentation for more information: ${MCP_DOCS_URL}`,

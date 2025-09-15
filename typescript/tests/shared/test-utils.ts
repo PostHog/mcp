@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/client";
+import { SessionManager } from "@/lib/utils/SessionManager";
 import { StateManager } from "@/lib/utils/StateManager";
 import { MemoryCache } from "@/lib/utils/cache/MemoryCache";
-import { SessionManager } from "@/lib/utils/SessionManager";
 import type { InsightQuery } from "@/schema/query";
 import type { Context } from "@/tools/types";
 import { expect } from "vitest";

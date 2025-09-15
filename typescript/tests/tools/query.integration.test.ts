@@ -38,6 +38,7 @@ describe("Query Integration Tests", () => {
 			featureFlags: [],
 			insights: [],
 			dashboards: [],
+			surveys: [],
 		};
 	});
 

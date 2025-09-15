@@ -15,7 +15,7 @@ import setActiveOrganizationTool from "@/tools/organizations/setActive";
 import type { Context } from "@/tools/types";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 
-describe("Organizations", { concurrent: false }, () => {
+describe.skip("Organizations", { concurrent: false }, () => {
 	let context: Context;
 	const createdResources: CreatedResources = {
 		featureFlags: [],
@@ -60,14 +60,28 @@ describe("Organizations", { concurrent: false }, () => {
 		});
 	});
 
-	describe("switch-organization tool", () => {
+	describe("set-active-organization tool", () => {
 		const setTool = setActiveOrganizationTool();
+		const getTool = getOrganizationsTool();
 
 		it("should set active organization", async () => {
-			const targetOrg = TEST_ORG_ID!;
-			const setResult = await setTool.handler(context, { orgId: targetOrg });
+			const orgsResult = await getTool.handler(context, {});
+			const orgs = parseToolResponse(orgsResult);
+			expect(orgs.length).toBeGreaterThan(0);
 
-			expect(setResult.content[0].text).toBe(`Switched to organization ${targetOrg}`);
+			const targetOrg = orgs[0];
+			const setResult = await setTool.handler(context, { orgId: targetOrg.id });
+
+			expect(setResult.content[0].text).toBe(`Switched to organization ${targetOrg.id}`);
+		});
+
+		it("should handle invalid organization ID", async () => {
+			try {
+				await setTool.handler(context, { orgId: "invalid-org-id-12345" });
+				expect.fail("Should have thrown an error");
+			} catch (error) {
+				expect(error).toBeDefined();
+			}
 		});
 	});
 

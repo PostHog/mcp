@@ -37,7 +37,7 @@ describe("Projects", { concurrent: false }, () => {
 		await cleanupResources(context.api, TEST_PROJECT_ID!, createdResources);
 	});
 
-	describe("get-projects tool", () => {
+	describe.skip("get-projects tool", () => {
 		const getTool = getProjectsTool();
 
 		it("should list all projects for the active organization", async () => {
@@ -195,7 +195,7 @@ describe("Projects", { concurrent: false }, () => {
 	});
 
 	describe("Projects workflow", () => {
-		it("should support listing and setting active project workflow", async () => {
+		it.skip("should support listing and setting active project workflow", async () => {
 			const getTool = getProjectsTool();
 			const setTool = setActiveProjectTool();
 

@@ -342,9 +342,7 @@ describe("Surveys", { concurrent: false }, () => {
 
 			// Search for the survey
 			const searchResult = await getAllTool.handler(context, {
-				data: {
-					search: "Search Test",
-				},
+				search: "Search Test",
 			});
 			const searchResults = parseToolResponse(searchResult);
 

@@ -36,9 +36,17 @@
 		"test": "vitest",
 		"test:integration": "vitest run --config vitest.integration.config.mts",
 		"test:watch": "vitest watch",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"generate-client": "tsx scripts/update-openapi-client.ts"
 	},
-	"keywords": ["posthog", "mcp", "ai", "agents", "analytics", "feature-flags"],
+	"keywords": [
+		"posthog",
+		"mcp",
+		"ai",
+		"agents",
+		"analytics",
+		"feature-flags"
+	],
 	"author": "PostHog Inc.",
 	"license": "MIT",
 	"peerDependencies": {
@@ -62,6 +70,8 @@
 		"dotenv": "^16.4.7",
 		"langchain": "^0.3.31",
 		"tsup": "^8.5.0",
+		"tsx": "^4.20.5",
+		"typed-openapi": "^2.2.2",
 		"typescript": "^5.8.3",
 		"uuid": "^11.1.0",
 		"vite": "^5.0.0",
@@ -70,5 +80,8 @@
 		"wrangler": "^4.14.4",
 		"zod-to-json-schema": "^3.24.6"
 	},
-	"files": ["dist", "README.md"]
+	"files": [
+		"dist",
+		"README.md"
+	]
 }

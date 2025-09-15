@@ -61,6 +61,8 @@ import {
 	SurveyResponseStatsOutputSchema,
 	UpdateSurveyInputSchema,
 } from "../schema/surveys.js";
+import { buildApiFetcher } from "./fetcher";
+import { type Schemas, type TypedErrorResponse, createApiClient } from "./generated";
 
 export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
 
@@ -71,10 +73,14 @@ export interface ApiConfig {
 export class ApiClient {
 	private config: ApiConfig;
 	private baseUrl: string;
+	// NOTE: The OpenAPI schema for the generated client is not always accurate
+	public generated: ReturnType<typeof createApiClient>;
 
 	constructor(config: ApiConfig) {
 		this.config = config;
 		this.baseUrl = config.baseUrl;
+
+		this.generated = createApiClient(buildApiFetcher(this.config), this.baseUrl);
 	}
 	private buildHeaders() {
 		return {
@@ -487,27 +493,28 @@ export class ApiClient {
 		return {
 			list: async ({
 				params,
-			}: { params?: ListInsightsData } = {}): Promise<Result<Array<SimpleInsight>>> => {
-				const validatedParams = params ? ListInsightsSchema.parse(params) : undefined;
-				const searchParams = new URLSearchParams();
+			}: { params?: ListInsightsData } = {}): Promise<Result<Array<Schemas.Insight>>> => {
+				try {
+					const response = await this.generated.request(
+						"get",
+						"/api/projects/{project_id}/insights/",
+						{
+							path: { project_id: projectId },
+							query: params
+								? {
+										limit: params.limit,
+										offset: params.offset,
+										//@ts-ignore search is not implemented as a query parameter
+										search: params.search,
+									}
+								: {},
+						},
+					);
 
-				if (validatedParams?.limit)
-					searchParams.append("limit", String(validatedParams.limit));
-				if (validatedParams?.offset)
-					searchParams.append("offset", String(validatedParams.offset));
-				if (validatedParams?.search) searchParams.append("search", validatedParams.search);
-
-				const url = `${this.baseUrl}/api/projects/${projectId}/insights/${searchParams.toString() ? `?${searchParams}` : ""}`;
-
-				const responseSchema = z.object({
-					results: z.array(SimpleInsightSchema),
-				});
-
-				const result = await this.fetchWithSchema(url, responseSchema);
-				if (result.success) {
-					return { success: true, data: result.data.results };
+					return { success: true, data: response.results };
+				} catch (error: any) {
+					return { success: false, error: error as Error };
 				}
-				return result;
 			},
 
 			create: async ({

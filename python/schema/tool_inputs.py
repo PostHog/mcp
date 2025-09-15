@@ -1142,19 +1142,6 @@ class ThankYouMessageDescriptionContentType(StrEnum):
     TEXT = "text"
 
 
-class Position(StrEnum):
-    TOP_LEFT = "top_left"
-    TOP_CENTER = "top_center"
-    TOP_RIGHT = "top_right"
-    MIDDLE_LEFT = "middle_left"
-    MIDDLE_CENTER = "middle_center"
-    MIDDLE_RIGHT = "middle_right"
-    LEFT = "left"
-    RIGHT = "right"
-    CENTER = "center"
-    NEXT_TO_TRIGGER = "next_to_trigger"
-
-
 class WidgetType(StrEnum):
     BUTTON = "button"
     TAB = "tab"
@@ -1182,7 +1169,6 @@ class Appearance(BaseModel):
     thankYouMessageDescriptionContentType: ThankYouMessageDescriptionContentType | None = None
     thankYouMessageCloseButtonText: str | None = None
     borderColor: str | None = None
-    position: Position | None = None
     placeholder: str | None = None
     shuffleQuestions: bool | None = None
     surveyPopupDelaySeconds: float | None = None
@@ -1690,7 +1676,6 @@ class Appearance1(BaseModel):
     thankYouMessageDescriptionContentType: ThankYouMessageDescriptionContentType | None = None
     thankYouMessageCloseButtonText: str | None = None
     borderColor: str | None = None
-    position: Position | None = None
     placeholder: str | None = None
     shuffleQuestions: bool | None = None
     surveyPopupDelaySeconds: float | None = None

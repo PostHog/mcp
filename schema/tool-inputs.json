@@ -2820,21 +2820,6 @@
             "borderColor": {
               "type": "string"
             },
-            "position": {
-              "type": "string",
-              "enum": [
-                "top_left",
-                "top_center",
-                "top_right",
-                "middle_left",
-                "middle_center",
-                "middle_right",
-                "left",
-                "right",
-                "center",
-                "next_to_trigger"
-              ]
-            },
             "placeholder": {
               "type": "string"
             },
@@ -3822,21 +3807,6 @@
             },
             "borderColor": {
               "type": "string"
-            },
-            "position": {
-              "type": "string",
-              "enum": [
-                "top_left",
-                "top_center",
-                "top_right",
-                "middle_left",
-                "middle_center",
-                "middle_right",
-                "left",
-                "right",
-                "center",
-                "next_to_trigger"
-              ]
             },
             "placeholder": {
               "type": "string"

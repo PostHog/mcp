@@ -224,7 +224,7 @@
 		}
 	},
 	"experiment-delete": {
-		"description": "Delete an experiment by ID (soft delete - marks as deleted).",
+		"description": "Delete an experiment by ID.",
 		"category": "Experiments",
 		"feature": "experiments",
 		"summary": "Delete an experiment by ID.",

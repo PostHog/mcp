@@ -21,7 +21,11 @@ import {
 	type SimpleDashboard,
 	SimpleDashboardSchema,
 } from "@/schema/dashboards";
-import type { Experiment, ExperimentExposureQueryResponse } from "@/schema/experiments";
+import type {
+	Experiment,
+	ExperimentExposureQuery,
+	ExperimentExposureQueryResponse,
+} from "@/schema/experiments";
 import {
 	ExperimentCreatePayloadSchema,
 	ExperimentExposureQueryResponseSchema,
@@ -32,6 +36,7 @@ import {
 import {
 	type CreateFeatureFlagInput,
 	CreateFeatureFlagInputSchema,
+	type FeatureFlag,
 	FeatureFlagSchema,
 	type UpdateFeatureFlagInput,
 	UpdateFeatureFlagInputSchema,
@@ -324,6 +329,7 @@ export class ApiClient {
 					ExperimentSchema,
 				);
 			},
+
 			getExposures: async ({
 				experimentId,
 				refresh = false,
@@ -358,12 +364,15 @@ export class ApiClient {
 					};
 				}
 
-				const exposureQuery = {
+				/**
+				 * create the exposure query
+				 */
+				const exposureQuery: ExperimentExposureQuery = {
 					kind: "ExperimentExposureQuery",
 					experiment_id: experimentId,
 					experiment_name: experiment.name,
 					exposure_criteria: experiment.exposure_criteria,
-					feature_flag: experiment.feature_flag,
+					feature_flag: experiment.feature_flag as FeatureFlag,
 					start_date: experiment.start_date,
 					end_date: experiment.end_date,
 					holdout: experiment.holdout,
@@ -398,6 +407,7 @@ export class ApiClient {
 					},
 				};
 			},
+
 			getMetricResults: async ({
 				experimentId,
 				refresh = false,
@@ -409,7 +419,7 @@ export class ApiClient {
 					experiment: Experiment;
 					primaryMetricsResults: any[];
 					secondaryMetricsResults: any[];
-					exposures: any;
+					exposures: ExperimentExposureQueryResponse;
 				}>
 			> => {
 				/**
@@ -419,9 +429,8 @@ export class ApiClient {
 				const experimentDetails = await this.experiments({ projectId }).get({
 					experimentId,
 				});
-				if (!experimentDetails.success) {
-					return experimentDetails;
-				}
+
+				if (!experimentDetails.success) return experimentDetails;
 
 				const experiment = experimentDetails.data;
 
@@ -445,21 +454,19 @@ export class ApiClient {
 					experimentId,
 					refresh,
 				});
-				if (!experimentExposure.success) {
-					return experimentExposure;
-				}
-				const exposures = experimentExposure.data;
+				if (!experimentExposure.success) return experimentExposure;
+
+				const { exposures } = experimentExposure.data;
 
 				// Prepare metrics queries
-				const primaryMetrics = [...(experiment.metrics || [])];
 				const sharedPrimaryMetrics = (experiment.saved_metrics || [])
-					.filter((sm: any) => sm.metadata.type === "primary")
-					.map((sm: any) => sm.query);
-				const allPrimaryMetrics = [...primaryMetrics, ...sharedPrimaryMetrics];
+					.filter(({ metadata }) => metadata.type === "primary")
+					.map(({ query }) => query);
+				const allPrimaryMetrics = [...(experiment.metrics || []), ...sharedPrimaryMetrics];
 
 				const sharedSecondaryMetrics = (experiment.saved_metrics || [])
-					.filter((sm: any) => sm.metadata.type === "secondary")
-					.map((sm: any) => sm.query);
+					.filter(({ metadata }) => metadata.type === "secondary")
+					.map(({ query }) => query);
 				const allSecondaryMetrics = [
 					...(experiment.metrics_secondary || []),
 					...sharedSecondaryMetrics,

@@ -10,9 +10,11 @@ export const getAllHandler = async (context: Context, _params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
 	const results = await context.api.experiments({ projectId }).list();
+
 	if (!results.success) {
 		throw new Error(`Failed to get experiments: ${results.error.message}`);
 	}
+
 	return { content: [{ type: "text", text: JSON.stringify(results.data) }] };
 };
 

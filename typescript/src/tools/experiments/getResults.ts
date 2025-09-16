@@ -1,6 +1,6 @@
+import { ExperimentResultsResponseSchema } from "@/schema/experiments";
 import { ExperimentResultsGetSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = ExperimentResultsGetSchema;
@@ -26,74 +26,28 @@ export const getResultsHandler = async (context: Context, params: Params) => {
 
 	const { experiment, primaryMetricsResults, secondaryMetricsResults, exposures } = result.data;
 
-	// Format the response for better readability
-	const formattedResponse = {
-		experiment: {
-			id: experiment.id,
-			name: experiment.name,
-			description: experiment.description,
-			feature_flag_key: experiment.feature_flag_key,
-			start_date: experiment.start_date,
-			end_date: experiment.end_date,
-			status: experiment.start_date
-				? experiment.end_date
-					? "completed"
-					: "running"
-				: "draft",
-			variants: experiment.parameters?.feature_flag_variants || [],
-		},
-		metrics: {
-			primary: {
-				count: primaryMetricsResults.length,
-				results: primaryMetricsResults
-					.map((result, index) => ({
-						index,
-						metric_name: experiment.metrics?.[index]?.name || `Metric ${index + 1}`,
-						data: result,
-					}))
-					.filter((item) => item.data !== null),
-			},
-			secondary: {
-				count: secondaryMetricsResults.length,
-				results: secondaryMetricsResults
-					.map((result, index) => ({
-						index,
-						metric_name:
-							experiment.metrics_secondary?.[index]?.name ||
-							`Secondary Metric ${index + 1}`,
-						data: result,
-					}))
-					.filter((item) => item.data !== null),
-			},
-		},
-		exposures: exposures,
-	};
+	// Format the response using the schema
+	const parsedExperiment = ExperimentResultsResponseSchema.parse({
+		experiment,
+		primaryMetricsResults,
+		secondaryMetricsResults,
+		exposures,
+	});
 
 	return {
 		content: [
 			{
 				type: "text",
-				text: JSON.stringify(formattedResponse, null, 2),
+				text: JSON.stringify(parsedExperiment, null, 2),
 			},
 		],
 	};
 };
 
-const definition = getToolDefinition("experiment-results-get");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "experiment-results-get",
-	title: definition.title,
-	description: definition.description,
 	schema,
 	handler: getResultsHandler,
-	scopes: ["experiments:read"],
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: true,
-		readOnlyHint: true,
-	},
 });
 
 export default tool;

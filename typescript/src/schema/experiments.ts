@@ -203,6 +203,61 @@ export const ExperimentExposureQueryResponseSchema = z.object({
 	}),
 });
 
+export const ExperimentResultsResponseSchema = z
+	.object({
+		experiment: ExperimentSchema.pick({
+			id: true,
+			name: true,
+			description: true,
+			feature_flag_key: true,
+			start_date: true,
+			end_date: true,
+			metrics: true,
+			metrics_secondary: true,
+			parameters: true, // Pick parameters to extract variants
+		}).transform((data) => ({
+			id: data.id,
+			name: data.name,
+			description: data.description,
+			feature_flag_key: data.feature_flag_key,
+			metrics: data.metrics,
+			metrics_secondary: data.metrics_secondary,
+			start_date: data.start_date,
+			end_date: data.end_date,
+			status: data.start_date ? (data.end_date ? "completed" : "running") : "draft",
+			variants: data.parameters?.feature_flag_variants || [],
+		})),
+		exposures: ExperimentExposureQueryResponseSchema,
+		primaryMetricsResults: z.array(z.any()),
+		secondaryMetricsResults: z.array(z.any()),
+	})
+	.transform(({ experiment, exposures, primaryMetricsResults, secondaryMetricsResults }) => {
+		return {
+			experiment,
+			exposures,
+			metrics: {
+				primary: {
+					count: primaryMetricsResults.length,
+					results: primaryMetricsResults
+						.map((result, index) => ({
+							index,
+							data: result,
+						}))
+						.filter((item) => item.data !== null),
+				},
+				secondary: {
+					count: secondaryMetricsResults.length,
+					results: secondaryMetricsResults
+						.map((result, index) => ({
+							index,
+							data: result,
+						}))
+						.filter((item) => item.data !== null),
+				},
+			},
+		};
+	});
+
 /**
  * Schema for creating a new experiment
  * This validates the payload sent to the API

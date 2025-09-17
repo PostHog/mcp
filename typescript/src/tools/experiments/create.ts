@@ -1,22 +1,24 @@
+import { ExperimentCreatePayloadSchema } from "@/schema/experiments";
 import { ExperimentCreateSchema } from "@/schema/tool-inputs";
-import { getToolDefinition } from "@/tools/toolDefinitions";
-import type { Context, Tool } from "@/tools/types";
+import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
 
 const schema = ExperimentCreateSchema;
+
+type Params = z.infer<typeof schema>;
 
 /**
  * Create a comprehensive A/B test experiment with guided setup
  * This tool helps users create well-configured experiments through conversation
  */
-export const createExperimentHandler = async (context: Context, params: any) => {
+export const createExperimentHandler = async (context: Context, params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
-	// Parse and validate the params using the schema to apply defaults
-	const validatedParams = schema.parse(params);
+	// Transform tool input to API payload format using the schema transformation
+	const apiPayload = ExperimentCreatePayloadSchema.parse(params);
 
-	// The API client handles all validation and transformation with Zod
-	const result = await context.api.experiments({ projectId }).create(validatedParams as any);
+	// Send to API with full type safety
+	const result = await context.api.experiments({ projectId }).create(apiPayload);
 
 	if (!result.success) {
 		throw new Error(`Failed to create experiment: ${result.error.message}`);
@@ -27,17 +29,6 @@ export const createExperimentHandler = async (context: Context, params: any) => 
 	const experimentWithUrl = {
 		...experiment,
 		url: `${context.api.getProjectBaseUrl(projectId)}/experiments/${experiment.id}`,
-		status: experiment.start_date ? "running" : "draft",
-		variants_summary:
-			experiment.parameters?.feature_flag_variants?.map((v) => ({
-				key: v.key,
-				name: v.name || v.key,
-				percentage: v.rollout_percentage,
-			})) || [],
-		metrics_summary: {
-			primary_count: experiment.metrics?.length || 0,
-			secondary_count: experiment.metrics_secondary?.length || 0,
-		},
 	};
 
 	return {
@@ -50,21 +41,10 @@ export const createExperimentHandler = async (context: Context, params: any) => 
 	};
 };
 
-const definition = getToolDefinition("experiment-create");
-
-const tool = (): Tool<typeof schema> => ({
+const tool = (): ToolBase<typeof schema> => ({
 	name: "experiment-create",
-	title: definition.title,
-	description: definition.description,
 	schema,
-	handler: createExperimentHandler, // Now accepts any params and validates internally
-	scopes: ["experiments:write"],
-	annotations: {
-		destructiveHint: false,
-		idempotentHint: false,
-		openWorldHint: true,
-		readOnlyHint: false,
-	},
+	handler: createExperimentHandler,
 });
 
 export default tool;

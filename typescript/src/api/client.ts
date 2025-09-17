@@ -23,11 +23,12 @@ import {
 } from "@/schema/dashboards";
 import type {
 	Experiment,
+	ExperimentApiPayload,
 	ExperimentExposureQuery,
 	ExperimentExposureQueryResponse,
 } from "@/schema/experiments";
 import {
-	ExperimentCreatePayloadSchema,
+	ExperimentApiPayloadSchema,
 	ExperimentExposureQueryResponseSchema,
 	ExperimentExposureQuerySchema,
 	ExperimentSchema,
@@ -545,18 +546,15 @@ export class ApiClient {
 				};
 			},
 
-			create: async (
-				experimentData: z.infer<typeof ExperimentCreatePayloadSchema>,
-			): Promise<Result<Experiment>> => {
-				// Build and validate payload using Zod
-				const payload = ExperimentCreatePayloadSchema.parse(experimentData);
+			create: async (experimentData: ExperimentApiPayload): Promise<Result<Experiment>> => {
+				const createBody = ExperimentApiPayloadSchema.parse(experimentData);
 
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/experiments/`,
 					ExperimentSchema,
 					{
 						method: "POST",
-						body: JSON.stringify(payload),
+						body: JSON.stringify(createBody),
 					},
 				);
 			},

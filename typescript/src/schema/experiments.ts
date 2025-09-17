@@ -1,6 +1,7 @@
+import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
-
 import { FeatureFlagSchema } from "./flags";
+import { ExperimentCreateSchema as ToolExperimentCreateSchema } from "./tool-inputs";
 
 const ExperimentType = ["web", "product"] as const;
 
@@ -21,6 +22,8 @@ export const ExperimentMetricBasePropertiesSchema = z.object({
 	conversion_window_unit: z.any().optional(), // FunnelConversionWindowTimeUnit
 });
 
+export type ExperimentMetricBaseProperties = z.infer<typeof ExperimentMetricBasePropertiesSchema>;
+
 /**
  * This is the schema for the experiment metric outlier handling.
  * It references the ExperimentMetricOutlierHandling type from
@@ -30,6 +33,8 @@ export const ExperimentMetricOutlierHandlingSchema = z.object({
 	lower_bound_percentile: z.number().optional(),
 	upper_bound_percentile: z.number().optional(),
 });
+
+export type ExperimentMetricOutlierHandling = z.infer<typeof ExperimentMetricOutlierHandlingSchema>;
 
 /**
  * This is the schema for the experiment metric source.
@@ -62,6 +67,8 @@ export const ExperimentMeanMetricSchema = z
 	.merge(ExperimentMetricBasePropertiesSchema)
 	.merge(ExperimentMetricOutlierHandlingSchema);
 
+export type ExperimentMeanMetric = z.infer<typeof ExperimentMeanMetricSchema>;
+
 /**
  * This is the schema for the experiment funnel metric.
  * It references the ExperimentFunnelMetric type from
@@ -74,6 +81,8 @@ export const ExperimentFunnelMetricSchema = z
 		funnel_order_type: z.any().optional(), // StepOrderValue
 	})
 	.merge(ExperimentMetricBasePropertiesSchema);
+
+export type ExperimentFunnelMetric = z.infer<typeof ExperimentFunnelMetricSchema>;
 
 /**
  * This is the schema for the experiment ratio metric.
@@ -88,6 +97,8 @@ export const ExperimentRatioMetricSchema = z
 	})
 	.merge(ExperimentMetricBasePropertiesSchema);
 
+export type ExperimentRatioMetric = z.infer<typeof ExperimentRatioMetricSchema>;
+
 /**
  * This is the schema for the experiment metric.
  * It references the ExperimentMetric type from
@@ -98,6 +109,8 @@ export const ExperimentMetricSchema = z.union([
 	ExperimentFunnelMetricSchema,
 	ExperimentRatioMetricSchema,
 ]);
+
+export type ExperimentMetric = z.infer<typeof ExperimentMetricSchema>;
 
 /**
  * This is the schema for the experiment exposure config.
@@ -171,6 +184,151 @@ export const ExperimentSchema = z.object({
 	conclusion_comment: z.string().nullish(),
 });
 
+export type Experiment = z.infer<typeof ExperimentSchema>;
+
+/**
+ * Schema for the API payload when creating an experiment
+ * This is derived from ExperimentSchema with appropriate omissions
+ */
+export const ExperimentApiPayloadSchema = ExperimentSchema.omit({
+	id: true,
+	feature_flag: true,
+	exposure_cohort: true,
+	exposure_criteria: true,
+	saved_metrics: true,
+	saved_metrics_ids: true,
+	start_date: true,
+	end_date: true,
+	deleted: true,
+	archived: true,
+	created_at: true,
+	updated_at: true,
+	holdout: true,
+	stats_config: true,
+	conclusion: true,
+	conclusion_comment: true,
+}).partial();
+
+export type ExperimentApiPayload = z.infer<typeof ExperimentApiPayloadSchema>;
+
+/**
+ * Transform tool input metrics to ExperimentMetric format for API
+ */
+const transformMetricToApi = (metric: any): z.infer<typeof ExperimentMetricSchema> => {
+	const uuid = uuidv4();
+	const base = {
+		kind: "ExperimentMetric" as const,
+		uuid,
+		name: metric.name,
+	};
+
+	switch (metric.metric_type) {
+		case "mean":
+			return {
+				...base,
+				metric_type: "mean",
+				source: {
+					kind: "EventsNode",
+					event: metric.event_name,
+					properties: metric.properties || {},
+				},
+			};
+
+		case "funnel":
+			return {
+				...base,
+				metric_type: "funnel",
+				series: (metric.funnel_steps || [metric.event_name]).map((event: string) => ({
+					kind: "EventsNode",
+					event,
+					properties: metric.properties || {},
+				})),
+			};
+
+		case "ratio":
+			return {
+				...base,
+				metric_type: "ratio",
+				numerator: {
+					kind: "EventsNode",
+					event: metric.event_name,
+					properties: metric.properties?.numerator || metric.properties || {},
+				},
+				denominator: {
+					kind: "EventsNode",
+					event: metric.properties?.denominator_event || metric.event_name,
+					properties: metric.properties?.denominator || metric.properties || {},
+				},
+			};
+
+		default:
+			throw new Error(`Unknown metric type: ${metric.metric_type}`);
+	}
+};
+
+/**
+ * Transform tool input to API payload format
+ * This bridges the gap between user-friendly input and PostHog API requirements
+ */
+export const ExperimentCreatePayloadSchema = ToolExperimentCreateSchema.transform((input) => {
+	// Transform metrics with proper UUIDs
+	const primaryMetrics = input.primary_metrics?.map(transformMetricToApi) || [];
+	const secondaryMetrics = input.secondary_metrics?.map(transformMetricToApi) || [];
+
+	return {
+		// Core fields
+		name: input.name,
+		description: input.description || null,
+		feature_flag_key: input.feature_flag_key, // Maps to get_feature_flag_key in serializer
+		type: input.type || "product",
+
+		// Metrics - new format
+		metrics: primaryMetrics.length > 0 ? primaryMetrics : null,
+		metrics_secondary: secondaryMetrics.length > 0 ? secondaryMetrics : null,
+
+		// Metrics UUIDs for ordering
+		primary_metrics_ordered_uuids:
+			primaryMetrics.length > 0 ? primaryMetrics.map((m) => m.uuid) : null,
+		secondary_metrics_ordered_uuids:
+			secondaryMetrics.length > 0 ? secondaryMetrics.map((m) => m.uuid) : null,
+
+		// Legacy fields still required by API
+		filters: {}, // Legacy but still in model
+		secondary_metrics: [], // Legacy secondary metrics format
+		saved_metrics_ids: [], // Empty array for saved metrics
+
+		// Parameters with variants
+		parameters: {
+			feature_flag_variants: input.variants || [
+				{ key: "control", name: "Control", rollout_percentage: 50 },
+				{ key: "test", name: "Test", rollout_percentage: 50 },
+			],
+			minimum_detectable_effect: input.minimum_detectable_effect || 30,
+		},
+
+		// Exposure criteria
+		exposure_criteria: input.filter_test_accounts
+			? {
+					filterTestAccounts: input.filter_test_accounts,
+				}
+			: null,
+
+		// Stats config (empty, will be filled by backend)
+		stats_config: {},
+
+		// State fields
+		start_date: input.draft === false ? new Date().toISOString() : null,
+		end_date: null,
+		archived: false,
+		deleted: false,
+
+		// Optional holdout
+		holdout_id: input.holdout_id || null,
+	};
+}).pipe(ExperimentApiPayloadSchema);
+
+export type ExperimentCreatePayload = z.output<typeof ExperimentCreatePayloadSchema>;
+
 /**
  * This is the schema for the experiment exposure query.
  * It references the ExperimentExposureQuery type from
@@ -187,6 +345,8 @@ export const ExperimentExposureQuerySchema = z.object({
 	holdout: z.any().optional(),
 });
 
+export type ExperimentExposureQuery = z.infer<typeof ExperimentExposureQuerySchema>;
+
 export const ExperimentExposureTimeSeriesSchema = z.object({
 	variant: z.string(),
 	days: z.array(z.string()),
@@ -202,6 +362,8 @@ export const ExperimentExposureQueryResponseSchema = z.object({
 		date_to: z.string().nullable(), // API can return null for date_to
 	}),
 });
+
+export type ExperimentExposureQueryResponse = z.infer<typeof ExperimentExposureQueryResponseSchema>;
 
 export const ExperimentResultsResponseSchema = z
 	.object({
@@ -259,61 +421,6 @@ export const ExperimentResultsResponseSchema = z
 	});
 
 /**
- * Schema for creating a new experiment
- * This validates the payload sent to the API
- */
-export const ExperimentCreatePayloadSchema = z.object({
-	name: z.string(),
-	description: z.string().optional(),
-	feature_flag_key: z.string(),
-	type: z.enum(ExperimentType).optional(),
-
-	// Base fields required by API
-	filters: z.object({}).default({}),
-	saved_metrics_ids: z.array(z.any()).default([]),
-	saved_metrics: z.array(z.any()).default([]),
-	primary_metrics_ordered_uuids: z.null().default(null),
-	secondary_metrics_ordered_uuids: z.null().default(null),
-	archived: z.boolean().default(false),
-	deleted: z.boolean().default(false),
-
-	// Metrics - these will be transformed from simple input to proper ExperimentMetric
-	metrics: z.array(ExperimentMetricSchema).optional().default([]),
-	metrics_secondary: z.array(ExperimentMetricSchema).optional().default([]),
-
-	// Parameters
-	parameters: z
-		.object({
-			feature_flag_variants: z
-				.array(
-					z.object({
-						key: z.string(),
-						name: z.string().optional(),
-						rollout_percentage: z.number(),
-					}),
-				)
-				.default([
-					{ key: "control", rollout_percentage: 50 },
-					{ key: "test", rollout_percentage: 50 },
-				]),
-			minimum_detectable_effect: z.number().optional(),
-		})
-		.optional(),
-
-	// Exposure criteria
-	exposure_criteria: z
-		.object({
-			filterTestAccounts: z.boolean().default(true),
-			properties: z.any().optional(),
-		})
-		.optional(),
-
-	// Optional fields
-	holdout_id: z.number().optional(),
-	start_date: z.string().optional(), // Set when not draft
-});
-
-/**
  * Schema for updating existing experiments
  * All fields are optional to support partial updates
  */
@@ -361,18 +468,4 @@ export const ExperimentUpdatePayloadSchema = z
 	})
 	.strict();
 
-// experiment type
-export type Experiment = z.infer<typeof ExperimentSchema>;
-export type ExperimentCreatePayload = z.infer<typeof ExperimentCreatePayloadSchema>;
 export type ExperimentUpdatePayload = z.infer<typeof ExperimentUpdatePayloadSchema>;
-//metric types
-export type ExperimentMetricBaseProperties = z.infer<typeof ExperimentMetricBasePropertiesSchema>;
-export type ExperimentMetricOutlierHandling = z.infer<typeof ExperimentMetricOutlierHandlingSchema>;
-export type ExperimentMeanMetric = z.infer<typeof ExperimentMeanMetricSchema>;
-export type ExperimentFunnelMetric = z.infer<typeof ExperimentFunnelMetricSchema>;
-export type ExperimentRatioMetric = z.infer<typeof ExperimentRatioMetricSchema>;
-export type ExperimentMetric = z.infer<typeof ExperimentMetricSchema>;
-// query types
-export type ExperimentExposureQuery = z.infer<typeof ExperimentExposureQuerySchema>;
-// response types
-export type ExperimentExposureQueryResponse = z.infer<typeof ExperimentExposureQueryResponseSchema>;

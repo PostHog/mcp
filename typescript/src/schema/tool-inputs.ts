@@ -6,7 +6,6 @@ import {
 	UpdateDashboardInputSchema,
 } from "./dashboards";
 import { ErrorDetailsSchema, ListErrorsSchema } from "./errors";
-import { ExperimentUpdatePayloadSchema } from "./experiments";
 import { FilterGroupsSchema, UpdateFeatureFlagInputSchema } from "./flags";
 import { CreateInsightInputSchema, ListInsightsSchema, UpdateInsightInputSchema } from "./insights";
 import { InsightQuerySchema } from "./query";
@@ -66,10 +65,83 @@ export const ExperimentDeleteSchema = z.object({
 	experimentId: z.number().describe("The ID of the experiment to delete"),
 });
 
+/**
+ * User-friendly input schema for experiment updates
+ * This provides a simplified interface that gets transformed to API format
+ */
+export const ExperimentUpdateInputSchema = z.object({
+	name: z.string().optional().describe("Update experiment name"),
+
+	description: z.string().optional().describe("Update experiment description"),
+
+	// Primary metrics with guidance
+	primary_metrics: z
+		.array(
+			z.object({
+				name: z.string().optional().describe("Human-readable metric name"),
+				metric_type: z
+					.enum(["mean", "funnel", "ratio"])
+					.describe(
+						"Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics",
+					),
+				event_name: z
+					.string()
+					.describe("PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase')"),
+				funnel_steps: z
+					.array(z.string())
+					.optional()
+					.describe("For funnel metrics only: Array of event names for each funnel step"),
+				properties: z.record(z.any()).optional().describe("Event properties to filter on"),
+				description: z.string().optional().describe("What this metric measures"),
+			}),
+		)
+		.optional()
+		.describe("Update primary metrics"),
+
+	secondary_metrics: z
+		.array(
+			z.object({
+				name: z.string().optional().describe("Human-readable metric name"),
+				metric_type: z.enum(["mean", "funnel", "ratio"]).describe("Metric type"),
+				event_name: z.string().describe("PostHog event name"),
+				funnel_steps: z
+					.array(z.string())
+					.optional()
+					.describe("For funnel metrics only: Array of event names"),
+				properties: z.record(z.any()).optional().describe("Event properties to filter on"),
+				description: z.string().optional().describe("What this metric measures"),
+			}),
+		)
+		.optional()
+		.describe("Update secondary metrics"),
+
+	minimum_detectable_effect: z
+		.number()
+		.optional()
+		.describe("Update minimum detectable effect in percentage"),
+
+	// Experiment state management
+	launch: z.boolean().optional().describe("Launch experiment (set start_date) or keep as draft"),
+
+	conclude: z
+		.enum(["won", "lost", "inconclusive", "stopped_early", "invalid"])
+		.optional()
+		.describe("Conclude experiment with result"),
+
+	conclusion_comment: z.string().optional().describe("Comment about experiment conclusion"),
+
+	restart: z
+		.boolean()
+		.optional()
+		.describe("Restart concluded experiment (clears end_date and conclusion)"),
+
+	archive: z.boolean().optional().describe("Archive or unarchive experiment"),
+});
+
 export const ExperimentUpdateSchema = z.object({
 	experimentId: z.number().describe("The ID of the experiment to update"),
-	data: ExperimentUpdatePayloadSchema.describe(
-		"The experiment data to update. To restart a concluded experiment: set end_date=null, conclusion=null, conclusion_comment=null, and optionally set a new start_date. To make it draft again, also set start_date=null.",
+	data: ExperimentUpdateInputSchema.describe(
+		"The experiment data to update using user-friendly format",
 	),
 });
 

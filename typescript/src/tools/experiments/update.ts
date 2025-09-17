@@ -1,3 +1,4 @@
+import { ExperimentUpdateTransformSchema } from "@/schema/experiments";
 import { ExperimentUpdateSchema } from "@/schema/tool-inputs";
 import { getToolDefinition } from "@/tools/toolDefinitions";
 import type { Context, Tool } from "@/tools/types";
@@ -11,9 +12,12 @@ export const updateHandler = async (context: Context, params: Params) => {
 	const { experimentId, data } = params;
 	const projectId = await context.stateManager.getProjectId();
 
+	// Transform the tool input to API payload format
+	const apiPayload = ExperimentUpdateTransformSchema.parse(data);
+
 	const updateResult = await context.api.experiments({ projectId }).update({
 		experimentId,
-		updateData: data,
+		updateData: apiPayload,
 	});
 
 	if (!updateResult.success) {
@@ -23,7 +27,6 @@ export const updateHandler = async (context: Context, params: Params) => {
 	const experimentWithUrl = {
 		...updateResult.data,
 		url: `${context.api.getProjectBaseUrl(projectId)}/experiments/${updateResult.data.id}`,
-		status: updateResult.data.start_date ? "running" : "draft",
 	};
 
 	return {

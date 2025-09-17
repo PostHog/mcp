@@ -1,7 +1,10 @@
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { FeatureFlagSchema } from "./flags";
-import { ExperimentCreateSchema as ToolExperimentCreateSchema } from "./tool-inputs";
+import {
+	ExperimentCreateSchema as ToolExperimentCreateSchema,
+	ExperimentUpdateInputSchema as ToolExperimentUpdateInputSchema,
+} from "./tool-inputs";
 
 const ExperimentType = ["web", "product"] as const;
 
@@ -212,6 +215,26 @@ export const ExperimentApiPayloadSchema = ExperimentSchema.omit({
 export type ExperimentApiPayload = z.infer<typeof ExperimentApiPayloadSchema>;
 
 /**
+ * Schema for the API payload when updating an experiment
+ * Derived from ExperimentSchema, omitting fields that cannot be updated
+ */
+export const ExperimentUpdateApiPayloadSchema = ExperimentSchema.omit({
+	id: true,
+	feature_flag: true,
+	feature_flag_key: true,
+	type: true,
+	exposure_cohort: true,
+	saved_metrics: true,
+	deleted: true,
+	created_at: true,
+	updated_at: true,
+	holdout: true,
+	holdout_id: true,
+}).partial();
+
+export type ExperimentUpdateApiPayload = z.infer<typeof ExperimentUpdateApiPayloadSchema>;
+
+/**
  * Transform tool input metrics to ExperimentMetric format for API
  */
 const transformMetricToApi = (metric: any): z.infer<typeof ExperimentMetricSchema> => {
@@ -328,6 +351,74 @@ export const ExperimentCreatePayloadSchema = ToolExperimentCreateSchema.transfor
 }).pipe(ExperimentApiPayloadSchema);
 
 export type ExperimentCreatePayload = z.output<typeof ExperimentCreatePayloadSchema>;
+
+/**
+ * Transform user-friendly update input to API payload format for experiment updates
+ * This handles partial updates with the same transformation patterns as creation
+ */
+export const ExperimentUpdateTransformSchema = ToolExperimentUpdateInputSchema.transform(
+	(input) => {
+		const updatePayload: Record<string, any> = {};
+
+		// Basic fields - direct mapping
+		if (input.name !== undefined) {
+			updatePayload.name = input.name;
+		}
+		if (input.description !== undefined) {
+			updatePayload.description = input.description;
+		}
+
+		// Transform metrics if provided
+		if (input.primary_metrics !== undefined) {
+			updatePayload.metrics = input.primary_metrics.map(transformMetricToApi);
+			updatePayload.primary_metrics_ordered_uuids = updatePayload.metrics.map(
+				(m: any) => m.uuid!,
+			);
+		}
+
+		if (input.secondary_metrics !== undefined) {
+			updatePayload.metrics_secondary = input.secondary_metrics.map(transformMetricToApi);
+			updatePayload.secondary_metrics_ordered_uuids = updatePayload.metrics_secondary.map(
+				(m: any) => m.uuid!,
+			);
+		}
+
+		// Transform minimum detectable effect into parameters
+		if (input.minimum_detectable_effect !== undefined) {
+			updatePayload.parameters = {
+				...updatePayload.parameters,
+				minimum_detectable_effect: input.minimum_detectable_effect,
+			};
+		}
+
+		// Handle experiment state management
+		if (input.launch === true) {
+			updatePayload.start_date = new Date().toISOString();
+		}
+
+		if (input.conclude !== undefined) {
+			updatePayload.conclusion = input.conclude;
+			updatePayload.end_date = new Date().toISOString();
+			if (input.conclusion_comment !== undefined) {
+				updatePayload.conclusion_comment = input.conclusion_comment;
+			}
+		}
+
+		if (input.restart === true) {
+			updatePayload.end_date = null;
+			updatePayload.conclusion = null;
+			updatePayload.conclusion_comment = null;
+		}
+
+		if (input.archive !== undefined) {
+			updatePayload.archived = input.archive;
+		}
+
+		return updatePayload;
+	},
+).pipe(ExperimentUpdateApiPayloadSchema);
+
+export type ExperimentUpdateTransform = z.output<typeof ExperimentUpdateTransformSchema>;
 
 /**
  * This is the schema for the experiment exposure query.

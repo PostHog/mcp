@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
-
 import { ErrorCode } from "@/lib/errors";
 import { withPagination } from "@/lib/utils/api";
 import { getSearchParamsFromRecord } from "@/lib/utils/helper-functions";
@@ -26,13 +24,14 @@ import type {
 	ExperimentApiPayload,
 	ExperimentExposureQuery,
 	ExperimentExposureQueryResponse,
+	ExperimentUpdateApiPayload,
 } from "@/schema/experiments";
 import {
 	ExperimentApiPayloadSchema,
 	ExperimentExposureQueryResponseSchema,
 	ExperimentExposureQuerySchema,
 	ExperimentSchema,
-	ExperimentUpdatePayloadSchema,
+	ExperimentUpdateApiPayloadSchema,
 } from "@/schema/experiments";
 import {
 	type CreateFeatureFlagInput,
@@ -52,7 +51,6 @@ import {
 } from "@/schema/insights";
 import { type Organization, OrganizationSchema } from "@/schema/orgs";
 import { type Project, ProjectSchema } from "@/schema/projects";
-import { PropertyDefinitionSchema } from "@/schema/properties";
 import { isShortId } from "@/tools/insights/utils";
 import { z } from "zod";
 import type {
@@ -564,36 +562,17 @@ export class ApiClient {
 				updateData,
 			}: {
 				experimentId: number;
-				updateData: z.infer<typeof ExperimentUpdatePayloadSchema>;
+				updateData: ExperimentUpdateApiPayload;
 			}): Promise<Result<Experiment>> => {
 				try {
-					// Helper function to ensure metrics have UUIDs (for metrics added in updates)
-					const ensureMetricUuid = (metric: any): any => {
-						if (!metric.uuid) {
-							return { ...metric, uuid: uuidv4() };
-						}
-						return metric;
-					};
+					const updateBody = ExperimentUpdateApiPayloadSchema.parse(updateData);
 
-					// Transform metrics if present to ensure they have UUIDs
-					const payload = { ...updateData };
-					if (payload.metrics) {
-						payload.metrics = payload.metrics.map(ensureMetricUuid);
-					}
-					if (payload.metrics_secondary) {
-						payload.metrics_secondary = payload.metrics_secondary.map(ensureMetricUuid);
-					}
-
-					// Validate payload
-					const validated = ExperimentUpdatePayloadSchema.parse(payload);
-
-					// Make API call
 					return this.fetchWithSchema(
 						`${this.baseUrl}/api/projects/${projectId}/experiments/${experimentId}/`,
 						ExperimentSchema,
 						{
 							method: "PATCH",
-							body: JSON.stringify(validated),
+							body: JSON.stringify(updateBody),
 						},
 					);
 				} catch (error) {

@@ -448,6 +448,145 @@
       ],
       "additionalProperties": false
     },
+    "ExperimentUpdateInputSchema": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Update experiment name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Update experiment description"
+        },
+        "primary_metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Human-readable metric name"
+              },
+              "metric_type": {
+                "type": "string",
+                "enum": [
+                  "mean",
+                  "funnel",
+                  "ratio"
+                ],
+                "description": "Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics"
+              },
+              "event_name": {
+                "type": "string",
+                "description": "PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase')"
+              },
+              "funnel_steps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "For funnel metrics only: Array of event names for each funnel step"
+              },
+              "properties": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Event properties to filter on"
+              },
+              "description": {
+                "type": "string",
+                "description": "What this metric measures"
+              }
+            },
+            "required": [
+              "metric_type",
+              "event_name"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Update primary metrics"
+        },
+        "secondary_metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Human-readable metric name"
+              },
+              "metric_type": {
+                "type": "string",
+                "enum": [
+                  "mean",
+                  "funnel",
+                  "ratio"
+                ],
+                "description": "Metric type"
+              },
+              "event_name": {
+                "type": "string",
+                "description": "PostHog event name"
+              },
+              "funnel_steps": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "For funnel metrics only: Array of event names"
+              },
+              "properties": {
+                "type": "object",
+                "additionalProperties": {},
+                "description": "Event properties to filter on"
+              },
+              "description": {
+                "type": "string",
+                "description": "What this metric measures"
+              }
+            },
+            "required": [
+              "metric_type",
+              "event_name"
+            ],
+            "additionalProperties": false
+          },
+          "description": "Update secondary metrics"
+        },
+        "minimum_detectable_effect": {
+          "type": "number",
+          "description": "Update minimum detectable effect in percentage"
+        },
+        "launch": {
+          "type": "boolean",
+          "description": "Launch experiment (set start_date) or keep as draft"
+        },
+        "conclude": {
+          "type": "string",
+          "enum": [
+            "won",
+            "lost",
+            "inconclusive",
+            "stopped_early",
+            "invalid"
+          ],
+          "description": "Conclude experiment with result"
+        },
+        "conclusion_comment": {
+          "type": "string",
+          "description": "Comment about experiment conclusion"
+        },
+        "restart": {
+          "type": "boolean",
+          "description": "Restart concluded experiment (clears end_date and conclusion)"
+        },
+        "archive": {
+          "type": "boolean",
+          "description": "Archive or unarchive experiment"
+        }
+      },
+      "additionalProperties": false
+    },
     "ExperimentUpdateSchema": {
       "type": "object",
       "properties": {
@@ -459,394 +598,141 @@
           "type": "object",
           "properties": {
             "name": {
-              "type": "string"
+              "type": "string",
+              "description": "Update experiment name"
             },
             "description": {
-              "type": [
-                "string",
-                "null"
-              ]
+              "type": "string",
+              "description": "Update experiment description"
             },
-            "start_date": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "end_date": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "parameters": {
-              "type": "object",
-              "properties": {
-                "feature_flag_variants": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "key": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "rollout_percentage": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "key",
-                      "rollout_percentage"
+            "primary_metrics": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Human-readable metric name"
+                  },
+                  "metric_type": {
+                    "type": "string",
+                    "enum": [
+                      "mean",
+                      "funnel",
+                      "ratio"
                     ],
-                    "additionalProperties": false
-                  }
-                },
-                "minimum_detectable_effect": {
-                  "type": [
-                    "number",
-                    "null"
-                  ]
-                },
-                "recommended_running_time": {
-                  "type": [
-                    "number",
-                    "null"
-                  ]
-                },
-                "recommended_sample_size": {
-                  "type": [
-                    "number",
-                    "null"
-                  ]
-                },
-                "variant_screenshot_media_ids": {
-                  "type": "object",
-                  "additionalProperties": {
+                    "description": "Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics"
+                  },
+                  "event_name": {
+                    "type": "string",
+                    "description": "PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase')"
+                  },
+                  "funnel_steps": {
                     "type": "array",
                     "items": {
                       "type": "string"
-                    }
-                  }
-                }
-              },
-              "additionalProperties": false
-            },
-            "metrics": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "metric_type": {
-                        "type": "string",
-                        "const": "mean"
-                      },
-                      "source": {},
-                      "kind": {
-                        "type": "string",
-                        "const": "ExperimentMetric"
-                      },
-                      "uuid": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "conversion_window": {
-                        "type": "number"
-                      },
-                      "conversion_window_unit": {},
-                      "lower_bound_percentile": {
-                        "type": "number"
-                      },
-                      "upper_bound_percentile": {
-                        "type": "number"
-                      }
                     },
-                    "required": [
-                      "metric_type",
-                      "kind"
-                    ],
-                    "additionalProperties": false
+                    "description": "For funnel metrics only: Array of event names for each funnel step"
                   },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "metric_type": {
-                        "type": "string",
-                        "const": "funnel"
-                      },
-                      "series": {
-                        "type": "array"
-                      },
-                      "funnel_order_type": {},
-                      "kind": {
-                        "type": "string",
-                        "const": "ExperimentMetric"
-                      },
-                      "uuid": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "conversion_window": {
-                        "type": "number"
-                      },
-                      "conversion_window_unit": {}
-                    },
-                    "required": [
-                      "metric_type",
-                      "series",
-                      "kind"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "metric_type": {
-                        "type": "string",
-                        "const": "ratio"
-                      },
-                      "numerator": {},
-                      "denominator": {},
-                      "kind": {
-                        "type": "string",
-                        "const": "ExperimentMetric"
-                      },
-                      "uuid": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "conversion_window": {
-                        "type": "number"
-                      },
-                      "conversion_window_unit": {}
-                    },
-                    "required": [
-                      "metric_type",
-                      "kind"
-                    ],
-                    "additionalProperties": false
-                  }
-                ]
-              }
-            },
-            "metrics_secondary": {
-              "type": "array",
-              "items": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "metric_type": {
-                        "type": "string",
-                        "const": "mean"
-                      },
-                      "source": {},
-                      "kind": {
-                        "type": "string",
-                        "const": "ExperimentMetric"
-                      },
-                      "uuid": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "conversion_window": {
-                        "type": "number"
-                      },
-                      "conversion_window_unit": {},
-                      "lower_bound_percentile": {
-                        "type": "number"
-                      },
-                      "upper_bound_percentile": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "metric_type",
-                      "kind"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "metric_type": {
-                        "type": "string",
-                        "const": "funnel"
-                      },
-                      "series": {
-                        "type": "array"
-                      },
-                      "funnel_order_type": {},
-                      "kind": {
-                        "type": "string",
-                        "const": "ExperimentMetric"
-                      },
-                      "uuid": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "conversion_window": {
-                        "type": "number"
-                      },
-                      "conversion_window_unit": {}
-                    },
-                    "required": [
-                      "metric_type",
-                      "series",
-                      "kind"
-                    ],
-                    "additionalProperties": false
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "metric_type": {
-                        "type": "string",
-                        "const": "ratio"
-                      },
-                      "numerator": {},
-                      "denominator": {},
-                      "kind": {
-                        "type": "string",
-                        "const": "ExperimentMetric"
-                      },
-                      "uuid": {
-                        "type": "string"
-                      },
-                      "name": {
-                        "type": "string"
-                      },
-                      "conversion_window": {
-                        "type": "number"
-                      },
-                      "conversion_window_unit": {}
-                    },
-                    "required": [
-                      "metric_type",
-                      "kind"
-                    ],
-                    "additionalProperties": false
-                  }
-                ]
-              }
-            },
-            "primary_metrics_ordered_uuids": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "secondary_metrics_ordered_uuids": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "archived": {
-              "type": "boolean"
-            },
-            "conclusion": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "enum": [
-                    "won",
-                    "lost",
-                    "inconclusive",
-                    "stopped_early",
-                    "invalid"
-                  ]
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
-            "conclusion_comment": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "exposure_criteria": {
-              "type": "object",
-              "properties": {
-                "filterTestAccounts": {
-                  "type": "boolean"
-                },
-                "exposure_config": {
-                  "type": "object",
                   "properties": {
-                    "kind": {
-                      "type": "string",
-                      "const": "ExperimentEventExposureConfig"
-                    },
-                    "event": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Event properties to filter on"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "What this metric measures"
+                  }
+                },
+                "required": [
+                  "metric_type",
+                  "event_name"
+                ],
+                "additionalProperties": false
+              },
+              "description": "Update primary metrics"
+            },
+            "secondary_metrics": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Human-readable metric name"
+                  },
+                  "metric_type": {
+                    "type": "string",
+                    "enum": [
+                      "mean",
+                      "funnel",
+                      "ratio"
+                    ],
+                    "description": "Metric type"
+                  },
+                  "event_name": {
+                    "type": "string",
+                    "description": "PostHog event name"
+                  },
+                  "funnel_steps": {
+                    "type": "array",
+                    "items": {
                       "type": "string"
                     },
-                    "properties": {
-                      "type": "array"
-                    }
+                    "description": "For funnel metrics only: Array of event names"
                   },
-                  "required": [
-                    "kind",
-                    "event",
-                    "properties"
-                  ],
-                  "additionalProperties": false
+                  "properties": {
+                    "type": "object",
+                    "additionalProperties": {},
+                    "description": "Event properties to filter on"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "What this metric measures"
+                  }
                 },
-                "multiple_variant_handling": {
-                  "type": "string",
-                  "enum": [
-                    "exclude",
-                    "first_seen"
-                  ]
-                }
+                "required": [
+                  "metric_type",
+                  "event_name"
+                ],
+                "additionalProperties": false
               },
-              "additionalProperties": false
+              "description": "Update secondary metrics"
             },
-            "saved_metrics_ids": {
-              "anyOf": [
-                {
-                  "type": "array"
-                },
-                {
-                  "type": "null"
-                }
-              ]
+            "minimum_detectable_effect": {
+              "type": "number",
+              "description": "Update minimum detectable effect in percentage"
             },
-            "stats_config": {}
+            "launch": {
+              "type": "boolean",
+              "description": "Launch experiment (set start_date) or keep as draft"
+            },
+            "conclude": {
+              "type": "string",
+              "enum": [
+                "won",
+                "lost",
+                "inconclusive",
+                "stopped_early",
+                "invalid"
+              ],
+              "description": "Conclude experiment with result"
+            },
+            "conclusion_comment": {
+              "type": "string",
+              "description": "Comment about experiment conclusion"
+            },
+            "restart": {
+              "type": "boolean",
+              "description": "Restart concluded experiment (clears end_date and conclusion)"
+            },
+            "archive": {
+              "type": "boolean",
+              "description": "Archive or unarchive experiment"
+            }
           },
           "additionalProperties": false,
-          "description": "The experiment data to update. To restart a concluded experiment: set end_date=null, conclusion=null, conclusion_comment=null, and optionally set a new start_date. To make it draft again, also set start_date=null."
+          "description": "The experiment data to update using user-friendly format"
         }
       },
       "required": [

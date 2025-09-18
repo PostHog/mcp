@@ -21,13 +21,12 @@ import {
 } from "@/schema/dashboards";
 import type {
 	Experiment,
-	ExperimentApiPayload,
 	ExperimentExposureQuery,
 	ExperimentExposureQueryResponse,
 	ExperimentUpdateApiPayload,
 } from "@/schema/experiments";
 import {
-	ExperimentApiPayloadSchema,
+	ExperimentCreatePayloadSchema,
 	ExperimentExposureQueryResponseSchema,
 	ExperimentExposureQuerySchema,
 	ExperimentSchema,
@@ -51,6 +50,7 @@ import {
 } from "@/schema/insights";
 import { type Organization, OrganizationSchema } from "@/schema/orgs";
 import { type Project, ProjectSchema } from "@/schema/projects";
+import type { ExperimentCreateSchema } from "@/schema/tool-inputs";
 import { isShortId } from "@/tools/insights/utils";
 import { z } from "zod";
 import type {
@@ -544,8 +544,11 @@ export class ApiClient {
 				};
 			},
 
-			create: async (experimentData: ExperimentApiPayload): Promise<Result<Experiment>> => {
-				const createBody = ExperimentApiPayloadSchema.parse(experimentData);
+			create: async (
+				experimentData: z.infer<typeof ExperimentCreateSchema>,
+			): Promise<Result<Experiment>> => {
+				// Transform agent input to API payload
+				const createBody = ExperimentCreatePayloadSchema.parse(experimentData);
 
 				return this.fetchWithSchema(
 					`${this.baseUrl}/api/projects/${projectId}/experiments/`,

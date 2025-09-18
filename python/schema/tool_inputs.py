@@ -345,113 +345,81 @@ class ExperimentResultsGetSchema(BaseModel):
     """
 
 
-class FeatureFlagVariant(BaseModel):
+class PrimaryMetric1(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    key: str
     name: str | None = None
-    rollout_percentage: float
+    """
+    Human-readable metric name
+    """
+    metric_type: MetricType1
+    """
+    Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics
+    """
+    event_name: str
+    """
+    PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase')
+    """
+    funnel_steps: list[str] | None = None
+    """
+    For funnel metrics only: Array of event names for each funnel step
+    """
+    properties: dict[str, Any] | None = None
+    """
+    Event properties to filter on
+    """
+    description: str | None = None
+    """
+    What this metric measures
+    """
 
 
-class Parameters(BaseModel):
+class MetricType3(StrEnum):
+    """
+    Metric type
+    """
+
+    MEAN = "mean"
+    FUNNEL = "funnel"
+    RATIO = "ratio"
+
+
+class SecondaryMetric1(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    feature_flag_variants: list[FeatureFlagVariant] | None = None
-    minimum_detectable_effect: float | None = None
-    recommended_running_time: float | None = None
-    recommended_sample_size: float | None = None
-    variant_screenshot_media_ids: dict[str, list[str]] | None = None
-
-
-class Metrics(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    metric_type: Literal["mean"] = "mean"
-    source: Any | None = None
-    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
-    uuid: str | None = None
     name: str | None = None
-    conversion_window: float | None = None
-    conversion_window_unit: Any | None = None
-    lower_bound_percentile: float | None = None
-    upper_bound_percentile: float | None = None
+    """
+    Human-readable metric name
+    """
+    metric_type: MetricType3
+    """
+    Metric type
+    """
+    event_name: str
+    """
+    PostHog event name
+    """
+    funnel_steps: list[str] | None = None
+    """
+    For funnel metrics only: Array of event names
+    """
+    properties: dict[str, Any] | None = None
+    """
+    Event properties to filter on
+    """
+    description: str | None = None
+    """
+    What this metric measures
+    """
 
 
-class Metrics1(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    metric_type: Literal["funnel"] = "funnel"
-    series: list
-    funnel_order_type: Any | None = None
-    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
-    uuid: str | None = None
-    name: str | None = None
-    conversion_window: float | None = None
-    conversion_window_unit: Any | None = None
+class Conclude(StrEnum):
+    """
+    Conclude experiment with result
+    """
 
-
-class Metrics2(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    metric_type: Literal["ratio"] = "ratio"
-    numerator: Any | None = None
-    denominator: Any | None = None
-    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
-    uuid: str | None = None
-    name: str | None = None
-    conversion_window: float | None = None
-    conversion_window_unit: Any | None = None
-
-
-class MetricsSecondary(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    metric_type: Literal["mean"] = "mean"
-    source: Any | None = None
-    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
-    uuid: str | None = None
-    name: str | None = None
-    conversion_window: float | None = None
-    conversion_window_unit: Any | None = None
-    lower_bound_percentile: float | None = None
-    upper_bound_percentile: float | None = None
-
-
-class MetricsSecondary1(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    metric_type: Literal["funnel"] = "funnel"
-    series: list
-    funnel_order_type: Any | None = None
-    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
-    uuid: str | None = None
-    name: str | None = None
-    conversion_window: float | None = None
-    conversion_window_unit: Any | None = None
-
-
-class MetricsSecondary2(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    metric_type: Literal["ratio"] = "ratio"
-    numerator: Any | None = None
-    denominator: Any | None = None
-    kind: Literal["ExperimentMetric"] = "ExperimentMetric"
-    uuid: str | None = None
-    name: str | None = None
-    conversion_window: float | None = None
-    conversion_window_unit: Any | None = None
-
-
-class Conclusion(StrEnum):
     WON = "won"
     LOST = "lost"
     INCONCLUSIVE = "inconclusive"
@@ -459,52 +427,180 @@ class Conclusion(StrEnum):
     INVALID = "invalid"
 
 
-class ExposureConfig(BaseModel):
+class ExperimentUpdateInputSchema(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    kind: Literal["ExperimentEventExposureConfig"] = "ExperimentEventExposureConfig"
-    event: str
-    properties: list
+    name: str | None = None
+    """
+    Update experiment name
+    """
+    description: str | None = None
+    """
+    Update experiment description
+    """
+    primary_metrics: list[PrimaryMetric1] | None = None
+    """
+    Update primary metrics
+    """
+    secondary_metrics: list[SecondaryMetric1] | None = None
+    """
+    Update secondary metrics
+    """
+    minimum_detectable_effect: float | None = None
+    """
+    Update minimum detectable effect in percentage
+    """
+    launch: bool | None = None
+    """
+    Launch experiment (set start_date) or keep as draft
+    """
+    conclude: Conclude | None = None
+    """
+    Conclude experiment with result
+    """
+    conclusion_comment: str | None = None
+    """
+    Comment about experiment conclusion
+    """
+    restart: bool | None = None
+    """
+    Restart concluded experiment (clears end_date and conclusion)
+    """
+    archive: bool | None = None
+    """
+    Archive or unarchive experiment
+    """
 
 
-class MultipleVariantHandling(StrEnum):
-    EXCLUDE = "exclude"
-    FIRST_SEEN = "first_seen"
+class MetricType4(StrEnum):
+    """
+    Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics
+    """
+
+    MEAN = "mean"
+    FUNNEL = "funnel"
+    RATIO = "ratio"
 
 
-class ExposureCriteria(BaseModel):
+class PrimaryMetric2(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    filterTestAccounts: bool | None = None
-    exposure_config: ExposureConfig | None = None
-    multiple_variant_handling: MultipleVariantHandling | None = None
+    name: str | None = None
+    """
+    Human-readable metric name
+    """
+    metric_type: MetricType4
+    """
+    Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics
+    """
+    event_name: str
+    """
+    PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase')
+    """
+    funnel_steps: list[str] | None = None
+    """
+    For funnel metrics only: Array of event names for each funnel step
+    """
+    properties: dict[str, Any] | None = None
+    """
+    Event properties to filter on
+    """
+    description: str | None = None
+    """
+    What this metric measures
+    """
+
+
+class MetricType5(StrEnum):
+    """
+    Metric type
+    """
+
+    MEAN = "mean"
+    FUNNEL = "funnel"
+    RATIO = "ratio"
+
+
+class SecondaryMetric2(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    name: str | None = None
+    """
+    Human-readable metric name
+    """
+    metric_type: MetricType5
+    """
+    Metric type
+    """
+    event_name: str
+    """
+    PostHog event name
+    """
+    funnel_steps: list[str] | None = None
+    """
+    For funnel metrics only: Array of event names
+    """
+    properties: dict[str, Any] | None = None
+    """
+    Event properties to filter on
+    """
+    description: str | None = None
+    """
+    What this metric measures
+    """
 
 
 class Data4(BaseModel):
     """
-    The experiment data to update. To restart a concluded experiment: set end_date=null, conclusion=null, conclusion_comment=null, and optionally set a new start_date. To make it draft again, also set start_date=null.
+    The experiment data to update using user-friendly format
     """
 
     model_config = ConfigDict(
         extra="forbid",
     )
     name: str | None = None
+    """
+    Update experiment name
+    """
     description: str | None = None
-    start_date: str | None = None
-    end_date: str | None = None
-    parameters: Parameters | None = None
-    metrics: list[Metrics | Metrics1 | Metrics2] | None = None
-    metrics_secondary: list[MetricsSecondary | MetricsSecondary1 | MetricsSecondary2] | None = None
-    primary_metrics_ordered_uuids: list[str] | None = None
-    secondary_metrics_ordered_uuids: list[str] | None = None
-    archived: bool | None = None
-    conclusion: Conclusion | None = None
+    """
+    Update experiment description
+    """
+    primary_metrics: list[PrimaryMetric2] | None = None
+    """
+    Update primary metrics
+    """
+    secondary_metrics: list[SecondaryMetric2] | None = None
+    """
+    Update secondary metrics
+    """
+    minimum_detectable_effect: float | None = None
+    """
+    Update minimum detectable effect in percentage
+    """
+    launch: bool | None = None
+    """
+    Launch experiment (set start_date) or keep as draft
+    """
+    conclude: Conclude | None = None
+    """
+    Conclude experiment with result
+    """
     conclusion_comment: str | None = None
-    exposure_criteria: ExposureCriteria | None = None
-    saved_metrics_ids: list | None = None
-    stats_config: Any | None = None
+    """
+    Comment about experiment conclusion
+    """
+    restart: bool | None = None
+    """
+    Restart concluded experiment (clears end_date and conclusion)
+    """
+    archive: bool | None = None
+    """
+    Archive or unarchive experiment
+    """
 
 
 class ExperimentUpdateSchema(BaseModel):
@@ -517,7 +613,7 @@ class ExperimentUpdateSchema(BaseModel):
     """
     data: Data4
     """
-    The experiment data to update. To restart a concluded experiment: set end_date=null, conclusion=null, conclusion_comment=null, and optionally set a new start_date. To make it draft again, also set start_date=null.
+    The experiment data to update using user-friendly format
     """
 
 
@@ -1220,7 +1316,7 @@ class QueryRunInputSchema(BaseModel):
     query: Query2 | Query3
 
 
-class Type10(StrEnum):
+class Type11(StrEnum):
     POPOVER = "popover"
     API = "api"
     WIDGET = "widget"
@@ -1599,7 +1695,7 @@ class SurveyCreateSchema(BaseModel):
     )
     name: Annotated[str, Field(min_length=1)]
     description: str | None = None
-    type: Type10 | None = None
+    type: Type11 | None = None
     questions: Annotated[
         list[Questions | Questions1 | Questions2 | Questions3 | Questions4 | Questions5],
         Field(min_length=1),
@@ -2095,7 +2191,7 @@ class SurveyUpdateSchema(BaseModel):
     )
     name: Annotated[str | None, Field(min_length=1)] = None
     description: str | None = None
-    type: Type10 | None = None
+    type: Type11 | None = None
     questions: Annotated[
         list[Questions6 | Questions7 | Questions8 | Questions9 | Questions10 | Questions11] | None,
         Field(min_length=1),

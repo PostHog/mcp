@@ -305,19 +305,17 @@ export const ExperimentCreatePayloadSchema = ToolExperimentCreateSchema.transfor
 		feature_flag_key: input.feature_flag_key, // Maps to get_feature_flag_key in serializer
 		type: input.type || "product",
 
-		// Metrics - new format
-		metrics: primaryMetrics.length > 0 ? primaryMetrics : null,
-		metrics_secondary: secondaryMetrics.length > 0 ? secondaryMetrics : null,
+		// Metrics - ensure arrays are never null, always empty arrays when no metrics
+		metrics: primaryMetrics,
+		metrics_secondary: secondaryMetrics,
 
-		// Metrics UUIDs for ordering
-		primary_metrics_ordered_uuids:
-			primaryMetrics.length > 0 ? primaryMetrics.map((m) => m.uuid) : null,
-		secondary_metrics_ordered_uuids:
-			secondaryMetrics.length > 0 ? secondaryMetrics.map((m) => m.uuid) : null,
+		// Metrics UUIDs for ordering - ensure arrays are never null
+		primary_metrics_ordered_uuids: primaryMetrics.map((m) => m.uuid),
+		secondary_metrics_ordered_uuids: secondaryMetrics.map((m) => m.uuid),
 
 		// Legacy fields still required by API
 		filters: {}, // Legacy but still in model
-		secondary_metrics: [], // Legacy secondary metrics format
+		secondary_metrics: secondaryMetrics, // Use the same array as metrics_secondary
 		saved_metrics_ids: [], // Empty array for saved metrics
 
 		// Parameters with variants

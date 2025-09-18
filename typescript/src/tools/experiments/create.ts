@@ -1,4 +1,3 @@
-import { ExperimentCreatePayloadSchema } from "@/schema/experiments";
 import { ExperimentCreateSchema } from "@/schema/tool-inputs";
 import type { Context, ToolBase } from "@/tools/types";
 import type { z } from "zod";
@@ -14,17 +13,12 @@ type Params = z.infer<typeof schema>;
 export const createExperimentHandler = async (context: Context, params: Params) => {
 	const projectId = await context.stateManager.getProjectId();
 
-	// Transform tool input to API payload format using the schema transformation
-	const apiPayload = ExperimentCreatePayloadSchema.parse(params);
-
-	// Send to API with full type safety
-	const result = await context.api.experiments({ projectId }).create(apiPayload);
+	const result = await context.api.experiments({ projectId }).create(params);
 
 	if (!result.success) {
 		throw new Error(`Failed to create experiment: ${result.error.message}`);
 	}
 
-	// Format the response with useful information
 	const experiment = result.data;
 	const experimentWithUrl = {
 		...experiment,

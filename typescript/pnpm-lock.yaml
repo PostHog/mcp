@@ -17,6 +17,9 @@ importers:
       ai:
         specifier: ^5.0.18
         version: 5.0.20(zod@3.25.76)
+      fflate:
+        specifier: ^0.8.2
+        version: 0.8.2
       posthog-node:
         specifier: ^4.18.0
         version: 4.18.0
@@ -1462,6 +1465,9 @@ packages:
     peerDependenciesMeta:
       picomatch:
         optional: true
+
+  fflate@0.8.2:
+    resolution: {integrity: sha512-cPJU47OaAoCbg0pBvzsgpTPhmhqI5eJjh/JIu8tPj5q+T7iLvW/JAYUqmE7KOB4R1ZyEhzBaIQpQpardBF5z8A==}
 
   finalhandler@2.1.0:
     resolution: {integrity: sha512-/t88Ty3d5JWQbWYgaOGCCYfXRwV1+be02WqYYlL6h0lEiUAMPM8o8qKGO01YIkOHzka2up08wvgYD0mDiI+q3Q==}
@@ -3663,6 +3669,8 @@ snapshots:
   fdir@6.5.0(picomatch@4.0.3):
     optionalDependencies:
       picomatch: 4.0.3
+
+  fflate@0.8.2: {}
 
   finalhandler@2.1.0:
     dependencies:

@@ -39,7 +39,14 @@
 		"typecheck": "tsc --noEmit",
 		"generate-client": "tsx scripts/update-openapi-client.ts"
 	},
-	"keywords": ["posthog", "mcp", "ai", "agents", "analytics", "feature-flags"],
+	"keywords": [
+		"posthog",
+		"mcp",
+		"ai",
+		"agents",
+		"analytics",
+		"feature-flags"
+	],
 	"author": "PostHog Inc.",
 	"license": "MIT",
 	"peerDependencies": {
@@ -52,6 +59,7 @@
 		"@modelcontextprotocol/sdk": "^1.17.3",
 		"agents": "^0.0.113",
 		"ai": "^5.0.18",
+		"fflate": "^0.8.2",
 		"posthog-node": "^4.18.0",
 		"uuid": "^11.1.0",
 		"zod": "^3.24.4"
@@ -73,5 +81,8 @@
 		"wrangler": "^4.14.4",
 		"zod-to-json-schema": "^3.24.6"
 	},
-	"files": ["dist", "README.md"]
+	"files": [
+		"dist",
+		"README.md"
+	]
 }

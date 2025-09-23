@@ -13,6 +13,8 @@ import { DurableObjectCache } from "@/lib/utils/cache/DurableObjectCache";
 import { hash } from "@/lib/utils/helper-functions";
 import { getToolsFromContext } from "@/tools";
 import type { CloudRegion, Context, State, Tool } from "@/tools/types";
+import { getPromptsFromContext, registerPrompts } from "@/prompts";
+import { registerResources } from "@/resources";
 
 const INSTRUCTIONS = `
 - You are a helpful assistant that can query PostHog API.
@@ -29,11 +31,18 @@ type RequestProperties = {
 
 // Define our MCP agent with tools
 export class MyMCP extends McpAgent<Env> {
-	server = new McpServer({
-		name: "PostHog",
-		version: "1.0.0",
-		instructions: INSTRUCTIONS,
-	});
+	private _server: McpServer | undefined;
+
+	get server() {
+		if (!this._server) {
+			this._server = new McpServer({
+				name: "PostHog",
+				version: "1.0.0",
+				instructions: INSTRUCTIONS,
+			});
+		}
+		return this._server;
+	}
 
 	initialState: State = {
 		projectId: undefined,
@@ -253,6 +262,13 @@ export class MyMCP extends McpAgent<Env> {
 		for (const tool of allTools) {
 			this.registerTool(tool, async (params) => tool.handler(context, params));
 		}
+
+		// Register prompts
+		const prompts = await getPromptsFromContext(context);
+		registerPrompts(this.server, context, prompts);
+
+		// Register resources
+		registerResources(this.server, context);
 	}
 }
 

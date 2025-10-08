@@ -1,6 +1,6 @@
 # PostHog MCP
 
-The MCP server has been moved into the PostHog Monorepo - you can find it (here)[https://github.com/PostHog/posthog/tree/master/products/mcp]
+The MCP server has been moved into the PostHog Monorepo - you can find it [here](https://github.com/PostHog/posthog/tree/master/products/mcp).
 
 Documentation: https://posthog.com/docs/model-context-protocol
 

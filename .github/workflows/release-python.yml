@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
         with:
           fetch-depth: 0
-          token: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
+          token: ${{ secrets.POSTHOG_BOT_PAT }}
 
       - name: Set up Python
         uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
@@ -56,7 +56,7 @@ jobs:
       - name: Create GitHub release
         uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1
         env:
-          GITHUB_TOKEN: ${{ secrets.POSTHOG_BOT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.POSTHOG_BOT_PAT }}
         with:
           tag_name: posthog_agent_toolkit-v${{ env.REPO_VERSION }}
           release_name: posthog_agent_toolkit ${{ env.REPO_VERSION }}

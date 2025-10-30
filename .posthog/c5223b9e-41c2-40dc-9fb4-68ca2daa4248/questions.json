@@ -1,0 +1,119 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the primary purpose of the PostHog MCP Server codebase?",
+      "options": [
+        "To provide a unified API client for PostHog interactions through the Model Context Protocol",
+        "To create a web server for hosting PostHog analytics dashboards",
+        "To build a database management system for PostHog data",
+        "To develop a mobile application for PostHog analytics"
+      ]
+    },
+    {
+      "id": "q2",
+      "question": "Which design pattern is used for error handling in the API client?",
+      "options": [
+        "Result<T, E> pattern for explicit error handling",
+        "Try-catch blocks for exception handling",
+        "Optional/Maybe monads for null safety",
+        "Error callback functions for async operations"
+      ]
+    },
+    {
+      "id": "q3",
+      "question": "What is the monorepo structure of the PostHog MCP Server?",
+      "options": [
+        "TypeScript and Python implementations in separate directories",
+        "Only TypeScript implementation with Python bindings",
+        "Multiple microservices in different languages",
+        "Single language implementation with multiple frameworks"
+      ]
+    },
+    {
+      "id": "q4",
+      "question": "How are input schemas managed across different programming languages?",
+      "options": [
+        "Zod schemas in TypeScript are generated to JSON for Python/other implementations",
+        "Separate schema definitions maintained for each language",
+        "Shared protocol buffer definitions across all languages",
+        "Runtime schema validation without cross-language generation"
+      ]
+    },
+    {
+      "id": "q5",
+      "question": "What is the primary deployment platform for this MCP Server?",
+      "options": [
+        "Cloudflare Workers",
+        "AWS Lambda",
+        "Google Cloud Functions",
+        "Heroku"
+      ]
+    },
+    {
+      "id": "q6",
+      "question": "Which organizations have adopted the Model Context Protocol as of 2025?",
+      "options": [
+        "Anthropic, OpenAI, Google DeepMind, AWS, and Google",
+        "Only Anthropic and OpenAI",
+        "Anthropic, Microsoft, and Google",
+        "All major cloud providers exclusively"
+      ]
+    },
+    {
+      "id": "q7",
+      "question": "What code formatting and linting tool is used in the project?",
+      "options": [
+        "Biome",
+        "ESLint and Prettier",
+        "TSLint",
+        "StandardJS"
+      ]
+    },
+    {
+      "id": "q8",
+      "question": "How is the API client organized in terms of resource access?",
+      "options": [
+        "By resource types with methods like organizations(), projects(), featureFlags(), etc.",
+        "By HTTP methods (GET, POST, PUT, DELETE)",
+        "By endpoint paths in a flat structure",
+        "By authentication type and permission level"
+      ]
+    }
+  ],
+  "answered": true,
+  "answers": [
+    {
+      "questionId": "q1",
+      "selectedOption": "To provide a unified API client for PostHog interactions through the Model Context Protocol"
+    },
+    {
+      "questionId": "q2",
+      "selectedOption": "Result<T, E> pattern for explicit error handling"
+    },
+    {
+      "questionId": "q3",
+      "selectedOption": "TypeScript and Python implementations in separate directories"
+    },
+    {
+      "questionId": "q4",
+      "selectedOption": "Zod schemas in TypeScript are generated to JSON for Python/other implementations"
+    },
+    {
+      "questionId": "q5",
+      "selectedOption": "Cloudflare Workers"
+    },
+    {
+      "questionId": "q6",
+      "selectedOption": "Anthropic, OpenAI, Google DeepMind, AWS, and Google"
+    },
+    {
+      "questionId": "q7",
+      "selectedOption": "Biome"
+    },
+    {
+      "questionId": "q8",
+      "selectedOption": "By resource types with methods like organizations(), projects(), featureFlags(), etc."
+    }
+  ]
+}

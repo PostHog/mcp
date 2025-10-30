@@ -184,3 +184,5 @@ npx
 ```
 -y mcp-remote@latest http://localhost:8787/mcp --header "Authorization: Bearer {INSERT_YOUR_PERSONAL_API_KEY_HERE}"
 ```
+
+hello 123

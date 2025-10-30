@@ -1,0 +1,1 @@
+I'll help you run some example grep searches and terminal commands to explore this PostHog MCP codebase.

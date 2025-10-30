@@ -1,0 +1,77 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "question": "What is the primary purpose of the PostHog MCP server repository?",
+      "options": [
+        "To provide a Model Context Protocol server implementation for PostHog",
+        "To manage PostHog analytics data",
+        "To create PostHog plugins",
+        "To handle PostHog API authentication"
+      ]
+    },
+    {
+      "id": "q2",
+      "question": "What programming languages are used in this codebase?",
+      "options": [
+        "TypeScript and Python",
+        "JavaScript and Go",
+        "Java and C++",
+        "Ruby and PHP"
+      ]
+    },
+    {
+      "id": "q3",
+      "question": "What installation methods are documented in the README?",
+      "options": [
+        "Quick install, manual, and Docker",
+        "NPM only",
+        "Docker only",
+        "Source code compilation only"
+      ]
+    },
+    {
+      "id": "q4",
+      "question": "What is the location of the main README.md file?",
+      "options": [
+        "/Users/jonathan/dev/mcp/README.md",
+        "/Users/jonathan/README.md",
+        "/dev/mcp/README.md",
+        "/mcp/README.md"
+      ]
+    },
+    {
+      "id": "q5",
+      "question": "What documentation sections are included in the README?",
+      "options": [
+        "Installation, usage examples, feature filtering, development setup, and project structure",
+        "Only installation instructions",
+        "Only API documentation",
+        "Only troubleshooting guides"
+      ]
+    }
+  ],
+  "answered": true,
+  "answers": [
+    {
+      "questionId": "q1",
+      "selectedOption": "To provide a Model Context Protocol server implementation for PostHog"
+    },
+    {
+      "questionId": "q2",
+      "selectedOption": "TypeScript and Python"
+    },
+    {
+      "questionId": "q3",
+      "selectedOption": "Quick install, manual, and Docker"
+    },
+    {
+      "questionId": "q4",
+      "selectedOption": "/Users/jonathan/dev/mcp/README.md"
+    },
+    {
+      "questionId": "q5",
+      "selectedOption": "Installation, usage examples, feature filtering, development setup, and project structure"
+    }
+  ]
+}
